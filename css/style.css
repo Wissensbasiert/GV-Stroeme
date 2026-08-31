@@ -2608,17 +2608,6 @@ svg:focus {
   font-size: 1.22rem;
   line-height: 1.2;
 }
-.ki-prototype-badge {
-  flex: 0 0 auto;
-  padding: 6px 9px;
-  color: #3d686b;
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: 0.035em;
-  background: rgba(255, 255, 255, 0.78);
-  border: 1px solid #cfe0da;
-  border-radius: 999px;
-}
 .ki-modal-body {
   display: flex;
   flex: 1 1 auto;
@@ -2626,27 +2615,6 @@ svg:focus {
   min-height: 0;
   padding: 0 26px 18px;
   background: rgba(248, 250, 252, 0.96);
-}
-.ki-context-strip {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  flex: 0 0 auto;
-  padding: 10px 2px 9px;
-  color: #475569;
-  font-size: 0.7rem;
-  font-weight: 650;
-  border-bottom: 1px solid #e2e8f0;
-}
-.ki-context-label {
-  padding: 3px 7px;
-  color: #277342;
-  font-size: 0.61rem;
-  font-weight: 800;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  background: #e9f7ed;
-  border-radius: 999px;
 }
 .ki-modal-main {
   display: flex;
@@ -2659,13 +2627,8 @@ svg:focus {
   justify-content: center;
   flex: 1 1 auto;
   flex-direction: column;
-  padding: 40px 12px 24px;
+  padding: 48px 12px 28px;
   text-align: center;
-}
-.ki-start-logo {
-  width: 42px;
-  height: 42px;
-  margin-bottom: 14px;
 }
 .ki-start-panel h4 {
   max-width: 570px;
@@ -2675,13 +2638,6 @@ svg:focus {
   font-weight: 720;
   line-height: 1.28;
   letter-spacing: -0.025em;
-}
-.ki-start-panel p {
-  max-width: 530px;
-  margin: 9px 0 0;
-  color: #64748b;
-  font-size: 0.78rem;
-  line-height: 1.55;
 }
 .ki-conversation {
   display: none;
@@ -3858,25 +3814,14 @@ svg:focus {
     width: 29px;
     height: 29px;
   }
-  .ki-prototype-badge {
-    display: none;
-  }
   .ki-modal-body {
     padding: 0 14px 12px;
-  }
-  .ki-context-strip {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 5px;
   }
   .ki-start-panel {
     padding: 28px 8px 18px;
   }
   .ki-start-panel h4 {
     font-size: 1.18rem;
-  }
-  .ki-start-panel p {
-    font-size: 0.73rem;
   }
   .ki-message {
     max-width: 96%;

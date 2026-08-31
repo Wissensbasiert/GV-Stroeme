@@ -1489,18 +1489,6 @@
 
     // Güterstrom-KI interaction prototype. It deliberately demonstrates the
     // intended workflow without inventing values or contacting a model.
-    const getAiContextSummary = () => [
-      document.getElementById('summaryRegion')?.textContent,
-      document.getElementById('summaryPeriod')?.textContent,
-      document.getElementById('summaryMetric')?.textContent,
-      document.getElementById('summaryDirection')?.textContent
-    ].filter(Boolean).join(' · ');
-
-    const updateAiContext = () => {
-      const context = document.getElementById('aiContextSummary');
-      if (context) context.textContent = getAiContextSummary() || 'Aktuelle Auswahl wird geladen …';
-    };
-
     const appendAiMessage = (kind, content) => {
       const conversation = document.getElementById('aiConversation');
       if (!conversation) return;
@@ -1552,8 +1540,7 @@
       const title = document.createElement('strong');
       title.textContent = 'Frage erkannt – Datenabfrage noch nicht verbunden.';
       const explanation = document.createElement('p');
-      const context = getAiContextSummary() || 'der aktuellen Auswahl';
-      explanation.textContent = `Im späteren Ausbau würde die Güterstrom-KI für „${context}“ passende geprüfte Abfragen auswählen, die Daten auswerten und das Ergebnis mit Quellen und Einschränkungen erläutern. Dieser Interface-Test erzeugt bewusst keine Zahlen.`;
+      explanation.textContent = 'Im späteren Ausbau würde die Güterstrom-KI für Ihre Frage passende geprüfte Abfragen auswählen, die Daten auswerten und das Ergebnis mit Quellen und Einschränkungen erläutern. Dieser Interface-Test erzeugt bewusst keine Zahlen.';
       const meta = document.createElement('span');
       meta.className = 'ki-message-meta';
       meta.textContent = 'Prototyp-Antwort · keine Modell- oder Datenverbindung';
@@ -1573,7 +1560,6 @@
           if (modalId === 'modalSteckbrief') await prepareSteckbriefModal();
           if (modalId === 'modalHelp' || modalId === 'modalLicenses') await refreshDataCoverage();
           if (modalId === 'modalAi') {
-            updateAiContext();
             requestAnimationFrame(() => document.getElementById('aiQuestionInput')?.focus());
           }
         });

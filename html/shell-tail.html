@@ -17,18 +17,11 @@
             <h3 id="aiModalTitle">Güterstrom-KI</h3>
           </div>
         </div>
-        <span class="ki-prototype-badge">Interface-Prototyp</span>
       </div>
       <div class="ki-modal-body">
-        <div class="ki-context-strip" aria-label="Aktueller Analysekontext">
-          <span class="ki-context-label">Aktuelle Auswahl</span>
-          <span id="aiContextSummary">Deutschland · 2024 · Tonnen · Versand + Empfang</span>
-        </div>
         <div class="ki-modal-main">
           <section class="ki-start-panel" id="aiStartPanel">
-            <img class="ki-start-logo" src="assets/icons/gueterstrom-ki-mark.svg" alt="">
             <h4>Was möchten Sie über die Güterverkehrsströme wissen?</h4>
-            <p>Fragen Sie zur aktuellen Auswahl oder vergleichen Sie Regionen, Verkehrsträger und Entwicklungen.</p>
           </section>
           <div class="ki-conversation" id="aiConversation" aria-live="polite"></div>
         </div>
@@ -38,16 +31,16 @@
             <textarea id="aiQuestionInput" rows="1" maxlength="600" placeholder="Güterstrom-KI fragen"></textarea>
             <button type="submit" class="ki-send-button" aria-label="Frage testen">
               <span>Frage testen</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline></svg>
             </button>
           </form>
           <button type="button" class="ki-examples-toggle" id="aiExamplesToggle" aria-expanded="false" aria-controls="aiExamples">Was kann ich fragen?</button>
           <div class="ki-examples-panel" id="aiExamples" hidden>
-            <p>Beispielfragen zur aktuellen Auswahl</p>
+            <p>Beispielfragen</p>
             <div class="ki-suggestions" aria-label="Beispielfragen">
               <button type="button" class="ki-suggestion" data-ai-question="Welche Regionen haben bis 2040 den stärksten Zuwachs im Schienengüterverkehr?">Wo wächst der Schienengüterverkehr bis 2040 am stärksten?</button>
               <button type="button" class="ki-suggestion" data-ai-question="Welche Gütergruppen prägen die aktuell ausgewählte Region?">Welche Gütergruppen prägen die ausgewählte Region?</button>
-              <button type="button" class="ki-suggestion" data-ai-question="Welche Relationen sind für die aktuell ausgewählte Region am wichtigsten?">Welches sind die wichtigsten Verkehrsrelationen?</button>
+              <button type="button" class="ki-suggestion" data-ai-question="Welches sind die wichtigsten Verkehrsrelationen von und nach Berlin?">Welches sind die wichtigsten Verkehrsrelationen von und nach Berlin?</button>
             </div>
           </div>
           <p class="ki-prototype-note" id="aiPrototypeNotice"><strong>Interface-Prototyp:</strong> Noch keine echte KI- oder Datenabfrage; Zahlen werden nicht simuliert.</p>
@@ -138,6 +131,6 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=20260831-ki-minimal-v26"></script>
+  <script src="js/app.js?v=20260831-ki-minimal-v27"></script>
 </body>
 </html>
