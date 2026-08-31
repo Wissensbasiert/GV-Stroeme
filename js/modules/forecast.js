@@ -761,8 +761,13 @@
         </div>
       `;
 
-      line.bindTooltip(tipHtml, { sticky: true, opacity: 0.98 });
-      marker.bindTooltip(tipHtml, { sticky: true, opacity: 0.98 });
+      const relationTooltipOptions = {
+        sticky: true,
+        opacity: 0.98,
+        className: 'forecast-relation-leaflet-tooltip'
+      };
+      line.bindTooltip(tipHtml, relationTooltipOptions);
+      marker.bindTooltip(tipHtml, relationTooltipOptions);
 
       line.on('mouseover', event => {
         openActiveRelationTooltip('forecast', line, event);

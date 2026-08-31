@@ -604,11 +604,10 @@
     }
   }
 
-  function applyMobileLegendDefaults() {
-    if (!window.matchMedia('(max-width: 900px)').matches) return;
+  function applyResponsiveLegendDefaults(isMobile = window.matchMedia('(max-width: 900px)').matches) {
     document.querySelectorAll('.choropleth-legend').forEach(legend => {
       if (legend.dataset.legendUserToggled === 'true') return;
-      setLegendCollapsedState(legend, true);
+      setLegendCollapsedState(legend, isMobile);
     });
   }
 
@@ -1364,10 +1363,10 @@
         });
       }
     });
-    applyMobileLegendDefaults();
+    applyResponsiveLegendDefaults();
     const mobileLegendQuery = window.matchMedia('(max-width: 900px)');
     mobileLegendQuery.addEventListener?.('change', event => {
-      if (event.matches) applyMobileLegendDefaults();
+      applyResponsiveLegendDefaults(event.matches);
     });
 
     // Maritime Selected Port Reset Button
