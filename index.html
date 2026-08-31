@@ -36,8 +36,8 @@
 
       <!-- Header Action Modals -->
       <div class="header-buttons">
-        <button class="btn-header btn-header-ai" id="btnAiModal" title="Güterstrom-KI als Interface-Prototyp öffnen">
-          <img src="assets/icons/gueterstrom-ki-mark.svg" alt="" class="header-ai-icon" aria-hidden="true">
+        <button class="btn-header btn-header-ai" id="btnAiModal" title="Analyseassistent öffnen">
+          <img src="assets/icons/gueterstrom-ki-variante-c-datenkorridor.svg" alt="" class="header-ai-icon" aria-hidden="true">
           KI fragen
           <span class="header-ai-badge">Test</span>
         </button>
@@ -1266,16 +1266,16 @@
        MODALS
        ============================================================ -->
 
-  <!-- Güterstrom-KI: interaction prototype without model or data connection -->
+  <!-- Analyseassistent: interaction prototype without model or data connection -->
   <div class="modal-backdrop" id="modalAi" role="presentation">
     <div class="modal-dialog ki-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="aiModalTitle" aria-describedby="aiPrototypeNotice">
-      <button class="modal-close" data-close="modalAi" aria-label="Güterstrom-KI schließen">&times;</button>
+      <button class="modal-close" data-close="modalAi" aria-label="Analyseassistent schließen">&times;</button>
       <div class="ki-modal-header">
         <div class="ki-modal-brand">
-          <span class="ki-modal-logo"><img src="assets/icons/gueterstrom-ki-mark.svg" alt=""></span>
+          <span class="ki-modal-logo"><img src="assets/icons/gueterstrom-ki-variante-c-datenkorridor.svg" alt=""></span>
           <div>
             <div class="ki-modal-overline">Fragen an die Güterverkehrsdaten</div>
-            <h3 id="aiModalTitle">Güterstrom-KI</h3>
+            <h3 id="aiModalTitle">Analyseassistent</h3>
           </div>
         </div>
       </div>
@@ -1288,8 +1288,8 @@
         </div>
         <div class="ki-composer-area">
           <form class="ki-question-form" id="aiQuestionForm">
-            <label class="sr-only" for="aiQuestionInput">Frage an die Güterstrom-KI</label>
-            <textarea id="aiQuestionInput" rows="1" maxlength="600" placeholder="Güterstrom-KI fragen"></textarea>
+            <label class="sr-only" for="aiQuestionInput">Frage an den Analyseassistenten</label>
+            <textarea id="aiQuestionInput" rows="1" maxlength="600" placeholder="Analyseassistenten fragen"></textarea>
             <button type="submit" class="ki-send-button" aria-label="Frage testen">
               <span>Frage testen</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline></svg>

@@ -1487,7 +1487,7 @@
       });
     });
 
-    // Güterstrom-KI interaction prototype. It deliberately demonstrates the
+    // Analyseassistent interaction prototype. It deliberately demonstrates the
     // intended workflow without inventing values or contacting a model.
     const appendAiMessage = (kind, content) => {
       const conversation = document.getElementById('aiConversation');
@@ -1502,7 +1502,7 @@
       avatar.className = 'ki-message-avatar';
       if (kind === 'assistant') {
         const icon = document.createElement('img');
-        icon.src = 'assets/icons/gueterstrom-ki-mark.svg';
+        icon.src = 'assets/icons/gueterstrom-ki-variante-c-datenkorridor.svg';
         icon.alt = '';
         avatar.appendChild(icon);
       } else {
@@ -1540,7 +1540,7 @@
       const title = document.createElement('strong');
       title.textContent = 'Frage erkannt – Datenabfrage noch nicht verbunden.';
       const explanation = document.createElement('p');
-      explanation.textContent = 'Im späteren Ausbau würde die Güterstrom-KI für Ihre Frage passende geprüfte Abfragen auswählen, die Daten auswerten und das Ergebnis mit Quellen und Einschränkungen erläutern. Dieser Interface-Test erzeugt bewusst keine Zahlen.';
+      explanation.textContent = 'Im späteren Ausbau würde der Analyseassistent für Ihre Frage passende geprüfte Abfragen auswählen, die Daten auswerten und das Ergebnis mit Quellen und Einschränkungen erläutern. Dieser Interface-Test erzeugt bewusst keine Zahlen.';
       const meta = document.createElement('span');
       meta.className = 'ki-message-meta';
       meta.textContent = 'Prototyp-Antwort · keine Modell- oder Datenverbindung';
