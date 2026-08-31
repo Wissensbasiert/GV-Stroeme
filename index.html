@@ -14,7 +14,7 @@
   <!-- Leaflet CSS for Real Geographic Vector Maps -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <!-- Custom App Styles -->
-  <link rel="stylesheet" href="css/style.css?v=20260831-legend-titles-v23">
+  <link rel="stylesheet" href="css/style.css?v=20260831-ki-interface-v24">
   
   <!-- Leaflet JS & Chart.js -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -36,6 +36,11 @@
 
       <!-- Header Action Modals -->
       <div class="header-buttons">
+        <button class="btn-header btn-header-ai" id="btnAiModal" title="Güterstrom-KI als Interface-Prototyp öffnen">
+          <img src="assets/icons/gueterstrom-ki-mark.svg" alt="" class="header-ai-icon" aria-hidden="true">
+          KI fragen
+          <span class="header-ai-badge">Test</span>
+        </button>
         <button class="btn-header" id="btnHelpModal" title="Hinweise zur Nutzung">
           <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><circle cx="12" cy="8" r="0.8" fill="currentColor"></circle></svg>
           Hinweise
@@ -1261,6 +1266,58 @@
        MODALS
        ============================================================ -->
 
+  <!-- Güterstrom-KI: interaction prototype without model or data connection -->
+  <div class="modal-backdrop" id="modalAi" role="presentation">
+    <div class="modal-dialog ki-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="aiModalTitle" aria-describedby="aiPrototypeNotice">
+      <button class="modal-close" data-close="modalAi" aria-label="Güterstrom-KI schließen">&times;</button>
+      <div class="ki-modal-header">
+        <div class="ki-modal-brand">
+          <span class="ki-modal-logo"><img src="assets/icons/gueterstrom-ki-mark.svg" alt=""></span>
+          <div>
+            <div class="ki-modal-overline">Fragen an die Güterverkehrsdaten</div>
+            <h3 id="aiModalTitle">Güterstrom-KI</h3>
+          </div>
+        </div>
+        <span class="ki-prototype-badge">Interface-Prototyp</span>
+      </div>
+      <div class="ki-prototype-notice" id="aiPrototypeNotice">
+        <strong>Noch keine echte KI- oder Datenabfrage.</strong>
+        Dieser lokale Test zeigt zunächst Bedienung und Erscheinungsbild. Zahlen werden nicht simuliert.
+      </div>
+      <div class="ki-modal-body">
+        <div class="ki-context-strip" aria-label="Aktueller Analysekontext">
+          <span class="ki-context-label">Aktuelle Auswahl</span>
+          <span id="aiContextSummary">Deutschland · 2024 · Tonnen · Versand + Empfang</span>
+        </div>
+        <div class="ki-conversation" id="aiConversation" aria-live="polite">
+          <article class="ki-message ki-message-assistant">
+            <div class="ki-message-avatar"><img src="assets/icons/gueterstrom-ki-mark.svg" alt=""></div>
+            <div class="ki-message-content">
+              <strong>Welche Frage möchten Sie untersuchen?</strong>
+              <p>Formulieren Sie frei. Im späteren Ausbau würde ich geprüfte Datenabfragen kombinieren und Ergebnisse mit Zeitraum, Einheit, Quelle und fachlichen Grenzen ausgeben.</p>
+            </div>
+          </article>
+        </div>
+        <div class="ki-suggestions" aria-label="Beispielfragen">
+          <button type="button" class="ki-suggestion" data-ai-question="Welche Regionen haben bis 2040 den stärksten Zuwachs im Schienengüterverkehr?">Stärkster Zuwachs bis 2040</button>
+          <button type="button" class="ki-suggestion" data-ai-question="Welche Gütergruppen prägen die aktuell ausgewählte Region?">Güterstruktur der Region</button>
+          <button type="button" class="ki-suggestion" data-ai-question="Welche Relationen sind für die aktuell ausgewählte Region am wichtigsten?">Wichtigste Relationen</button>
+        </div>
+        <form class="ki-question-form" id="aiQuestionForm">
+          <label class="sr-only" for="aiQuestionInput">Frage an die Güterstrom-KI</label>
+          <textarea id="aiQuestionInput" rows="2" maxlength="600" placeholder="Zum Beispiel: Wie entwickelt sich der Schienengüterverkehr in meiner Region?"></textarea>
+          <div class="ki-question-footer">
+            <span>Freie Fragen · Antworten später aus geprüften Abfragen</span>
+            <button type="submit" class="ki-send-button">
+              Frage testen
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- Regional Profile / Steckbrief Modal Dialog -->
   <div class="modal-backdrop" id="modalSteckbrief" role="presentation">
     <div class="modal-dialog modal-dialog-xl" role="dialog" aria-modal="true" aria-labelledby="steckbriefModalTitle">
@@ -1343,6 +1400,6 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=20260831-legend-titles-v23"></script>
+  <script src="js/app.js?v=20260831-ki-interface-v24"></script>
 </body>
 </html>

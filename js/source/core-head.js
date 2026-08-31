@@ -1488,6 +1488,78 @@
       });
     });
 
+    // Güterstrom-KI interaction prototype. It deliberately demonstrates the
+    // intended workflow without inventing values or contacting a model.
+    const getAiContextSummary = () => [
+      document.getElementById('summaryRegion')?.textContent,
+      document.getElementById('summaryPeriod')?.textContent,
+      document.getElementById('summaryMetric')?.textContent,
+      document.getElementById('summaryDirection')?.textContent
+    ].filter(Boolean).join(' · ');
+
+    const updateAiContext = () => {
+      const context = document.getElementById('aiContextSummary');
+      if (context) context.textContent = getAiContextSummary() || 'Aktuelle Auswahl wird geladen …';
+    };
+
+    const appendAiMessage = (kind, content) => {
+      const conversation = document.getElementById('aiConversation');
+      if (!conversation) return;
+
+      const message = document.createElement('article');
+      message.className = `ki-message ki-message-${kind}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = 'ki-message-avatar';
+      if (kind === 'assistant') {
+        const icon = document.createElement('img');
+        icon.src = 'assets/icons/gueterstrom-ki-mark.svg';
+        icon.alt = '';
+        avatar.appendChild(icon);
+      } else {
+        avatar.textContent = 'Sie';
+      }
+
+      const body = document.createElement('div');
+      body.className = 'ki-message-content';
+      if (typeof content === 'string') {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = content;
+        body.appendChild(paragraph);
+      } else {
+        body.appendChild(content);
+      }
+
+      message.append(avatar, body);
+      conversation.appendChild(message);
+      conversation.scrollTop = conversation.scrollHeight;
+    };
+
+    const submitAiPrototypeQuestion = () => {
+      const input = document.getElementById('aiQuestionInput');
+      const question = input?.value.trim();
+      if (!question) {
+        input?.focus();
+        return;
+      }
+
+      appendAiMessage('user', question);
+      input.value = '';
+
+      const response = document.createDocumentFragment();
+      const title = document.createElement('strong');
+      title.textContent = 'Frage erkannt – Datenabfrage noch nicht verbunden.';
+      const explanation = document.createElement('p');
+      const context = getAiContextSummary() || 'der aktuellen Auswahl';
+      explanation.textContent = `Im späteren Ausbau würde die Güterstrom-KI für „${context}“ passende geprüfte Abfragen auswählen, die Daten auswerten und das Ergebnis mit Quellen und Einschränkungen erläutern. Dieser Interface-Test erzeugt bewusst keine Zahlen.`;
+      const meta = document.createElement('span');
+      meta.className = 'ki-message-meta';
+      meta.textContent = 'Prototyp-Antwort · keine Modell- oder Datenverbindung';
+      response.append(title, explanation, meta);
+      appendAiMessage('assistant', response);
+      input.focus();
+    };
+
     // Modals Handling
     const setupModal = (btnId, modalId) => {
       const btn = document.getElementById(btnId);
@@ -1498,6 +1570,10 @@
           modal.querySelector('.modal-close')?.focus();
           if (modalId === 'modalSteckbrief') await prepareSteckbriefModal();
           if (modalId === 'modalHelp' || modalId === 'modalLicenses') await refreshDataCoverage();
+          if (modalId === 'modalAi') {
+            updateAiContext();
+            requestAnimationFrame(() => document.getElementById('aiQuestionInput')?.focus());
+          }
         });
         modal.querySelectorAll('.modal-close, [data-close]')?.forEach(c => {
           c.addEventListener('click', () => {
@@ -1520,10 +1596,30 @@
       }
     };
 
+    setupModal('btnAiModal', 'modalAi');
     setupModal('btnSteckbriefModal', 'modalSteckbrief');
     setupModal('btnHelpModal', 'modalHelp');
     setupModal('btnLicensesModal', 'modalLicenses');
     setupModal('brandLogoBtn', 'modalLicenses');
+
+    document.getElementById('aiQuestionForm')?.addEventListener('submit', event => {
+      event.preventDefault();
+      submitAiPrototypeQuestion();
+    });
+    document.getElementById('aiQuestionInput')?.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        submitAiPrototypeQuestion();
+      }
+    });
+    document.querySelectorAll('[data-ai-question]').forEach(button => {
+      button.addEventListener('click', () => {
+        const input = document.getElementById('aiQuestionInput');
+        if (!input) return;
+        input.value = button.getAttribute('data-ai-question') || '';
+        submitAiPrototypeQuestion();
+      });
+    });
 
     document.getElementById('btnPrintSteckbrief')?.addEventListener('click', () => {
       window.print();

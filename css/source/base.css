@@ -35,6 +35,18 @@
   --transition: all 0.2s ease;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Targeted refinement: modal content, intermodal module and maritime legend */
 .inline-ui-icon {
   width: 16px;
@@ -1089,9 +1101,10 @@ body {
 }
 
 /* Analysis flow: first orientation, then regional profile, then provenance. */
-#btnHelpModal { order: 1; }
-#btnSteckbriefModal { order: 2; }
-#btnLicensesModal { order: 3; }
+#btnAiModal { order: 1; }
+#btnHelpModal { order: 2; }
+#btnSteckbriefModal { order: 3; }
+#btnLicensesModal { order: 4; }
 
 .btn-header {
   display: flex;
@@ -1120,6 +1133,45 @@ body {
   width: 15px;
   height: 15px;
   color: var(--text-muted);
+}
+
+.btn-header-ai {
+  position: relative;
+  gap: 7px;
+  padding: 5px 8px 5px 6px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #63b472 0%, #4c7f83 100%);
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(76, 127, 131, 0.18);
+}
+.btn-header-ai:hover {
+  color: #ffffff;
+  background: linear-gradient(135deg, #55a865 0%, #3f6f73 100%);
+  border-color: transparent;
+  box-shadow: 0 6px 16px rgba(76, 127, 131, 0.24);
+  transform: translateY(-1px);
+}
+.btn-header-ai:focus-visible {
+  outline-color: #4c7f83;
+}
+.header-ai-icon {
+  width: 25px;
+  height: 25px;
+  padding: 4px;
+  object-fit: contain;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 7px;
+}
+.header-ai-badge {
+  padding: 2px 5px;
+  color: #215b3b;
+  font-size: 0.56rem;
+  font-weight: 850;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: #e8f7ec;
+  border-radius: 999px;
 }
 
 /* App Container (Flex Row: Sidebar + Main Content) */
