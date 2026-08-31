@@ -1505,6 +1505,8 @@
       const conversation = document.getElementById('aiConversation');
       if (!conversation) return;
 
+      conversation.closest('.ki-modal-body')?.classList.add('has-conversation');
+
       const message = document.createElement('article');
       message.className = `ki-message ki-message-${kind}`;
 
@@ -1544,6 +1546,7 @@
 
       appendAiMessage('user', question);
       input.value = '';
+      input.style.height = '';
 
       const response = document.createDocumentFragment();
       const title = document.createElement('strong');
@@ -1611,12 +1614,30 @@
         submitAiPrototypeQuestion();
       }
     });
+    document.getElementById('aiQuestionInput')?.addEventListener('input', event => {
+      const input = event.currentTarget;
+      input.style.height = 'auto';
+      input.style.height = `${Math.min(input.scrollHeight, 118)}px`;
+    });
+    document.getElementById('aiExamplesToggle')?.addEventListener('click', event => {
+      const button = event.currentTarget;
+      const examples = document.getElementById('aiExamples');
+      if (!examples) return;
+      const willOpen = examples.hidden;
+      examples.hidden = !willOpen;
+      button.setAttribute('aria-expanded', String(willOpen));
+    });
     document.querySelectorAll('[data-ai-question]').forEach(button => {
       button.addEventListener('click', () => {
         const input = document.getElementById('aiQuestionInput');
         if (!input) return;
         input.value = button.getAttribute('data-ai-question') || '';
-        submitAiPrototypeQuestion();
+        input.dispatchEvent(new Event('input'));
+        const examples = document.getElementById('aiExamples');
+        const toggle = document.getElementById('aiExamplesToggle');
+        if (examples) examples.hidden = true;
+        toggle?.setAttribute('aria-expanded', 'false');
+        input.focus();
       });
     });
 

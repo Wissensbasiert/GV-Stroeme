@@ -19,40 +19,39 @@
         </div>
         <span class="ki-prototype-badge">Interface-Prototyp</span>
       </div>
-      <div class="ki-prototype-notice" id="aiPrototypeNotice">
-        <strong>Noch keine echte KI- oder Datenabfrage.</strong>
-        Dieser lokale Test zeigt zunächst Bedienung und Erscheinungsbild. Zahlen werden nicht simuliert.
-      </div>
       <div class="ki-modal-body">
         <div class="ki-context-strip" aria-label="Aktueller Analysekontext">
           <span class="ki-context-label">Aktuelle Auswahl</span>
           <span id="aiContextSummary">Deutschland · 2024 · Tonnen · Versand + Empfang</span>
         </div>
-        <div class="ki-conversation" id="aiConversation" aria-live="polite">
-          <article class="ki-message ki-message-assistant">
-            <div class="ki-message-avatar"><img src="assets/icons/gueterstrom-ki-mark.svg" alt=""></div>
-            <div class="ki-message-content">
-              <strong>Welche Frage möchten Sie untersuchen?</strong>
-              <p>Formulieren Sie frei. Im späteren Ausbau würde ich geprüfte Datenabfragen kombinieren und Ergebnisse mit Zeitraum, Einheit, Quelle und fachlichen Grenzen ausgeben.</p>
-            </div>
-          </article>
+        <div class="ki-modal-main">
+          <section class="ki-start-panel" id="aiStartPanel">
+            <img class="ki-start-logo" src="assets/icons/gueterstrom-ki-mark.svg" alt="">
+            <h4>Was möchten Sie über die Güterverkehrsströme wissen?</h4>
+            <p>Fragen Sie zur aktuellen Auswahl oder vergleichen Sie Regionen, Verkehrsträger und Entwicklungen.</p>
+          </section>
+          <div class="ki-conversation" id="aiConversation" aria-live="polite"></div>
         </div>
-        <div class="ki-suggestions" aria-label="Beispielfragen">
-          <button type="button" class="ki-suggestion" data-ai-question="Welche Regionen haben bis 2040 den stärksten Zuwachs im Schienengüterverkehr?">Stärkster Zuwachs bis 2040</button>
-          <button type="button" class="ki-suggestion" data-ai-question="Welche Gütergruppen prägen die aktuell ausgewählte Region?">Güterstruktur der Region</button>
-          <button type="button" class="ki-suggestion" data-ai-question="Welche Relationen sind für die aktuell ausgewählte Region am wichtigsten?">Wichtigste Relationen</button>
-        </div>
-        <form class="ki-question-form" id="aiQuestionForm">
-          <label class="sr-only" for="aiQuestionInput">Frage an die Güterstrom-KI</label>
-          <textarea id="aiQuestionInput" rows="2" maxlength="600" placeholder="Zum Beispiel: Wie entwickelt sich der Schienengüterverkehr in meiner Region?"></textarea>
-          <div class="ki-question-footer">
-            <span>Freie Fragen · Antworten später aus geprüften Abfragen</span>
-            <button type="submit" class="ki-send-button">
-              Frage testen
+        <div class="ki-composer-area">
+          <form class="ki-question-form" id="aiQuestionForm">
+            <label class="sr-only" for="aiQuestionInput">Frage an die Güterstrom-KI</label>
+            <textarea id="aiQuestionInput" rows="1" maxlength="600" placeholder="Güterstrom-KI fragen"></textarea>
+            <button type="submit" class="ki-send-button" aria-label="Frage testen">
+              <span>Frage testen</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             </button>
+          </form>
+          <button type="button" class="ki-examples-toggle" id="aiExamplesToggle" aria-expanded="false" aria-controls="aiExamples">Was kann ich fragen?</button>
+          <div class="ki-examples-panel" id="aiExamples" hidden>
+            <p>Beispielfragen zur aktuellen Auswahl</p>
+            <div class="ki-suggestions" aria-label="Beispielfragen">
+              <button type="button" class="ki-suggestion" data-ai-question="Welche Regionen haben bis 2040 den stärksten Zuwachs im Schienengüterverkehr?">Wo wächst der Schienengüterverkehr bis 2040 am stärksten?</button>
+              <button type="button" class="ki-suggestion" data-ai-question="Welche Gütergruppen prägen die aktuell ausgewählte Region?">Welche Gütergruppen prägen die ausgewählte Region?</button>
+              <button type="button" class="ki-suggestion" data-ai-question="Welche Relationen sind für die aktuell ausgewählte Region am wichtigsten?">Welches sind die wichtigsten Verkehrsrelationen?</button>
+            </div>
           </div>
-        </form>
+          <p class="ki-prototype-note" id="aiPrototypeNotice"><strong>Interface-Prototyp:</strong> Noch keine echte KI- oder Datenabfrage; Zahlen werden nicht simuliert.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -139,6 +138,6 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=20260831-ki-feedback-v25"></script>
+  <script src="js/app.js?v=20260831-ki-minimal-v26"></script>
 </body>
 </html>

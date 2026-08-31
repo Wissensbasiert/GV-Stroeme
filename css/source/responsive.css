@@ -380,25 +380,28 @@
   .ki-prototype-badge {
     display: none;
   }
-  .ki-prototype-notice {
-    padding: 8px 16px;
-  }
   .ki-modal-body {
-    padding: 0 14px 14px;
+    padding: 0 14px 12px;
   }
   .ki-context-strip {
     align-items: flex-start;
     flex-direction: column;
     gap: 5px;
   }
+  .ki-start-panel {
+    padding: 28px 8px 18px;
+  }
+  .ki-start-panel h4 {
+    font-size: 1.18rem;
+  }
+  .ki-start-panel p {
+    font-size: 0.73rem;
+  }
   .ki-message {
     max-width: 96%;
   }
-  .ki-question-footer > span {
-    display: none;
-  }
-  .ki-question-footer {
-    justify-content: flex-end;
+  .ki-prototype-note {
+    font-size: 0.58rem;
   }
 }
 
