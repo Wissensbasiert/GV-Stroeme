@@ -348,6 +348,25 @@
   white-space: nowrap;
 }
 
+/* Forecast relation lines use the same stable reading width as the other
+   map modules. Without an explicit class Leaflet shrinks the tooltip to its
+   shortest content width and may separate a value from its unit. */
+.leaflet-tooltip.forecast-relation-leaflet-tooltip {
+  width: min(360px, var(--forecast-tooltip-max-width, calc(100vw - 42px)));
+  min-width: min(320px, var(--forecast-tooltip-max-width, calc(100vw - 42px)));
+  max-width: var(--forecast-tooltip-max-width, calc(100vw - 42px));
+  box-sizing: border-box;
+  white-space: normal;
+}
+.leaflet-tooltip.forecast-relation-leaflet-tooltip .flow-relation-tooltip {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.leaflet-tooltip.forecast-relation-leaflet-tooltip .flow-tooltip-value {
+  white-space: nowrap;
+}
+
 /* The forecast map sits in a narrower card. Keep regional hover cards within
    its visible Leaflet viewport, even when the screen is comparatively small.
    Percentages would be relative to Leaflet's initially widthless tooltip and
