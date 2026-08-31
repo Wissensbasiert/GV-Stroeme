@@ -1,0 +1,18 @@
+# Lokale Sicherungen und Arbeitsergebnisse
+backups/
+outputs/
+
+# Umfangreiche, reproduzierbare Ausgangsdaten
+data/raw/
+
+# Python-Artefakte und lokale Entwicklungsumgebungen
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Lokale Editor- und Betriebssystemdateien
+.DS_Store
+Thumbs.db
+*.log
+

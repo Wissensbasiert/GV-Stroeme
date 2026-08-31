@@ -1,0 +1,227 @@
+{
+  "title": "Datenkatalog Güterverkehrsströme Deutschland",
+  "last_updated": "2026-08-21",
+  "sources": {
+    "Destatis_IWW": {
+      "name": "Binnenschifffahrtsstatistik (EVAS 46321)",
+      "provider": "Statistisches Bundesamt (Destatis)",
+      "time_range": "2011 - 2025",
+      "granularity_temporal": "Monatlich & Jährlich",
+      "spatial_levels": [
+        "Hafen (HafenID, UN/LOCODE)",
+        "NUTS-3 (Inland & EU)",
+        "ISO-Ländercode"
+      ],
+      "commodity_classification": "NST-2007 (3-Steller / Gütergruppen)",
+      "metrics": [
+        "Tonnen",
+        "Tonnen_km",
+        "TEU",
+        "TEU_km",
+        "Anzahl_Ladungstraeger"
+      ],
+      "files_count": 15,
+      "encoding": "UTF-8 with BOM / UTF-8",
+      "delimiter": ";",
+      "description": "Erfasst alle Gütertransporte auf deutschen Binnenwasserstraßen (Binnenverkehr, grenzüberschreitender Empfang/Versand, Durchgangsverkehr soweit erfasst). Enthält präzise Hafen- und NUTS3-Relationen für Quelle und Ziel."
+    },
+    "Destatis_MRTM": {
+      "name": "Seeverkehrsstatistik (EVAS 46331)",
+      "provider": "Statistisches Bundesamt (Destatis)",
+      "time_range": "2011 - 2025",
+      "granularity_temporal": "Monatlich & Jährlich",
+      "spatial_levels": [
+        "Hafen (HafenID, UN/LOCODE)",
+        "NUTS-3 (Inland & EU)",
+        "ISO-Ländercode (Weltweit)"
+      ],
+      "commodity_classification": "NST-2007 (3-Steller / Gütergruppen)",
+      "metrics": [
+        "Guetergewicht (Tonnen)",
+        "TEU",
+        "Anzahl_Ladungstraeger"
+      ],
+      "files_count": 15,
+      "encoding": "UTF-8 with BOM / UTF-8",
+      "delimiter": ";",
+      "description": "Erfasst den Güterumschlag der deutschen Seehäfen mit weltweiten Partnerhäfen. Enthält Einlade- und Ausladehäfen (UN/LOCODE), Schiffsarten, Flaggen und Containerdifferenzierung."
+    },
+    "Destatis_SGV": {
+      "name": "Schienengüterverkehrsstatistik (EVAS 46131)",
+      "provider": "Statistisches Bundesamt (Destatis)",
+      "time_range": "2016 - 2025",
+      "granularity_temporal": "Monatlich & Jährlich",
+      "spatial_levels": [
+        "Inland: NUTS-3",
+        "Ausland: NUTS-2"
+      ],
+      "spatial_nomenclature_versions": {
+        "2016-2020": "NUTS 2016",
+        "2021-2023": "NUTS 2021",
+        "2024-2025": "NUTS 2024"
+      },
+      "commodity_classification": "NST-2007 (3-Steller / 2-Steller)",
+      "metrics": [
+        "Befoerderungsmenge_in_Tonnen",
+        "Befoerderungsleistung_in_TKM",
+        "TEU",
+        "Anzahl_Ladeeinheiten"
+      ],
+      "files_count": 10,
+      "encoding": "ISO-8859-15 / Latin1",
+      "delimiter": ";",
+      "description": "Erfasst Transporte im Schienengüterverkehr über deutsche Eisenbahnnetze. Verkehrsbeziehungen: 1=Binnen, 2=Versand Ausland, 3=Empfang Ausland, 4=Transit."
+    },
+    "KBA_Strasse_VE7": {
+      "name": "KBA VE 7 - Verkehrsverflechtung europäischer Lastkraftfahrzeuge",
+      "provider": "Kraftfahrt-Bundesamt (KBA) / Eurostat Road Freight",
+      "time_range": "2010 - 2024",
+      "granularity_temporal": "Jährlich",
+      "spatial_levels": [
+        "Beladeregion: NUTS-3 (In- & Ausland)",
+        "Entladeregion: NUTS-3 (In- & Ausland)"
+      ],
+      "commodity_classification": "Keine (Aggregiert über alle Güterarten für vollständige NUTS3xNUTS3 Matrix)",
+      "metrics": [
+        "Fahrten",
+        "Kilometer",
+        "Inlands_km",
+        "Tonnen",
+        "Tkm",
+        "Inlands_tkm",
+        "Fahrzeugdatensaetze"
+      ],
+      "file": "ve7_2010_2024.csv (16.8 MB)",
+      "encoding": "UTF-8 with BOM",
+      "delimiter": ";",
+      "description": "Vollständige Quelle-Ziel-Verflechtungsmatrix (O-D) für den Straßengüterverkehr europäischer Lkw mit Bezug zu Deutschland auf NUTS-3-Ebene. Essentiell für Spinnendiagramme und Korridoranalysen."
+    },
+    "KBA_Strasse_VE12_VE13": {
+      "name": "KBA VE 12 (Versand) & VE 13 (Empfang) - Gütergruppen",
+      "provider": "Kraftfahrt-Bundesamt (KBA)",
+      "time_range": "2010 - 2024",
+      "granularity_temporal": "Jährlich",
+      "spatial_levels": [
+        "NUTS-3"
+      ],
+      "commodity_classification": "7 Güterhauptgruppen (Position 1 bis 7)",
+      "metrics": [
+        "Fahrten",
+        "Kilometer",
+        "Tonnen",
+        "Tkm",
+        "Fahrzeugdatensaetze"
+      ],
+      "files": [
+        "ve12_2010_2024.csv",
+        "ve13_2010_2024.csv"
+      ],
+      "encoding": "UTF-8 with BOM",
+      "delimiter": ";",
+      "description": "Differenzierung des Straßengüterverkehrs nach Region (NUTS-3) und 7 aggregierten NST-2007 Hauptgruppen."
+    },
+    "KBA_Strasse_VD2": {
+      "name": "KBA VD 2-V (Versand) & VD 2-E (Empfang) - Entfernungsstufen",
+      "provider": "Kraftfahrt-Bundesamt (KBA)",
+      "time_range": "2016 - 2024",
+      "granularity_temporal": "Jährlich",
+      "spatial_levels": [
+        "NUTS-3"
+      ],
+      "distance_classes": "FT_ENTF3 (Entfernungsstufen: z.B. Nahbereich, Fernbereich)",
+      "metrics": [
+        "FT_I (Inlandsfahrten)",
+        "KM_I",
+        "TON_I",
+        "TKM_I",
+        "FT_G (Gesamtfahrten)",
+        "KM_G",
+        "TON_G",
+        "TKM_G"
+      ],
+      "files_count": 18,
+      "encoding": "UTF-8 with BOM",
+      "delimiter": ";",
+      "description": "Erfasst Lastfahrten deutscher Lkw nach NUTS-3 und Distanzklassen."
+    },
+    "KBA_Strasse_VD3c": {
+      "name": "KBA VD 3c-V (Versand) & VD 3c-E (Empfang) - 20 Güterabteilungen",
+      "provider": "Kraftfahrt-Bundesamt (KBA)",
+      "time_range": "2016 - 2024",
+      "granularity_temporal": "Jährlich",
+      "spatial_levels": [
+        "NUTS-2"
+      ],
+      "commodity_classification": "20 Güterabteilungen nach NST-2007",
+      "metrics": [
+        "FT_I",
+        "KM_I",
+        "TON_I",
+        "TKM_I",
+        "FT_G",
+        "KM_G",
+        "TON_G",
+        "TKM_G"
+      ],
+      "files_count": 18,
+      "encoding": "UTF-8 with BOM",
+      "delimiter": ";",
+      "description": "Detaillierte Güteraufteilung (20 NST-2007 Abteilungen) für deutsche Lkw auf Regierungsbezirksebene (NUTS-2)."
+    },
+    "Toll_Collect_Maut": {
+      "name": "Lkw-Maut-Portal: Start-Ziel-Relationen zwischen Gemeinden",
+      "provider": "BALM / Toll Collect",
+      "time_range": "Monatlich; in Testabfragen Daten ab Juni 2025 nachgewiesen, genaue Verfügbarkeit produktiv prüfen",
+      "spatial_levels": [
+        "Verwaltungsgebiete Gemeinden (LAU-Ebene 2)",
+        "Start-Ziel-Relationen über Amtliche Gemeindeschlüssel (AGS)"
+      ],
+      "formats": [
+        "Monatlicher CSV-Download (zuletzt verfügbarer Monat)",
+        "GeoJSON (mautdaten_bund_monat_s/z)",
+        "ArcGIS FeatureServer API (gezielte Gemeindeabfragen)"
+      ],
+      "metrics": [
+        "Anzahl der Befahrungen",
+        "Fahrleistung in km",
+        "Distanzkennwerte",
+        "Fahrzeitkennwerte"
+      ],
+      "access_constraint": "Die API erfordert explizit entweder ags_start plus richtung oder ags_ziel plus richtung; bundesweite Komplettabfragen sind nicht zulässig.",
+      "status": "Noch nicht in das Dashboard integriert; als separates, gemeindebezogenes Live-Modul vorgemerkt.",
+      "description": "Mautfahrten auf dem mautpflichtigen Streckennetz, aggregiert zu Gemeinde-Start-Ziel-Relationen. Die Kennzahlen sind kein vollständiger Straßengüterverkehr und enthalten keine Gütermengen. Quelle: BALM, Toll Collect GmbH; für Gemeindegeodaten zusätzlich BKG gemäß Lizenzhinweis."
+    },
+    "Geodaten_NUTS": {
+      "name": "GISCO Eurostat NUTS Geometrien",
+      "provider": "Eurostat / GISCO",
+      "versions": [
+        "2016",
+        "2021",
+        "2024"
+      ],
+      "crs": "EPSG:3035 (ETRS89 / LAEA Europe) & WGS84",
+      "formats": [
+        "GeoPackage (.gpkg)"
+      ],
+      "description": "Grenzpolygone für NUTS-0 (Länder), NUTS-1 (Bundesländer), NUTS-2 (Regierungsbezirke), NUTS-3 (Kreise/kreisfreie Städte)."
+    },
+    "VP2040_Prognose": {
+      "name": "Verkehrsprognose 2040 (BMDV)",
+      "provider": "BMDV / Intraplan / Trimode / ETR / MWP",
+      "baseline_year": "2019",
+      "forecast_horizons": [
+        "2040"
+      ],
+      "spatial_levels": [
+        "NUTS-3 (Deutschland: 400 Kreise/kreisfreie Städte, Ausland aggregiert)",
+        "VP2040 Verkehrszellen (VZ: Binnenzellen 100101-1607704, Auslandszellen)"
+      ],
+      "included_assets": [
+        "Shapefiles & Excel-Zellenkataloge (NUTS-3 und Verkehrszellen)",
+        "Kartenwerke (PDF Deutschland & Europa)",
+        "Nutzungsbedingungen für Verflechtungsmatrizen & Intermodale Transportketten"
+      ],
+      "status": "NUTS-3-Verflechtungsmatrizen für das Basisjahr 2019 und die Basisprognose 2040 (P1) sowie Verkehrszellengeometrien und Referenztabellen sind im Dashboard integriert. Intermodale Transportketten liegen zusätzlich als Rohdaten vor."
+    }
+  }
+}

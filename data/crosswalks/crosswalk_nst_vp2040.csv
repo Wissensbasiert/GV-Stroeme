@@ -1,0 +1,26 @@
+vp40_code;vp40_name;nst2007_division;nst2007_division_name;nst2007_group7;nst2007_group7_name;split_notes
+10;Land- und forstwirtschaftliche Erzeugnisse;01;"Erzeugnisse der Landwirtschaft, Jagd und Forstwirtschaft; Fische";1;Erzeugnisse der Land- und Forstwirtschaft, Rohstoffe;Entspricht NST-2007 Abteilung 01
+21;Steinkohle;02;Kohle, rohes Erdöl und Erdgas;1;Erzeugnisse der Land- und Forstwirtschaft, Rohstoffe;Unterteilung der NST-2007 Abteilung 02
+22;Braunkohle;02;Kohle, rohes Erdöl und Erdgas;1;Erzeugnisse der Land- und Forstwirtschaft, Rohstoffe;Unterteilung der NST-2007 Abteilung 02
+23;Erdöl und Erdgas;02;Kohle, rohes Erdöl und Erdgas;1;Erzeugnisse der Land- und Forstwirtschaft, Rohstoffe;Unterteilung der NST-2007 Abteilung 02
+31;Erze;03;"Erze, Steine und Erden; sonstige Bergbauerzeugnisse";1;Erzeugnisse der Land- und Forstwirtschaft, Rohstoffe;Unterteilung der NST-2007 Abteilung 03
+32;Düngemittel;08;"Chemische Erzeugnisse, synthetische Fasern, Gummi- und Kunststoffwaren";3;Mineralische, chemische und Mineralölerzeugnisse;Separierte Düngemittel aus NST-2007 Abteilung 08
+33;Steine und Erden, Baustoffe;03;"Erze, Steine und Erden; sonstige Bergbauerzeugnisse";1;Erzeugnisse der Land- und Forstwirtschaft, Rohstoffe;Unterteilung der NST-2007 Abteilung 03
+40;Nahrungs- und Genussmittel;04;"Nahrungs- und Genussmittel, Tabakerzeugnisse";2;Konsumgüter zum kurzfristigen Verbrauch, Holzwaren;Entspricht NST-2007 Abteilung 04
+50;Textilien, Bekleidung, Lederwaren;05;"Textilien, Bekleidung, Lederwaren";2;Konsumgüter zum kurzfristigen Verbrauch, Holzwaren;Entspricht NST-2007 Abteilung 05
+60;Holzwaren, Papier, Pappe, Druck;06;"Holz, Holzwaren, Papier, Pappe, Druckerzeugnisse";2;Konsumgüter zum kurzfristigen Verbrauch, Holzwaren;Entspricht NST-2007 Abteilung 06
+71;Koks;07;Kokerei- und Mineralölerzeugnisse;3;Mineralische, chemische und Mineralölerzeugnisse;Unterteilung der NST-2007 Abteilung 07
+72;Mineralölerzeugnisse;07;Kokerei- und Mineralölerzeugnisse;3;Mineralische, chemische und Mineralölerzeugnisse;Unterteilung der NST-2007 Abteilung 07
+80;Chemische Erzeugnisse, Kunststoffe;08;"Chemische Erzeugnisse, synthetische Fasern, Gummi- und Kunststoffwaren";3;Mineralische, chemische und Mineralölerzeugnisse;Entspricht NST-2007 Abteilung 08 ohne Düngemittel
+90;Sonstige Mineralerzeugnisse (Glas, Keramik);09;"Glas, Keramik, bearbeitete Steine und Erden";3;Mineralische, chemische und Mineralölerzeugnisse;Entspricht NST-2007 Abteilung 09
+100;Metalle und Halbzeug (Eisen, Stahl);10;Metalle und Metallerzeugnisse;4;Metalle und Metallerzeugnisse;Entspricht NST-2007 Abteilung 10
+110;Maschinen, Geräte, Elektronik, Uhren;11;Maschinen und Ausrüstungen, Haushaltsgeräte etc.;5;Maschinen und Ausrüstungen, langlebige Konsumgüter;Entspricht NST-2007 Abteilung 11
+120;Fahrzeuge und Fahrzeugteile;12;Fahrzeuge;5;Maschinen und Ausrüstungen, langlebige Konsumgüter;Entspricht NST-2007 Abteilung 12
+130;Möbel, Industriewaren, Sport, Spiel;13;"Möbel, sonstige Industriewaren";5;Maschinen und Ausrüstungen, langlebige Konsumgüter;Entspricht NST-2007 Abteilung 13
+140;Sekundärrohstoffe, Abfälle;14;"Sekundärrohstoffe; kommunale Abfälle und sonstige Abfälle";6;Sekundärrohstoffe, Abfälle;Entspricht NST-2007 Abteilung 14
+150;Post, Pakete, Expressgut (KEP);15;Post, Pakete;7;Sonstige Produkte;Entspricht NST-2007 Abteilung 15
+160;Ladehilfsmittel & Transportmaterial;16;Geräte und Material für die Güterbeförderung;7;Sonstige Produkte;Entspricht NST-2007 Abteilung 16
+170;Umzugsgut, Gepäck;17;Im Rahmen von Umzügen beförderte Güter;7;Sonstige Produkte;Entspricht NST-2007 Abteilung 17
+180;Sammelgut (Stückgut);18;Sammelgut: eine Mischung verschiedener Arten von Gütern;7;Sonstige Produkte;Entspricht NST-2007 Abteilung 18
+190;Containerladung (Gutart unbekannt);19;Nicht identifizierbare Güter;7;Sonstige Produkte;Entspricht NST-2007 Abteilung 19
+200;Sonstige Güter a.n.g.;20;Sonstige Güter a.n.g.;7;Sonstige Produkte;Entspricht NST-2007 Abteilung 20

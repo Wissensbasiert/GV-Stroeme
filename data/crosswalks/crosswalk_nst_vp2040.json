@@ -1,0 +1,227 @@
+[
+  {
+    "vp40_code": 10,
+    "vp40_name": "Land- und forstwirtschaftliche Erzeugnisse",
+    "nst2007_division": "01",
+    "nst2007_division_name": "Erzeugnisse der Landwirtschaft, Jagd und Forstwirtschaft; Fische",
+    "nst2007_group7": "1",
+    "nst2007_group7_name": "Erzeugnisse der Land- und Forstwirtschaft, Rohstoffe",
+    "split_notes": "1:1 Entsprechung zu NST-2007 Abteilung 01"
+  },
+  {
+    "vp40_code": 21,
+    "vp40_name": "Steinkohle",
+    "nst2007_division": "02",
+    "nst2007_division_name": "Kohle, rohes Erdöl und Erdgas",
+    "nst2007_group7": "1",
+    "nst2007_group7_name": "Erzeugnisse der Land- und Forstwirtschaft, Rohstoffe",
+    "split_notes": "Unterteilung der Abteilung 02 (Gruppe 02.1)"
+  },
+  {
+    "vp40_code": 22,
+    "vp40_name": "Braunkohle",
+    "nst2007_division": "02",
+    "nst2007_division_name": "Kohle, rohes Erdöl und Erdgas",
+    "nst2007_group7": "1",
+    "nst2007_group7_name": "Erzeugnisse der Land- und Forstwirtschaft, Rohstoffe",
+    "split_notes": "Unterteilung der Abteilung 02 (Gruppe 02.2)"
+  },
+  {
+    "vp40_code": 23,
+    "vp40_name": "Erdöl und Erdgas",
+    "nst2007_division": "02",
+    "nst2007_division_name": "Kohle, rohes Erdöl und Erdgas",
+    "nst2007_group7": "1",
+    "nst2007_group7_name": "Erzeugnisse der Land- und Forstwirtschaft, Rohstoffe",
+    "split_notes": "Unterteilung der Abteilung 02 (Gruppe 02.3)"
+  },
+  {
+    "vp40_code": 31,
+    "vp40_name": "Erze",
+    "nst2007_division": "03",
+    "nst2007_division_name": "Erze, Steine und Erden; sonstige Bergbauerzeugnisse",
+    "nst2007_group7": "1",
+    "nst2007_group7_name": "Erzeugnisse der Land- und Forstwirtschaft, Rohstoffe",
+    "split_notes": "Unterteilung der Abteilung 03 (Eisenerze, NE-Metallerze)"
+  },
+  {
+    "vp40_code": 32,
+    "vp40_name": "Düngemittel",
+    "nst2007_division": "08",
+    "nst2007_division_name": "Chemische Erzeugnisse, synthetische Fasern, Gummi- und Kunststoffwaren",
+    "nst2007_group7": "3",
+    "nst2007_group7_name": "Mineralische, chemische und Mineralölerzeugnisse",
+    "split_notes": "Separierte Düngemittel aus Chemie"
+  },
+  {
+    "vp40_code": 33,
+    "vp40_name": "Steine und Erden, Baustoffe",
+    "nst2007_division": "03",
+    "nst2007_division_name": "Erze, Steine und Erden; sonstige Bergbauerzeugnisse",
+    "nst2007_group7": "1",
+    "nst2007_group7_name": "Erzeugnisse der Land- und Forstwirtschaft, Rohstoffe",
+    "split_notes": "Unterteilung der Abteilung 03 (Kies, Sand, Natursteine)"
+  },
+  {
+    "vp40_code": 40,
+    "vp40_name": "Nahrungs- und Genussmittel",
+    "nst2007_division": "04",
+    "nst2007_division_name": "Nahrungs- und Genussmittel, Tabakerzeugnisse",
+    "nst2007_group7": "2",
+    "nst2007_group7_name": "Konsumgüter zum kurzfristigen Verbrauch, Holzwaren",
+    "split_notes": "1:1 Entsprechung zu NST-2007 Abteilung 04"
+  },
+  {
+    "vp40_code": 50,
+    "vp40_name": "Textilien, Bekleidung, Lederwaren",
+    "nst2007_division": "05",
+    "nst2007_division_name": "Textilien, Bekleidung, Lederwaren",
+    "nst2007_group7": "2",
+    "nst2007_group7_name": "Konsumgüter zum kurzfristigen Verbrauch, Holzwaren",
+    "split_notes": "1:1 Entsprechung zu NST-2007 Abteilung 05"
+  },
+  {
+    "vp40_code": 60,
+    "vp40_name": "Holzwaren, Papier, Pappe, Druck",
+    "nst2007_division": "06",
+    "nst2007_division_name": "Holz, Holzwaren, Papier, Pappe, Druckerzeugnisse",
+    "nst2007_group7": "2",
+    "nst2007_group7_name": "Konsumgüter zum kurzfristigen Verbrauch, Holzwaren",
+    "split_notes": "1:1 Entsprechung zu NST-2007 Abteilung 06"
+  },
+  {
+    "vp40_code": 71,
+    "vp40_name": "Koks",
+    "nst2007_division": "07",
+    "nst2007_division_name": "Kokerei- und Mineralölerzeugnisse",
+    "nst2007_group7": "3",
+    "nst2007_group7_name": "Mineralische, chemische und Mineralölerzeugnisse",
+    "split_notes": "Unterteilung der Abteilung 07 (Koks)"
+  },
+  {
+    "vp40_code": 72,
+    "vp40_name": "Mineralölerzeugnisse",
+    "nst2007_division": "07",
+    "nst2007_division_name": "Kokerei- und Mineralölerzeugnisse",
+    "nst2007_group7": "3",
+    "nst2007_group7_name": "Mineralische, chemische und Mineralölerzeugnisse",
+    "split_notes": "Unterteilung der Abteilung 07 (Benzin, Diesel, Heizöl)"
+  },
+  {
+    "vp40_code": 80,
+    "vp40_name": "Chemische Erzeugnisse, Kunststoffe",
+    "nst2007_division": "08",
+    "nst2007_division_name": "Chemische Erzeugnisse, synthetische Fasern, Gummi- und Kunststoffwaren",
+    "nst2007_group7": "3",
+    "nst2007_group7_name": "Mineralische, chemische und Mineralölerzeugnisse",
+    "split_notes": "Entspricht Abteilung 08 ohne Düngemittel"
+  },
+  {
+    "vp40_code": 90,
+    "vp40_name": "Sonstige Mineralerzeugnisse (Glas, Keramik)",
+    "nst2007_division": "09",
+    "nst2007_division_name": "Glas, Keramik, bearbeitete Steine und Erden",
+    "nst2007_group7": "3",
+    "nst2007_group7_name": "Mineralische, chemische und Mineralölerzeugnisse",
+    "split_notes": "1:1 Entsprechung zu NST-2007 Abteilung 09"
+  },
+  {
+    "vp40_code": 100,
+    "vp40_name": "Metalle und Halbzeug (Eisen, Stahl)",
+    "nst2007_division": "10",
+    "nst2007_division_name": "Metalle und Metallerzeugnisse",
+    "nst2007_group7": "4",
+    "nst2007_group7_name": "Metalle und Metallerzeugnisse",
+    "split_notes": "1:1 Entsprechung zu NST-2007 Abteilung 10"
+  },
+  {
+    "vp40_code": 110,
+    "vp40_name": "Maschinen, Geräte, Elektronik, Uhren",
+    "nst2007_division": "11",
+    "nst2007_division_name": "Maschinen und Ausrüstungen, Haushaltsgeräte etc.",
+    "nst2007_group7": "5",
+    "nst2007_group7_name": "Maschinen und Ausrüstungen, langlebige Konsumgüter",
+    "split_notes": "Entspricht NST-2007 Abteilung 11"
+  },
+  {
+    "vp40_code": 120,
+    "vp40_name": "Fahrzeuge und Fahrzeugteile",
+    "nst2007_division": "12",
+    "nst2007_division_name": "Fahrzeuge",
+    "nst2007_group7": "5",
+    "nst2007_group7_name": "Maschinen und Ausrüstungen, langlebige Konsumgüter",
+    "split_notes": "Entspricht NST-2007 Abteilung 12"
+  },
+  {
+    "vp40_code": 130,
+    "vp40_name": "Möbel, Industriewaren, Sport, Spiel",
+    "nst2007_division": "13",
+    "nst2007_division_name": "Möbel, sonstige Industriewaren",
+    "nst2007_group7": "5",
+    "nst2007_group7_name": "Maschinen und Ausrüstungen, langlebige Konsumgüter",
+    "split_notes": "Entspricht NST-2007 Abteilung 13"
+  },
+  {
+    "vp40_code": 140,
+    "vp40_name": "Sekundärrohstoffe, Abfälle",
+    "nst2007_division": "14",
+    "nst2007_division_name": "Sekundärrohstoffe; kommunale Abfälle und sonstige Abfälle",
+    "nst2007_group7": "6",
+    "nst2007_group7_name": "Sekundärrohstoffe, Abfälle",
+    "split_notes": "Entspricht NST-2007 Abteilung 14"
+  },
+  {
+    "vp40_code": 150,
+    "vp40_name": "Post, Pakete, Expressgut (KEP)",
+    "nst2007_division": "15",
+    "nst2007_division_name": "Post, Pakete",
+    "nst2007_group7": "7",
+    "nst2007_group7_name": "Sonstige Produkte",
+    "split_notes": "Entspricht NST-2007 Abteilung 15"
+  },
+  {
+    "vp40_code": 160,
+    "vp40_name": "Ladehilfsmittel & Transportmaterial",
+    "nst2007_division": "16",
+    "nst2007_division_name": "Geräte und Material für die Güterbeförderung",
+    "nst2007_group7": "7",
+    "nst2007_group7_name": "Sonstige Produkte",
+    "split_notes": "Entspricht NST-2007 Abteilung 16"
+  },
+  {
+    "vp40_code": 170,
+    "vp40_name": "Umzugsgut, Gepäck",
+    "nst2007_division": "17",
+    "nst2007_division_name": "Im Rahmen von Umzügen beförderte Güter",
+    "nst2007_group7": "7",
+    "nst2007_group7_name": "Sonstige Produkte",
+    "split_notes": "Entspricht NST-2007 Abteilung 17"
+  },
+  {
+    "vp40_code": 180,
+    "vp40_name": "Sammelgut (Stückgut)",
+    "nst2007_division": "18",
+    "nst2007_division_name": "Sammelgut: eine Mischung verschiedener Arten von Gütern",
+    "nst2007_group7": "7",
+    "nst2007_group7_name": "Sonstige Produkte",
+    "split_notes": "Entspricht NST-2007 Abteilung 18"
+  },
+  {
+    "vp40_code": 190,
+    "vp40_name": "Containerladung (Gutart unbekannt)",
+    "nst2007_division": "19",
+    "nst2007_division_name": "Nicht identifizierbare Güter",
+    "nst2007_group7": "7",
+    "nst2007_group7_name": "Sonstige Produkte",
+    "split_notes": "Containertransporte im KV"
+  },
+  {
+    "vp40_code": 200,
+    "vp40_name": "Sonstige Güter a.n.g.",
+    "nst2007_division": "20",
+    "nst2007_division_name": "Sonstige Güter a.n.g.",
+    "nst2007_group7": "7",
+    "nst2007_group7_name": "Sonstige Produkte",
+    "split_notes": "Entspricht NST-2007 Abteilung 20"
+  }
+]

@@ -1,0 +1,129 @@
+      <section id="tab-road" class="tab-pane">
+        <div class="module-layout-grid">
+          <!-- Left: Tall Map -->
+          <div class="card map-card-tall">
+            <div class="card-header">
+              <div class="card-title" id="roadMapCardTitle">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z"></path><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                <span id="roadMapTitleText">Straßengüterverkehr in Beförderungsmenge im Jahr 2024</span>
+              </div>
+              <div class="card-actions">
+                <label style="font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <input type="checkbox" id="toggleRoadSpider" checked> Verbindungen anzeigen
+                </label>
+              </div>
+            </div>
+            <div class="map-container-leaflet map-container-tall">
+              <div id="roadLeafletMap" class="leaflet-map-frame"></div>
+              <!-- Choropleth Legend Box -->
+              <div class="choropleth-legend" id="roadChoroplethLegend">
+                <div class="legend-header">
+                  <span class="legend-title" id="roadLegendTitleLabel">Straßengüterverkehr</span>
+                  <button type="button" class="btn-legend-toggle" id="btnToggleLegend_road" title="Legende minimieren/maximieren">−</button>
+                </div>
+                <div class="legend-body" id="legendBody_road">
+                  <div class="legend-scale">
+                    <span style="background: #fef3c7;"></span>
+                    <span style="background: #fde68a;"></span>
+                    <span style="background: #f59e0b;"></span>
+                    <span style="background: #d97706;"></span>
+                    <span style="background: #92400e;"></span>
+                  </div>
+                  <div class="legend-labels" id="roadLegendLabelsContainer">
+                    <span>&lt; 2 Mio. t</span>
+                    <span>&gt; 20 Mio. t</span>
+                  </div>
+                  <div class="legend-spider-section" id="roadLegendSpiderSection" style="display: none;">
+                    <div class="legend-subtitle">Verbindungen</div>
+                    <div class="legend-spider-rows">
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thin" id="spiderLineThin_road" style="background:#f59e0b;"></span>
+                        <span class="legend-spider-val" id="spiderLegMin_road">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-med" id="spiderLineMed_road" style="background:#f59e0b;"></span>
+                        <span class="legend-spider-val" id="spiderLegMed_road">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thick" id="spiderLineThick_road" style="background:#f59e0b;"></span>
+                        <span class="legend-spider-val" id="spiderLegMax_road">--</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Table + Commodity Chart -->
+          <div class="right-analytics-column">
+            <div class="card table-card-compact">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34c2.83-.49 5-2.97 5-5.99V4H6v4.67c0 3.02 2.17 5.5 5 5.99z"></path></svg>
+                  <span id="roadRelationsTitle">Top 10 Relationen: Region auswählen</span>
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Straßengüterverkehr: Relationen
+                      </div>
+                      Dargestellt sind die stärksten Quell- und Zielbeziehungen aus der amtlichen KBA-Verflechtungsmatrix VE7. Die regionale Güterstruktur und die regionalen Kennzahlen stammen dagegen aus den KBA-Auswertungen VE12/VE13. Diese amtlichen Produkte unterscheiden sich in Aufbau und Abgrenzung; deshalb ist die Summe der Relationen nicht mit der nationalen oder regionalen Randsumme gleichzusetzen. Die Relationen sind über alle Güterarten zusammengefasst. Top-Auswahl und „Binnenverkehr ausblenden“ wirken nur auf Karte und Tabelle, nicht auf die Kennzahlen.
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div class="data-table-wrapper table-wrapper-compact">
+                <table class="data-table" id="tableRoadDetails">
+                  <thead>
+                    <tr>
+                      <th style="width: 32%;">Partnerregion</th>
+                      <th style="width: 22%;" title="Gütergruppe nach NST-2007">Gütergruppe</th>
+                      <th class="table-measure-header" id="thRoadMetricUnit" style="width: 22%; text-align: right;" title="Menge in 1.000 Tonnen">Menge (in 1.000 Tonnen)</th>
+                      <th class="table-change-header" id="thPrev_road" style="width: 12%; text-align: right;" title="Veränderung gegenüber dem Vorjahr">Δ<br><span>Vorjahr</span></th>
+                      <th class="table-change-header" style="width: 12%; text-align: right;" id="thTrend_road" title="Veränderung gegenüber dem Basisjahr 2016">Δ<br><span>ggü. 2016</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableRoadDetailsBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card chart-card-single">
+              <div class="card-header">
+                <div class="card-title">
+                  Güterstruktur im Straßengüterverkehr (NST-2007)
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Straßengüterverkehr: Güterstruktur
+                      </div>
+                      Dieses Diagramm schlüsselt das regionale Transportaufkommen auf der Straße nach den sieben amtlich verfügbaren NST-2007-Hauptgruppen auf. Die 20 Abteilungen werden vom KBA für diese räumliche Ebene nicht bereitgestellt und daher nicht als leere Auswahl angeboten. Die Zeitreihe reicht bis 2024.
+                    </span>
+                  </span>
+                </div>
+                <div class="card-actions">
+                  <select id="selectRoadNstLevel" class="select-input-sm" style="margin-right: 6px;">
+                    <option value="7" selected>7 Hauptgruppen</option>
+                    <option value="20" disabled title="Für den Straßengüterverkehr liegen auf der verwendeten NUTS-3-Ebene nur sieben Hauptgruppen vor.">20 Abteilungen – nicht verfügbar</option>
+                  </select>
+                  <div class="toggle-group" id="toggleRoadCommodityGroup">
+                    <button class="toggle-btn active" data-view="snapshot">Status</button>
+                    <button class="toggle-btn" data-view="trend">Dynamik</button>
+                  </div>
+                </div>
+              </div>
+              <div class="chart-canvas-wrap">
+                <canvas id="chartRoadCommodity"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TAB 3: SCHIENENGÜTERVERKEHR
+           ============================================================ -->

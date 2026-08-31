@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 300" role="img" aria-labelledby="title desc">
+  <title id="title">Entwurf für den Güterströme-KI-Knopf</title>
+  <desc id="desc">Links das Güterstrom-KI-Zeichen, rechts seine Anwendung als grüner Knopf in einer hellen Kopfzeile.</desc>
+  <defs>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#63B472"/>
+      <stop offset="1" stop-color="#4C7F83"/>
+    </linearGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#0F172A" flood-opacity="0.12"/>
+    </filter>
+    <symbol id="mark" viewBox="0 0 64 64">
+      <path d="M13 12h38a7 7 0 0 1 7 7v23a7 7 0 0 1-7 7H37l-9 8v-8H13a7 7 0 0 1-7-7V19a7 7 0 0 1 7-7Z" fill="currentColor"/>
+      <path d="M19 17v27M31 17v27M43 17v27" fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-width="1.5" opacity="0.24"/>
+      <path d="m14.5 38 11-9.5 11 5 13-12" fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+      <circle cx="14.5" cy="38" r="3.1" fill="#FFFFFF"/>
+      <circle cx="25.5" cy="28.5" r="3.1" fill="#FFFFFF"/>
+      <circle cx="36.5" cy="33.5" r="3.1" fill="#FFFFFF"/>
+      <path d="M49.5 17.25 51 20l2.75 1.5L51 23l-1.5 2.75L48 23l-2.75-1.5L48 20Z" fill="#FFFFFF"/>
+    </symbol>
+  </defs>
+  <rect width="860" height="300" rx="28" fill="#F8FAFC"/>
+  <g transform="translate(54 54)">
+    <rect width="192" height="192" rx="30" fill="#FFFFFF" stroke="#E2E8F0" filter="url(#soft)"/>
+    <circle cx="96" cy="84" r="54" fill="#F1F8F3"/>
+    <use href="#mark" x="55" y="43" width="82" height="82" color="#63B472"/>
+    <text x="96" y="157" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="700" fill="#0F172A">Güterstrom-KI</text>
+    <text x="96" y="178" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="500" fill="#64748B">Dialog · Daten · Bewegung</text>
+  </g>
+  <g transform="translate(292 72)">
+    <text x="0" y="0" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800" letter-spacing="1.6" fill="#63B472">ANWENDUNG IM KOPFBEREICH</text>
+    <rect x="0" y="24" width="514" height="96" rx="18" fill="#FFFFFF" stroke="#E2E8F0" filter="url(#soft)"/>
+    <text x="24" y="62" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="750" fill="#0F172A">Güterströme Deutschland</text>
+    <text x="24" y="84" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="500" fill="#64748B">Interaktive Datenanalyse</text>
+    <rect x="353" y="49" width="137" height="46" rx="13" fill="url(#brand)"/>
+    <rect x="362" y="56" width="32" height="32" rx="8" fill="#FFFFFF" opacity="0.98"/>
+    <use href="#mark" x="366" y="60" width="24" height="24" color="#4C7F83"/>
+    <text x="405" y="77" font-family="Inter, Arial, sans-serif" font-size="14" font-weight="750" fill="#FFFFFF">KI fragen</text>
+    <text x="0" y="155" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="600" fill="#334155">Containerform + Dialogfeld</text>
+    <text x="0" y="178" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="450" fill="#64748B">Der Datenpfad steht für räumliche Güterbewegung und Analyse.</text>
+  </g>
+</svg>

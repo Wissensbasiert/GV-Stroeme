@@ -1,0 +1,129 @@
+      <section id="tab-iww" class="tab-pane">
+        <div class="module-layout-grid">
+          <!-- Left: Tall Map -->
+          <div class="card map-card-tall">
+            <div class="card-header">
+              <div class="card-title" id="iwwMapCardTitle">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20a6 6 0 0 0 10 0 6 6 0 0 0 10 0M4 16l2-8 6 3 6-3 2 8M12 4v7"></path></svg>
+                <span id="iwwMapTitleText">Binnenschifffahrt in Beförderungsmenge im Jahr 2024</span>
+              </div>
+              <div class="card-actions">
+                <label style="font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <input type="checkbox" id="toggleIwwSpider" checked> Verbindungen anzeigen
+                </label>
+              </div>
+            </div>
+            <div class="map-container-leaflet map-container-tall">
+              <div id="iwwLeafletMap" class="leaflet-map-frame"></div>
+              <!-- Choropleth Legend Box -->
+              <div class="choropleth-legend" id="iwwChoroplethLegend">
+                <div class="legend-header">
+                  <span class="legend-title" id="iwwLegendTitleLabel">Binnenschifffahrt</span>
+                  <button type="button" class="btn-legend-toggle" id="btnToggleLegend_iww" title="Legende minimieren/maximieren">−</button>
+                </div>
+                <div class="legend-body" id="legendBody_iww">
+                  <div class="legend-scale">
+                    <span style="background: #f0fdfa;"></span>
+                    <span style="background: #99f6e4;"></span>
+                    <span style="background: #2dd4bf;"></span>
+                    <span style="background: #0d9488;"></span>
+                    <span style="background: #115e59;"></span>
+                  </div>
+                  <div class="legend-labels" id="iwwLegendLabelsContainer">
+                    <span>&lt; 0,1 Mio. t</span>
+                    <span>&gt; 1 Mio. t</span>
+                  </div>
+                  <div class="legend-spider-section" id="iwwLegendSpiderSection" style="display: none;">
+                    <div class="legend-subtitle">Verbindungen</div>
+                    <div class="legend-spider-rows">
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thin" id="spiderLineThin_iww" style="background:#0d9488;"></span>
+                        <span class="legend-spider-val" id="spiderLegMin_iww">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-med" id="spiderLineMed_iww" style="background:#0d9488;"></span>
+                        <span class="legend-spider-val" id="spiderLegMed_iww">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thick" id="spiderLineThick_iww" style="background:#0d9488;"></span>
+                        <span class="legend-spider-val" id="spiderLegMax_iww">--</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Table + Commodity Chart -->
+          <div class="right-analytics-column">
+            <div class="card table-card-compact">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34c2.83-.49 5-2.97 5-5.99V4H6v4.67c0 3.02 2.17 5.5 5 5.99z"></path></svg>
+                  <span id="iwwRelationsTitle">Top 10 Relationen: Region auswählen</span>
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Binnenschifffahrt: Relationen
+                      </div>
+                      Diese Tabelle bildet die stärksten Wasserstraßen-Relationen des ausgewählten Kreises ab, differenzierbar nach NST-2007. Laut Datensatzbeschreibung liegt eine NUTS-Zuordnung nur vor, sofern die jeweilige Lade- oder Löschregion entsprechend gegliedert werden kann. Nationale Kennzahlen berücksichtigen deshalb auch Datensätze, die nicht vollständig als NUTS-Relation darstellbar sind. Die Summe der Top-Relationen kann daher unter der nationalen Randsumme liegen. Top-Auswahl und „Binnenverkehr ausblenden“ verändern keine Kennzahl.
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div class="data-table-wrapper table-wrapper-compact">
+                <table class="data-table" id="tableIwwDetails">
+                  <thead>
+                    <tr>
+                      <th style="width: 32%;">Partnerregion</th>
+                      <th style="width: 22%;" title="Güterart nach NST-2007">Güterart (NST-2007)</th>
+                      <th class="table-measure-header" id="thIwwMetricUnit" style="width: 22%; text-align: right;" title="Menge in 1.000 Tonnen">Menge (in 1.000 Tonnen)</th>
+                      <th class="table-change-header" id="thPrev_iww" style="width: 12%; text-align: right;" title="Veränderung gegenüber dem Vorjahr">Δ<br><span>Vorjahr</span></th>
+                      <th class="table-change-header" style="width: 12%; text-align: right;" id="thTrend_iww" title="Veränderung gegenüber dem Basisjahr 2016">Δ<br><span>ggü. 2016</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableIwwDetailsBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card chart-card-single">
+              <div class="card-header">
+                <div class="card-title">
+                  Güterstruktur in der Binnenschifffahrt (NST-2007)
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Binnenschifffahrt: Güterstruktur
+                      </div>
+                      Dieses Diagramm zeigt das auf Binnenschiffen transportierte Güterspektrum der Region nach NST-2007. Die Ansicht verdeutlicht den Schwerpunkt auf Massengütern, Baustoffen, chemischen Erzeugnissen oder Containern und bildet die Mengenentwicklung bis 2025 ab.
+                    </span>
+                  </span>
+                </div>
+                <div class="card-actions">
+                  <select id="selectIwwNstLevel" class="select-input-sm" style="margin-right: 6px;">
+                    <option value="7" selected>7 Hauptgruppen</option>
+                    <option value="20">20 Abteilungen</option>
+                  </select>
+                  <div class="toggle-group" id="toggleIwwCommodityGroup">
+                    <button class="toggle-btn active" data-view="snapshot">Status</button>
+                    <button class="toggle-btn" data-view="trend">Dynamik</button>
+                  </div>
+                </div>
+              </div>
+              <div class="chart-canvas-wrap">
+                <canvas id="chartIwwCommodity"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TAB 5: SEEVERKEHR & HÄFEN
+           ============================================================ -->

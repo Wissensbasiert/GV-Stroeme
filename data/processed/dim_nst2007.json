@@ -1,0 +1,143 @@
+{
+  "groups_7": {
+    "1": {
+      "name": "Land-, forstwirtsch. Erzeugnisse, lebende Tiere, Nahrungs- u. Genussmittel",
+      "divisions": [
+        "01",
+        "04"
+      ]
+    },
+    "2": {
+      "name": "Feste Brennstoffe, Erdöl, Mineralölerzeugnisse, Gase",
+      "divisions": [
+        "02",
+        "07"
+      ]
+    },
+    "3": {
+      "name": "Erze, NE-Metallerze, Eisen, Stahl, NE-Metalle",
+      "divisions": [
+        "03 (Teilgruppen 031–033)",
+        "10"
+      ]
+    },
+    "4": {
+      "name": "Steine, Erden, Baustoffe, sonstige Bergbauerzeugnisse",
+      "divisions": [
+        "03 (Teilgruppen 034–036)",
+        "09"
+      ]
+    },
+    "5": {
+      "name": "Chemische Erzeugnisse, Düngemittel, Gummi-, Kunststoffwaren",
+      "divisions": [
+        "05",
+        "06",
+        "08"
+      ]
+    },
+    "6": {
+      "name": "Metallerzeugnisse, Maschinen, Ausrüstungen, Fahrzeuge",
+      "divisions": [
+        "11",
+        "12",
+        "13",
+        "14"
+      ]
+    },
+    "7": {
+      "name": "Sonstige Halb- und Fertigwaren, Sekundärrohstoffe, Sammelgüter, Container",
+      "divisions": [
+        "15",
+        "16",
+        "17",
+        "18",
+        "19",
+        "20"
+      ]
+    }
+  },
+  "divisions_20": {
+    "01": {
+      "name": "Erzeugnisse der Landwirtschaft, Jagd und Forstwirtschaft; Fische",
+      "group_7": "1"
+    },
+    "02": {
+      "name": "Kohle, rohes Erdöl und Erdgas",
+      "group_7": "2"
+    },
+    "03": {
+      "name": "Erze, Steine und Erden; sonstige Bergbauerzeugnisse",
+      "group_7": "3/4",
+      "mapping_note": "Die Zuordnung erfolgt in den 3-Steller-Daten: 031–033 zu Gruppe 3, 034–036 zu Gruppe 4."
+    },
+    "04": {
+      "name": "Nahrungs- und Genussmittel, Tabakerzeugnisse",
+      "group_7": "1"
+    },
+    "05": {
+      "name": "Textilien, Bekleidung, Lederwaren",
+      "group_7": "5"
+    },
+    "06": {
+      "name": "Holz, Holzwaren, Papier, Pappe, Druckerzeugnisse",
+      "group_7": "5"
+    },
+    "07": {
+      "name": "Kokerei- und Mineralölerzeugnisse",
+      "group_7": "2"
+    },
+    "08": {
+      "name": "Chemische Erzeugnisse, synthetische Fasern, Gummi- und Kunststoffwaren",
+      "group_7": "5"
+    },
+    "09": {
+      "name": "Glas, Keramik, bearbeitete Steine und Erden",
+      "group_7": "4"
+    },
+    "10": {
+      "name": "Metalle und Metallerzeugnisse",
+      "group_7": "3"
+    },
+    "11": {
+      "name": "Maschinen, Ausrüstungen, Haushaltsgeräte",
+      "group_7": "6"
+    },
+    "12": {
+      "name": "Elektronische Ausrüstungen, Präzisionsinstrumente",
+      "group_7": "6"
+    },
+    "13": {
+      "name": "Fahrzeuge und Fahrzeugteile",
+      "group_7": "6"
+    },
+    "14": {
+      "name": "Möbel, sonstige Industriewaren",
+      "group_7": "6"
+    },
+    "15": {
+      "name": "Sekundärrohstoffe, Abfälle",
+      "group_7": "7"
+    },
+    "16": {
+      "name": "Sammelgut, Post, Expressgut",
+      "group_7": "7"
+    },
+    "17": {
+      "name": "Im Rahmen von Umzügen beförderte Güter",
+      "group_7": "7"
+    },
+    "18": {
+      "name": "Zusammengesetzte Güter (Containerladung)",
+      "group_7": "7"
+    },
+    "19": {
+      "name": "Nicht identifizierbare Güter",
+      "group_7": "7"
+    },
+    "20": {
+      "name": "Sonstige Güter a.n.g.",
+      "group_7": "7"
+    }
+  }
+}

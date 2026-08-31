@@ -1,0 +1,2570 @@
+{
+  "DE111": {
+    "id": "DE111",
+    "name": "Stuttgart, Stadtkreis",
+    "lng": 9.17218,
+    "lat": 48.77473
+  },
+  "DE112": {
+    "id": "DE112",
+    "name": "Böblingen",
+    "lng": 8.9428,
+    "lat": 48.67802
+  },
+  "DE113": {
+    "id": "DE113",
+    "name": "Esslingen",
+    "lng": 9.36896,
+    "lat": 48.64796
+  },
+  "DE114": {
+    "id": "DE114",
+    "name": "Göppingen",
+    "lng": 9.71727,
+    "lat": 48.66313
+  },
+  "DE115": {
+    "id": "DE115",
+    "name": "Ludwigsburg",
+    "lng": 9.12428,
+    "lat": 48.94043
+  },
+  "DE123": {
+    "id": "DE123",
+    "name": "Karlsruhe, Landkreis",
+    "lng": 8.56255,
+    "lat": 49.08179
+  },
+  "DE124": {
+    "id": "DE124",
+    "name": "Rastatt",
+    "lng": 8.24131,
+    "lat": 48.76173
+  },
+  "DE125": {
+    "id": "DE125",
+    "name": "Heidelberg, Stadtkreis",
+    "lng": 8.69385,
+    "lat": 49.40542
+  },
+  "DE126": {
+    "id": "DE126",
+    "name": "Mannheim, Stadtkreis",
+    "lng": 8.50065,
+    "lat": 49.49915
+  },
+  "DE127": {
+    "id": "DE127",
+    "name": "Neckar-Odenwald-Kreis",
+    "lng": 9.27976,
+    "lat": 49.46636
+  },
+  "DE128": {
+    "id": "DE128",
+    "name": "Rhein-Neckar-Kreis",
+    "lng": 8.7672,
+    "lat": 49.3685
+  },
+  "DE129": {
+    "id": "DE129",
+    "name": "Pforzheim, Stadtkreis",
+    "lng": 8.71243,
+    "lat": 48.87639
+  },
+  "DE116": {
+    "id": "DE116",
+    "name": "Rems-Murr-Kreis",
+    "lng": 9.50129,
+    "lat": 48.89894
+  },
+  "DE117": {
+    "id": "DE117",
+    "name": "Heilbronn, Stadtkreis",
+    "lng": 9.18246,
+    "lat": 49.15274
+  },
+  "DE118": {
+    "id": "DE118",
+    "name": "Heilbronn, Landkreis",
+    "lng": 9.19024,
+    "lat": 49.17678
+  },
+  "DE119": {
+    "id": "DE119",
+    "name": "Hohenlohekreis",
+    "lng": 9.61383,
+    "lat": 49.27144
+  },
+  "DE11A": {
+    "id": "DE11A",
+    "name": "Schwäbisch Hall",
+    "lng": 9.90883,
+    "lat": 49.14448
+  },
+  "DE11B": {
+    "id": "DE11B",
+    "name": "Main-Tauber-Kreis",
+    "lng": 9.72592,
+    "lat": 49.56039
+  },
+  "DE11C": {
+    "id": "DE11C",
+    "name": "Heidenheim",
+    "lng": 10.1819,
+    "lat": 48.66226
+  },
+  "DE11D": {
+    "id": "DE11D",
+    "name": "Ostalbkreis",
+    "lng": 10.08972,
+    "lat": 48.87754
+  },
+  "DE121": {
+    "id": "DE121",
+    "name": "Baden-Baden, Stadtkreis",
+    "lng": 8.23185,
+    "lat": 48.74859
+  },
+  "DE122": {
+    "id": "DE122",
+    "name": "Karlsruhe, Stadtkreis",
+    "lng": 8.41296,
+    "lat": 49.01142
+  },
+  "DE133": {
+    "id": "DE133",
+    "name": "Emmendingen",
+    "lng": 7.89749,
+    "lat": 48.14865
+  },
+  "DE134": {
+    "id": "DE134",
+    "name": "Ortenaukreis",
+    "lng": 8.01635,
+    "lat": 48.42079
+  },
+  "DE13A": {
+    "id": "DE13A",
+    "name": "Waldshut",
+    "lng": 8.21864,
+    "lat": 47.69715
+  },
+  "DE141": {
+    "id": "DE141",
+    "name": "Reutlingen",
+    "lng": 9.3658,
+    "lat": 48.40644
+  },
+  "DE142": {
+    "id": "DE142",
+    "name": "Tübingen, Landkreis",
+    "lng": 8.98754,
+    "lat": 48.48163
+  },
+  "DE143": {
+    "id": "DE143",
+    "name": "Zollernalbkreis",
+    "lng": 8.93742,
+    "lat": 48.26736
+  },
+  "DE144": {
+    "id": "DE144",
+    "name": "Ulm, Stadtkreis",
+    "lng": 9.95005,
+    "lat": 48.39063
+  },
+  "DE145": {
+    "id": "DE145",
+    "name": "Alb-Donau-Kreis",
+    "lng": 9.82726,
+    "lat": 48.40171
+  },
+  "DE135": {
+    "id": "DE135",
+    "name": "Rottweil",
+    "lng": 8.5325,
+    "lat": 48.25404
+  },
+  "DE136": {
+    "id": "DE136",
+    "name": "Schwarzwald-Baar-Kreis",
+    "lng": 8.41125,
+    "lat": 48.01885
+  },
+  "DE137": {
+    "id": "DE137",
+    "name": "Tuttlingen",
+    "lng": 8.7942,
+    "lat": 48.0112
+  },
+  "DE138": {
+    "id": "DE138",
+    "name": "Konstanz",
+    "lng": 8.91592,
+    "lat": 47.79316
+  },
+  "DE139": {
+    "id": "DE139",
+    "name": "Lörrach",
+    "lng": 7.77381,
+    "lat": 47.70339
+  },
+  "DE12A": {
+    "id": "DE12A",
+    "name": "Calw",
+    "lng": 8.63592,
+    "lat": 48.67881
+  },
+  "DE12B": {
+    "id": "DE12B",
+    "name": "Enzkreis",
+    "lng": 8.73742,
+    "lat": 48.91448
+  },
+  "DE12C": {
+    "id": "DE12C",
+    "name": "Freudenstadt",
+    "lng": 8.46523,
+    "lat": 48.4743
+  },
+  "DE131": {
+    "id": "DE131",
+    "name": "Freiburg im Breisgau, Stadtkreis",
+    "lng": 7.81831,
+    "lat": 47.99277
+  },
+  "DE132": {
+    "id": "DE132",
+    "name": "Breisgau-Hochschwarzwald",
+    "lng": 7.92508,
+    "lat": 47.92507
+  },
+  "DEA28": {
+    "id": "DEA28",
+    "name": "Euskirchen",
+    "lng": 6.6437,
+    "lat": 50.53616
+  },
+  "DEA29": {
+    "id": "DEA29",
+    "name": "Heinsberg",
+    "lng": 6.16395,
+    "lat": 51.04933
+  },
+  "DED53": {
+    "id": "DED53",
+    "name": "Nordsachsen",
+    "lng": 12.77952,
+    "lat": 51.47296
+  },
+  "DEE01": {
+    "id": "DEE01",
+    "name": "Dessau-Roßlau, Kreisfreie Stadt",
+    "lng": 12.2312,
+    "lat": 51.85357
+  },
+  "DEE02": {
+    "id": "DEE02",
+    "name": "Halle (Saale), Kreisfreie Stadt",
+    "lng": 11.9688,
+    "lat": 51.47996
+  },
+  "DEA5C": {
+    "id": "DEA5C",
+    "name": "Unna",
+    "lng": 7.63658,
+    "lat": 51.57831
+  },
+  "DEB11": {
+    "id": "DEB11",
+    "name": "Koblenz, Kreisfreie Stadt",
+    "lng": 7.57919,
+    "lat": 50.34865
+  },
+  "DEB12": {
+    "id": "DEB12",
+    "name": "Ahrweiler",
+    "lng": 7.04486,
+    "lat": 50.46763
+  },
+  "DE927": {
+    "id": "DE927",
+    "name": "Nienburg (Weser)",
+    "lng": 9.11379,
+    "lat": 52.60902
+  },
+  "DE928": {
+    "id": "DE928",
+    "name": "Schaumburg",
+    "lng": 9.20637,
+    "lat": 52.29281
+  },
+  "DEB23": {
+    "id": "DEB23",
+    "name": "Eifelkreis Bitburg-Prüm",
+    "lng": 6.41025,
+    "lat": 50.06196
+  },
+  "DEB24": {
+    "id": "DEB24",
+    "name": "Vulkaneifel",
+    "lng": 6.74897,
+    "lat": 50.23831
+  },
+  "DEE03": {
+    "id": "DEE03",
+    "name": "Magdeburg, Kreisfreie Stadt",
+    "lng": 11.64152,
+    "lat": 52.11645
+  },
+  "DEE04": {
+    "id": "DEE04",
+    "name": "Altmarkkreis Salzwedel",
+    "lng": 11.22722,
+    "lat": 52.67985
+  },
+  "DEE05": {
+    "id": "DEE05",
+    "name": "Anhalt-Bitterfeld",
+    "lng": 12.1432,
+    "lat": 51.79505
+  },
+  "DEB13": {
+    "id": "DEB13",
+    "name": "Altenkirchen (Westerwald)",
+    "lng": 7.74385,
+    "lat": 50.75075
+  },
+  "DEB14": {
+    "id": "DEB14",
+    "name": "Bad Kreuznach",
+    "lng": 7.68654,
+    "lat": 49.82466
+  },
+  "DE929": {
+    "id": "DE929",
+    "name": "Region Hannover",
+    "lng": 9.71978,
+    "lat": 52.42191
+  },
+  "DE931": {
+    "id": "DE931",
+    "name": "Celle",
+    "lng": 10.10357,
+    "lat": 52.71315
+  },
+  "DEB25": {
+    "id": "DEB25",
+    "name": "Trier-Saarburg",
+    "lng": 6.69511,
+    "lat": 49.69639
+  },
+  "DEB31": {
+    "id": "DEB31",
+    "name": "Frankenthal (Pfalz), Kreisfreie Stadt",
+    "lng": 8.35781,
+    "lat": 49.53345
+  },
+  "DEB32": {
+    "id": "DEB32",
+    "name": "Kaiserslautern, Kreisfreie Stadt",
+    "lng": 7.76065,
+    "lat": 49.43287
+  },
+  "DEB33": {
+    "id": "DEB33",
+    "name": "Landau in der Pfalz, Kreisfreie Stadt",
+    "lng": 8.05094,
+    "lat": 49.22459
+  },
+  "DEB34": {
+    "id": "DEB34",
+    "name": "Ludwigshafen am Rhein, Kreisfreie Stadt",
+    "lng": 8.39666,
+    "lat": 49.4819
+  },
+  "DEE06": {
+    "id": "DEE06",
+    "name": "Jerichower Land",
+    "lng": 12.02645,
+    "lat": 52.26053
+  },
+  "DEE07": {
+    "id": "DEE07",
+    "name": "Börde",
+    "lng": 11.34782,
+    "lat": 52.22059
+  },
+  "DEB15": {
+    "id": "DEB15",
+    "name": "Birkenfeld",
+    "lng": 7.27765,
+    "lat": 49.71246
+  },
+  "DEB17": {
+    "id": "DEB17",
+    "name": "Mayen-Koblenz",
+    "lng": 7.33209,
+    "lat": 50.33165
+  },
+  "DE932": {
+    "id": "DE932",
+    "name": "Cuxhaven",
+    "lng": 8.81212,
+    "lat": 53.61607
+  },
+  "DE933": {
+    "id": "DE933",
+    "name": "Harburg",
+    "lng": 9.96296,
+    "lat": 53.31576
+  },
+  "DEB35": {
+    "id": "DEB35",
+    "name": "Mainz, Kreisfreie Stadt",
+    "lng": 8.241,
+    "lat": 49.97399
+  },
+  "DEB36": {
+    "id": "DEB36",
+    "name": "Neustadt an der Weinstraße, Kreisfreie Stadt",
+    "lng": 8.15208,
+    "lat": 49.34201
+  },
+  "DEB37": {
+    "id": "DEB37",
+    "name": "Pirmasens, Kreisfreie Stadt",
+    "lng": 7.59434,
+    "lat": 49.19728
+  },
+  "DEB38": {
+    "id": "DEB38",
+    "name": "Speyer, Kreisfreie Stadt",
+    "lng": 8.43421,
+    "lat": 49.32984
+  },
+  "DEB39": {
+    "id": "DEB39",
+    "name": "Worms, Kreisfreie Stadt",
+    "lng": 8.32458,
+    "lat": 49.64955
+  },
+  "DEB3A": {
+    "id": "DEB3A",
+    "name": "Zweibrücken, Kreisfreie Stadt",
+    "lng": 7.36557,
+    "lat": 49.24833
+  },
+  "DEB3B": {
+    "id": "DEB3B",
+    "name": "Alzey-Worms",
+    "lng": 8.15703,
+    "lat": 49.75954
+  },
+  "DEE08": {
+    "id": "DEE08",
+    "name": "Burgenlandkreis",
+    "lng": 11.88367,
+    "lat": 51.14726
+  },
+  "DEE09": {
+    "id": "DEE09",
+    "name": "Harz",
+    "lng": 10.95889,
+    "lat": 51.82115
+  },
+  "DEB18": {
+    "id": "DEB18",
+    "name": "Neuwied",
+    "lng": 7.46914,
+    "lat": 50.55759
+  },
+  "DEB1A": {
+    "id": "DEB1A",
+    "name": "Rhein-Lahn-Kreis",
+    "lng": 7.84252,
+    "lat": 50.263
+  },
+  "DE934": {
+    "id": "DE934",
+    "name": "Lüchow-Dannenberg",
+    "lng": 11.12302,
+    "lat": 53.02
+  },
+  "DE935": {
+    "id": "DE935",
+    "name": "Lüneburg, Landkreis",
+    "lng": 10.57304,
+    "lat": 53.23279
+  },
+  "DEB3C": {
+    "id": "DEB3C",
+    "name": "Bad Dürkheim",
+    "lng": 8.11023,
+    "lat": 49.45305
+  },
+  "DEB3D": {
+    "id": "DEB3D",
+    "name": "Donnersbergkreis",
+    "lng": 7.9153,
+    "lat": 49.63193
+  },
+  "DEB3E": {
+    "id": "DEB3E",
+    "name": "Germersheim",
+    "lng": 8.24609,
+    "lat": 49.11591
+  },
+  "DEE0D": {
+    "id": "DEE0D",
+    "name": "Stendal",
+    "lng": 11.83965,
+    "lat": 52.69658
+  },
+  "DEE0E": {
+    "id": "DEE0E",
+    "name": "Wittenberg",
+    "lng": 12.70185,
+    "lat": 51.82015
+  },
+  "DEF01": {
+    "id": "DEF01",
+    "name": "Flensburg, Kreisfreie Stadt",
+    "lng": 9.43842,
+    "lat": 54.78458
+  },
+  "DEB1B": {
+    "id": "DEB1B",
+    "name": "Westerwaldkreis",
+    "lng": 7.8655,
+    "lat": 50.55222
+  },
+  "DEB1C": {
+    "id": "DEB1C",
+    "name": "Cochem-Zell",
+    "lng": 7.17429,
+    "lat": 50.13297
+  },
+  "DE936": {
+    "id": "DE936",
+    "name": "Osterholz",
+    "lng": 8.80834,
+    "lat": 53.25096
+  },
+  "DE937": {
+    "id": "DE937",
+    "name": "Rotenburg (Wümme)",
+    "lng": 9.30735,
+    "lat": 53.25046
+  },
+  "DEB3F": {
+    "id": "DEB3F",
+    "name": "Kaiserslautern, Landkreis",
+    "lng": 7.68481,
+    "lat": 49.44613
+  },
+  "DEB3G": {
+    "id": "DEB3G",
+    "name": "Kusel",
+    "lng": 7.47149,
+    "lat": 49.54991
+  },
+  "DEE0A": {
+    "id": "DEE0A",
+    "name": "Mansfeld-Südharz",
+    "lng": 11.3566,
+    "lat": 51.53574
+  },
+  "DEB1D": {
+    "id": "DEB1D",
+    "name": "Rhein-Hunsrück-Kreis",
+    "lng": 7.49987,
+    "lat": 50.04391
+  },
+  "DEB21": {
+    "id": "DEB21",
+    "name": "Trier, Kreisfreie Stadt",
+    "lng": 6.65515,
+    "lat": 49.76287
+  },
+  "DEB22": {
+    "id": "DEB22",
+    "name": "Bernkastel-Wittlich",
+    "lng": 6.96752,
+    "lat": 49.9244
+  },
+  "DE938": {
+    "id": "DE938",
+    "name": "Heidekreis",
+    "lng": 9.76864,
+    "lat": 52.92813
+  },
+  "DE939": {
+    "id": "DE939",
+    "name": "Stade",
+    "lng": 9.4184,
+    "lat": 53.5787
+  },
+  "DEB3H": {
+    "id": "DEB3H",
+    "name": "Südliche Weinstraße",
+    "lng": 8.04802,
+    "lat": 49.19014
+  },
+  "DEB3I": {
+    "id": "DEB3I",
+    "name": "Rhein-Pfalz-Kreis",
+    "lng": 8.36035,
+    "lat": 49.41671
+  },
+  "DEE0B": {
+    "id": "DEE0B",
+    "name": "Saalekreis",
+    "lng": 11.86564,
+    "lat": 51.42555
+  },
+  "DEE0C": {
+    "id": "DEE0C",
+    "name": "Salzlandkreis",
+    "lng": 11.64256,
+    "lat": 51.85181
+  },
+  "DE80L": {
+    "id": "DE80L",
+    "name": "Vorpommern-Rügen",
+    "lng": 12.9925,
+    "lat": 54.28475
+  },
+  "DE80M": {
+    "id": "DE80M",
+    "name": "Nordwestmecklenburg",
+    "lng": 11.25155,
+    "lat": 53.82148
+  },
+  "DE93A": {
+    "id": "DE93A",
+    "name": "Uelzen",
+    "lng": 10.54775,
+    "lat": 52.98349
+  },
+  "DE93B": {
+    "id": "DE93B",
+    "name": "Verden",
+    "lng": 9.17573,
+    "lat": 52.9732
+  },
+  "DE941": {
+    "id": "DE941",
+    "name": "Delmenhorst, Kreisfreie Stadt",
+    "lng": 8.64586,
+    "lat": 53.04942
+  },
+  "DE942": {
+    "id": "DE942",
+    "name": "Emden, Kreisfreie Stadt",
+    "lng": 7.18091,
+    "lat": 53.36119
+  },
+  "DE943": {
+    "id": "DE943",
+    "name": "Oldenburg (Oldenburg), Kreisfreie Stadt",
+    "lng": 8.22465,
+    "lat": 53.14474
+  },
+  "DEB3J": {
+    "id": "DEB3J",
+    "name": "Mainz-Bingen",
+    "lng": 8.0798,
+    "lat": 49.92198
+  },
+  "DEB3K": {
+    "id": "DEB3K",
+    "name": "Südwestpfalz",
+    "lng": 7.65914,
+    "lat": 49.20805
+  },
+  "DEA2A": {
+    "id": "DEA2A",
+    "name": "Oberbergischer Kreis",
+    "lng": 7.5168,
+    "lat": 51.01252
+  },
+  "DEA2B": {
+    "id": "DEA2B",
+    "name": "Rheinisch-Bergischer Kreis",
+    "lng": 7.19493,
+    "lat": 51.02288
+  },
+  "DE944": {
+    "id": "DE944",
+    "name": "Osnabrück, Kreisfreie Stadt",
+    "lng": 8.04701,
+    "lat": 52.27753
+  },
+  "DE945": {
+    "id": "DE945",
+    "name": "Wilhelmshaven, Kreisfreie Stadt",
+    "lng": 8.0875,
+    "lat": 53.56685
+  },
+  "DE946": {
+    "id": "DE946",
+    "name": "Ammerland",
+    "lng": 8.01333,
+    "lat": 53.21842
+  },
+  "DE947": {
+    "id": "DE947",
+    "name": "Aurich",
+    "lng": 7.36908,
+    "lat": 53.49731
+  },
+  "DEC01": {
+    "id": "DEC01",
+    "name": "Regionalverband Saarbrücken",
+    "lng": 6.95712,
+    "lat": 49.25142
+  },
+  "DEC02": {
+    "id": "DEC02",
+    "name": "Merzig-Wadern",
+    "lng": 6.67994,
+    "lat": 49.49581
+  },
+  "DEC03": {
+    "id": "DEC03",
+    "name": "Neunkirchen",
+    "lng": 7.11708,
+    "lat": 49.37584
+  },
+  "DEC04": {
+    "id": "DEC04",
+    "name": "Saarlouis",
+    "lng": 6.77568,
+    "lat": 49.35548
+  },
+  "DEA2C": {
+    "id": "DEA2C",
+    "name": "Rhein-Sieg-Kreis",
+    "lng": 7.23419,
+    "lat": 50.76064
+  },
+  "DEA2D": {
+    "id": "DEA2D",
+    "name": "Städteregion Aachen",
+    "lng": 6.217,
+    "lat": 50.72717
+  },
+  "DEA31": {
+    "id": "DEA31",
+    "name": "Bottrop, Kreisfreie Stadt",
+    "lng": 6.91966,
+    "lat": 51.57157
+  },
+  "DEA32": {
+    "id": "DEA32",
+    "name": "Gelsenkirchen, Kreisfreie Stadt",
+    "lng": 7.07126,
+    "lat": 51.55392
+  },
+  "DE80N": {
+    "id": "DE80N",
+    "name": "Vorpommern-Greifswald",
+    "lng": 13.78306,
+    "lat": 53.7887
+  },
+  "DE80O": {
+    "id": "DE80O",
+    "name": "Ludwigslust-Parchim",
+    "lng": 11.53346,
+    "lat": 53.45022
+  },
+  "DE948": {
+    "id": "DE948",
+    "name": "Cloppenburg",
+    "lng": 7.90502,
+    "lat": 52.9106
+  },
+  "DE949": {
+    "id": "DE949",
+    "name": "Emsland",
+    "lng": 7.40239,
+    "lat": 52.73745
+  },
+  "DE94A": {
+    "id": "DE94A",
+    "name": "Friesland (DE)",
+    "lng": 7.98298,
+    "lat": 53.50842
+  },
+  "DEC05": {
+    "id": "DEC05",
+    "name": "Saarpfalz-Kreis",
+    "lng": 7.24193,
+    "lat": 49.24869
+  },
+  "DEC06": {
+    "id": "DEC06",
+    "name": "St. Wendel",
+    "lng": 7.10081,
+    "lat": 49.51958
+  },
+  "DED21": {
+    "id": "DED21",
+    "name": "Dresden, Kreisfreie Stadt",
+    "lng": 13.78357,
+    "lat": 51.06622
+  },
+  "DEA33": {
+    "id": "DEA33",
+    "name": "Münster, Kreisfreie Stadt",
+    "lng": 7.6235,
+    "lat": 51.95444
+  },
+  "DEA34": {
+    "id": "DEA34",
+    "name": "Borken",
+    "lng": 6.89928,
+    "lat": 51.96131
+  },
+  "DEA35": {
+    "id": "DEA35",
+    "name": "Coesfeld",
+    "lng": 7.36641,
+    "lat": 51.86664
+  },
+  "DE911": {
+    "id": "DE911",
+    "name": "Braunschweig, Kreisfreie Stadt",
+    "lng": 10.5239,
+    "lat": 52.27555
+  },
+  "DE912": {
+    "id": "DE912",
+    "name": "Salzgitter, Kreisfreie Stadt",
+    "lng": 10.37071,
+    "lat": 52.12437
+  },
+  "DE913": {
+    "id": "DE913",
+    "name": "Wolfsburg, Kreisfreie Stadt",
+    "lng": 10.785,
+    "lat": 52.41077
+  },
+  "DE914": {
+    "id": "DE914",
+    "name": "Gifhorn",
+    "lng": 10.60425,
+    "lat": 52.58011
+  },
+  "DE94B": {
+    "id": "DE94B",
+    "name": "Grafschaft Bentheim",
+    "lng": 7.02025,
+    "lat": 52.47605
+  },
+  "DE94C": {
+    "id": "DE94C",
+    "name": "Leer",
+    "lng": 7.47601,
+    "lat": 53.24182
+  },
+  "DE94D": {
+    "id": "DE94D",
+    "name": "Oldenburg, Landkreis",
+    "lng": 8.38962,
+    "lat": 52.98817
+  },
+  "DED2C": {
+    "id": "DED2C",
+    "name": "Bautzen",
+    "lng": 14.23102,
+    "lat": 51.26888
+  },
+  "DED2D": {
+    "id": "DED2D",
+    "name": "Görlitz",
+    "lng": 14.7509,
+    "lat": 51.22489
+  },
+  "DEA36": {
+    "id": "DEA36",
+    "name": "Recklinghausen",
+    "lng": 7.15894,
+    "lat": 51.67263
+  },
+  "DEA37": {
+    "id": "DEA37",
+    "name": "Steinfurt",
+    "lng": 7.57917,
+    "lat": 52.21152
+  },
+  "DEA38": {
+    "id": "DEA38",
+    "name": "Warendorf",
+    "lng": 7.95849,
+    "lat": 51.87021
+  },
+  "DE916": {
+    "id": "DE916",
+    "name": "Goslar",
+    "lng": 10.40051,
+    "lat": 51.87452
+  },
+  "DE917": {
+    "id": "DE917",
+    "name": "Helmstedt",
+    "lng": 10.88882,
+    "lat": 52.26015
+  },
+  "DE94E": {
+    "id": "DE94E",
+    "name": "Osnabrück, Landkreis",
+    "lng": 8.0462,
+    "lat": 52.38129
+  },
+  "DE94F": {
+    "id": "DE94F",
+    "name": "Vechta",
+    "lng": 8.22295,
+    "lat": 52.6602
+  },
+  "DE94G": {
+    "id": "DE94G",
+    "name": "Wesermarsch",
+    "lng": 8.39041,
+    "lat": 53.35556
+  },
+  "DED2E": {
+    "id": "DED2E",
+    "name": "Meißen",
+    "lng": 13.48311,
+    "lat": 51.2392
+  },
+  "DED2F": {
+    "id": "DED2F",
+    "name": "Sächsische Schweiz-Osterzgebirge",
+    "lng": 13.87333,
+    "lat": 50.91679
+  },
+  "DED41": {
+    "id": "DED41",
+    "name": "Chemnitz, Kreisfreie Stadt",
+    "lng": 12.91172,
+    "lat": 50.82623
+  },
+  "DEA41": {
+    "id": "DEA41",
+    "name": "Bielefeld, Kreisfreie Stadt",
+    "lng": 8.54088,
+    "lat": 52.01085
+  },
+  "DEA42": {
+    "id": "DEA42",
+    "name": "Gütersloh",
+    "lng": 8.35135,
+    "lat": 51.93175
+  },
+  "DEA43": {
+    "id": "DEA43",
+    "name": "Herford",
+    "lng": 8.64429,
+    "lat": 52.16764
+  },
+  "DEA44": {
+    "id": "DEA44",
+    "name": "Höxter",
+    "lng": 9.17813,
+    "lat": 51.6847
+  },
+  "DE918": {
+    "id": "DE918",
+    "name": "Northeim",
+    "lng": 9.84777,
+    "lat": 51.74275
+  },
+  "DE91A": {
+    "id": "DE91A",
+    "name": "Peine",
+    "lng": 10.25528,
+    "lat": 52.30429
+  },
+  "DE91B": {
+    "id": "DE91B",
+    "name": "Wolfenbüttel",
+    "lng": 10.58373,
+    "lat": 52.12701
+  },
+  "DE94H": {
+    "id": "DE94H",
+    "name": "Wittmund",
+    "lng": 7.70553,
+    "lat": 53.57602
+  },
+  "DEA11": {
+    "id": "DEA11",
+    "name": "Düsseldorf, Kreisfreie Stadt",
+    "lng": 6.81052,
+    "lat": 51.2353
+  },
+  "DEA12": {
+    "id": "DEA12",
+    "name": "Duisburg, Kreisfreie Stadt",
+    "lng": 6.73493,
+    "lat": 51.43907
+  },
+  "DEA13": {
+    "id": "DEA13",
+    "name": "Essen, Kreisfreie Stadt",
+    "lng": 7.01682,
+    "lat": 51.43384
+  },
+  "DEA14": {
+    "id": "DEA14",
+    "name": "Krefeld, Kreisfreie Stadt",
+    "lng": 6.57929,
+    "lat": 51.34545
+  },
+  "DEA15": {
+    "id": "DEA15",
+    "name": "Mönchengladbach, Kreisfreie Stadt",
+    "lng": 6.41182,
+    "lat": 51.16732
+  },
+  "DEA16": {
+    "id": "DEA16",
+    "name": "Mülheim an der Ruhr, Kreisfreie Stadt",
+    "lng": 6.87839,
+    "lat": 51.41378
+  },
+  "DED42": {
+    "id": "DED42",
+    "name": "Erzgebirgskreis",
+    "lng": 12.94457,
+    "lat": 50.60888
+  },
+  "DEA45": {
+    "id": "DEA45",
+    "name": "Lippe",
+    "lng": 8.95089,
+    "lat": 51.98129
+  },
+  "DEA46": {
+    "id": "DEA46",
+    "name": "Minden-Lübbecke",
+    "lng": 8.73953,
+    "lat": 52.35252
+  },
+  "DEA47": {
+    "id": "DEA47",
+    "name": "Paderborn",
+    "lng": 8.71971,
+    "lat": 51.664
+  },
+  "DE91C": {
+    "id": "DE91C",
+    "name": "Göttingen",
+    "lng": 10.08688,
+    "lat": 51.56405
+  },
+  "DEA17": {
+    "id": "DEA17",
+    "name": "Oberhausen, Kreisfreie Stadt",
+    "lng": 6.84718,
+    "lat": 51.51275
+  },
+  "DEA18": {
+    "id": "DEA18",
+    "name": "Remscheid, Kreisfreie Stadt",
+    "lng": 7.22391,
+    "lat": 51.18278
+  },
+  "DEA19": {
+    "id": "DEA19",
+    "name": "Solingen, Kreisfreie Stadt",
+    "lng": 7.06621,
+    "lat": 51.16243
+  },
+  "DEA1A": {
+    "id": "DEA1A",
+    "name": "Wuppertal, Kreisfreie Stadt",
+    "lng": 7.169,
+    "lat": 51.25068
+  },
+  "DEA1B": {
+    "id": "DEA1B",
+    "name": "Kleve",
+    "lng": 6.25898,
+    "lat": 51.65204
+  },
+  "DEA1C": {
+    "id": "DEA1C",
+    "name": "Mettmann",
+    "lng": 6.96908,
+    "lat": 51.25713
+  },
+  "DED43": {
+    "id": "DED43",
+    "name": "Mittelsachsen",
+    "lng": 13.13819,
+    "lat": 50.95558
+  },
+  "DEA51": {
+    "id": "DEA51",
+    "name": "Bochum, Kreisfreie Stadt",
+    "lng": 7.22502,
+    "lat": 51.46997
+  },
+  "DEA52": {
+    "id": "DEA52",
+    "name": "Dortmund, Kreisfreie Stadt",
+    "lng": 7.4749,
+    "lat": 51.51609
+  },
+  "DEA53": {
+    "id": "DEA53",
+    "name": "Hagen, Kreisfreie Stadt",
+    "lng": 7.49792,
+    "lat": 51.34784
+  },
+  "DEA54": {
+    "id": "DEA54",
+    "name": "Hamm, Kreisfreie Stadt",
+    "lng": 7.82397,
+    "lat": 51.66528
+  },
+  "DEA55": {
+    "id": "DEA55",
+    "name": "Herne, Kreisfreie Stadt",
+    "lng": 7.20844,
+    "lat": 51.53771
+  },
+  "DEA56": {
+    "id": "DEA56",
+    "name": "Ennepe-Ruhr-Kreis",
+    "lng": 7.32414,
+    "lat": 51.34679
+  },
+  "DE922": {
+    "id": "DE922",
+    "name": "Diepholz",
+    "lng": 8.70128,
+    "lat": 52.72821
+  },
+  "DE923": {
+    "id": "DE923",
+    "name": "Hameln-Pyrmont",
+    "lng": 9.38971,
+    "lat": 52.09517
+  },
+  "DEA1D": {
+    "id": "DEA1D",
+    "name": "Rhein-Kreis Neuss",
+    "lng": 6.64912,
+    "lat": 51.14346
+  },
+  "DEA1E": {
+    "id": "DEA1E",
+    "name": "Viersen",
+    "lng": 6.32602,
+    "lat": 51.28288
+  },
+  "DEA1F": {
+    "id": "DEA1F",
+    "name": "Wesel",
+    "lng": 6.61841,
+    "lat": 51.62695
+  },
+  "DEA22": {
+    "id": "DEA22",
+    "name": "Bonn, Kreisfreie Stadt",
+    "lng": 7.10975,
+    "lat": 50.70563
+  },
+  "DEA23": {
+    "id": "DEA23",
+    "name": "Köln, Kreisfreie Stadt",
+    "lng": 6.97339,
+    "lat": 50.94566
+  },
+  "DED44": {
+    "id": "DED44",
+    "name": "Vogtlandkreis",
+    "lng": 12.23506,
+    "lat": 50.45667
+  },
+  "DED45": {
+    "id": "DED45",
+    "name": "Zwickau",
+    "lng": 12.52569,
+    "lat": 50.75059
+  },
+  "DEA57": {
+    "id": "DEA57",
+    "name": "Hochsauerlandkreis",
+    "lng": 8.38492,
+    "lat": 51.30696
+  },
+  "DEA58": {
+    "id": "DEA58",
+    "name": "Märkischer Kreis",
+    "lng": 7.71294,
+    "lat": 51.26237
+  },
+  "DE925": {
+    "id": "DE925",
+    "name": "Hildesheim",
+    "lng": 9.94336,
+    "lat": 52.09028
+  },
+  "DE926": {
+    "id": "DE926",
+    "name": "Holzminden",
+    "lng": 9.55125,
+    "lat": 51.88056
+  },
+  "DEA24": {
+    "id": "DEA24",
+    "name": "Leverkusen, Kreisfreie Stadt",
+    "lng": 7.01517,
+    "lat": 51.05334
+  },
+  "DEA26": {
+    "id": "DEA26",
+    "name": "Düren",
+    "lng": 6.44554,
+    "lat": 50.81788
+  },
+  "DEA27": {
+    "id": "DEA27",
+    "name": "Rhein-Erft-Kreis",
+    "lng": 6.71691,
+    "lat": 50.90481
+  },
+  "DED51": {
+    "id": "DED51",
+    "name": "Leipzig, Kreisfreie Stadt",
+    "lng": 12.37517,
+    "lat": 51.34209
+  },
+  "DED52": {
+    "id": "DED52",
+    "name": "Leipzig",
+    "lng": 12.59944,
+    "lat": 51.22134
+  },
+  "DEA59": {
+    "id": "DEA59",
+    "name": "Olpe",
+    "lng": 7.97643,
+    "lat": 51.08611
+  },
+  "DEA5A": {
+    "id": "DEA5A",
+    "name": "Siegen-Wittgenstein",
+    "lng": 8.19458,
+    "lat": 50.93752
+  },
+  "DEA5B": {
+    "id": "DEA5B",
+    "name": "Soest",
+    "lng": 8.21757,
+    "lat": 51.56449
+  },
+  "DE257": {
+    "id": "DE257",
+    "name": "Erlangen-Höchstadt",
+    "lng": 10.91503,
+    "lat": 49.64002
+  },
+  "DE258": {
+    "id": "DE258",
+    "name": "Fürth, Landkreis",
+    "lng": 10.84955,
+    "lat": 49.44662
+  },
+  "DE733": {
+    "id": "DE733",
+    "name": "Hersfeld-Rotenburg",
+    "lng": 9.75299,
+    "lat": 50.90613
+  },
+  "DE734": {
+    "id": "DE734",
+    "name": "Kassel, Landkreis",
+    "lng": 9.40668,
+    "lat": 51.40096
+  },
+  "DE27C": {
+    "id": "DE27C",
+    "name": "Unterallgäu",
+    "lng": 10.38919,
+    "lat": 48.03974
+  },
+  "DE27D": {
+    "id": "DE27D",
+    "name": "Donau-Ries",
+    "lng": 10.7125,
+    "lat": 48.80701
+  },
+  "DE226": {
+    "id": "DE226",
+    "name": "Kelheim",
+    "lng": 11.85786,
+    "lat": 48.82488
+  },
+  "DE227": {
+    "id": "DE227",
+    "name": "Landshut, Landkreis",
+    "lng": 12.19557,
+    "lat": 48.55763
+  },
+  "DE407": {
+    "id": "DE407",
+    "name": "Elbe-Elster",
+    "lng": 13.45963,
+    "lat": 51.61225
+  },
+  "DE408": {
+    "id": "DE408",
+    "name": "Havelland",
+    "lng": 12.62836,
+    "lat": 52.62103
+  },
+  "DE735": {
+    "id": "DE735",
+    "name": "Schwalm-Eder-Kreis",
+    "lng": 9.37337,
+    "lat": 51.02354
+  },
+  "DE736": {
+    "id": "DE736",
+    "name": "Waldeck-Frankenberg",
+    "lng": 8.88847,
+    "lat": 51.19032
+  },
+  "DE27E": {
+    "id": "DE27E",
+    "name": "Oberallgäu",
+    "lng": 10.25855,
+    "lat": 47.5722
+  },
+  "DE300": {
+    "id": "DE300",
+    "name": "Berlin",
+    "lng": 13.4019,
+    "lat": 52.5015
+  },
+  "DE228": {
+    "id": "DE228",
+    "name": "Passau, Landkreis",
+    "lng": 13.36635,
+    "lat": 48.55873
+  },
+  "DE229": {
+    "id": "DE229",
+    "name": "Regen",
+    "lng": 13.0999,
+    "lat": 49.0229
+  },
+  "DE409": {
+    "id": "DE409",
+    "name": "Märkisch-Oderland",
+    "lng": 14.14702,
+    "lat": 52.60664
+  },
+  "DE40A": {
+    "id": "DE40A",
+    "name": "Oberhavel",
+    "lng": 13.20523,
+    "lat": 52.90629
+  },
+  "DE737": {
+    "id": "DE737",
+    "name": "Werra-Meißner-Kreis",
+    "lng": 9.92904,
+    "lat": 51.1907
+  },
+  "DE803": {
+    "id": "DE803",
+    "name": "Rostock, Kreisfreie Stadt",
+    "lng": 12.14277,
+    "lat": 54.14715
+  },
+  "DE804": {
+    "id": "DE804",
+    "name": "Schwerin, Kreisfreie Stadt",
+    "lng": 11.41658,
+    "lat": 53.62138
+  },
+  "DE401": {
+    "id": "DE401",
+    "name": "Brandenburg an der Havel, Kreisfreie Stadt",
+    "lng": 12.51816,
+    "lat": 52.40198
+  },
+  "DE402": {
+    "id": "DE402",
+    "name": "Cottbus, Kreisfreie Stadt",
+    "lng": 14.3662,
+    "lat": 51.77256
+  },
+  "DE403": {
+    "id": "DE403",
+    "name": "Frankfurt (Oder), Kreisfreie Stadt",
+    "lng": 14.49028,
+    "lat": 52.32452
+  },
+  "DE404": {
+    "id": "DE404",
+    "name": "Potsdam, Kreisfreie Stadt",
+    "lng": 13.02889,
+    "lat": 52.42619
+  },
+  "DE22A": {
+    "id": "DE22A",
+    "name": "Rottal-Inn",
+    "lng": 12.86754,
+    "lat": 48.42455
+  },
+  "DE22B": {
+    "id": "DE22B",
+    "name": "Straubing-Bogen",
+    "lng": 12.58224,
+    "lat": 48.89976
+  },
+  "DE40B": {
+    "id": "DE40B",
+    "name": "Oberspreewald-Lausitz",
+    "lng": 13.94339,
+    "lat": 51.61583
+  },
+  "DE40C": {
+    "id": "DE40C",
+    "name": "Oder-Spree",
+    "lng": 14.21982,
+    "lat": 52.24378
+  },
+  "DE80J": {
+    "id": "DE80J",
+    "name": "Mecklenburgische Seenplatte",
+    "lng": 13.00224,
+    "lat": 53.54339
+  },
+  "DE405": {
+    "id": "DE405",
+    "name": "Barnim",
+    "lng": 13.70315,
+    "lat": 52.82271
+  },
+  "DE22C": {
+    "id": "DE22C",
+    "name": "Dingolfing-Landau",
+    "lng": 12.61041,
+    "lat": 48.64113
+  },
+  "DE231": {
+    "id": "DE231",
+    "name": "Amberg, Kreisfreie Stadt",
+    "lng": 11.84525,
+    "lat": 49.45098
+  },
+  "DE232": {
+    "id": "DE232",
+    "name": "Regensburg, Kreisfreie Stadt",
+    "lng": 12.11373,
+    "lat": 49.01291
+  },
+  "DE233": {
+    "id": "DE233",
+    "name": "Weiden i. d. Opf, Kreisfreie Stadt",
+    "lng": 12.15399,
+    "lat": 49.6691
+  },
+  "DE40D": {
+    "id": "DE40D",
+    "name": "Ostprignitz-Ruppin",
+    "lng": 12.63614,
+    "lat": 52.99119
+  },
+  "DE406": {
+    "id": "DE406",
+    "name": "Dahme-Spreewald",
+    "lng": 13.8204,
+    "lat": 52.04192
+  },
+  "DE234": {
+    "id": "DE234",
+    "name": "Amberg-Sulzbach",
+    "lng": 11.80118,
+    "lat": 49.48661
+  },
+  "DE235": {
+    "id": "DE235",
+    "name": "Cham",
+    "lng": 12.69424,
+    "lat": 49.23696
+  },
+  "DE40E": {
+    "id": "DE40E",
+    "name": "Potsdam-Mittelmark",
+    "lng": 12.68892,
+    "lat": 52.24619
+  },
+  "DE80K": {
+    "id": "DE80K",
+    "name": "Landkreis Rostock",
+    "lng": 12.22128,
+    "lat": 53.9118
+  },
+  "DE146": {
+    "id": "DE146",
+    "name": "Biberach",
+    "lng": 9.77423,
+    "lat": 48.10774
+  },
+  "DE147": {
+    "id": "DE147",
+    "name": "Bodenseekreis",
+    "lng": 9.38856,
+    "lat": 47.71464
+  },
+  "DE236": {
+    "id": "DE236",
+    "name": "Neumarkt i. d. OPf.",
+    "lng": 11.56671,
+    "lat": 49.21585
+  },
+  "DE40F": {
+    "id": "DE40F",
+    "name": "Prignitz",
+    "lng": 11.96181,
+    "lat": 53.1093
+  },
+  "DE40G": {
+    "id": "DE40G",
+    "name": "Spree-Neiße",
+    "lng": 14.43307,
+    "lat": 51.75832
+  },
+  "DE259": {
+    "id": "DE259",
+    "name": "Nürnberger Land",
+    "lng": 11.36946,
+    "lat": 49.49193
+  },
+  "DE25A": {
+    "id": "DE25A",
+    "name": "Neustadt a. d. Aisch-Bad Windsheim",
+    "lng": 10.46504,
+    "lat": 49.56955
+  },
+  "DE148": {
+    "id": "DE148",
+    "name": "Ravensburg",
+    "lng": 9.7803,
+    "lat": 47.82507
+  },
+  "DE149": {
+    "id": "DE149",
+    "name": "Sigmaringen",
+    "lng": 9.24111,
+    "lat": 48.03891
+  },
+  "DE237": {
+    "id": "DE237",
+    "name": "Neustadt a. d. Waldnaab",
+    "lng": 12.09879,
+    "lat": 49.68672
+  },
+  "DE40H": {
+    "id": "DE40H",
+    "name": "Teltow-Fläming",
+    "lng": 13.2759,
+    "lat": 52.07289
+  },
+  "DE25B": {
+    "id": "DE25B",
+    "name": "Roth",
+    "lng": 11.12397,
+    "lat": 49.20286
+  },
+  "DE25C": {
+    "id": "DE25C",
+    "name": "Weißenburg-Gunzenhausen",
+    "lng": 10.89362,
+    "lat": 49.03277
+  },
+  "DE261": {
+    "id": "DE261",
+    "name": "Aschaffenburg, Kreisfreie Stadt",
+    "lng": 9.14581,
+    "lat": 49.96391
+  },
+  "DE262": {
+    "id": "DE262",
+    "name": "Schweinfurt, Kreisfreie Stadt",
+    "lng": 10.22101,
+    "lat": 50.04733
+  },
+  "DE211": {
+    "id": "DE211",
+    "name": "Ingolstadt, Kreisfreie Stadt",
+    "lng": 11.39447,
+    "lat": 48.75541
+  },
+  "DE212": {
+    "id": "DE212",
+    "name": "München, Kreisfreie Stadt",
+    "lng": 11.547,
+    "lat": 48.15322
+  },
+  "DE213": {
+    "id": "DE213",
+    "name": "Rosenheim, Kreisfreie Stadt",
+    "lng": 12.10908,
+    "lat": 47.84438
+  },
+  "DE214": {
+    "id": "DE214",
+    "name": "Altötting",
+    "lng": 12.70559,
+    "lat": 48.20969
+  },
+  "DE215": {
+    "id": "DE215",
+    "name": "Berchtesgadener Land",
+    "lng": 12.90198,
+    "lat": 47.69839
+  },
+  "DE238": {
+    "id": "DE238",
+    "name": "Regensburg, Landkreis",
+    "lng": 12.12121,
+    "lat": 49.02137
+  },
+  "DE40I": {
+    "id": "DE40I",
+    "name": "Uckermark",
+    "lng": 13.86131,
+    "lat": 53.20589
+  },
+  "DE501": {
+    "id": "DE501",
+    "name": "Bremen, Kreisfreie Stadt",
+    "lng": 8.78159,
+    "lat": 53.11843
+  },
+  "DE502": {
+    "id": "DE502",
+    "name": "Bremerhaven, Kreisfreie Stadt",
+    "lng": 8.58658,
+    "lat": 53.53811
+  },
+  "DE263": {
+    "id": "DE263",
+    "name": "Würzburg, Kreisfreie Stadt",
+    "lng": 9.941,
+    "lat": 49.78485
+  },
+  "DE264": {
+    "id": "DE264",
+    "name": "Aschaffenburg, Landkreis",
+    "lng": 9.23838,
+    "lat": 50.00805
+  },
+  "DE265": {
+    "id": "DE265",
+    "name": "Bad Kissingen",
+    "lng": 9.96461,
+    "lat": 50.22254
+  },
+  "DE216": {
+    "id": "DE216",
+    "name": "Bad Tölz-Wolfratshausen",
+    "lng": 11.483,
+    "lat": 47.72713
+  },
+  "DE217": {
+    "id": "DE217",
+    "name": "Dachau",
+    "lng": 11.35681,
+    "lat": 48.33458
+  },
+  "DE218": {
+    "id": "DE218",
+    "name": "Ebersberg",
+    "lng": 11.91341,
+    "lat": 48.07613
+  },
+  "DE239": {
+    "id": "DE239",
+    "name": "Schwandorf",
+    "lng": 12.25236,
+    "lat": 49.36833
+  },
+  "DE23A": {
+    "id": "DE23A",
+    "name": "Tirschenreuth",
+    "lng": 12.20014,
+    "lat": 49.89941
+  },
+  "DE241": {
+    "id": "DE241",
+    "name": "Bamberg, Kreisfreie Stadt",
+    "lng": 10.89893,
+    "lat": 49.88721
+  },
+  "DE600": {
+    "id": "DE600",
+    "name": "Hamburg",
+    "lng": 10.01594,
+    "lat": 53.5473
+  },
+  "DE711": {
+    "id": "DE711",
+    "name": "Darmstadt, Kreisfreie Stadt",
+    "lng": 8.66463,
+    "lat": 49.88144
+  },
+  "DE712": {
+    "id": "DE712",
+    "name": "Frankfurt am Main, Kreisfreie Stadt",
+    "lng": 8.64389,
+    "lat": 50.11789
+  },
+  "DE713": {
+    "id": "DE713",
+    "name": "Offenbach am Main, Kreisfreie Stadt",
+    "lng": 8.7807,
+    "lat": 50.09088
+  },
+  "DE714": {
+    "id": "DE714",
+    "name": "Wiesbaden, Kreisfreie Stadt",
+    "lng": 8.26042,
+    "lat": 50.07909
+  },
+  "DE266": {
+    "id": "DE266",
+    "name": "Rhön-Grabfeld",
+    "lng": 10.25507,
+    "lat": 50.37135
+  },
+  "DE267": {
+    "id": "DE267",
+    "name": "Haßberge",
+    "lng": 10.607,
+    "lat": 50.06255
+  },
+  "DE219": {
+    "id": "DE219",
+    "name": "Eichstätt",
+    "lng": 11.37032,
+    "lat": 48.89809
+  },
+  "DE21A": {
+    "id": "DE21A",
+    "name": "Erding",
+    "lng": 12.00062,
+    "lat": 48.30017
+  },
+  "DE21B": {
+    "id": "DE21B",
+    "name": "Freising",
+    "lng": 11.74056,
+    "lat": 48.44738
+  },
+  "DE242": {
+    "id": "DE242",
+    "name": "Bayreuth, Kreisfreie Stadt",
+    "lng": 11.58443,
+    "lat": 49.93778
+  },
+  "DE243": {
+    "id": "DE243",
+    "name": "Coburg, Kreisfreie Stadt",
+    "lng": 10.96448,
+    "lat": 50.26422
+  },
+  "DE244": {
+    "id": "DE244",
+    "name": "Hof, Kreisfreie Stadt",
+    "lng": 11.89719,
+    "lat": 50.31075
+  },
+  "DE245": {
+    "id": "DE245",
+    "name": "Bamberg, Landkreis",
+    "lng": 10.88331,
+    "lat": 49.8935
+  },
+  "DE715": {
+    "id": "DE715",
+    "name": "Bergstraße",
+    "lng": 8.66035,
+    "lat": 49.61775
+  },
+  "DE716": {
+    "id": "DE716",
+    "name": "Darmstadt-Dieburg",
+    "lng": 8.79544,
+    "lat": 49.8555
+  },
+  "DE717": {
+    "id": "DE717",
+    "name": "Groß-Gerau",
+    "lng": 8.47023,
+    "lat": 49.90425
+  },
+  "DE268": {
+    "id": "DE268",
+    "name": "Kitzingen",
+    "lng": 10.25579,
+    "lat": 49.75321
+  },
+  "DE269": {
+    "id": "DE269",
+    "name": "Miltenberg",
+    "lng": 9.23477,
+    "lat": 49.75719
+  },
+  "DE21C": {
+    "id": "DE21C",
+    "name": "Fürstenfeldbruck",
+    "lng": 11.20088,
+    "lat": 48.18768
+  },
+  "DE21D": {
+    "id": "DE21D",
+    "name": "Garmisch-Partenkirchen",
+    "lng": 11.12998,
+    "lat": 47.55636
+  },
+  "DE21E": {
+    "id": "DE21E",
+    "name": "Landsberg am Lech",
+    "lng": 10.94875,
+    "lat": 48.02429
+  },
+  "DE246": {
+    "id": "DE246",
+    "name": "Bayreuth, Landkreis",
+    "lng": 11.55494,
+    "lat": 49.88356
+  },
+  "DE718": {
+    "id": "DE718",
+    "name": "Hochtaunuskreis",
+    "lng": 8.50448,
+    "lat": 50.28151
+  },
+  "DE719": {
+    "id": "DE719",
+    "name": "Main-Kinzig-Kreis",
+    "lng": 9.28591,
+    "lat": 50.24391
+  },
+  "DE71A": {
+    "id": "DE71A",
+    "name": "Main-Taunus-Kreis",
+    "lng": 8.43428,
+    "lat": 50.10229
+  },
+  "DE26A": {
+    "id": "DE26A",
+    "name": "Main-Spessart",
+    "lng": 9.66265,
+    "lat": 49.99331
+  },
+  "DE26B": {
+    "id": "DE26B",
+    "name": "Schweinfurt, Landkreis",
+    "lng": 10.25989,
+    "lat": 50.01713
+  },
+  "DE21F": {
+    "id": "DE21F",
+    "name": "Miesbach",
+    "lng": 11.80904,
+    "lat": 47.74161
+  },
+  "DE21G": {
+    "id": "DE21G",
+    "name": "Mühldorf a. Inn",
+    "lng": 12.382,
+    "lat": 48.23934
+  },
+  "DE21H": {
+    "id": "DE21H",
+    "name": "München, Landkreis",
+    "lng": 11.63126,
+    "lat": 48.0743
+  },
+  "DE247": {
+    "id": "DE247",
+    "name": "Coburg, Landkreis",
+    "lng": 10.94234,
+    "lat": 50.26774
+  },
+  "DE248": {
+    "id": "DE248",
+    "name": "Forchheim",
+    "lng": 11.17325,
+    "lat": 49.72106
+  },
+  "DE71B": {
+    "id": "DE71B",
+    "name": "Odenwaldkreis",
+    "lng": 8.97949,
+    "lat": 49.67155
+  },
+  "DE71C": {
+    "id": "DE71C",
+    "name": "Offenbach, Landkreis",
+    "lng": 8.81152,
+    "lat": 50.02171
+  },
+  "DE71D": {
+    "id": "DE71D",
+    "name": "Rheingau-Taunus-Kreis",
+    "lng": 8.08079,
+    "lat": 50.14188
+  },
+  "DE26C": {
+    "id": "DE26C",
+    "name": "Würzburg, Landkreis",
+    "lng": 9.92726,
+    "lat": 49.73745
+  },
+  "DE271": {
+    "id": "DE271",
+    "name": "Augsburg, Kreisfreie Stadt",
+    "lng": 10.8856,
+    "lat": 48.34574
+  },
+  "DE272": {
+    "id": "DE272",
+    "name": "Kaufbeuren, Kreisfreie Stadt",
+    "lng": 10.61635,
+    "lat": 47.8798
+  },
+  "DE273": {
+    "id": "DE273",
+    "name": "Kempten (Allgäu), Kreisfreie Stadt",
+    "lng": 10.30788,
+    "lat": 47.73819
+  },
+  "DE274": {
+    "id": "DE274",
+    "name": "Memmingen, Kreisfreie Stadt",
+    "lng": 10.16365,
+    "lat": 47.97922
+  },
+  "DE21I": {
+    "id": "DE21I",
+    "name": "Neuburg-Schrobenhausen",
+    "lng": 11.19735,
+    "lat": 48.66452
+  },
+  "DE21J": {
+    "id": "DE21J",
+    "name": "Pfaffenhofen a. d. Ilm",
+    "lng": 11.52415,
+    "lat": 48.5962
+  },
+  "DE249": {
+    "id": "DE249",
+    "name": "Hof, Landkreis",
+    "lng": 11.81911,
+    "lat": 50.27305
+  },
+  "DE24A": {
+    "id": "DE24A",
+    "name": "Kronach",
+    "lng": 11.37204,
+    "lat": 50.32805
+  },
+  "DE71E": {
+    "id": "DE71E",
+    "name": "Wetteraukreis",
+    "lng": 8.90747,
+    "lat": 50.35477
+  },
+  "DE721": {
+    "id": "DE721",
+    "name": "Gießen, Landkreis",
+    "lng": 8.80766,
+    "lat": 50.57031
+  },
+  "DE275": {
+    "id": "DE275",
+    "name": "Aichach-Friedberg",
+    "lng": 11.05279,
+    "lat": 48.42744
+  },
+  "DE276": {
+    "id": "DE276",
+    "name": "Augsburg, Landkreis",
+    "lng": 10.73202,
+    "lat": 48.35411
+  },
+  "DE21K": {
+    "id": "DE21K",
+    "name": "Rosenheim, Landkreis",
+    "lng": 12.16271,
+    "lat": 47.87815
+  },
+  "DE21L": {
+    "id": "DE21L",
+    "name": "Starnberg",
+    "lng": 11.28158,
+    "lat": 48.00607
+  },
+  "DE24B": {
+    "id": "DE24B",
+    "name": "Kulmbach",
+    "lng": 11.48193,
+    "lat": 50.10256
+  },
+  "DE24C": {
+    "id": "DE24C",
+    "name": "Lichtenfels",
+    "lng": 11.11698,
+    "lat": 50.10936
+  },
+  "DE24D": {
+    "id": "DE24D",
+    "name": "Wunsiedel i. Fichtelgebirge",
+    "lng": 12.04181,
+    "lat": 50.09012
+  },
+  "DE251": {
+    "id": "DE251",
+    "name": "Ansbach, Kreisfreie Stadt",
+    "lng": 10.56385,
+    "lat": 49.292
+  },
+  "DE722": {
+    "id": "DE722",
+    "name": "Lahn-Dill-Kreis",
+    "lng": 8.36545,
+    "lat": 50.64792
+  },
+  "DE723": {
+    "id": "DE723",
+    "name": "Limburg-Weilburg",
+    "lng": 8.19924,
+    "lat": 50.42731
+  },
+  "DE724": {
+    "id": "DE724",
+    "name": "Marburg-Biedenkopf",
+    "lng": 8.73787,
+    "lat": 50.83688
+  },
+  "DE277": {
+    "id": "DE277",
+    "name": "Dillingen a.d. Donau",
+    "lng": 10.52781,
+    "lat": 48.59646
+  },
+  "DE278": {
+    "id": "DE278",
+    "name": "Günzburg",
+    "lng": 10.38137,
+    "lat": 48.35262
+  },
+  "DE279": {
+    "id": "DE279",
+    "name": "Neu-Ulm",
+    "lng": 10.14135,
+    "lat": 48.29802
+  },
+  "DE21M": {
+    "id": "DE21M",
+    "name": "Traunstein",
+    "lng": 12.57968,
+    "lat": 47.89437
+  },
+  "DE21N": {
+    "id": "DE21N",
+    "name": "Weilheim-Schongau",
+    "lng": 11.04839,
+    "lat": 47.78763
+  },
+  "DE221": {
+    "id": "DE221",
+    "name": "Landshut, Kreisfreie Stadt",
+    "lng": 12.15927,
+    "lat": 48.54462
+  },
+  "DE252": {
+    "id": "DE252",
+    "name": "Erlangen, Kreisfreie Stadt",
+    "lng": 10.97871,
+    "lat": 49.58224
+  },
+  "DE253": {
+    "id": "DE253",
+    "name": "Fürth, Kreisfreie Stadt",
+    "lng": 10.96546,
+    "lat": 49.49113
+  },
+  "DE254": {
+    "id": "DE254",
+    "name": "Nürnberg, Kreisfreie Stadt",
+    "lng": 11.08235,
+    "lat": 49.43616
+  },
+  "DE255": {
+    "id": "DE255",
+    "name": "Schwabach, Kreisfreie Stadt",
+    "lng": 11.02333,
+    "lat": 49.33575
+  },
+  "DE725": {
+    "id": "DE725",
+    "name": "Vogelsbergkreis",
+    "lng": 9.27167,
+    "lat": 50.63798
+  },
+  "DE731": {
+    "id": "DE731",
+    "name": "Kassel, Kreisfreie Stadt",
+    "lng": 9.45993,
+    "lat": 51.31146
+  },
+  "DE732": {
+    "id": "DE732",
+    "name": "Fulda",
+    "lng": 9.75898,
+    "lat": 50.56376
+  },
+  "DE27A": {
+    "id": "DE27A",
+    "name": "Lindau (Bodensee)",
+    "lng": 9.85642,
+    "lat": 47.59895
+  },
+  "DE27B": {
+    "id": "DE27B",
+    "name": "Ostallgäu",
+    "lng": 10.6398,
+    "lat": 47.76963
+  },
+  "DE222": {
+    "id": "DE222",
+    "name": "Passau, Kreisfreie Stadt",
+    "lng": 13.41535,
+    "lat": 48.58211
+  },
+  "DE223": {
+    "id": "DE223",
+    "name": "Straubing, Kreisfreie Stadt",
+    "lng": 12.57379,
+    "lat": 48.88078
+  },
+  "DE224": {
+    "id": "DE224",
+    "name": "Deggendorf",
+    "lng": 13.00077,
+    "lat": 48.7788
+  },
+  "DE225": {
+    "id": "DE225",
+    "name": "Freyung-Grafenau",
+    "lng": 13.51324,
+    "lat": 48.82699
+  },
+  "DE256": {
+    "id": "DE256",
+    "name": "Ansbach, Landkreis",
+    "lng": 10.46812,
+    "lat": 49.24803
+  },
+  "DEG0G": {
+    "id": "DEG0G",
+    "name": "Weimarer Land",
+    "lng": 11.37309,
+    "lat": 50.97145
+  },
+  "DEG0J": {
+    "id": "DEG0J",
+    "name": "Saale-Holzland-Kreis",
+    "lng": 11.73144,
+    "lat": 50.90402
+  },
+  "DEG0K": {
+    "id": "DEG0K",
+    "name": "Saale-Orla-Kreis",
+    "lng": 11.71064,
+    "lat": 50.58072
+  },
+  "DEG0L": {
+    "id": "DEG0L",
+    "name": "Greiz",
+    "lng": 12.07422,
+    "lat": 50.74834
+  },
+  "DEG0M": {
+    "id": "DEG0M",
+    "name": "Altenburger Land",
+    "lng": 12.39894,
+    "lat": 50.95639
+  },
+  "DEG0Q": {
+    "id": "DEG0Q",
+    "name": "Schmalkalden-Meiningen",
+    "lng": 10.39663,
+    "lat": 50.63099
+  },
+  "DEG0R": {
+    "id": "DEG0R",
+    "name": "Wartburgkreis",
+    "lng": 10.2186,
+    "lat": 50.90058
+  },
+  "DEG0S": {
+    "id": "DEG0S",
+    "name": "Suhl, Kreisfreie Stadt",
+    "lng": 10.71778,
+    "lat": 50.62097
+  },
+  "DEG0T": {
+    "id": "DEG0T",
+    "name": "Ilm-Kreis",
+    "lng": 10.97472,
+    "lat": 50.74223
+  },
+  "DEG0U": {
+    "id": "DEG0U",
+    "name": "Saalfeld-Rudolstadt",
+    "lng": 11.31249,
+    "lat": 50.64085
+  },
+  "DEF02": {
+    "id": "DEF02",
+    "name": "Kiel, Kreisfreie Stadt",
+    "lng": 10.13227,
+    "lat": 54.32448
+  },
+  "DEF03": {
+    "id": "DEF03",
+    "name": "Lübeck, Kreisfreie Stadt",
+    "lng": 10.72697,
+    "lat": 53.87239
+  },
+  "DEF04": {
+    "id": "DEF04",
+    "name": "Neumünster, Kreisfreie Stadt",
+    "lng": 9.98422,
+    "lat": 54.08094
+  },
+  "DEF05": {
+    "id": "DEF05",
+    "name": "Dithmarschen",
+    "lng": 9.10758,
+    "lat": 54.13356
+  },
+  "DEG0V": {
+    "id": "DEG0V",
+    "name": "Sonneberg",
+    "lng": 11.13642,
+    "lat": 50.4212
+  },
+  "DEF06": {
+    "id": "DEF06",
+    "name": "Herzogtum Lauenburg",
+    "lng": 10.60159,
+    "lat": 53.58882
+  },
+  "DEF07": {
+    "id": "DEF07",
+    "name": "Nordfriesland",
+    "lng": 8.89782,
+    "lat": 54.61497
+  },
+  "DEF08": {
+    "id": "DEF08",
+    "name": "Ostholstein",
+    "lng": 10.81789,
+    "lat": 54.18901
+  },
+  "DEF09": {
+    "id": "DEF09",
+    "name": "Pinneberg",
+    "lng": 9.73911,
+    "lat": 53.71732
+  },
+  "DEF0A": {
+    "id": "DEF0A",
+    "name": "Plön",
+    "lng": 10.36349,
+    "lat": 54.24324
+  },
+  "DEF0B": {
+    "id": "DEF0B",
+    "name": "Rendsburg-Eckernförde",
+    "lng": 9.78102,
+    "lat": 54.28926
+  },
+  "DEF0C": {
+    "id": "DEF0C",
+    "name": "Schleswig-Flensburg",
+    "lng": 9.50326,
+    "lat": 54.62326
+  },
+  "DEF0D": {
+    "id": "DEF0D",
+    "name": "Segeberg",
+    "lng": 10.14055,
+    "lat": 53.91992
+  },
+  "DEF0E": {
+    "id": "DEF0E",
+    "name": "Steinburg",
+    "lng": 9.51932,
+    "lat": 53.92871
+  },
+  "DEF0F": {
+    "id": "DEF0F",
+    "name": "Stormarn",
+    "lng": 10.33141,
+    "lat": 53.72075
+  },
+  "DEG01": {
+    "id": "DEG01",
+    "name": "Erfurt, Kreisfreie Stadt",
+    "lng": 11.02011,
+    "lat": 50.98316
+  },
+  "DEG02": {
+    "id": "DEG02",
+    "name": "Gera, Kreisfreie Stadt",
+    "lng": 12.08264,
+    "lat": 50.89373
+  },
+  "DEG03": {
+    "id": "DEG03",
+    "name": "Jena, Kreisfreie Stadt",
+    "lng": 11.58686,
+    "lat": 50.92438
+  },
+  "DEG05": {
+    "id": "DEG05",
+    "name": "Weimar, Kreisfreie Stadt",
+    "lng": 11.31769,
+    "lat": 50.97812
+  },
+  "DEG06": {
+    "id": "DEG06",
+    "name": "Eichsfeld",
+    "lng": 10.26046,
+    "lat": 51.37921
+  },
+  "DEG07": {
+    "id": "DEG07",
+    "name": "Nordhausen",
+    "lng": 10.73097,
+    "lat": 51.5022
+  },
+  "DEG09": {
+    "id": "DEG09",
+    "name": "Unstrut-Hainich-Kreis",
+    "lng": 10.56064,
+    "lat": 51.17875
+  },
+  "DEG0A": {
+    "id": "DEG0A",
+    "name": "Kyffhäuserkreis",
+    "lng": 10.98468,
+    "lat": 51.32495
+  },
+  "DEG0C": {
+    "id": "DEG0C",
+    "name": "Gotha",
+    "lng": 10.69375,
+    "lat": 50.91052
+  },
+  "DEG0D": {
+    "id": "DEG0D",
+    "name": "Sömmerda",
+    "lng": 11.15473,
+    "lat": 51.15784
+  },
+  "DEG0E": {
+    "id": "DEG0E",
+    "name": "Hildburghausen",
+    "lng": 10.73403,
+    "lat": 50.43383
+  },
+  "DEG0F": {
+    "id": "DEG0F",
+    "name": "Ilm-Kreis",
+    "lng": 10.96631,
+    "lat": 50.73779
+  },
+  "DEG0H": {
+    "id": "DEG0H",
+    "name": "Sonneberg",
+    "lng": 11.13298,
+    "lat": 50.41467
+  },
+  "DEG0I": {
+    "id": "DEG0I",
+    "name": "Saalfeld-Rudolstadt",
+    "lng": 11.30911,
+    "lat": 50.6377
+  },
+  "DEG0B": {
+    "id": "DEG0B",
+    "name": "Schmalkalden-Meiningen",
+    "lng": 10.4051,
+    "lat": 50.63065
+  },
+  "DEG0N": {
+    "id": "DEG0N",
+    "name": "Eisenach, Kreisfreie Stadt",
+    "lng": 10.3,
+    "lat": 50.98961
+  },
+  "DEG04": {
+    "id": "DEG04",
+    "name": "Suhl, Kreisfreie Stadt",
+    "lng": 10.68843,
+    "lat": 50.61161
+  },
+  "DEG0P": {
+    "id": "DEG0P",
+    "name": "Wartburgkreis",
+    "lng": 10.21023,
+    "lat": 50.88546
+  },
+  "DEHAM": {
+    "id": "DEHAM",
+    "name": "Hamburg",
+    "lng": 9.975,
+    "lat": 53.535
+  },
+  "DEBRV": {
+    "id": "DEBRV",
+    "name": "Bremerhaven",
+    "lng": 8.545,
+    "lat": 53.57
+  },
+  "DEWVN": {
+    "id": "DEWVN",
+    "name": "Wilhelmshaven",
+    "lng": 8.14,
+    "lat": 53.585
+  },
+  "DERSK": {
+    "id": "DERSK",
+    "name": "Rostock",
+    "lng": 12.115,
+    "lat": 54.15
+  },
+  "DELBC": {
+    "id": "DELBC",
+    "name": "Lübeck",
+    "lng": 10.705,
+    "lat": 53.895
+  },
+  "DEBRB": {
+    "id": "DEBRB",
+    "name": "Brunsbüttel",
+    "lng": 9.155,
+    "lat": 53.89
+  },
+  "DEBRE": {
+    "id": "DEBRE",
+    "name": "Bremen",
+    "lng": 8.765,
+    "lat": 53.115
+  },
+  "DEBKE": {
+    "id": "DEBKE",
+    "name": "Brake (Unterweser)",
+    "lng": 8.49,
+    "lat": 53.33
+  },
+  "DESTA": {
+    "id": "DESTA",
+    "name": "Stade (Bützfleth)",
+    "lng": 9.505,
+    "lat": 53.645
+  },
+  "DEKEL": {
+    "id": "DEKEL",
+    "name": "Kiel",
+    "lng": 10.15,
+    "lat": 54.335
+  },
+  "DEEME": {
+    "id": "DEEME",
+    "name": "Emden",
+    "lng": 7.195,
+    "lat": 53.345
+  },
+  "DECUX": {
+    "id": "DECUX",
+    "name": "Cuxhaven",
+    "lng": 8.71,
+    "lat": 53.875
+  },
+  "DESAS": {
+    "id": "DESAS",
+    "name": "Sassnitz / Mukran",
+    "lng": 13.63,
+    "lat": 54.495
+  },
+  "DEWIS": {
+    "id": "DEWIS",
+    "name": "Wismar",
+    "lng": 11.455,
+    "lat": 53.895
+  },
+  "DENOH": {
+    "id": "DENOH",
+    "name": "Nordenham",
+    "lng": 8.495,
+    "lat": 53.5
+  },
+  "DENHA": {
+    "id": "DENHA",
+    "name": "Nordenham",
+    "lng": 8.4833,
+    "lat": 53.4833
+  },
+  "DESTL": {
+    "id": "DESTL",
+    "name": "Stralsund",
+    "lng": 13.1,
+    "lat": 54.3
+  },
+  "DEVIW": {
+    "id": "DEVIW",
+    "name": "Vierow",
+    "lng": 13.5724,
+    "lat": 54.1303
+  },
+  "DEBSK": {
+    "id": "DEBSK",
+    "name": "Puttgarden",
+    "lng": 11.226,
+    "lat": 54.5008
+  },
+  "DEPAP": {
+    "id": "DEPAP",
+    "name": "Papenburg",
+    "lng": 7.3652,
+    "lat": 53.1004
+  },
+  "DELBM": {
+    "id": "DELBM",
+    "name": "Industriehafen Lubmin",
+    "lng": 13.6433,
+    "lat": 54.155
+  }
+}

@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Güterverkehrsströme Deutschland – Interaktives Fach-Dashboard | Wissensbasierte Planung</title>
+  <meta name="description" content="Interaktives Fach-Dashboard für Güterverkehrsströme in Deutschland: NUTS-3 Verflechtungen, Choroplethenkarten, Modal Split, Güterstrukturen, Seeverkehr und intermodale Verkehre.">
+  
+  <!-- Google Fonts: Inter for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS for Real Geographic Vector Maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Custom App Styles -->
+  <link rel="stylesheet" href="css/style.css?v=20260831-legend-titles-v23">
+  
+  <!-- Leaflet JS & Chart.js -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="app-header-top">
+      <div class="brand-section">
+        <img src="assets/logo_wbp.svg" alt="Wissensbasierte Planung Logo" class="brand-logo" id="brandLogoBtn" title="Wissensbasierte Planung - Dr. Paul Hebes">
+        <div class="brand-title-wrap">
+          <div class="brand-title">
+            <span>Güterverkehrsströme Deutschland</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Header Action Modals -->
+      <div class="header-buttons">
+        <button class="btn-header" id="btnHelpModal" title="Hinweise zur Nutzung">
+          <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><circle cx="12" cy="8" r="0.8" fill="currentColor"></circle></svg>
+          Hinweise
+        </button>
+        <button class="btn-header" id="btnSteckbriefModal" title="Regionalen Steckbrief öffnen">
+          <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Steckbrief
+        </button>
+        <button class="btn-header" id="btnLicensesModal" title="Quellen und Lizenzhinweise">
+          <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Quellen
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <!-- Collapsible analysis context: current selection remains visible at all times. -->
+    <section class="analysis-panel is-collapsed" id="analysisPanel" aria-label="Aktuelle Einstellungen">
+      <button type="button" class="analysis-panel-toggle" id="btnToggleAnalysisPanel" aria-expanded="false" aria-controls="analysisPanelBody">
+        <svg class="analysis-panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="6" x2="19" y2="6"></line><line x1="5" y1="12" x2="19" y2="12"></line><line x1="5" y1="18" x2="19" y2="18"></line><circle cx="9" cy="6" r="1.55"></circle><circle cx="15" cy="12" r="1.55"></circle><circle cx="11" cy="18" r="1.55"></circle></svg>
+        <span class="analysis-panel-label">Aktuelle Einstellungen</span>
+        <span class="analysis-summary" aria-live="polite">
+          <span class="analysis-summary-item" id="summaryRegion">Deutschland</span>
+          <span class="analysis-summary-item" id="summaryPeriod">2024</span>
+          <span class="analysis-summary-item" id="summaryMetric">Tonnen</span>
+          <span class="analysis-summary-item" id="summaryDirection">Versand + Empfang</span>
+          <span class="analysis-summary-item analysis-summary-detail" id="summaryGoods">Alle Güterarten</span>
+          <span class="analysis-summary-item analysis-summary-detail" id="summaryScope">Top 10 · Binnenverkehr ein</span>
+        </span>
+        <svg class="analysis-panel-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+
+      <div class="analysis-panel-body" id="analysisPanelBody" hidden>
+        <div class="analysis-filter-group analysis-filter-group-space">
+          <div class="analysis-filter-group-title">Raum &amp; Zeit</div>
+          <div class="analysis-filter-group-controls">
+      <!-- Searchable Combobox for NUTS-3 Regions -->
+      <div class="control-group" id="controlGroupRegion">
+        <label for="regionSearchInput" class="control-label">Region / Kreis (NUTS-3):</label>
+        <div class="search-combobox">
+          <input type="text" id="regionSearchInput" class="search-input" value="Deutschland" placeholder="Deutschland" autocomplete="off">
+          <button type="button" id="btnClearRegion" class="btn-clear-input" title="Auf Deutschland zurücksetzen">&times;</button>
+          <div class="autocomplete-dropdown" id="regionAutocompleteList"></div>
+        </div>
+      </div>
+
+      <div class="control-group" id="controlGroupYear">
+        <label for="selectYear" class="control-label">Jahr:</label>
+        <select id="selectYear" class="select-input select-input-compact">
+          <option value="2025">2025</option>
+          <option value="2024" selected>2024</option>
+          <option value="2023">2023</option>
+          <option value="2022">2022</option>
+          <option value="2021">2021</option>
+          <option value="2020">2020</option>
+          <option value="2019">2019</option>
+          <option value="2018">2018</option>
+          <option value="2017">2017</option>
+          <option value="2016">2016</option>
+        </select>
+      </div>
+
+      <!-- Forecast Scenario Control (Visible only when tab-forecast is active) -->
+      <div class="control-group" id="controlGroupScenario" style="display: none;">
+        <label for="selectScenario" class="control-label">Prognosefall / Horizont:</label>
+        <select id="selectScenario" class="select-input select-input-compact" style="min-width: 195px;" title="Verkehrsprognose 2040 Szenario auswählen">
+          <option value="2019_BASE">2019: Basisjahr</option>
+          <option value="2040_P1" selected>2040: Basisprognose (P1)</option>
+        </select>
+      </div>
+          </div>
+        </div>
+
+        <div class="analysis-filter-group analysis-filter-group-view">
+          <div class="analysis-filter-group-title">Betrachtung</div>
+          <div class="analysis-filter-group-controls">
+      <div class="control-group" id="controlGroupMetric">
+        <label for="selectMetric" class="control-label">Kennzahl:</label>
+        <select id="selectMetric" class="select-input select-input-compact">
+          <option value="tonnes" selected>Tonnen (t)</option>
+          <option value="tkm">Tonnen-km (tkm)</option>
+        </select>
+      </div>
+
+      <div class="control-group" id="controlGroupDirection">
+        <label for="selectDirection" class="control-label">Richtung:</label>
+        <select id="selectDirection" class="select-input select-input-compact">
+          <option value="all" selected>Versand + Empfang</option>
+          <option value="outbound">Versand (Outbound)</option>
+          <option value="inbound">Empfang (Inbound)</option>
+          <option value="balance">Saldo (Versand − Empfang)</option>
+        </select>
+      </div>
+
+      <div class="control-group" id="controlGroupGoods">
+        <label for="selectGlobalGroup" class="control-label">Güterart:</label>
+        <select id="selectGlobalGroup" class="select-input select-input-compact" style="max-width: 175px;" title="Nach Güterhauptgruppe (NST-2007) filtern">
+          <option value="ALL" selected>Alle Güterarten</option>
+          <option value="1">1: Land- und Forstwirtschaft, Rohstoffe</option>
+          <option value="2">2: Konsumgüter, Holzwaren</option>
+          <option value="3">3: Mineralische, chemische und Mineralölerzeugnisse</option>
+          <option value="4">4: Metalle und Metallerzeugnisse</option>
+          <option value="5">5: Maschinen, Ausrüstungen, langlebige Konsumgüter</option>
+          <option value="6">6: Sekundärrohstoffe, Abfälle</option>
+          <option value="7">7: Sonstige Produkte</option>
+        </select>
+      </div>
+          </div>
+        </div>
+
+        <div class="analysis-filter-group analysis-filter-group-display">
+          <div class="analysis-filter-group-title">Darstellung</div>
+          <div class="analysis-filter-group-controls">
+      <div class="control-group" id="controlGroupTopX">
+        <label for="selectTopX" class="control-label">Top-Filter:</label>
+        <select id="selectTopX" class="select-input select-input-compact">
+          <option value="5">Top 5</option>
+          <option value="10" selected>Top 10</option>
+          <option value="20">Top 20</option>
+        </select>
+      </div>
+
+      <div class="control-group" id="controlGroupBinnenverkehr">
+        <label for="selectBinnenverkehr" class="control-label" title="Darstellungsfilter für Selbstrelationen in Verbindungslinien und Relationstabellen; Kennzahlen und Flächenwerte bleiben unverändert.">Binnenverkehr:</label>
+        <select id="selectBinnenverkehr" class="select-input select-input-compact">
+          <option value="include" selected>Einbeziehen</option>
+          <option value="exclude">Ausblenden</option>
+        </select>
+      </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sidebar Navigation with Authentic Transport SVGs and Integrated Collapse Arrow -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="nav-section-title">Analyse-Module</div>
+        <button class="sidebar-collapse-btn" id="btnToggleSidebar" title="Seitenleiste ein-/ausklappen">
+          <svg class="sidebar-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+      </div>
+
+      <ul class="nav-list" id="mainNav">
+        <li class="nav-item active" data-tab="tab-overview" title="Übersicht">
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span class="nav-label">Übersicht</span>
+        </li>
+        <li class="nav-item" data-tab="tab-road" title="Straßengüterverkehr">
+          <!-- Semi-Truck / LKW SVG -->
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z"></path><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+          <span class="nav-label">Straßengüterverkehr</span>
+        </li>
+        <li class="nav-item" data-tab="tab-rail" title="Schienengüterverkehr">
+          <!-- Freight Train SVG -->
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="16" rx="2"></rect><path d="M4 11h16M12 3v8m-4 8 2 2m6-2-2 2M8 15h.01M16 15h.01"></path></svg>
+          <span class="nav-label">Schienengüterverkehr</span>
+        </li>
+        <li class="nav-item" data-tab="tab-iww" title="Binnenschifffahrt">
+          <!-- Inland Waterway Barge SVG -->
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20a6 6 0 0 0 10 0 6 6 0 0 0 10 0M4 16l2-8 6 3 6-3 2 8M12 4v7"></path></svg>
+          <span class="nav-label">Binnenschifffahrt</span>
+        </li>
+        <li class="nav-item" data-tab="tab-maritime" title="Seeverkehr & Häfen">
+          <!-- Maritime Cargo Ship / Anchor SVG -->
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"></circle><line x1="12" y1="22" x2="12" y2="8"></line><path d="M5 12H2a10 10 0 0 0 20 0h-3"></path></svg>
+          <span class="nav-label">Seeverkehr & Häfen</span>
+        </li>
+        <li class="nav-item" data-tab="tab-intermodal" title="Intermodaler Verkehr & KV">
+          <!-- Intermodal ISO Container SVG -->
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="1.5"></rect><line x1="7" y1="5" x2="7" y2="19"></line><line x1="12" y1="5" x2="12" y2="19"></line><line x1="17" y1="5" x2="17" y2="19"></line><circle cx="4.5" cy="7.5" r="0.75" fill="currentColor"></circle><circle cx="19.5" cy="7.5" r="0.75" fill="currentColor"></circle><circle cx="4.5" cy="16.5" r="0.75" fill="currentColor"></circle><circle cx="19.5" cy="16.5" r="0.75" fill="currentColor"></circle></svg>
+          <span class="nav-label">Intermodaler Verkehr & KV</span>
+        </li>
+        <li class="nav-item" data-tab="tab-forecast" title="Verkehrsprognose 2040">
+          <!-- Forecast Growth Curve SVG -->
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+          <span class="nav-label">Verkehrsprognose 2040</span>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+      <!-- ============================================================
+           TAB 1: REGIONALE ÜBERSICHT
+           ============================================================ -->
+      <section id="tab-overview" class="tab-pane active">
+        <!-- KPI Summary Strip -->
+        <div class="kpi-row" id="kpiOverviewRow">
+          <div class="kpi-card" style="border-top: 3px solid #059669;">
+            <div class="kpi-title" id="kpiTotalTitle">Gesamtaufkommen</div>
+            <div class="kpi-value" id="kpiTotalTonnes">--</div>
+            <div class="kpi-sub neutral" id="kpiTotalSub">Mio. Tonnen</div>
+          </div>
+          <div class="kpi-card" style="border-top: 3px solid #f59e0b;">
+            <div class="kpi-title" id="kpiRoadTitle">Straße (LKW)</div>
+            <div class="kpi-value" id="kpiRoadTonnes">--</div>
+            <div class="kpi-sub" id="kpiRoadShare">-- % Anteil</div>
+          </div>
+          <div class="kpi-card" style="border-top: 3px solid #2563eb;">
+            <div class="kpi-title" id="kpiRailTitle">Schiene (Bahn)</div>
+            <div class="kpi-value" id="kpiRailTonnes">--</div>
+            <div class="kpi-sub" id="kpiRailShare">-- % Anteil</div>
+          </div>
+          <div class="kpi-card" style="border-top: 3px solid #0f766e;">
+            <div class="kpi-title" id="kpiIwwTitle">Wasserstraße (Binnenschiff)</div>
+            <div class="kpi-value" id="kpiIwwTonnes">--</div>
+            <div class="kpi-sub" id="kpiIwwShare">-- % Anteil</div>
+          </div>
+        </div>
+
+        <!-- Master Layout: Tall Map on Left (Full Height) | Analytics Stack on Right -->
+        <div class="module-layout-grid">
+          <!-- Left Column: Tall Map -->
+          <div class="card map-card-tall">
+            <div class="card-header">
+              <div class="card-title" id="overviewMapCardTitle">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                <span id="overviewMapTitleText">Gesamter Güterverkehr in Beförderungsmenge im Jahr 2024</span>
+              </div>
+              <div class="card-actions">
+                <label style="font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <input type="checkbox" id="toggleSpider" checked> Verbindungen anzeigen
+                </label>
+              </div>
+            </div>
+            <div class="map-container-leaflet map-container-tall">
+              <div id="overviewLeafletMap" class="leaflet-map-frame"></div>
+              <!-- Choropleth Legend Box with Collapse Toggle & Spider Thickness -->
+              <div class="choropleth-legend" id="overviewChoroplethLegend">
+                <div class="legend-header">
+                  <span class="legend-title" id="legendTitleLabel">Güteraufkommen</span>
+                  <button type="button" class="btn-legend-toggle" id="btnToggleLegend_overview" title="Legende minimieren/maximieren">−</button>
+                </div>
+                <div class="legend-body" id="legendBody_overview">
+                  <div class="legend-scale" id="legendScaleContainer">
+                    <span style="background: #edf8f1;"></span>
+                    <span style="background: #bae6c5;"></span>
+                    <span style="background: #74c48d;"></span>
+                    <span style="background: #3b9d5d;"></span>
+                    <span style="background: #1b5e35;"></span>
+                  </div>
+                  <div class="legend-labels" id="legendLabelsContainer">
+                    <span>&lt; 2 Mio. t</span>
+                    <span>&gt; 20 Mio. t</span>
+                  </div>
+                  <div class="legend-spider-section" id="overviewLegendSpiderSection" style="display: none;">
+                    <div class="legend-subtitle">Verbindungen</div>
+                    <div class="legend-spider-rows">
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thin" id="spiderLineThin_overview"></span>
+                        <span class="legend-spider-val" id="spiderLegMin_overview">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-med" id="spiderLineMed_overview"></span>
+                        <span class="legend-spider-val" id="spiderLegMed_overview">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thick" id="spiderLineThick_overview"></span>
+                        <span class="legend-spider-val" id="spiderLegMax_overview">--</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Top-X Table + Bottom 2 Charts Side-by-Side -->
+          <div class="right-analytics-column">
+            <!-- Top-X Table -->
+            <div class="card table-card-compact">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34c2.83-.49 5-2.97 5-5.99V4H6v4.67c0 3.02 2.17 5.5 5 5.99z"></path></svg>
+                  <span id="overviewRelationsTitle">Top 10 Relationen: Region auswählen</span>
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Stärkste Verflechtungen
+                      </div>
+                      Diese Tabelle zeigt die stärksten bilateralen Partnerregionen des ausgewählten Kreises. Bei allen Güterarten fließen Straße, Schiene und Binnenschiff ein. Bei einer einzelnen Gütergruppe werden nur Schiene und Binnenschiff berücksichtigt, weil die KBA-Verflechtungsmatrix auf regionaler Ebene keine entsprechende Güterdifferenzierung enthält. Nationale Kennzahlen werden aus den vollständigen nationalen Quelldaten berechnet; die Summe der angezeigten Relationen kann wegen fehlender oder gröberer Regionalzuordnungen sowie der Top-Auswahl niedriger sein. „Binnenverkehr ausblenden“ entfernt nur Selbstrelationen aus Karte und Tabelle und verändert keine Kennzahl.
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div id="overviewDataNotice" class="data-notice-banner" style="display:none;"></div>
+              <div class="data-table-wrapper table-wrapper-compact">
+                <table class="data-table" id="tableTopRelations">
+                  <thead>
+                    <tr>
+                      <th style="width: 44%;">Partnerregion</th>
+                      <th class="table-measure-header" id="thMetricUnit" style="width: 24%; text-align: right;" title="Menge in 1.000 Tonnen">Menge (in 1.000 Tonnen)</th>
+                      <th class="table-change-header" id="thPrev_overview" style="width: 16%; text-align: right;" title="Veränderung gegenüber dem Vorjahr">Δ<br><span>Vorjahr</span></th>
+                      <th class="table-change-header" style="width: 16%; text-align: right;" id="thTrend_overview" title="Veränderung gegenüber dem Basisjahr 2016">Δ<br><span>ggü. 2016</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableTopRelationsBody">
+                    <!-- Dynamically populated -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Bottom 2 Charts Side-by-Side (Modal Split & Güterstruktur) -->
+            <div class="bottom-split-charts-row">
+              <!-- Modal Split Chart -->
+              <div class="card sub-chart-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10h-10z"></path></svg>
+                    <span id="modalSplitCardTitle">Modal Split</span>
+                    <span class="info-tooltip-wrap" tabindex="0">
+                      <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                      <span class="info-tooltip-box">
+                        <div class="info-tooltip-title">
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                          Modal Split
+                        </div>
+                        <span id="modalSplitInfoText">Dieses Diagramm bildet die Anteile und die zeitliche Entwicklung der drei Hauptverkehrsträger Straßengüterverkehr, Schienengüterverkehr und Binnenschifffahrt für die gewählte Region ab. Im Zeitverlauf (Dynamik) sind für Schiene und Binnenschiff bereits Daten bis 2025 enthalten, während die amtlichen Straßendaten aktuell mit dem Berichtsjahr 2024 abschließen.</span>
+                      </span>
+                    </span>
+                  </div>
+                  <div class="card-actions">
+                    <div class="toggle-group" id="toggleModalSplitGroup">
+                      <button class="toggle-btn active" data-view="snapshot">Status</button>
+                      <button class="toggle-btn" data-view="trend">Dynamik</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap">
+                  <canvas id="chartModalSplit"></canvas>
+                </div>
+              </div>
+
+              <!-- Commodity Structure Chart -->
+              <div class="card sub-chart-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                    Güterstruktur (NST)
+                    <span class="info-tooltip-wrap" tabindex="0">
+                      <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                      <span class="info-tooltip-box">
+                        <div class="info-tooltip-title">
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                          Güterstruktur (NST-2007)
+                        </div>
+                        Hier wird die Zusammensetzung der transportierten Güter nach den Hauptgruppen der europäischen Güterverkehrsstatistik (NST-2007) dargestellt. In der Status-Ansicht werden die Mengen des ausgewählten Jahres abgebildet. Die Zeitreihen-Ansicht bündelt die konsolidierten Berichtsjahre aller Verkehrsträger, um statistische Verzerrungen durch unterjährige Meldezeitpunkte zu vermeiden.
+                      </span>
+                    </span>
+                  </div>
+                  <div class="card-actions">
+                    <div class="toggle-group" id="toggleCommodityGroup">
+                      <button class="toggle-btn active" data-view="snapshot">Status</button>
+                      <button class="toggle-btn" data-view="trend">Dynamik</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap">
+                  <canvas id="chartCommodity"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TAB 2: STRASSENGÜTERVERKEHR
+           ============================================================ -->
+      <section id="tab-road" class="tab-pane">
+        <div class="module-layout-grid">
+          <!-- Left: Tall Map -->
+          <div class="card map-card-tall">
+            <div class="card-header">
+              <div class="card-title" id="roadMapCardTitle">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z"></path><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                <span id="roadMapTitleText">Straßengüterverkehr in Beförderungsmenge im Jahr 2024</span>
+              </div>
+              <div class="card-actions">
+                <label style="font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <input type="checkbox" id="toggleRoadSpider" checked> Verbindungen anzeigen
+                </label>
+              </div>
+            </div>
+            <div class="map-container-leaflet map-container-tall">
+              <div id="roadLeafletMap" class="leaflet-map-frame"></div>
+              <!-- Choropleth Legend Box -->
+              <div class="choropleth-legend" id="roadChoroplethLegend">
+                <div class="legend-header">
+                  <span class="legend-title" id="roadLegendTitleLabel">Straßengüterverkehr</span>
+                  <button type="button" class="btn-legend-toggle" id="btnToggleLegend_road" title="Legende minimieren/maximieren">−</button>
+                </div>
+                <div class="legend-body" id="legendBody_road">
+                  <div class="legend-scale">
+                    <span style="background: #fef3c7;"></span>
+                    <span style="background: #fde68a;"></span>
+                    <span style="background: #f59e0b;"></span>
+                    <span style="background: #d97706;"></span>
+                    <span style="background: #92400e;"></span>
+                  </div>
+                  <div class="legend-labels" id="roadLegendLabelsContainer">
+                    <span>&lt; 2 Mio. t</span>
+                    <span>&gt; 20 Mio. t</span>
+                  </div>
+                  <div class="legend-spider-section" id="roadLegendSpiderSection" style="display: none;">
+                    <div class="legend-subtitle">Verbindungen</div>
+                    <div class="legend-spider-rows">
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thin" id="spiderLineThin_road" style="background:#f59e0b;"></span>
+                        <span class="legend-spider-val" id="spiderLegMin_road">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-med" id="spiderLineMed_road" style="background:#f59e0b;"></span>
+                        <span class="legend-spider-val" id="spiderLegMed_road">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thick" id="spiderLineThick_road" style="background:#f59e0b;"></span>
+                        <span class="legend-spider-val" id="spiderLegMax_road">--</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Table + Commodity Chart -->
+          <div class="right-analytics-column">
+            <div class="card table-card-compact">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34c2.83-.49 5-2.97 5-5.99V4H6v4.67c0 3.02 2.17 5.5 5 5.99z"></path></svg>
+                  <span id="roadRelationsTitle">Top 10 Relationen: Region auswählen</span>
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Straßengüterverkehr: Relationen
+                      </div>
+                      Dargestellt sind die stärksten Quell- und Zielbeziehungen aus der amtlichen KBA-Verflechtungsmatrix VE7. Die regionale Güterstruktur und die regionalen Kennzahlen stammen dagegen aus den KBA-Auswertungen VE12/VE13. Diese amtlichen Produkte unterscheiden sich in Aufbau und Abgrenzung; deshalb ist die Summe der Relationen nicht mit der nationalen oder regionalen Randsumme gleichzusetzen. Die Relationen sind über alle Güterarten zusammengefasst. Top-Auswahl und „Binnenverkehr ausblenden“ wirken nur auf Karte und Tabelle, nicht auf die Kennzahlen.
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div class="data-table-wrapper table-wrapper-compact">
+                <table class="data-table" id="tableRoadDetails">
+                  <thead>
+                    <tr>
+                      <th style="width: 32%;">Partnerregion</th>
+                      <th style="width: 22%;" title="Gütergruppe nach NST-2007">Gütergruppe</th>
+                      <th class="table-measure-header" id="thRoadMetricUnit" style="width: 22%; text-align: right;" title="Menge in 1.000 Tonnen">Menge (in 1.000 Tonnen)</th>
+                      <th class="table-change-header" id="thPrev_road" style="width: 12%; text-align: right;" title="Veränderung gegenüber dem Vorjahr">Δ<br><span>Vorjahr</span></th>
+                      <th class="table-change-header" style="width: 12%; text-align: right;" id="thTrend_road" title="Veränderung gegenüber dem Basisjahr 2016">Δ<br><span>ggü. 2016</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableRoadDetailsBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card chart-card-single">
+              <div class="card-header">
+                <div class="card-title">
+                  Güterstruktur im Straßengüterverkehr (NST-2007)
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Straßengüterverkehr: Güterstruktur
+                      </div>
+                      Dieses Diagramm schlüsselt das regionale Transportaufkommen auf der Straße nach den sieben amtlich verfügbaren NST-2007-Hauptgruppen auf. Die 20 Abteilungen werden vom KBA für diese räumliche Ebene nicht bereitgestellt und daher nicht als leere Auswahl angeboten. Die Zeitreihe reicht bis 2024.
+                    </span>
+                  </span>
+                </div>
+                <div class="card-actions">
+                  <select id="selectRoadNstLevel" class="select-input-sm" style="margin-right: 6px;">
+                    <option value="7" selected>7 Hauptgruppen</option>
+                    <option value="20" disabled title="Für den Straßengüterverkehr liegen auf der verwendeten NUTS-3-Ebene nur sieben Hauptgruppen vor.">20 Abteilungen – nicht verfügbar</option>
+                  </select>
+                  <div class="toggle-group" id="toggleRoadCommodityGroup">
+                    <button class="toggle-btn active" data-view="snapshot">Status</button>
+                    <button class="toggle-btn" data-view="trend">Dynamik</button>
+                  </div>
+                </div>
+              </div>
+              <div class="chart-canvas-wrap">
+                <canvas id="chartRoadCommodity"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TAB 3: SCHIENENGÜTERVERKEHR
+           ============================================================ -->
+      <section id="tab-rail" class="tab-pane">
+        <div class="module-layout-grid">
+          <!-- Left: Tall Map -->
+          <div class="card map-card-tall">
+            <div class="card-header">
+              <div class="card-title" id="railMapCardTitle">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="16" rx="2"></rect><path d="M4 11h16M12 3v8m-4 8 2 2m6-2-2 2M8 15h.01M16 15h.01"></path></svg>
+                <span id="railMapTitleText">Schienengüterverkehr in Beförderungsmenge im Jahr 2024</span>
+              </div>
+              <div class="card-actions">
+                <label style="font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <input type="checkbox" id="toggleRailSpider" checked> Verbindungen anzeigen
+                </label>
+              </div>
+            </div>
+            <div class="map-container-leaflet map-container-tall">
+              <div id="railLeafletMap" class="leaflet-map-frame"></div>
+              <!-- Choropleth Legend Box -->
+              <div class="choropleth-legend" id="railChoroplethLegend">
+                <div class="legend-header">
+                  <span class="legend-title" id="railLegendTitleLabel">Schienengüterverkehr</span>
+                  <button type="button" class="btn-legend-toggle" id="btnToggleLegend_rail" title="Legende minimieren/maximieren">−</button>
+                </div>
+                <div class="legend-body" id="legendBody_rail">
+                  <div class="legend-scale">
+                    <span style="background: #eff6ff;"></span>
+                    <span style="background: #bfdbfe;"></span>
+                    <span style="background: #60a5fa;"></span>
+                    <span style="background: #2563eb;"></span>
+                    <span style="background: #1e40af;"></span>
+                  </div>
+                  <div class="legend-labels" id="railLegendLabelsContainer">
+                    <span>&lt; 0,2 Mio. t</span>
+                    <span>&gt; 2 Mio. t</span>
+                  </div>
+                  <div class="legend-spider-section" id="railLegendSpiderSection" style="display: none;">
+                    <div class="legend-subtitle">Verbindungen</div>
+                    <div class="legend-spider-rows">
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thin" id="spiderLineThin_rail" style="background:#2563eb;"></span>
+                        <span class="legend-spider-val" id="spiderLegMin_rail">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-med" id="spiderLineMed_rail" style="background:#2563eb;"></span>
+                        <span class="legend-spider-val" id="spiderLegMed_rail">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thick" id="spiderLineThick_rail" style="background:#2563eb;"></span>
+                        <span class="legend-spider-val" id="spiderLegMax_rail">--</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Table + Commodity Chart -->
+          <div class="right-analytics-column">
+            <div class="card table-card-compact">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34c2.83-.49 5-2.97 5-5.99V4H6v4.67c0 3.02 2.17 5.5 5 5.99z"></path></svg>
+                  <span id="railRelationsTitle">Top 10 Relationen: Region auswählen</span>
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Schienengüterverkehr: Relationen
+                      </div>
+                      Hier sehen Sie die stärksten gemeldeten Schienengüterverkehrs-Verbindungen des ausgewählten Kreises zu Regionen im In- und Ausland, differenzierbar nach NST-2007. Nationale Kennzahlen berücksichtigen alle national relevanten Datensätze. In die Relationstabelle gelangen nur Datensätze mit nutzbarer Quell- und Zielzuordnung; ausländische Bezüge können zudem räumlich gröber erfasst sein. Daher kann die Summe der angezeigten Top-Relationen unter der nationalen Randsumme liegen. „Binnenverkehr ausblenden“ ist ausschließlich ein Darstellungsfilter.
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div class="data-table-wrapper table-wrapper-compact">
+                <table class="data-table" id="tableRailDetails">
+                  <thead>
+                    <tr>
+                      <th style="width: 32%;">Partnerregion</th>
+                      <th style="width: 22%;" title="Güterart nach NST-2007">Güterart (NST-2007)</th>
+                      <th class="table-measure-header" id="thRailMetricUnit" style="width: 22%; text-align: right;" title="Menge in 1.000 Tonnen">Menge (in 1.000 Tonnen)</th>
+                      <th class="table-change-header" id="thPrev_rail" style="width: 12%; text-align: right;" title="Veränderung gegenüber dem Vorjahr">Δ<br><span>Vorjahr</span></th>
+                      <th class="table-change-header" style="width: 12%; text-align: right;" id="thTrend_rail" title="Veränderung gegenüber dem Basisjahr 2016">Δ<br><span>ggü. 2016</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableRailDetailsBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card chart-card-single">
+              <div class="card-header">
+                <div class="card-title">
+                  Güterstruktur auf der Schiene (NST-2007)
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Schienengüterverkehr: Güterstruktur
+                      </div>
+                      Dargestellt ist die Verteilung der transportierten Güterarten im Schienengüterverkehr für die ausgewählte Region nach NST-2007. Neben dem Status des aktuellen Berichtsjahres zeigt die Dynamik-Ansicht die langfristige Mengenentwicklung der Gütergruppen auf der Schiene bis 2025.
+                    </span>
+                  </span>
+                </div>
+                <div class="card-actions">
+                  <select id="selectRailNstLevel" class="select-input-sm" style="margin-right: 6px;">
+                    <option value="7" selected>7 Hauptgruppen</option>
+                    <option value="20">20 Abteilungen</option>
+                  </select>
+                  <div class="toggle-group" id="toggleRailCommodityGroup">
+                    <button class="toggle-btn active" data-view="snapshot">Status</button>
+                    <button class="toggle-btn" data-view="trend">Dynamik</button>
+                  </div>
+                </div>
+              </div>
+              <div class="chart-canvas-wrap">
+                <canvas id="chartRailCommodity"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TAB 4: BINNENSCHIFFFAHRT
+           ============================================================ -->
+      <section id="tab-iww" class="tab-pane">
+        <div class="module-layout-grid">
+          <!-- Left: Tall Map -->
+          <div class="card map-card-tall">
+            <div class="card-header">
+              <div class="card-title" id="iwwMapCardTitle">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20a6 6 0 0 0 10 0 6 6 0 0 0 10 0M4 16l2-8 6 3 6-3 2 8M12 4v7"></path></svg>
+                <span id="iwwMapTitleText">Binnenschifffahrt in Beförderungsmenge im Jahr 2024</span>
+              </div>
+              <div class="card-actions">
+                <label style="font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <input type="checkbox" id="toggleIwwSpider" checked> Verbindungen anzeigen
+                </label>
+              </div>
+            </div>
+            <div class="map-container-leaflet map-container-tall">
+              <div id="iwwLeafletMap" class="leaflet-map-frame"></div>
+              <!-- Choropleth Legend Box -->
+              <div class="choropleth-legend" id="iwwChoroplethLegend">
+                <div class="legend-header">
+                  <span class="legend-title" id="iwwLegendTitleLabel">Binnenschifffahrt</span>
+                  <button type="button" class="btn-legend-toggle" id="btnToggleLegend_iww" title="Legende minimieren/maximieren">−</button>
+                </div>
+                <div class="legend-body" id="legendBody_iww">
+                  <div class="legend-scale">
+                    <span style="background: #f0fdfa;"></span>
+                    <span style="background: #99f6e4;"></span>
+                    <span style="background: #2dd4bf;"></span>
+                    <span style="background: #0d9488;"></span>
+                    <span style="background: #115e59;"></span>
+                  </div>
+                  <div class="legend-labels" id="iwwLegendLabelsContainer">
+                    <span>&lt; 0,1 Mio. t</span>
+                    <span>&gt; 1 Mio. t</span>
+                  </div>
+                  <div class="legend-spider-section" id="iwwLegendSpiderSection" style="display: none;">
+                    <div class="legend-subtitle">Verbindungen</div>
+                    <div class="legend-spider-rows">
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thin" id="spiderLineThin_iww" style="background:#0d9488;"></span>
+                        <span class="legend-spider-val" id="spiderLegMin_iww">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-med" id="spiderLineMed_iww" style="background:#0d9488;"></span>
+                        <span class="legend-spider-val" id="spiderLegMed_iww">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thick" id="spiderLineThick_iww" style="background:#0d9488;"></span>
+                        <span class="legend-spider-val" id="spiderLegMax_iww">--</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Table + Commodity Chart -->
+          <div class="right-analytics-column">
+            <div class="card table-card-compact">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34c2.83-.49 5-2.97 5-5.99V4H6v4.67c0 3.02 2.17 5.5 5 5.99z"></path></svg>
+                  <span id="iwwRelationsTitle">Top 10 Relationen: Region auswählen</span>
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Binnenschifffahrt: Relationen
+                      </div>
+                      Diese Tabelle bildet die stärksten Wasserstraßen-Relationen des ausgewählten Kreises ab, differenzierbar nach NST-2007. Laut Datensatzbeschreibung liegt eine NUTS-Zuordnung nur vor, sofern die jeweilige Lade- oder Löschregion entsprechend gegliedert werden kann. Nationale Kennzahlen berücksichtigen deshalb auch Datensätze, die nicht vollständig als NUTS-Relation darstellbar sind. Die Summe der Top-Relationen kann daher unter der nationalen Randsumme liegen. Top-Auswahl und „Binnenverkehr ausblenden“ verändern keine Kennzahl.
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div class="data-table-wrapper table-wrapper-compact">
+                <table class="data-table" id="tableIwwDetails">
+                  <thead>
+                    <tr>
+                      <th style="width: 32%;">Partnerregion</th>
+                      <th style="width: 22%;" title="Güterart nach NST-2007">Güterart (NST-2007)</th>
+                      <th class="table-measure-header" id="thIwwMetricUnit" style="width: 22%; text-align: right;" title="Menge in 1.000 Tonnen">Menge (in 1.000 Tonnen)</th>
+                      <th class="table-change-header" id="thPrev_iww" style="width: 12%; text-align: right;" title="Veränderung gegenüber dem Vorjahr">Δ<br><span>Vorjahr</span></th>
+                      <th class="table-change-header" style="width: 12%; text-align: right;" id="thTrend_iww" title="Veränderung gegenüber dem Basisjahr 2016">Δ<br><span>ggü. 2016</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableIwwDetailsBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card chart-card-single">
+              <div class="card-header">
+                <div class="card-title">
+                  Güterstruktur in der Binnenschifffahrt (NST-2007)
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Binnenschifffahrt: Güterstruktur
+                      </div>
+                      Dieses Diagramm zeigt das auf Binnenschiffen transportierte Güterspektrum der Region nach NST-2007. Die Ansicht verdeutlicht den Schwerpunkt auf Massengütern, Baustoffen, chemischen Erzeugnissen oder Containern und bildet die Mengenentwicklung bis 2025 ab.
+                    </span>
+                  </span>
+                </div>
+                <div class="card-actions">
+                  <select id="selectIwwNstLevel" class="select-input-sm" style="margin-right: 6px;">
+                    <option value="7" selected>7 Hauptgruppen</option>
+                    <option value="20">20 Abteilungen</option>
+                  </select>
+                  <div class="toggle-group" id="toggleIwwCommodityGroup">
+                    <button class="toggle-btn active" data-view="snapshot">Status</button>
+                    <button class="toggle-btn" data-view="trend">Dynamik</button>
+                  </div>
+                </div>
+              </div>
+              <div class="chart-canvas-wrap">
+                <canvas id="chartIwwCommodity"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TAB 5: SEEVERKEHR & HÄFEN
+           ============================================================ -->
+      <section id="tab-maritime" class="tab-pane">
+        <!-- Maritime Standardized KPIs -->
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-title" id="kpiMrtmTotalTitle">Seegüterumschlag (Gesamt)</div>
+            <div class="kpi-value" id="kpiMrtmTotalVal">--</div>
+            <div class="kpi-sub" id="kpiMrtmTotalSub">Seeseitiges Gesamtvolumen</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" id="kpiMrtmTeuTitle">Containerumschlag</div>
+            <div class="kpi-value" id="kpiMrtmTeuVal">--</div>
+            <div class="kpi-sub" id="kpiMrtmTeuSub">Standardcontainer (TEU)</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" id="kpiMrtmInTitle">Seeseitiger Empfang</div>
+            <div class="kpi-value" id="kpiMrtmInVal">--</div>
+            <div class="kpi-sub" id="kpiMrtmInSub">Empfang über Seehäfen</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" id="kpiMrtmOutTitle">Seeseitiger Versand</div>
+            <div class="kpi-value" id="kpiMrtmOutVal">--</div>
+            <div class="kpi-sub" id="kpiMrtmOutSub">Versand über Seehäfen</div>
+          </div>
+        </div>
+
+        <div class="module-layout-grid">
+          <!-- Left: Tall Map -->
+          <div class="card map-card-tall">
+            <div class="card-header">
+              <div class="card-title">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"></circle><line x1="12" y1="22" x2="12" y2="8"></line><path d="M5 12H2a10 10 0 0 0 20 0h-3"></path></svg>
+                <span id="maritimeMapTitle">Deutsche Seehäfen – Gesamt</span>
+                <span class="info-tooltip-wrap" tabindex="0">
+                  <span class="info-icon-btn" title="Informationen zur Standortauswahl">i</span>
+                  <span class="info-tooltip-box">
+                    <div class="info-tooltip-title">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      Seehäfen & Standortabdeckung
+                    </div>
+                    Dargestellt sind die im jeweiligen Berichtsjahr aufbereiteten Seehafenstandorte mit <strong>mehr als 400.000 t Güterumschlag</strong>. Die Auswahl ist bewusst auf die für die bundesweite Einordnung relevanten Standorte konzentriert; kleinere Hafen- und Anlegestellen werden nicht kartiert. <strong>Klicken Sie auf einen Hafen, um ihn auszuwählen und die Analysen darauf zu begrenzen.</strong>
+                  </span>
+                </span>
+              </div>
+              <div class="card-actions" id="maritimePortResetAction" style="display: none;">
+                <button type="button" class="select-input-sm maritime-reset-button" id="btnResetSelectedPort" title="Filter auf alle Seehäfen zurücksetzen">Alle Häfen</button>
+              </div>
+            </div>
+            <div class="map-container-leaflet map-container-tall">
+              <div id="maritimeLeafletMap" class="leaflet-map-frame"></div>
+              <div class="choropleth-legend" id="maritimeMapLegend">
+                <div class="legend-header">
+                  <div class="legend-title" id="legendTitle_maritime">Seehafen-Umschlag</div>
+                  <button type="button" class="btn-legend-toggle" id="btnToggleLegend_maritime" title="Legende minimieren">−</button>
+                </div>
+                <div class="legend-body" id="legendBody_maritime">
+                  <div class="legend-subtitle">Hafen-Umschlag</div>
+                  <div class="legend-spider-rows">
+                    <div class="legend-spider-item">
+                      <span class="legend-symbol-slot"><span class="legend-circle-sample legend-circle-small"></span></span>
+                      <span class="legend-spider-val" id="spiderLegMin_maritime">&lt; 5 Mio. t</span>
+                    </div>
+                    <div class="legend-spider-item">
+                      <span class="legend-symbol-slot"><span class="legend-circle-sample legend-circle-medium"></span></span>
+                      <span class="legend-spider-val" id="spiderLegMed_maritime">5 – 25 Mio. t</span>
+                    </div>
+                    <div class="legend-spider-item">
+                      <span class="legend-symbol-slot"><span class="legend-circle-sample legend-circle-large"></span></span>
+                      <span class="legend-spider-val" id="spiderLegMax_maritime">&gt; 25 Mio. t</span>
+                    </div>
+                  </div>
+                  <div style="margin-top: 6px; padding-top: 5px; border-top: 1px solid #e2e8f0; font-size: 0.7rem; color: #64748b;" id="mrtmFilterStatus">
+                    Alle Seehäfen aktiv
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Table + Commodity Chart -->
+          <div class="right-analytics-column">
+            <div class="card table-card-compact">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34c2.83-.49 5-2.97 5-5.99V4H6v4.67c0 3.02 2.17 5.5 5 5.99z"></path></svg>
+                  <span id="maritimePartnersTitle">Internationale Beziehungen eines ausgewählten Seehafens</span>
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Seeverkehr: internationale Beziehungen
+                      </div>
+                      Nach Auswahl eines Seehafens zeigt die Tabelle dessen stärkste internationale Partnerländer für das ausgewählte Berichtsjahr. Sie ist eine Top-Auswahl und keine Zerlegung des gesamten deutschen Seegüterumschlags: Binnenbezüge, weitere Partner und nicht kartierte Häfen können in der nationalen Kennzahl enthalten sein. Ohne Hafenauswahl wird bewusst keine bundesweite Rangfolge angezeigt. Die Güterarten folgen durchgängig NST-2007.
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div class="data-table-wrapper table-wrapper-compact">
+                <table class="data-table" id="tableMaritimePartners">
+                  <thead>
+                    <tr>
+                      <th style="width: 30%;">Partnerland / Kontinent</th>
+                      <th style="width: 20%;">Güterart</th>
+                      <th class="table-measure-header" id="thMaritimeMetricUnit" style="width: 20%; text-align: right;" title="Menge in Millionen Tonnen">Menge (Mio. t)</th>
+                  <th class="table-change-header" id="thPrev_maritime" style="width: 15%; text-align: right;" title="Veränderung gegenüber dem Vorjahr">Δ<br><span>Vorjahr</span></th>
+                  <th class="table-change-header" style="width: 15%; text-align: right;" id="thTrend_maritime" title="Veränderung gegenüber dem Basisjahr 2016">Δ<br><span>ggü. 2016</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableMaritimePartnersBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card chart-card-single">
+              <div class="card-header">
+                <div class="card-title">
+                  <span id="maritimeCommodityTitle">Güterstruktur des deutschen Seeverkehrs</span>
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Seeverkehr: Güterstruktur
+                      </div>
+                      Dieses Diagramm schlüsselt den seeseitigen Güterumschlag nach den amtlichen NST-2007 Gütergruppen (7 Hauptgruppen bzw. 20 Abteilungen) auf. Es zeigt das Güterspektrum im ausgewählten Berichtsjahr (Status) sowie die mehrjährige Umschlagentwicklung von 2016 bis 2025 (Dynamik).
+                    </span>
+                  </span>
+                </div>
+                <div class="card-actions">
+                  <select id="selectMaritimeNstLevel" class="select-input-sm" style="margin-right: 6px;">
+                    <option value="7" selected>7 Hauptgruppen</option>
+                    <option value="20">20 Abteilungen</option>
+                  </select>
+                  <div class="toggle-group" id="toggleMaritimeCommodityGroup">
+                    <button class="toggle-btn active" data-view="snapshot">Status</button>
+                    <button class="toggle-btn" data-view="trend">Dynamik</button>
+                  </div>
+                </div>
+              </div>
+              <div class="chart-canvas-wrap">
+                <canvas id="chartMaritimeCommodity"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TAB 6: INTERMODALER VERKEHR & KV
+           ============================================================ -->
+      <section id="tab-intermodal" class="tab-pane">
+        <div class="kpi-row">
+          <div class="kpi-card" style="border-top: 3px solid #047857;">
+            <div class="kpi-title" id="sgkvRailTitle">KV Schiene</div>
+            <div class="kpi-value" id="sgkvRailIntermodal">--</div>
+            <div class="kpi-sub" id="sgkvRailShare">--</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" id="sgkvIwwTitle">KV Binnenschiff</div>
+            <div class="kpi-value" id="sgkvIwwContainer">--</div>
+            <div class="kpi-sub" id="sgkvIwwShare">--</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" id="sgkvRailShareTitle">KV-Anteil Schiene</div>
+            <div class="kpi-value" id="sgkvRailShareKpi">--</div>
+            <div class="kpi-sub" id="sgkvRailTotal">--</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" id="sgkvIwwShareTitle">KV-Anteil Binnenschiff</div>
+            <div class="kpi-value" id="sgkvIwwShareKpi">--</div>
+            <div class="kpi-sub" id="sgkvIwwTotal">--</div>
+          </div>
+        </div>
+
+        <div class="module-layout-grid intermodal-module-layout">
+          <div class="card map-card-tall">
+            <div class="card-header">
+              <div class="card-title">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                <span id="intermodalMapTitle">Kombinierter Verkehr nach Region</span>
+                <span class="info-tooltip-wrap" tabindex="0">
+                  <span class="info-icon-btn" title="Informationen zur Kartenbasis">i</span>
+                  <span class="info-tooltip-box">Die Flächen zeigen die Summe der in den beiden amtlichen Teilmarktstatistiken erfassten KV-Mengen beziehungsweise Verkehrsleistungen auf Schiene und Binnenschiff. Diese Summe beschreibt die räumliche KV-Intensität, aber keine Zahl eindeutiger Sendungen: Eine intermodale Transportkette kann in beiden Teilmärkten vorkommen. Die Kennzahlen und Anteile bleiben deshalb getrennt. Nach Auswahl einer Region erscheinen deren stärkste Inlandrelationen.</span>
+                </span>
+              </div>
+              <div class="card-actions">
+                <label class="map-toggle-label"><input type="checkbox" id="toggleIntermodalRelations" checked> Verbindungen anzeigen</label>
+              </div>
+            </div>
+            <div class="map-container-leaflet map-container-tall">
+              <div id="intermodalLeafletMap" class="leaflet-map-frame"></div>
+              <div class="choropleth-legend" id="intermodalMapLegend">
+                <div class="legend-header">
+                  <span class="legend-title" id="intermodalAreaLegendTitle">Summe erfasster KV-Teilmärkte</span>
+                  <button type="button" class="btn-legend-toggle" id="btnToggleLegend_intermodal" title="Legende minimieren">−</button>
+                </div>
+                <div class="legend-body">
+                  <div class="legend-spider-rows">
+                    <div class="legend-spider-item"><span class="legend-line legend-line-med" style="background:#2563eb;"></span><span class="legend-spider-val">Schiene · Ladeeinheiten</span></div>
+                    <div class="legend-spider-item"><span class="legend-line legend-line-med" style="background:#0f766e;"></span><span class="legend-spider-val">Binnenschiff · Container</span></div>
+                  </div>
+                  <div class="legend-spider-section">
+                    <div class="legend-subtitle">Verbindungen</div>
+                    <div class="legend-spider-rows">
+                      <div class="legend-spider-item"><span class="legend-line legend-line-thin" style="background:#64748b;"></span><span class="legend-spider-val">geringere Relation</span></div>
+                      <div class="legend-spider-item"><span class="legend-line legend-line-thick" style="background:#64748b;"></span><span class="legend-spider-val">stärkere Relation</span></div>
+                    </div>
+                  </div>
+                  <div class="intermodal-map-scope" id="intermodalMapScope">Inländische NUTS-3-Relationen</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="right-analytics-column">
+            <div class="card table-card-compact">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34c2.83-.49 5-2.97 5-5.99V4H6v4.67c0 3.02 2.17 5.5 5 5.99z"></path></svg>
+                  <span id="intermodalRelationsTitle">Top 10 Relationen: Region auswählen</span>
+                  <span class="info-tooltip-wrap" tabindex="0"><span class="info-icon-btn" title="Informationen zur Tabelle">i</span><span class="info-tooltip-box">Nach Auswahl einer Region zeigen Tabelle und Karte deren stärkste Inlandrelationen. Zwei Badges bedeuten: Für dieselbe räumliche Relation liegen getrennte Einträge für Schiene und Binnenschiff vor. Die Mengen beider Teilmärkte werden in dieser Tabellenzeile für die Rangfolge addiert; sie sind jedoch keine Zahl eindeutiger Transportketten. Auf der Karte steht Blau für Schiene und Grün für Binnenschiff; bei beiden Teilmärkten liegt eine grüne Strichlinie über der blauen Volllinie. Die Relationstabelle enthält nur räumlich zuordenbare Datensätze; nationale Teilmarktwerte können deshalb höher sein. „Binnenverkehr ausblenden“ entfernt nur Selbstrelationen aus Karte und Tabelle und verändert weder KPI noch Flächenwerte.</span></span>
+                </div>
+              </div>
+              <div class="data-table-wrapper table-wrapper-compact">
+                <table class="data-table" id="tableIntermodalRelations">
+                  <thead><tr>
+                    <th style="width:32%;">Relation</th>
+                    <th style="width:16%;">Teilmarkt</th>
+                    <th class="table-measure-header" style="width:18%; text-align:right;" id="thIntermodalMeasure">Menge (Mio. t)</th>
+                  <th class="table-change-header" style="width:17%; text-align:right;" title="Veränderung gegenüber dem Vorjahr">Δ<br><span>Vorjahr</span></th>
+                  <th class="table-change-header" style="width:17%; text-align:right;" id="thTrend_intermodal" title="Veränderung gegenüber dem Basisjahr 2016">Δ<br><span>ggü. 2016</span></th>
+                  </tr></thead>
+                  <tbody id="tableIntermodalRelationsBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="bottom-split-charts-row intermodal-structure-row">
+              <div class="card sub-chart-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="16" rx="2"></rect><path d="M4 11h16M12 3v8m-4 8 2 2m6-2-2 2M8 15h.01M16 15h.01"></path></svg>
+                    <span id="intermodalRailStructureTitle">Ladeeinheiten · Schiene</span>
+                    <span class="info-tooltip-wrap" tabindex="0"><span class="info-icon-btn" title="Informationen zu Ladeeinheiten auf der Schiene">i</span><span class="info-tooltip-box">Dargestellt ist die Struktur der im Schienengüterverkehr ausgewiesenen Ladeeinheiten. Der Anteil bezieht sich auf den gesamten Schienengüterverkehr desselben Jahres und derselben Kennzahl.</span></span>
+                  </div>
+                  <div class="card-actions"><div class="toggle-group intermodal-structure-toggle" id="toggleIntermodalRailStructure"><button class="toggle-btn active" data-view="snapshot">Status</button><button class="toggle-btn" data-view="trend">Dynamik</button></div></div>
+                </div>
+                <div class="intermodal-structure-wrap"><canvas id="chartKvRailUnits"></canvas></div>
+              </div>
+
+              <div class="card sub-chart-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20a6 6 0 0 0 10 0 6 6 0 0 0 10 0M4 16l2-8 6 3 6-3 2 8M12 4v7"></path></svg>
+                    <span id="intermodalIwwStructureTitle">Containergrößen · Binnenschiff</span>
+                    <span class="info-tooltip-wrap" tabindex="0"><span class="info-icon-btn" title="Informationen zu Containergrößen im Binnenschiff">i</span><span class="info-tooltip-box">Dargestellt ist die Struktur der im Binnenschiffsverkehr ausgewiesenen Containergrößen. Der Anteil bezieht sich auf den gesamten Containerverkehr der Binnenschifffahrt desselben Jahres und derselben Kennzahl.</span></span>
+                  </div>
+                  <div class="card-actions"><div class="toggle-group intermodal-structure-toggle" id="toggleIntermodalIwwStructure"><button class="toggle-btn active" data-view="snapshot">Status</button><button class="toggle-btn" data-view="trend">Dynamik</button></div></div>
+                </div>
+                <div class="intermodal-structure-wrap"><canvas id="chartKvIwwUnits"></canvas></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TAB 7: VERKEHRSPROGNOSE 2040
+           ============================================================ -->
+      <section id="tab-forecast" class="tab-pane">
+        <!-- KPI Summary Strip -->
+        <div class="kpi-row" id="kpiForecastRow">
+          <div class="kpi-card" style="--kpi-accent: var(--accent-forecast);">
+            <div class="kpi-title" id="kpiForecastTotalTitle">Gesamtaufkommen</div>
+            <div class="kpi-value" id="kpiForecastTotalTonnes">--</div>
+            <div class="kpi-sub neutral" id="kpiForecastTotalSub">Mio. Tonnen</div>
+          </div>
+            <div class="kpi-card" style="--kpi-accent: var(--accent-road);">
+              <div class="kpi-title" id="kpiForecastRoadTitle">Straße (LKW)</div>
+            <div class="kpi-value" id="kpiForecastRoadTonnes">--</div>
+            <div class="kpi-sub" id="kpiForecastRoadShare">-- % Anteil</div>
+          </div>
+            <div class="kpi-card" style="--kpi-accent: var(--accent-rail);">
+              <div class="kpi-title" id="kpiForecastRailTitle">Schiene (Bahn)</div>
+            <div class="kpi-value" id="kpiForecastRailTonnes">--</div>
+            <div class="kpi-sub" id="kpiForecastRailShare">-- % Anteil</div>
+          </div>
+            <div class="kpi-card" style="--kpi-accent: var(--accent-iww);">
+              <div class="kpi-title" id="kpiForecastIwwTitle">Wasserstraße (Binnenschiff)</div>
+            <div class="kpi-value" id="kpiForecastIwwTonnes">--</div>
+            <div class="kpi-sub" id="kpiForecastIwwShare">-- % Anteil</div>
+          </div>
+        </div>
+
+        <!-- Master Layout: Tall Map on Left (Full Height) | Analytics Stack on Right -->
+        <div class="module-layout-grid">
+          <!-- Left Column: Tall Map -->
+          <div class="card map-card-tall">
+            <div class="card-header">
+              <div class="card-title" id="forecastMapCardTitle">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                <span id="forecastMapTitleText">Verkehrsprognose 2040: Güterverkehrsverflechtungen (Basisprognose P1)</span>
+              </div>
+              <div class="card-actions">
+                <label style="font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <input type="checkbox" id="toggleForecastSpider" checked> Verbindungen anzeigen
+                </label>
+              </div>
+            </div>
+            <div class="map-container-leaflet map-container-tall">
+              <div id="forecastLeafletMap" class="leaflet-map-frame"></div>
+              <!-- Choropleth Legend Box with Collapse Toggle & Spider Thickness -->
+              <div class="choropleth-legend" id="forecastChoroplethLegend">
+                <div class="legend-header">
+                  <span class="legend-title" id="forecastLegendTitleLabel">Prognose-Güteraufkommen</span>
+                  <button type="button" class="btn-legend-toggle" id="btnToggleLegend_forecast" title="Legende minimieren/maximieren">−</button>
+                </div>
+                <div class="legend-body" id="legendBody_forecast">
+                  <div class="legend-scale" id="forecastLegendScaleContainer">
+                    <span style="background: #eff6ff;"></span>
+                    <span style="background: #bfdbfe;"></span>
+                    <span style="background: #60a5fa;"></span>
+                    <span style="background: #2563eb;"></span>
+                    <span style="background: #1e3a8a;"></span>
+                  </div>
+                  <div class="legend-labels" id="forecastLegendLabelsContainer">
+                    <span>&lt; 2 Mio. t</span>
+                    <span>&gt; 20 Mio. t</span>
+                  </div>
+                  <div class="legend-spider-section" id="forecastLegendSpiderSection" style="display: none;">
+                    <div class="legend-subtitle">Verbindungen</div>
+                    <div class="legend-spider-rows">
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thin" id="spiderLineThin_forecast" style="background:#2563eb;"></span>
+                        <span class="legend-spider-val" id="spiderLegMin_forecast">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-med" id="spiderLineMed_forecast" style="background:#2563eb;"></span>
+                        <span class="legend-spider-val" id="spiderLegMed_forecast">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thick" id="spiderLineThick_forecast" style="background:#2563eb;"></span>
+                        <span class="legend-spider-val" id="spiderLegMax_forecast">--</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Top-X Table + Bottom 2 Charts Side-by-Side -->
+          <div class="right-analytics-column">
+            <!-- Top-X Table -->
+            <div class="card table-card-compact">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34c2.83-.49 5-2.97 5-5.99V4H6v4.67c0 3.02 2.17 5.5 5 5.99z"></path></svg>
+                  <span id="forecastRelationsTitle">Top 10 Relationen: Region auswählen</span>
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Verkehrsprognose 2040: Relationen
+                      </div>
+                      Dargestellt sind die stärksten prognostizierten Verbindungen des ausgewählten Kreises. Die nationale Randsumme umfasst die vollständige Matrix aller drei Landverkehrsträger einschließlich der eigenständigen Sonderzellen für Flughäfen, Seehäfen und Inseln. Für die regionale Darstellung werden deutsche Sonderzellen ihrem Standortkreis zugeordnet und anschließend genau einmal aggregiert; dadurch gehen keine Mengen verloren. Die Relationstabelle zeigt nur die Top-Verbindungen und ist daher keine nationale Randsumme. „Binnenverkehr ausblenden“ wirkt nur auf Linien und Tabellenzeilen, nicht auf Kennzahlen oder Prognosesummen.
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div class="data-table-wrapper table-wrapper-compact">
+                <table class="data-table" id="tableForecastRelations">
+                  <thead>
+                    <tr>
+                      <th style="width: 44%;">Partnerregion</th>
+                      <th style="width: 22%;" title="Güterart nach NST">Güterart (NST)</th>
+                      <th class="table-measure-header" id="thForecastMetricUnit" style="width: 18%; text-align: right;" title="Menge in 1.000 Tonnen">Menge (in 1.000 Tonnen)</th>
+                       <th class="table-change-header" id="thForecastChange" style="width: 16%; text-align: right;" title="Veränderung gegenüber dem Basisjahr 2019">Δ<br><span>ggü. 2019</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableForecastRelationsBody">
+                    <!-- Dynamically populated -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Bottom 2 Charts Side-by-Side (Modal Split & Güterstruktur/KV) -->
+            <div class="bottom-split-charts-row">
+              <!-- Modal Split Chart -->
+              <div class="card sub-chart-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10h-10z"></path></svg>
+                        <span id="forecastModalSplitCardTitle">Modal Split 2040</span>
+                    <span class="info-tooltip-wrap" tabindex="0">
+                      <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                      <span class="info-tooltip-box">
+                        <div class="info-tooltip-title">
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                          <span id="forecastModalSplitInfoTitle">Modal Split 2040</span>
+                        </div>
+                        <span id="forecastModalSplitInfoText">Verteilung der prognostizierten Verkehrsleistung und Beförderungsmenge auf die drei Landverkehrsträger Straße, Schiene und Binnenschifffahrt für das Jahr 2040.</span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap">
+                  <canvas id="chartForecastModalSplit"></canvas>
+                </div>
+              </div>
+
+              <!-- Commodity Structure & KV Chart -->
+              <div class="card sub-chart-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                      <span id="forecastChart2Title">Güterstruktur 2040 (NST-2007)</span>
+                    <span class="info-tooltip-wrap" tabindex="0">
+                      <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                      <span class="info-tooltip-box">
+                        <div class="info-tooltip-title">
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                          Güterstruktur & Kombinierter Verkehr 2040
+                        </div>
+                        Zusammensetzung der transportierten Güter nach sieben NST-2007-Hauptgruppen im Zieljahr 2040. Über das Auswahlfeld ist zusätzlich die originäre 25-teilige Gütersystematik der VP2040-Matrizen verfügbar. Die Umschaltung „Ladeeinheiten (KV)“ zeigt Behältertypen (Container, Wechselbehälter, Trailer).
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div class="forecast-chart-controls">
+                  <div class="forecast-chart-control-row">
+                    <label for="selectForecastChart2View">Darstellung</label>
+                    <select id="selectForecastChart2View" class="select-input-sm">
+                      <option value="commodity" selected>Güterstruktur</option>
+                      <option value="kv">Ladeeinheiten (KV)</option>
+                    </select>
+                  </div>
+                  <div class="forecast-chart-control-row" id="forecastCommodityLevelControl">
+                    <label for="selectForecastCommodityLevel">Gliederung</label>
+                    <select id="selectForecastCommodityLevel" class="select-input-sm">
+                      <option value="7" selected>7 Hauptgruppen</option>
+                      <option value="vp2040">25 Gütergruppen (VP2040)</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap">
+                  <canvas id="chartForecastCommodityKv"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ============================================================
+       MODALS
+       ============================================================ -->
+
+  <!-- Regional Profile / Steckbrief Modal Dialog -->
+  <div class="modal-backdrop" id="modalSteckbrief" role="presentation">
+    <div class="modal-dialog modal-dialog-xl" role="dialog" aria-modal="true" aria-labelledby="steckbriefModalTitle">
+      <button class="modal-close" data-close="modalSteckbrief">&times;</button>
+      <div class="modal-header steckbrief-modal-header">
+        <div class="steckbrief-modal-title-wrap">
+          <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <div>
+            <div class="steckbrief-overline">RAUMPROFIL</div>
+            <h3 id="steckbriefModalTitle">Regionaler Steckbrief</h3>
+            <div class="steckbrief-modal-code" id="steckbriefModalCode"></div>
+          </div>
+        </div>
+        <button type="button" class="steckbrief-print-button" id="btnPrintSteckbrief" title="Steckbrief über den Browser als PDF speichern">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          Als PDF speichern
+        </button>
+      </div>
+      <div class="modal-body" id="steckbriefModalBody">
+        <!-- Dynamically generated -->
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalHelp" role="presentation">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="helpModalTitle">
+      <button class="modal-close" data-close="modalHelp">&times;</button>
+      <div class="modal-header">
+        <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        <h3 id="helpModalTitle">Nutzungshinweise zum Dashboard</h3>
+      </div>
+      <div class="modal-body">
+        <h4>Wofür das Dashboard gedacht ist</h4>
+        <p>Das Dashboard dient Expertinnen und Experten der Verkehrsplanung, Logistik und Forschung als interaktive Arbeitsgrundlage für die Einordnung von Güterverkehrsströmen in Deutschland. Im Mittelpunkt stehen räumliche Verflechtungen: Sie können nationale Muster, regionale Profile und einzelne Verbindungen nachvollziehen.</p>
+        <h4>Was Sie auswerten können</h4>
+        <ul>
+          <li><strong>Übersicht:</strong> Vergleichen Sie den Status quo, die Entwicklung und die Verkehrsprognose für die drei landseitigen Verkehrsträger. Karten, Kennzahlen, Güterstrukturen, Modal Split und die wichtigsten Verbindungen bieten den ersten Überblick.</li>
+          <li><strong>Verkehrsträger:</strong> Vertiefen Sie Straßengüterverkehr, Schiene und Binnenschifffahrt jeweils mit Karten, Kennzahlen, Güterstrukturen und Relationen.</li>
+          <li><strong>Seeverkehr &amp; Häfen:</strong> Analysieren Sie den Seeverkehr und die wichtigsten deutschen Häfen mit Karten, Kennzahlen, Güterstrukturen und internationalen Partnerrelationen.</li>
+          <li><strong>Intermodale Verkehre &amp; KV:</strong> Betrachten Sie die abgrenzbaren Teilmärkte auf Schiene und Binnenschiff getrennt nach ihren verfügbaren Merkmalen und Zeitreihen.</li>
+          <li><strong>Verkehrsprognose 2040:</strong> Stellen Sie das Basisjahr 2019 der Basisprognose 2040 (P1) gegenüber und prüfen Sie prognostizierte Güterverkehrsverbindungen.</li>
+        </ul>
+        <h4>So arbeiten Sie mit dem Dashboard</h4>
+        <ul>
+          <li><strong>Einstellungen:</strong> Öffnen Sie die Leiste „Aktuelle Einstellungen“, um Region, Bezugsjahr, Kennzahl, Richtung, Güterart und weitere verfügbare Optionen zu wählen. Die sichtbaren Elemente aktualisieren sich mit der Auswahl.</li>
+          <li><strong>Karten und Abbildungen:</strong> Bewegen Sie den Mauszeiger über Karten, Kennzahlen, Diagramme und Tabellen, um kontextbezogene Werte und Erläuterungen zu sehen. Karten können vergrößert, verkleinert und verschoben werden.</li>
+          <li><strong>Auswahl:</strong> Klicken Sie auf Regionen, Seehäfen oder andere interaktive Elemente, um die dazugehörigen Auswertungen einzugrenzen. Nicht unterstützte Filter sind deaktiviert; eine Erläuterung erscheint beim Überfahren mit dem Mauszeiger.</li>
+          <li><strong>Steckbrief:</strong> Nach Auswahl einer Region fasst der Steckbrief die wichtigsten Kennzahlen, Strukturen, Verbindungen und den Ausblick bis 2040 für den betrachteten Raum zusammen. Er kann über den Browser als PDF gespeichert werden.</li>
+        </ul>
+        <h4>Datenstand und Vergleichbarkeit</h4>
+        <p>Die Datenabdeckung unterscheidet sich nach Verkehrsträger und Statistik. Die im Tool verfügbaren Zeiträume werden aus den geladenen Daten ermittelt:</p>
+        <ul class="data-coverage-list" id="helpDataCoverageList" aria-live="polite">
+          <li>Datenstände werden geladen …</li>
+          <li><strong>Verkehrsprognose VP 2040:</strong> Basisjahr 2019, Prognosehorizont 2040, Prognosefall 1 „Basisprognose 2040“.</li>
+        </ul>
+        <p class="data-coverage-sources">Quellen, Lizenzhinweise und der Bearbeitungsstand des Tools sind über den Menüpunkt „Quellen“ oben rechts erreichbar. Dort sind die verwendeten Datenbestände, ihre Lizenzen und der Bearbeitungsstand aufgeführt.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalLicenses" role="presentation">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="licensesModalTitle">
+      <button class="modal-close" data-close="modalLicenses">&times;</button>
+      <div class="modal-header">
+        <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        <h3 id="licensesModalTitle">Quellen, Bearbeitungsstand & Rechtliches</h3>
+      </div>
+      <div class="modal-body">
+        <h4>Dieses Tool</h4>
+        <p class="source-tool-meta">Konzeption und Datenaufbereitung: Wissensbasierte Planung, Dr. Paul Hebes, Berater für wissensbasierte Planung und Entscheidungsgrundlagen.<br>Bearbeitungsstand: August 2026.</p>
+        <p class="source-tool-impressum">Vollständige Anbieterangaben, Impressum und Datenschutz: <a href="https://wissensbasiert.de/impressum/" target="_blank" rel="noopener noreferrer">wissensbasiert.de/impressum</a>.</p>
+        <p class="source-tool-intro">Die Anwendung führt amtliche und öffentlich bereitgestellte Ausgangsdaten für Analysezwecke zusammen. Für Definitionen, Aktualität und Nachnutzung gelten jeweils die Originalquellen und die dort genannten Nutzungsbedingungen.</p>
+        <div class="source-list">
+          <section class="source-item"><h4>Straßengüterverkehr</h4><p><strong>Kraftfahrt-Bundesamt (KBA):</strong> Güterverkehrsstatistik; regionale Verflechtungen und Güterstrukturen. <a href="https://www.govdata.de/dl-de/by-2-0" target="_blank" rel="noopener noreferrer">Datenlizenz Deutschland – Namensnennung – Version 2.0</a>; eigene Berechnung und Darstellung.</p></section>
+          <section class="source-item"><h4>Schiene, Binnenschifffahrt, Seeverkehr und intermodale Verkehre</h4><p><strong>Statistisches Bundesamt (Destatis):</strong> Güterverkehrsstatistiken für Schiene, Binnenschifffahrt und Seeverkehr; die abgrenzbaren intermodalen Teilmärkte werden aus den Daten der Schiene und Binnenschifffahrt getrennt ausgewertet und nicht zu einer Gesamtsumme addiert. <a href="https://www.destatis.de/DE/Service/Impressum/copyright-genesis-online.html" target="_blank" rel="noopener noreferrer">Datenlizenz Deutschland – Namensnennung – Version 2.0</a>; eigene Berechnung und Darstellung.</p></section>
+          <section class="source-item"><h4>Verkehrsprognose 2040</h4><p><strong>Bundesministerium für Verkehr (BMV) (Hrsg.):</strong> Datensatz der „Verkehrsprognose 2040“, Teil 2: Wirtschafts- und Verkehrsentwicklungsprognose 2040, Forschungskennzeichen VB970423; Basisjahr 2019 und Prognosefall 1 „Basisprognose 2040“. Datenbereitstellung: Bundesanstalt für Straßen- und Verkehrswesen (BASt) über die Mobilithek. Die dargestellten Werte sind aus den überlassenen Datensätzen abgeleitete Auswertungsergebnisse. Quellenangabe gemäß den Nutzungsbedingungen des Datensatzes (Stand 12. Mai 2025); eigene Berechnung und Darstellung. <a href="https://bmdv.bund.de/SharedDocs/DE/Artikel/G/verkehrsprognose-2040.html" target="_blank" rel="noopener noreferrer">Dokumentation</a>.</p></section>
+          <section class="source-item"><h4>Raumbezug</h4><p><strong>Eurostat:</strong> NUTS-Geodaten der Stände 2016, 2021 und 2024. <a href="https://commission.europa.eu/legal-notice_en#copyright-notice" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>; eigene Aufbereitung und Darstellung.</p></section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js?v=20260831-legend-titles-v23"></script>
+</body>
+</html>

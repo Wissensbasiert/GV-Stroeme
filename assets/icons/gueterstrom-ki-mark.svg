@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Güterstrom-KI</title>
+  <desc id="desc">Ein stilisierter Frachtcontainer als Dialogfeld mit einem verbundenen Datenpfad.</desc>
+  <defs>
+    <linearGradient id="wbp-ai-gradient" x1="10" y1="12" x2="56" y2="52" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#63B472"/>
+      <stop offset="1" stop-color="#4C7F83"/>
+    </linearGradient>
+  </defs>
+  <path d="M13 12h38a7 7 0 0 1 7 7v23a7 7 0 0 1-7 7H37l-9 8v-8H13a7 7 0 0 1-7-7V19a7 7 0 0 1 7-7Z" fill="url(#wbp-ai-gradient)"/>
+  <path d="M19 17v27M31 17v27M43 17v27" fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-width="1.5" opacity="0.24"/>
+  <path d="m14.5 38 11-9.5 11 5 13-12" fill="none" stroke="#FFFFFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+  <circle cx="14.5" cy="38" r="3.1" fill="#FFFFFF"/>
+  <circle cx="25.5" cy="28.5" r="3.1" fill="#FFFFFF"/>
+  <circle cx="36.5" cy="33.5" r="3.1" fill="#FFFFFF"/>
+  <path d="M49.5 17.25 51 20l2.75 1.5L51 23l-1.5 2.75L48 23l-2.75-1.5L48 20Z" fill="#FFFFFF"/>
+</svg>

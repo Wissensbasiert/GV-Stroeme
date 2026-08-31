@@ -1,0 +1,92 @@
+    </main>
+  </div>
+
+  <!-- ============================================================
+       MODALS
+       ============================================================ -->
+
+  <!-- Regional Profile / Steckbrief Modal Dialog -->
+  <div class="modal-backdrop" id="modalSteckbrief" role="presentation">
+    <div class="modal-dialog modal-dialog-xl" role="dialog" aria-modal="true" aria-labelledby="steckbriefModalTitle">
+      <button class="modal-close" data-close="modalSteckbrief">&times;</button>
+      <div class="modal-header steckbrief-modal-header">
+        <div class="steckbrief-modal-title-wrap">
+          <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <div>
+            <div class="steckbrief-overline">RAUMPROFIL</div>
+            <h3 id="steckbriefModalTitle">Regionaler Steckbrief</h3>
+            <div class="steckbrief-modal-code" id="steckbriefModalCode"></div>
+          </div>
+        </div>
+        <button type="button" class="steckbrief-print-button" id="btnPrintSteckbrief" title="Steckbrief über den Browser als PDF speichern">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+          Als PDF speichern
+        </button>
+      </div>
+      <div class="modal-body" id="steckbriefModalBody">
+        <!-- Dynamically generated -->
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalHelp" role="presentation">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="helpModalTitle">
+      <button class="modal-close" data-close="modalHelp">&times;</button>
+      <div class="modal-header">
+        <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        <h3 id="helpModalTitle">Nutzungshinweise zum Dashboard</h3>
+      </div>
+      <div class="modal-body">
+        <h4>Wofür das Dashboard gedacht ist</h4>
+        <p>Das Dashboard dient Expertinnen und Experten der Verkehrsplanung, Logistik und Forschung als interaktive Arbeitsgrundlage für die Einordnung von Güterverkehrsströmen in Deutschland. Im Mittelpunkt stehen räumliche Verflechtungen: Sie können nationale Muster, regionale Profile und einzelne Verbindungen nachvollziehen.</p>
+        <h4>Was Sie auswerten können</h4>
+        <ul>
+          <li><strong>Übersicht:</strong> Vergleichen Sie den Status quo, die Entwicklung und die Verkehrsprognose für die drei landseitigen Verkehrsträger. Karten, Kennzahlen, Güterstrukturen, Modal Split und die wichtigsten Verbindungen bieten den ersten Überblick.</li>
+          <li><strong>Verkehrsträger:</strong> Vertiefen Sie Straßengüterverkehr, Schiene und Binnenschifffahrt jeweils mit Karten, Kennzahlen, Güterstrukturen und Relationen.</li>
+          <li><strong>Seeverkehr &amp; Häfen:</strong> Analysieren Sie den Seeverkehr und die wichtigsten deutschen Häfen mit Karten, Kennzahlen, Güterstrukturen und internationalen Partnerrelationen.</li>
+          <li><strong>Intermodale Verkehre &amp; KV:</strong> Betrachten Sie die abgrenzbaren Teilmärkte auf Schiene und Binnenschiff getrennt nach ihren verfügbaren Merkmalen und Zeitreihen.</li>
+          <li><strong>Verkehrsprognose 2040:</strong> Stellen Sie das Basisjahr 2019 der Basisprognose 2040 (P1) gegenüber und prüfen Sie prognostizierte Güterverkehrsverbindungen.</li>
+        </ul>
+        <h4>So arbeiten Sie mit dem Dashboard</h4>
+        <ul>
+          <li><strong>Einstellungen:</strong> Öffnen Sie die Leiste „Aktuelle Einstellungen“, um Region, Bezugsjahr, Kennzahl, Richtung, Güterart und weitere verfügbare Optionen zu wählen. Die sichtbaren Elemente aktualisieren sich mit der Auswahl.</li>
+          <li><strong>Karten und Abbildungen:</strong> Bewegen Sie den Mauszeiger über Karten, Kennzahlen, Diagramme und Tabellen, um kontextbezogene Werte und Erläuterungen zu sehen. Karten können vergrößert, verkleinert und verschoben werden.</li>
+          <li><strong>Auswahl:</strong> Klicken Sie auf Regionen, Seehäfen oder andere interaktive Elemente, um die dazugehörigen Auswertungen einzugrenzen. Nicht unterstützte Filter sind deaktiviert; eine Erläuterung erscheint beim Überfahren mit dem Mauszeiger.</li>
+          <li><strong>Steckbrief:</strong> Nach Auswahl einer Region fasst der Steckbrief die wichtigsten Kennzahlen, Strukturen, Verbindungen und den Ausblick bis 2040 für den betrachteten Raum zusammen. Er kann über den Browser als PDF gespeichert werden.</li>
+        </ul>
+        <h4>Datenstand und Vergleichbarkeit</h4>
+        <p>Die Datenabdeckung unterscheidet sich nach Verkehrsträger und Statistik. Die im Tool verfügbaren Zeiträume werden aus den geladenen Daten ermittelt:</p>
+        <ul class="data-coverage-list" id="helpDataCoverageList" aria-live="polite">
+          <li>Datenstände werden geladen …</li>
+          <li><strong>Verkehrsprognose VP 2040:</strong> Basisjahr 2019, Prognosehorizont 2040, Prognosefall 1 „Basisprognose 2040“.</li>
+        </ul>
+        <p class="data-coverage-sources">Quellen, Lizenzhinweise und der Bearbeitungsstand des Tools sind über den Menüpunkt „Quellen“ oben rechts erreichbar. Dort sind die verwendeten Datenbestände, ihre Lizenzen und der Bearbeitungsstand aufgeführt.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="modalLicenses" role="presentation">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="licensesModalTitle">
+      <button class="modal-close" data-close="modalLicenses">&times;</button>
+      <div class="modal-header">
+        <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        <h3 id="licensesModalTitle">Quellen, Bearbeitungsstand & Rechtliches</h3>
+      </div>
+      <div class="modal-body">
+        <h4>Dieses Tool</h4>
+        <p class="source-tool-meta">Konzeption und Datenaufbereitung: Wissensbasierte Planung, Dr. Paul Hebes, Berater für wissensbasierte Planung und Entscheidungsgrundlagen.<br>Bearbeitungsstand: August 2026.</p>
+        <p class="source-tool-impressum">Vollständige Anbieterangaben, Impressum und Datenschutz: <a href="https://wissensbasiert.de/impressum/" target="_blank" rel="noopener noreferrer">wissensbasiert.de/impressum</a>.</p>
+        <p class="source-tool-intro">Die Anwendung führt amtliche und öffentlich bereitgestellte Ausgangsdaten für Analysezwecke zusammen. Für Definitionen, Aktualität und Nachnutzung gelten jeweils die Originalquellen und die dort genannten Nutzungsbedingungen.</p>
+        <div class="source-list">
+          <section class="source-item"><h4>Straßengüterverkehr</h4><p><strong>Kraftfahrt-Bundesamt (KBA):</strong> Güterverkehrsstatistik; regionale Verflechtungen und Güterstrukturen. <a href="https://www.govdata.de/dl-de/by-2-0" target="_blank" rel="noopener noreferrer">Datenlizenz Deutschland – Namensnennung – Version 2.0</a>; eigene Berechnung und Darstellung.</p></section>
+          <section class="source-item"><h4>Schiene, Binnenschifffahrt, Seeverkehr und intermodale Verkehre</h4><p><strong>Statistisches Bundesamt (Destatis):</strong> Güterverkehrsstatistiken für Schiene, Binnenschifffahrt und Seeverkehr; die abgrenzbaren intermodalen Teilmärkte werden aus den Daten der Schiene und Binnenschifffahrt getrennt ausgewertet und nicht zu einer Gesamtsumme addiert. <a href="https://www.destatis.de/DE/Service/Impressum/copyright-genesis-online.html" target="_blank" rel="noopener noreferrer">Datenlizenz Deutschland – Namensnennung – Version 2.0</a>; eigene Berechnung und Darstellung.</p></section>
+          <section class="source-item"><h4>Verkehrsprognose 2040</h4><p><strong>Bundesministerium für Verkehr (BMV) (Hrsg.):</strong> Datensatz der „Verkehrsprognose 2040“, Teil 2: Wirtschafts- und Verkehrsentwicklungsprognose 2040, Forschungskennzeichen VB970423; Basisjahr 2019 und Prognosefall 1 „Basisprognose 2040“. Datenbereitstellung: Bundesanstalt für Straßen- und Verkehrswesen (BASt) über die Mobilithek. Die dargestellten Werte sind aus den überlassenen Datensätzen abgeleitete Auswertungsergebnisse. Quellenangabe gemäß den Nutzungsbedingungen des Datensatzes (Stand 12. Mai 2025); eigene Berechnung und Darstellung. <a href="https://bmdv.bund.de/SharedDocs/DE/Artikel/G/verkehrsprognose-2040.html" target="_blank" rel="noopener noreferrer">Dokumentation</a>.</p></section>
+          <section class="source-item"><h4>Raumbezug</h4><p><strong>Eurostat:</strong> NUTS-Geodaten der Stände 2016, 2021 und 2024. <a href="https://commission.europa.eu/legal-notice_en#copyright-notice" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>; eigene Aufbereitung und Darstellung.</p></section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js?v=20260831-legend-titles-v23"></script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+      <section id="tab-rail" class="tab-pane">
+        <div class="module-layout-grid">
+          <!-- Left: Tall Map -->
+          <div class="card map-card-tall">
+            <div class="card-header">
+              <div class="card-title" id="railMapCardTitle">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="16" rx="2"></rect><path d="M4 11h16M12 3v8m-4 8 2 2m6-2-2 2M8 15h.01M16 15h.01"></path></svg>
+                <span id="railMapTitleText">Schienengüterverkehr in Beförderungsmenge im Jahr 2024</span>
+              </div>
+              <div class="card-actions">
+                <label style="font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <input type="checkbox" id="toggleRailSpider" checked> Verbindungen anzeigen
+                </label>
+              </div>
+            </div>
+            <div class="map-container-leaflet map-container-tall">
+              <div id="railLeafletMap" class="leaflet-map-frame"></div>
+              <!-- Choropleth Legend Box -->
+              <div class="choropleth-legend" id="railChoroplethLegend">
+                <div class="legend-header">
+                  <span class="legend-title" id="railLegendTitleLabel">Schienengüterverkehr</span>
+                  <button type="button" class="btn-legend-toggle" id="btnToggleLegend_rail" title="Legende minimieren/maximieren">−</button>
+                </div>
+                <div class="legend-body" id="legendBody_rail">
+                  <div class="legend-scale">
+                    <span style="background: #eff6ff;"></span>
+                    <span style="background: #bfdbfe;"></span>
+                    <span style="background: #60a5fa;"></span>
+                    <span style="background: #2563eb;"></span>
+                    <span style="background: #1e40af;"></span>
+                  </div>
+                  <div class="legend-labels" id="railLegendLabelsContainer">
+                    <span>&lt; 0,2 Mio. t</span>
+                    <span>&gt; 2 Mio. t</span>
+                  </div>
+                  <div class="legend-spider-section" id="railLegendSpiderSection" style="display: none;">
+                    <div class="legend-subtitle">Verbindungen</div>
+                    <div class="legend-spider-rows">
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thin" id="spiderLineThin_rail" style="background:#2563eb;"></span>
+                        <span class="legend-spider-val" id="spiderLegMin_rail">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-med" id="spiderLineMed_rail" style="background:#2563eb;"></span>
+                        <span class="legend-spider-val" id="spiderLegMed_rail">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thick" id="spiderLineThick_rail" style="background:#2563eb;"></span>
+                        <span class="legend-spider-val" id="spiderLegMax_rail">--</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Table + Commodity Chart -->
+          <div class="right-analytics-column">
+            <div class="card table-card-compact">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34c2.83-.49 5-2.97 5-5.99V4H6v4.67c0 3.02 2.17 5.5 5 5.99z"></path></svg>
+                  <span id="railRelationsTitle">Top 10 Relationen: Region auswählen</span>
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Schienengüterverkehr: Relationen
+                      </div>
+                      Hier sehen Sie die stärksten gemeldeten Schienengüterverkehrs-Verbindungen des ausgewählten Kreises zu Regionen im In- und Ausland, differenzierbar nach NST-2007. Nationale Kennzahlen berücksichtigen alle national relevanten Datensätze. In die Relationstabelle gelangen nur Datensätze mit nutzbarer Quell- und Zielzuordnung; ausländische Bezüge können zudem räumlich gröber erfasst sein. Daher kann die Summe der angezeigten Top-Relationen unter der nationalen Randsumme liegen. „Binnenverkehr ausblenden“ ist ausschließlich ein Darstellungsfilter.
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div class="data-table-wrapper table-wrapper-compact">
+                <table class="data-table" id="tableRailDetails">
+                  <thead>
+                    <tr>
+                      <th style="width: 32%;">Partnerregion</th>
+                      <th style="width: 22%;" title="Güterart nach NST-2007">Güterart (NST-2007)</th>
+                      <th class="table-measure-header" id="thRailMetricUnit" style="width: 22%; text-align: right;" title="Menge in 1.000 Tonnen">Menge (in 1.000 Tonnen)</th>
+                      <th class="table-change-header" id="thPrev_rail" style="width: 12%; text-align: right;" title="Veränderung gegenüber dem Vorjahr">Δ<br><span>Vorjahr</span></th>
+                      <th class="table-change-header" style="width: 12%; text-align: right;" id="thTrend_rail" title="Veränderung gegenüber dem Basisjahr 2016">Δ<br><span>ggü. 2016</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableRailDetailsBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card chart-card-single">
+              <div class="card-header">
+                <div class="card-title">
+                  Güterstruktur auf der Schiene (NST-2007)
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Schienengüterverkehr: Güterstruktur
+                      </div>
+                      Dargestellt ist die Verteilung der transportierten Güterarten im Schienengüterverkehr für die ausgewählte Region nach NST-2007. Neben dem Status des aktuellen Berichtsjahres zeigt die Dynamik-Ansicht die langfristige Mengenentwicklung der Gütergruppen auf der Schiene bis 2025.
+                    </span>
+                  </span>
+                </div>
+                <div class="card-actions">
+                  <select id="selectRailNstLevel" class="select-input-sm" style="margin-right: 6px;">
+                    <option value="7" selected>7 Hauptgruppen</option>
+                    <option value="20">20 Abteilungen</option>
+                  </select>
+                  <div class="toggle-group" id="toggleRailCommodityGroup">
+                    <button class="toggle-btn active" data-view="snapshot">Status</button>
+                    <button class="toggle-btn" data-view="trend">Dynamik</button>
+                  </div>
+                </div>
+              </div>
+              <div class="chart-canvas-wrap">
+                <canvas id="chartRailCommodity"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TAB 4: BINNENSCHIFFFAHRT
+           ============================================================ -->

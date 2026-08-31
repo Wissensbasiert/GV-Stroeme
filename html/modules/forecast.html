@@ -1,0 +1,187 @@
+      <section id="tab-forecast" class="tab-pane">
+        <!-- KPI Summary Strip -->
+        <div class="kpi-row" id="kpiForecastRow">
+          <div class="kpi-card" style="--kpi-accent: var(--accent-forecast);">
+            <div class="kpi-title" id="kpiForecastTotalTitle">Gesamtaufkommen</div>
+            <div class="kpi-value" id="kpiForecastTotalTonnes">--</div>
+            <div class="kpi-sub neutral" id="kpiForecastTotalSub">Mio. Tonnen</div>
+          </div>
+            <div class="kpi-card" style="--kpi-accent: var(--accent-road);">
+              <div class="kpi-title" id="kpiForecastRoadTitle">Straße (LKW)</div>
+            <div class="kpi-value" id="kpiForecastRoadTonnes">--</div>
+            <div class="kpi-sub" id="kpiForecastRoadShare">-- % Anteil</div>
+          </div>
+            <div class="kpi-card" style="--kpi-accent: var(--accent-rail);">
+              <div class="kpi-title" id="kpiForecastRailTitle">Schiene (Bahn)</div>
+            <div class="kpi-value" id="kpiForecastRailTonnes">--</div>
+            <div class="kpi-sub" id="kpiForecastRailShare">-- % Anteil</div>
+          </div>
+            <div class="kpi-card" style="--kpi-accent: var(--accent-iww);">
+              <div class="kpi-title" id="kpiForecastIwwTitle">Wasserstraße (Binnenschiff)</div>
+            <div class="kpi-value" id="kpiForecastIwwTonnes">--</div>
+            <div class="kpi-sub" id="kpiForecastIwwShare">-- % Anteil</div>
+          </div>
+        </div>
+
+        <!-- Master Layout: Tall Map on Left (Full Height) | Analytics Stack on Right -->
+        <div class="module-layout-grid">
+          <!-- Left Column: Tall Map -->
+          <div class="card map-card-tall">
+            <div class="card-header">
+              <div class="card-title" id="forecastMapCardTitle">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                <span id="forecastMapTitleText">Verkehrsprognose 2040: Güterverkehrsverflechtungen (Basisprognose P1)</span>
+              </div>
+              <div class="card-actions">
+                <label style="font-size: 0.82rem; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                  <input type="checkbox" id="toggleForecastSpider" checked> Verbindungen anzeigen
+                </label>
+              </div>
+            </div>
+            <div class="map-container-leaflet map-container-tall">
+              <div id="forecastLeafletMap" class="leaflet-map-frame"></div>
+              <!-- Choropleth Legend Box with Collapse Toggle & Spider Thickness -->
+              <div class="choropleth-legend" id="forecastChoroplethLegend">
+                <div class="legend-header">
+                  <span class="legend-title" id="forecastLegendTitleLabel">Prognose-Güteraufkommen</span>
+                  <button type="button" class="btn-legend-toggle" id="btnToggleLegend_forecast" title="Legende minimieren/maximieren">−</button>
+                </div>
+                <div class="legend-body" id="legendBody_forecast">
+                  <div class="legend-scale" id="forecastLegendScaleContainer">
+                    <span style="background: #eff6ff;"></span>
+                    <span style="background: #bfdbfe;"></span>
+                    <span style="background: #60a5fa;"></span>
+                    <span style="background: #2563eb;"></span>
+                    <span style="background: #1e3a8a;"></span>
+                  </div>
+                  <div class="legend-labels" id="forecastLegendLabelsContainer">
+                    <span>&lt; 2 Mio. t</span>
+                    <span>&gt; 20 Mio. t</span>
+                  </div>
+                  <div class="legend-spider-section" id="forecastLegendSpiderSection" style="display: none;">
+                    <div class="legend-subtitle">Verbindungen</div>
+                    <div class="legend-spider-rows">
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thin" id="spiderLineThin_forecast" style="background:#2563eb;"></span>
+                        <span class="legend-spider-val" id="spiderLegMin_forecast">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-med" id="spiderLineMed_forecast" style="background:#2563eb;"></span>
+                        <span class="legend-spider-val" id="spiderLegMed_forecast">--</span>
+                      </div>
+                      <div class="legend-spider-item">
+                        <span class="legend-line legend-line-thick" id="spiderLineThick_forecast" style="background:#2563eb;"></span>
+                        <span class="legend-spider-val" id="spiderLegMax_forecast">--</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Top-X Table + Bottom 2 Charts Side-by-Side -->
+          <div class="right-analytics-column">
+            <!-- Top-X Table -->
+            <div class="card table-card-compact">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34c2.83-.49 5-2.97 5-5.99V4H6v4.67c0 3.02 2.17 5.5 5 5.99z"></path></svg>
+                  <span id="forecastRelationsTitle">Top 10 Relationen: Region auswählen</span>
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Verkehrsprognose 2040: Relationen
+                      </div>
+                      Dargestellt sind die stärksten prognostizierten Verbindungen des ausgewählten Kreises. Die nationale Randsumme umfasst die vollständige Matrix aller drei Landverkehrsträger einschließlich der eigenständigen Sonderzellen für Flughäfen, Seehäfen und Inseln. Für die regionale Darstellung werden deutsche Sonderzellen ihrem Standortkreis zugeordnet und anschließend genau einmal aggregiert; dadurch gehen keine Mengen verloren. Die Relationstabelle zeigt nur die Top-Verbindungen und ist daher keine nationale Randsumme. „Binnenverkehr ausblenden“ wirkt nur auf Linien und Tabellenzeilen, nicht auf Kennzahlen oder Prognosesummen.
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div class="data-table-wrapper table-wrapper-compact">
+                <table class="data-table" id="tableForecastRelations">
+                  <thead>
+                    <tr>
+                      <th style="width: 44%;">Partnerregion</th>
+                      <th style="width: 22%;" title="Güterart nach NST">Güterart (NST)</th>
+                      <th class="table-measure-header" id="thForecastMetricUnit" style="width: 18%; text-align: right;" title="Menge in 1.000 Tonnen">Menge (in 1.000 Tonnen)</th>
+                       <th class="table-change-header" id="thForecastChange" style="width: 16%; text-align: right;" title="Veränderung gegenüber dem Basisjahr 2019">Δ<br><span>ggü. 2019</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableForecastRelationsBody">
+                    <!-- Dynamically populated -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Bottom 2 Charts Side-by-Side (Modal Split & Güterstruktur/KV) -->
+            <div class="bottom-split-charts-row">
+              <!-- Modal Split Chart -->
+              <div class="card sub-chart-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M12 2a10 10 0 0 1 10 10h-10z"></path></svg>
+                        <span id="forecastModalSplitCardTitle">Modal Split 2040</span>
+                    <span class="info-tooltip-wrap" tabindex="0">
+                      <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                      <span class="info-tooltip-box">
+                        <div class="info-tooltip-title">
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                          <span id="forecastModalSplitInfoTitle">Modal Split 2040</span>
+                        </div>
+                        <span id="forecastModalSplitInfoText">Verteilung der prognostizierten Verkehrsleistung und Beförderungsmenge auf die drei Landverkehrsträger Straße, Schiene und Binnenschifffahrt für das Jahr 2040.</span>
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap">
+                  <canvas id="chartForecastModalSplit"></canvas>
+                </div>
+              </div>
+
+              <!-- Commodity Structure & KV Chart -->
+              <div class="card sub-chart-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                      <span id="forecastChart2Title">Güterstruktur 2040 (NST-2007)</span>
+                    <span class="info-tooltip-wrap" tabindex="0">
+                      <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                      <span class="info-tooltip-box">
+                        <div class="info-tooltip-title">
+                          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                          Güterstruktur & Kombinierter Verkehr 2040
+                        </div>
+                        Zusammensetzung der transportierten Güter nach sieben NST-2007-Hauptgruppen im Zieljahr 2040. Über das Auswahlfeld ist zusätzlich die originäre 25-teilige Gütersystematik der VP2040-Matrizen verfügbar. Die Umschaltung „Ladeeinheiten (KV)“ zeigt Behältertypen (Container, Wechselbehälter, Trailer).
+                      </span>
+                    </span>
+                  </div>
+                </div>
+                <div class="forecast-chart-controls">
+                  <div class="forecast-chart-control-row">
+                    <label for="selectForecastChart2View">Darstellung</label>
+                    <select id="selectForecastChart2View" class="select-input-sm">
+                      <option value="commodity" selected>Güterstruktur</option>
+                      <option value="kv">Ladeeinheiten (KV)</option>
+                    </select>
+                  </div>
+                  <div class="forecast-chart-control-row" id="forecastCommodityLevelControl">
+                    <label for="selectForecastCommodityLevel">Gliederung</label>
+                    <select id="selectForecastCommodityLevel" class="select-input-sm">
+                      <option value="7" selected>7 Hauptgruppen</option>
+                      <option value="vp2040">25 Gütergruppen (VP2040)</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="chart-canvas-wrap">
+                  <canvas id="chartForecastCommodityKv"></canvas>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+

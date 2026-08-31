@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Güterverkehrsströme Deutschland – Interaktives Fach-Dashboard | Wissensbasierte Planung</title>
+  <meta name="description" content="Interaktives Fach-Dashboard für Güterverkehrsströme in Deutschland: NUTS-3 Verflechtungen, Choroplethenkarten, Modal Split, Güterstrukturen, Seeverkehr und intermodale Verkehre.">
+  
+  <!-- Google Fonts: Inter for premium typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Leaflet CSS for Real Geographic Vector Maps -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Custom App Styles -->
+  <link rel="stylesheet" href="css/style.css?v=20260831-legend-titles-v23">
+  
+  <!-- Leaflet JS & Chart.js -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="app-header-top">
+      <div class="brand-section">
+        <img src="assets/logo_wbp.svg" alt="Wissensbasierte Planung Logo" class="brand-logo" id="brandLogoBtn" title="Wissensbasierte Planung - Dr. Paul Hebes">
+        <div class="brand-title-wrap">
+          <div class="brand-title">
+            <span>Güterverkehrsströme Deutschland</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Header Action Modals -->
+      <div class="header-buttons">
+        <button class="btn-header" id="btnHelpModal" title="Hinweise zur Nutzung">
+          <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><circle cx="12" cy="8" r="0.8" fill="currentColor"></circle></svg>
+          Hinweise
+        </button>
+        <button class="btn-header" id="btnSteckbriefModal" title="Regionalen Steckbrief öffnen">
+          <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Steckbrief
+        </button>
+        <button class="btn-header" id="btnLicensesModal" title="Quellen und Lizenzhinweise">
+          <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          Quellen
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <!-- Collapsible analysis context: current selection remains visible at all times. -->
+    <section class="analysis-panel is-collapsed" id="analysisPanel" aria-label="Aktuelle Einstellungen">
+      <button type="button" class="analysis-panel-toggle" id="btnToggleAnalysisPanel" aria-expanded="false" aria-controls="analysisPanelBody">
+        <svg class="analysis-panel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="6" x2="19" y2="6"></line><line x1="5" y1="12" x2="19" y2="12"></line><line x1="5" y1="18" x2="19" y2="18"></line><circle cx="9" cy="6" r="1.55"></circle><circle cx="15" cy="12" r="1.55"></circle><circle cx="11" cy="18" r="1.55"></circle></svg>
+        <span class="analysis-panel-label">Aktuelle Einstellungen</span>
+        <span class="analysis-summary" aria-live="polite">
+          <span class="analysis-summary-item" id="summaryRegion">Deutschland</span>
+          <span class="analysis-summary-item" id="summaryPeriod">2024</span>
+          <span class="analysis-summary-item" id="summaryMetric">Tonnen</span>
+          <span class="analysis-summary-item" id="summaryDirection">Versand + Empfang</span>
+          <span class="analysis-summary-item analysis-summary-detail" id="summaryGoods">Alle Güterarten</span>
+          <span class="analysis-summary-item analysis-summary-detail" id="summaryScope">Top 10 · Binnenverkehr ein</span>
+        </span>
+        <svg class="analysis-panel-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+
+      <div class="analysis-panel-body" id="analysisPanelBody" hidden>
+        <div class="analysis-filter-group analysis-filter-group-space">
+          <div class="analysis-filter-group-title">Raum &amp; Zeit</div>
+          <div class="analysis-filter-group-controls">
+      <!-- Searchable Combobox for NUTS-3 Regions -->
+      <div class="control-group" id="controlGroupRegion">
+        <label for="regionSearchInput" class="control-label">Region / Kreis (NUTS-3):</label>
+        <div class="search-combobox">
+          <input type="text" id="regionSearchInput" class="search-input" value="Deutschland" placeholder="Deutschland" autocomplete="off">
+          <button type="button" id="btnClearRegion" class="btn-clear-input" title="Auf Deutschland zurücksetzen">&times;</button>
+          <div class="autocomplete-dropdown" id="regionAutocompleteList"></div>
+        </div>
+      </div>
+
+      <div class="control-group" id="controlGroupYear">
+        <label for="selectYear" class="control-label">Jahr:</label>
+        <select id="selectYear" class="select-input select-input-compact">
+          <option value="2025">2025</option>
+          <option value="2024" selected>2024</option>
+          <option value="2023">2023</option>
+          <option value="2022">2022</option>
+          <option value="2021">2021</option>
+          <option value="2020">2020</option>
+          <option value="2019">2019</option>
+          <option value="2018">2018</option>
+          <option value="2017">2017</option>
+          <option value="2016">2016</option>
+        </select>
+      </div>
+
+      <!-- Forecast Scenario Control (Visible only when tab-forecast is active) -->
+      <div class="control-group" id="controlGroupScenario" style="display: none;">
+        <label for="selectScenario" class="control-label">Prognosefall / Horizont:</label>
+        <select id="selectScenario" class="select-input select-input-compact" style="min-width: 195px;" title="Verkehrsprognose 2040 Szenario auswählen">
+          <option value="2019_BASE">2019: Basisjahr</option>
+          <option value="2040_P1" selected>2040: Basisprognose (P1)</option>
+        </select>
+      </div>
+          </div>
+        </div>
+
+        <div class="analysis-filter-group analysis-filter-group-view">
+          <div class="analysis-filter-group-title">Betrachtung</div>
+          <div class="analysis-filter-group-controls">
+      <div class="control-group" id="controlGroupMetric">
+        <label for="selectMetric" class="control-label">Kennzahl:</label>
+        <select id="selectMetric" class="select-input select-input-compact">
+          <option value="tonnes" selected>Tonnen (t)</option>
+          <option value="tkm">Tonnen-km (tkm)</option>
+        </select>
+      </div>
+
+      <div class="control-group" id="controlGroupDirection">
+        <label for="selectDirection" class="control-label">Richtung:</label>
+        <select id="selectDirection" class="select-input select-input-compact">
+          <option value="all" selected>Versand + Empfang</option>
+          <option value="outbound">Versand (Outbound)</option>
+          <option value="inbound">Empfang (Inbound)</option>
+          <option value="balance">Saldo (Versand − Empfang)</option>
+        </select>
+      </div>
+
+      <div class="control-group" id="controlGroupGoods">
+        <label for="selectGlobalGroup" class="control-label">Güterart:</label>
+        <select id="selectGlobalGroup" class="select-input select-input-compact" style="max-width: 175px;" title="Nach Güterhauptgruppe (NST-2007) filtern">
+          <option value="ALL" selected>Alle Güterarten</option>
+          <option value="1">1: Land- und Forstwirtschaft, Rohstoffe</option>
+          <option value="2">2: Konsumgüter, Holzwaren</option>
+          <option value="3">3: Mineralische, chemische und Mineralölerzeugnisse</option>
+          <option value="4">4: Metalle und Metallerzeugnisse</option>
+          <option value="5">5: Maschinen, Ausrüstungen, langlebige Konsumgüter</option>
+          <option value="6">6: Sekundärrohstoffe, Abfälle</option>
+          <option value="7">7: Sonstige Produkte</option>
+        </select>
+      </div>
+          </div>
+        </div>
+
+        <div class="analysis-filter-group analysis-filter-group-display">
+          <div class="analysis-filter-group-title">Darstellung</div>
+          <div class="analysis-filter-group-controls">
+      <div class="control-group" id="controlGroupTopX">
+        <label for="selectTopX" class="control-label">Top-Filter:</label>
+        <select id="selectTopX" class="select-input select-input-compact">
+          <option value="5">Top 5</option>
+          <option value="10" selected>Top 10</option>
+          <option value="20">Top 20</option>
+        </select>
+      </div>
+
+      <div class="control-group" id="controlGroupBinnenverkehr">
+        <label for="selectBinnenverkehr" class="control-label" title="Darstellungsfilter für Selbstrelationen in Verbindungslinien und Relationstabellen; Kennzahlen und Flächenwerte bleiben unverändert.">Binnenverkehr:</label>
+        <select id="selectBinnenverkehr" class="select-input select-input-compact">
+          <option value="include" selected>Einbeziehen</option>
+          <option value="exclude">Ausblenden</option>
+        </select>
+      </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sidebar Navigation with Authentic Transport SVGs and Integrated Collapse Arrow -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="sidebar-header">
+        <div class="nav-section-title">Analyse-Module</div>
+        <button class="sidebar-collapse-btn" id="btnToggleSidebar" title="Seitenleiste ein-/ausklappen">
+          <svg class="sidebar-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+      </div>
+
+      <ul class="nav-list" id="mainNav">
+        <li class="nav-item active" data-tab="tab-overview" title="Übersicht">
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          <span class="nav-label">Übersicht</span>
+        </li>
+        <li class="nav-item" data-tab="tab-road" title="Straßengüterverkehr">
+          <!-- Semi-Truck / LKW SVG -->
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z"></path><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+          <span class="nav-label">Straßengüterverkehr</span>
+        </li>
+        <li class="nav-item" data-tab="tab-rail" title="Schienengüterverkehr">
+          <!-- Freight Train SVG -->
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="16" rx="2"></rect><path d="M4 11h16M12 3v8m-4 8 2 2m6-2-2 2M8 15h.01M16 15h.01"></path></svg>
+          <span class="nav-label">Schienengüterverkehr</span>
+        </li>
+        <li class="nav-item" data-tab="tab-iww" title="Binnenschifffahrt">
+          <!-- Inland Waterway Barge SVG -->
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20a6 6 0 0 0 10 0 6 6 0 0 0 10 0M4 16l2-8 6 3 6-3 2 8M12 4v7"></path></svg>
+          <span class="nav-label">Binnenschifffahrt</span>
+        </li>
+        <li class="nav-item" data-tab="tab-maritime" title="Seeverkehr & Häfen">
+          <!-- Maritime Cargo Ship / Anchor SVG -->
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"></circle><line x1="12" y1="22" x2="12" y2="8"></line><path d="M5 12H2a10 10 0 0 0 20 0h-3"></path></svg>
+          <span class="nav-label">Seeverkehr & Häfen</span>
+        </li>
+        <li class="nav-item" data-tab="tab-intermodal" title="Intermodaler Verkehr & KV">
+          <!-- Intermodal ISO Container SVG -->
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="1.5"></rect><line x1="7" y1="5" x2="7" y2="19"></line><line x1="12" y1="5" x2="12" y2="19"></line><line x1="17" y1="5" x2="17" y2="19"></line><circle cx="4.5" cy="7.5" r="0.75" fill="currentColor"></circle><circle cx="19.5" cy="7.5" r="0.75" fill="currentColor"></circle><circle cx="4.5" cy="16.5" r="0.75" fill="currentColor"></circle><circle cx="19.5" cy="16.5" r="0.75" fill="currentColor"></circle></svg>
+          <span class="nav-label">Intermodaler Verkehr & KV</span>
+        </li>
+        <li class="nav-item" data-tab="tab-forecast" title="Verkehrsprognose 2040">
+          <!-- Forecast Growth Curve SVG -->
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+          <span class="nav-label">Verkehrsprognose 2040</span>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+
+      <!-- ============================================================
+           TAB 1: REGIONALE ÜBERSICHT
+           ============================================================ -->

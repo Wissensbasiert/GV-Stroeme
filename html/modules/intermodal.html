@@ -1,0 +1,119 @@
+      <section id="tab-intermodal" class="tab-pane">
+        <div class="kpi-row">
+          <div class="kpi-card" style="border-top: 3px solid #047857;">
+            <div class="kpi-title" id="sgkvRailTitle">KV Schiene</div>
+            <div class="kpi-value" id="sgkvRailIntermodal">--</div>
+            <div class="kpi-sub" id="sgkvRailShare">--</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" id="sgkvIwwTitle">KV Binnenschiff</div>
+            <div class="kpi-value" id="sgkvIwwContainer">--</div>
+            <div class="kpi-sub" id="sgkvIwwShare">--</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" id="sgkvRailShareTitle">KV-Anteil Schiene</div>
+            <div class="kpi-value" id="sgkvRailShareKpi">--</div>
+            <div class="kpi-sub" id="sgkvRailTotal">--</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" id="sgkvIwwShareTitle">KV-Anteil Binnenschiff</div>
+            <div class="kpi-value" id="sgkvIwwShareKpi">--</div>
+            <div class="kpi-sub" id="sgkvIwwTotal">--</div>
+          </div>
+        </div>
+
+        <div class="module-layout-grid intermodal-module-layout">
+          <div class="card map-card-tall">
+            <div class="card-header">
+              <div class="card-title">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                <span id="intermodalMapTitle">Kombinierter Verkehr nach Region</span>
+                <span class="info-tooltip-wrap" tabindex="0">
+                  <span class="info-icon-btn" title="Informationen zur Kartenbasis">i</span>
+                  <span class="info-tooltip-box">Die Flächen zeigen die Summe der in den beiden amtlichen Teilmarktstatistiken erfassten KV-Mengen beziehungsweise Verkehrsleistungen auf Schiene und Binnenschiff. Diese Summe beschreibt die räumliche KV-Intensität, aber keine Zahl eindeutiger Sendungen: Eine intermodale Transportkette kann in beiden Teilmärkten vorkommen. Die Kennzahlen und Anteile bleiben deshalb getrennt. Nach Auswahl einer Region erscheinen deren stärkste Inlandrelationen.</span>
+                </span>
+              </div>
+              <div class="card-actions">
+                <label class="map-toggle-label"><input type="checkbox" id="toggleIntermodalRelations" checked> Verbindungen anzeigen</label>
+              </div>
+            </div>
+            <div class="map-container-leaflet map-container-tall">
+              <div id="intermodalLeafletMap" class="leaflet-map-frame"></div>
+              <div class="choropleth-legend" id="intermodalMapLegend">
+                <div class="legend-header">
+                  <span class="legend-title" id="intermodalAreaLegendTitle">Summe erfasster KV-Teilmärkte</span>
+                  <button type="button" class="btn-legend-toggle" id="btnToggleLegend_intermodal" title="Legende minimieren">−</button>
+                </div>
+                <div class="legend-body">
+                  <div class="legend-spider-rows">
+                    <div class="legend-spider-item"><span class="legend-line legend-line-med" style="background:#2563eb;"></span><span class="legend-spider-val">Schiene · Ladeeinheiten</span></div>
+                    <div class="legend-spider-item"><span class="legend-line legend-line-med" style="background:#0f766e;"></span><span class="legend-spider-val">Binnenschiff · Container</span></div>
+                  </div>
+                  <div class="legend-spider-section">
+                    <div class="legend-subtitle">Verbindungen</div>
+                    <div class="legend-spider-rows">
+                      <div class="legend-spider-item"><span class="legend-line legend-line-thin" style="background:#64748b;"></span><span class="legend-spider-val">geringere Relation</span></div>
+                      <div class="legend-spider-item"><span class="legend-line legend-line-thick" style="background:#64748b;"></span><span class="legend-spider-val">stärkere Relation</span></div>
+                    </div>
+                  </div>
+                  <div class="intermodal-map-scope" id="intermodalMapScope">Inländische NUTS-3-Relationen</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="right-analytics-column">
+            <div class="card table-card-compact">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34c2.83-.49 5-2.97 5-5.99V4H6v4.67c0 3.02 2.17 5.5 5 5.99z"></path></svg>
+                  <span id="intermodalRelationsTitle">Top 10 Relationen: Region auswählen</span>
+                  <span class="info-tooltip-wrap" tabindex="0"><span class="info-icon-btn" title="Informationen zur Tabelle">i</span><span class="info-tooltip-box">Nach Auswahl einer Region zeigen Tabelle und Karte deren stärkste Inlandrelationen. Zwei Badges bedeuten: Für dieselbe räumliche Relation liegen getrennte Einträge für Schiene und Binnenschiff vor. Die Mengen beider Teilmärkte werden in dieser Tabellenzeile für die Rangfolge addiert; sie sind jedoch keine Zahl eindeutiger Transportketten. Auf der Karte steht Blau für Schiene und Grün für Binnenschiff; bei beiden Teilmärkten liegt eine grüne Strichlinie über der blauen Volllinie. Die Relationstabelle enthält nur räumlich zuordenbare Datensätze; nationale Teilmarktwerte können deshalb höher sein. „Binnenverkehr ausblenden“ entfernt nur Selbstrelationen aus Karte und Tabelle und verändert weder KPI noch Flächenwerte.</span></span>
+                </div>
+              </div>
+              <div class="data-table-wrapper table-wrapper-compact">
+                <table class="data-table" id="tableIntermodalRelations">
+                  <thead><tr>
+                    <th style="width:32%;">Relation</th>
+                    <th style="width:16%;">Teilmarkt</th>
+                    <th class="table-measure-header" style="width:18%; text-align:right;" id="thIntermodalMeasure">Menge (Mio. t)</th>
+                  <th class="table-change-header" style="width:17%; text-align:right;" title="Veränderung gegenüber dem Vorjahr">Δ<br><span>Vorjahr</span></th>
+                  <th class="table-change-header" style="width:17%; text-align:right;" id="thTrend_intermodal" title="Veränderung gegenüber dem Basisjahr 2016">Δ<br><span>ggü. 2016</span></th>
+                  </tr></thead>
+                  <tbody id="tableIntermodalRelationsBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="bottom-split-charts-row intermodal-structure-row">
+              <div class="card sub-chart-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="16" rx="2"></rect><path d="M4 11h16M12 3v8m-4 8 2 2m6-2-2 2M8 15h.01M16 15h.01"></path></svg>
+                    <span id="intermodalRailStructureTitle">Ladeeinheiten · Schiene</span>
+                    <span class="info-tooltip-wrap" tabindex="0"><span class="info-icon-btn" title="Informationen zu Ladeeinheiten auf der Schiene">i</span><span class="info-tooltip-box">Dargestellt ist die Struktur der im Schienengüterverkehr ausgewiesenen Ladeeinheiten. Der Anteil bezieht sich auf den gesamten Schienengüterverkehr desselben Jahres und derselben Kennzahl.</span></span>
+                  </div>
+                  <div class="card-actions"><div class="toggle-group intermodal-structure-toggle" id="toggleIntermodalRailStructure"><button class="toggle-btn active" data-view="snapshot">Status</button><button class="toggle-btn" data-view="trend">Dynamik</button></div></div>
+                </div>
+                <div class="intermodal-structure-wrap"><canvas id="chartKvRailUnits"></canvas></div>
+              </div>
+
+              <div class="card sub-chart-card">
+                <div class="card-header">
+                  <div class="card-title">
+                    <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20a6 6 0 0 0 10 0 6 6 0 0 0 10 0M4 16l2-8 6 3 6-3 2 8M12 4v7"></path></svg>
+                    <span id="intermodalIwwStructureTitle">Containergrößen · Binnenschiff</span>
+                    <span class="info-tooltip-wrap" tabindex="0"><span class="info-icon-btn" title="Informationen zu Containergrößen im Binnenschiff">i</span><span class="info-tooltip-box">Dargestellt ist die Struktur der im Binnenschiffsverkehr ausgewiesenen Containergrößen. Der Anteil bezieht sich auf den gesamten Containerverkehr der Binnenschifffahrt desselben Jahres und derselben Kennzahl.</span></span>
+                  </div>
+                  <div class="card-actions"><div class="toggle-group intermodal-structure-toggle" id="toggleIntermodalIwwStructure"><button class="toggle-btn active" data-view="snapshot">Status</button><button class="toggle-btn" data-view="trend">Dynamik</button></div></div>
+                </div>
+                <div class="intermodal-structure-wrap"><canvas id="chartKvIwwUnits"></canvas></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TAB 7: VERKEHRSPROGNOSE 2040
+           ============================================================ -->

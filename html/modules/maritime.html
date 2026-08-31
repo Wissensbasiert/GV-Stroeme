@@ -1,0 +1,150 @@
+      <section id="tab-maritime" class="tab-pane">
+        <!-- Maritime Standardized KPIs -->
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-title" id="kpiMrtmTotalTitle">Seegüterumschlag (Gesamt)</div>
+            <div class="kpi-value" id="kpiMrtmTotalVal">--</div>
+            <div class="kpi-sub" id="kpiMrtmTotalSub">Seeseitiges Gesamtvolumen</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" id="kpiMrtmTeuTitle">Containerumschlag</div>
+            <div class="kpi-value" id="kpiMrtmTeuVal">--</div>
+            <div class="kpi-sub" id="kpiMrtmTeuSub">Standardcontainer (TEU)</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" id="kpiMrtmInTitle">Seeseitiger Empfang</div>
+            <div class="kpi-value" id="kpiMrtmInVal">--</div>
+            <div class="kpi-sub" id="kpiMrtmInSub">Empfang über Seehäfen</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" id="kpiMrtmOutTitle">Seeseitiger Versand</div>
+            <div class="kpi-value" id="kpiMrtmOutVal">--</div>
+            <div class="kpi-sub" id="kpiMrtmOutSub">Versand über Seehäfen</div>
+          </div>
+        </div>
+
+        <div class="module-layout-grid">
+          <!-- Left: Tall Map -->
+          <div class="card map-card-tall">
+            <div class="card-header">
+              <div class="card-title">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"></circle><line x1="12" y1="22" x2="12" y2="8"></line><path d="M5 12H2a10 10 0 0 0 20 0h-3"></path></svg>
+                <span id="maritimeMapTitle">Deutsche Seehäfen – Gesamt</span>
+                <span class="info-tooltip-wrap" tabindex="0">
+                  <span class="info-icon-btn" title="Informationen zur Standortauswahl">i</span>
+                  <span class="info-tooltip-box">
+                    <div class="info-tooltip-title">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                      Seehäfen & Standortabdeckung
+                    </div>
+                    Dargestellt sind die im jeweiligen Berichtsjahr aufbereiteten Seehafenstandorte mit <strong>mehr als 400.000 t Güterumschlag</strong>. Die Auswahl ist bewusst auf die für die bundesweite Einordnung relevanten Standorte konzentriert; kleinere Hafen- und Anlegestellen werden nicht kartiert. <strong>Klicken Sie auf einen Hafen, um ihn auszuwählen und die Analysen darauf zu begrenzen.</strong>
+                  </span>
+                </span>
+              </div>
+              <div class="card-actions" id="maritimePortResetAction" style="display: none;">
+                <button type="button" class="select-input-sm maritime-reset-button" id="btnResetSelectedPort" title="Filter auf alle Seehäfen zurücksetzen">Alle Häfen</button>
+              </div>
+            </div>
+            <div class="map-container-leaflet map-container-tall">
+              <div id="maritimeLeafletMap" class="leaflet-map-frame"></div>
+              <div class="choropleth-legend" id="maritimeMapLegend">
+                <div class="legend-header">
+                  <div class="legend-title" id="legendTitle_maritime">Seehafen-Umschlag</div>
+                  <button type="button" class="btn-legend-toggle" id="btnToggleLegend_maritime" title="Legende minimieren">−</button>
+                </div>
+                <div class="legend-body" id="legendBody_maritime">
+                  <div class="legend-subtitle">Hafen-Umschlag</div>
+                  <div class="legend-spider-rows">
+                    <div class="legend-spider-item">
+                      <span class="legend-symbol-slot"><span class="legend-circle-sample legend-circle-small"></span></span>
+                      <span class="legend-spider-val" id="spiderLegMin_maritime">&lt; 5 Mio. t</span>
+                    </div>
+                    <div class="legend-spider-item">
+                      <span class="legend-symbol-slot"><span class="legend-circle-sample legend-circle-medium"></span></span>
+                      <span class="legend-spider-val" id="spiderLegMed_maritime">5 – 25 Mio. t</span>
+                    </div>
+                    <div class="legend-spider-item">
+                      <span class="legend-symbol-slot"><span class="legend-circle-sample legend-circle-large"></span></span>
+                      <span class="legend-spider-val" id="spiderLegMax_maritime">&gt; 25 Mio. t</span>
+                    </div>
+                  </div>
+                  <div style="margin-top: 6px; padding-top: 5px; border-top: 1px solid #e2e8f0; font-size: 0.7rem; color: #64748b;" id="mrtmFilterStatus">
+                    Alle Seehäfen aktiv
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Table + Commodity Chart -->
+          <div class="right-analytics-column">
+            <div class="card table-card-compact">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.45 1-1 1H7v2h10v-2h-2c-.55 0-1-.45-1-1v-2.34c2.83-.49 5-2.97 5-5.99V4H6v4.67c0 3.02 2.17 5.5 5 5.99z"></path></svg>
+                  <span id="maritimePartnersTitle">Internationale Beziehungen eines ausgewählten Seehafens</span>
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Seeverkehr: internationale Beziehungen
+                      </div>
+                      Nach Auswahl eines Seehafens zeigt die Tabelle dessen stärkste internationale Partnerländer für das ausgewählte Berichtsjahr. Sie ist eine Top-Auswahl und keine Zerlegung des gesamten deutschen Seegüterumschlags: Binnenbezüge, weitere Partner und nicht kartierte Häfen können in der nationalen Kennzahl enthalten sein. Ohne Hafenauswahl wird bewusst keine bundesweite Rangfolge angezeigt. Die Güterarten folgen durchgängig NST-2007.
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div class="data-table-wrapper table-wrapper-compact">
+                <table class="data-table" id="tableMaritimePartners">
+                  <thead>
+                    <tr>
+                      <th style="width: 30%;">Partnerland / Kontinent</th>
+                      <th style="width: 20%;">Güterart</th>
+                      <th class="table-measure-header" id="thMaritimeMetricUnit" style="width: 20%; text-align: right;" title="Menge in Millionen Tonnen">Menge (Mio. t)</th>
+                  <th class="table-change-header" id="thPrev_maritime" style="width: 15%; text-align: right;" title="Veränderung gegenüber dem Vorjahr">Δ<br><span>Vorjahr</span></th>
+                  <th class="table-change-header" style="width: 15%; text-align: right;" id="thTrend_maritime" title="Veränderung gegenüber dem Basisjahr 2016">Δ<br><span>ggü. 2016</span></th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableMaritimePartnersBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card chart-card-single">
+              <div class="card-header">
+                <div class="card-title">
+                  <span id="maritimeCommodityTitle">Güterstruktur des deutschen Seeverkehrs</span>
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Seeverkehr: Güterstruktur
+                      </div>
+                      Dieses Diagramm schlüsselt den seeseitigen Güterumschlag nach den amtlichen NST-2007 Gütergruppen (7 Hauptgruppen bzw. 20 Abteilungen) auf. Es zeigt das Güterspektrum im ausgewählten Berichtsjahr (Status) sowie die mehrjährige Umschlagentwicklung von 2016 bis 2025 (Dynamik).
+                    </span>
+                  </span>
+                </div>
+                <div class="card-actions">
+                  <select id="selectMaritimeNstLevel" class="select-input-sm" style="margin-right: 6px;">
+                    <option value="7" selected>7 Hauptgruppen</option>
+                    <option value="20">20 Abteilungen</option>
+                  </select>
+                  <div class="toggle-group" id="toggleMaritimeCommodityGroup">
+                    <button class="toggle-btn active" data-view="snapshot">Status</button>
+                    <button class="toggle-btn" data-view="trend">Dynamik</button>
+                  </div>
+                </div>
+              </div>
+              <div class="chart-canvas-wrap">
+                <canvas id="chartMaritimeCommodity"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           TAB 6: INTERMODALER VERKEHR & KV
+           ============================================================ -->

@@ -1,0 +1,11 @@
+# Die Prognosedatei überschreitet GitHubs reguläre Dateigrenze.
+data/processed/web_forecast_2040.json filter=lfs diff=lfs merge=lfs -text
+
+# Einheitliche Textzeilen im Repository; Skripte und Browserdateien bleiben UTF-8.
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.md text eol=lf
+*.py text eol=lf
+

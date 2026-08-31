@@ -1,0 +1,4720 @@
+{
+  "100100": {
+    "id": "100100",
+    "name": "Flensburg, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 9.43977,
+    "lat": 54.78611
+  },
+  "100200": {
+    "id": "100200",
+    "name": "Kiel, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.12773,
+    "lat": 54.34193
+  },
+  "100300": {
+    "id": "100300",
+    "name": "Lübeck, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.72393,
+    "lat": 53.88082
+  },
+  "100400": {
+    "id": "100400",
+    "name": "Neumünster, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 9.97661,
+    "lat": 54.08303
+  },
+  "105100": {
+    "id": "105100",
+    "name": "Dithmarschen",
+    "cell_type": 1,
+    "lng": 9.12289,
+    "lat": 54.13278
+  },
+  "105300": {
+    "id": "105300",
+    "name": "Herzogtum Lauenburg",
+    "cell_type": 1,
+    "lng": 10.66468,
+    "lat": 53.59332
+  },
+  "105400": {
+    "id": "105400",
+    "name": "Nordfriesland",
+    "cell_type": 1,
+    "lng": 8.99568,
+    "lat": 54.66059
+  },
+  "105500": {
+    "id": "105500",
+    "name": "Ostholstein",
+    "cell_type": 1,
+    "lng": 10.73925,
+    "lat": 54.13691
+  },
+  "105600": {
+    "id": "105600",
+    "name": "Pinneberg",
+    "cell_type": 1,
+    "lng": 9.76702,
+    "lat": 53.72838
+  },
+  "105700": {
+    "id": "105700",
+    "name": "Plön",
+    "cell_type": 1,
+    "lng": 10.41205,
+    "lat": 54.2452
+  },
+  "105800": {
+    "id": "105800",
+    "name": "Rendsburg-Eckernförde",
+    "cell_type": 1,
+    "lng": 9.72219,
+    "lat": 54.32794
+  },
+  "105900": {
+    "id": "105900",
+    "name": "Schleswig-Flensburg",
+    "cell_type": 1,
+    "lng": 9.51623,
+    "lat": 54.57452
+  },
+  "106000": {
+    "id": "106000",
+    "name": "Segeberg",
+    "cell_type": 1,
+    "lng": 10.0972,
+    "lat": 53.87749
+  },
+  "106100": {
+    "id": "106100",
+    "name": "Steinburg",
+    "cell_type": 1,
+    "lng": 9.48251,
+    "lat": 53.90759
+  },
+  "106200": {
+    "id": "106200",
+    "name": "Stormarn",
+    "cell_type": 1,
+    "lng": 10.3033,
+    "lat": 53.70729
+  },
+  "110900": {
+    "id": "110900",
+    "name": "Flughafen Westerland",
+    "cell_type": 3,
+    "lng": 8.34056,
+    "lat": 54.91335
+  },
+  "160166": {
+    "id": "160166",
+    "name": "Seehafen Glückstadt",
+    "cell_type": 4,
+    "lng": 9.42322,
+    "lat": 53.78552
+  },
+  "160266": {
+    "id": "160266",
+    "name": "Seehafen Brunsbüttel",
+    "cell_type": 4,
+    "lng": 9.14917,
+    "lat": 53.89972
+  },
+  "160366": {
+    "id": "160366",
+    "name": "Seehafen Büsum",
+    "cell_type": 4,
+    "lng": 8.86551,
+    "lat": 54.12712
+  },
+  "160466": {
+    "id": "160466",
+    "name": "Seehafen Nordstrand (Husum)",
+    "cell_type": 4,
+    "lng": 9.03523,
+    "lat": 54.47162
+  },
+  "160566": {
+    "id": "160566",
+    "name": "Seehafen Dagebüll",
+    "cell_type": 4,
+    "lng": 8.69017,
+    "lat": 54.73072
+  },
+  "160666": {
+    "id": "160666",
+    "name": "Seehafen Flensburg",
+    "cell_type": 4,
+    "lng": 9.44079,
+    "lat": 54.80172
+  },
+  "160766": {
+    "id": "160766",
+    "name": "Seehafen Glücksburg",
+    "cell_type": 4,
+    "lng": 9.5301,
+    "lat": 54.84212
+  },
+  "160866": {
+    "id": "160866",
+    "name": "Seehafen Eckernförde",
+    "cell_type": 4,
+    "lng": 9.85656,
+    "lat": 54.47462
+  },
+  "160966": {
+    "id": "160966",
+    "name": "Seehafen Strande",
+    "cell_type": 4,
+    "lng": 10.1709,
+    "lat": 54.43422
+  },
+  "161066": {
+    "id": "161066",
+    "name": "Seehafen Kiel",
+    "cell_type": 4,
+    "lng": 10.1642,
+    "lat": 54.32512
+  },
+  "161166": {
+    "id": "161166",
+    "name": "Seehafen Laboe",
+    "cell_type": 4,
+    "lng": 10.2151,
+    "lat": 54.40112
+  },
+  "161266": {
+    "id": "161266",
+    "name": "Seehafen Puttgarden",
+    "cell_type": 4,
+    "lng": 11.2285,
+    "lat": 54.50162
+  },
+  "161366": {
+    "id": "161366",
+    "name": "Seehafen Neustadt in Holstein",
+    "cell_type": 4,
+    "lng": 10.8025,
+    "lat": 54.09542
+  },
+  "161466": {
+    "id": "161466",
+    "name": "Seehafen Lübeck-Travemünde",
+    "cell_type": 4,
+    "lng": 10.8562,
+    "lat": 53.95162
+  },
+  "170177": {
+    "id": "170177",
+    "name": "Insel Pellworm",
+    "cell_type": 5,
+    "lng": 8.33499,
+    "lat": 54.67675
+  },
+  "170277": {
+    "id": "170277",
+    "name": "Insel Amrum",
+    "cell_type": 5,
+    "lng": 8.56615,
+    "lat": 54.69216
+  },
+  "170377": {
+    "id": "170377",
+    "name": "Insel Föhr",
+    "cell_type": 5,
+    "lng": 8.32985,
+    "lat": 54.89969
+  },
+  "170477": {
+    "id": "170477",
+    "name": "Insel Sylt",
+    "cell_type": 5,
+    "lng": 8.68604,
+    "lat": 54.51749
+  },
+  "200000": {
+    "id": "200000",
+    "name": "Hamburg",
+    "cell_type": 1,
+    "lng": 9.94327,
+    "lat": 53.57147
+  },
+  "210900": {
+    "id": "210900",
+    "name": "Flughafen Hamburg",
+    "cell_type": 3,
+    "lng": 9.98833,
+    "lat": 53.6303
+  },
+  "260166": {
+    "id": "260166",
+    "name": "Seehafen Hamburg",
+    "cell_type": 4,
+    "lng": 9.96357,
+    "lat": 53.53792
+  },
+  "310100": {
+    "id": "310100",
+    "name": "Braunschweig, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.52033,
+    "lat": 52.27355
+  },
+  "310200": {
+    "id": "310200",
+    "name": "Salzgitter, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.33852,
+    "lat": 52.11936
+  },
+  "310300": {
+    "id": "310300",
+    "name": "Wolfsburg, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.77938,
+    "lat": 52.40685
+  },
+  "315100": {
+    "id": "315100",
+    "name": "Gifhorn",
+    "cell_type": 1,
+    "lng": 10.66267,
+    "lat": 52.57873
+  },
+  "315300": {
+    "id": "315300",
+    "name": "Goslar",
+    "cell_type": 1,
+    "lng": 10.34538,
+    "lat": 51.846
+  },
+  "315400": {
+    "id": "315400",
+    "name": "Helmstedt",
+    "cell_type": 1,
+    "lng": 10.89217,
+    "lat": 52.26088
+  },
+  "315500": {
+    "id": "315500",
+    "name": "Northeim",
+    "cell_type": 1,
+    "lng": 9.85634,
+    "lat": 51.7644
+  },
+  "315700": {
+    "id": "315700",
+    "name": "Peine",
+    "cell_type": 1,
+    "lng": 10.2507,
+    "lat": 52.31122
+  },
+  "315800": {
+    "id": "315800",
+    "name": "Wolfenbüttel",
+    "cell_type": 1,
+    "lng": 10.65466,
+    "lat": 52.13442
+  },
+  "315900": {
+    "id": "315900",
+    "name": "Göttingen",
+    "cell_type": 1,
+    "lng": 10.02321,
+    "lat": 51.565
+  },
+  "324100": {
+    "id": "324100",
+    "name": "Region Hannover",
+    "cell_type": 1,
+    "lng": 9.80034,
+    "lat": 52.40182
+  },
+  "325100": {
+    "id": "325100",
+    "name": "Diepholz",
+    "cell_type": 1,
+    "lng": 8.7622,
+    "lat": 52.74536
+  },
+  "325200": {
+    "id": "325200",
+    "name": "Hameln-Pyrmont",
+    "cell_type": 1,
+    "lng": 9.41457,
+    "lat": 52.09496
+  },
+  "325400": {
+    "id": "325400",
+    "name": "Hildesheim",
+    "cell_type": 1,
+    "lng": 9.92748,
+    "lat": 52.09599
+  },
+  "325500": {
+    "id": "325500",
+    "name": "Holzminden",
+    "cell_type": 1,
+    "lng": 9.56324,
+    "lat": 51.84387
+  },
+  "325600": {
+    "id": "325600",
+    "name": "Nienburg (Weser)",
+    "cell_type": 1,
+    "lng": 9.25703,
+    "lat": 52.64871
+  },
+  "325700": {
+    "id": "325700",
+    "name": "Schaumburg",
+    "cell_type": 1,
+    "lng": 9.20386,
+    "lat": 52.27675
+  },
+  "335100": {
+    "id": "335100",
+    "name": "Celle",
+    "cell_type": 1,
+    "lng": 10.06252,
+    "lat": 52.71364
+  },
+  "335200": {
+    "id": "335200",
+    "name": "Cuxhaven",
+    "cell_type": 1,
+    "lng": 8.87963,
+    "lat": 53.58173
+  },
+  "335300": {
+    "id": "335300",
+    "name": "Harburg",
+    "cell_type": 1,
+    "lng": 9.90819,
+    "lat": 53.31666
+  },
+  "335400": {
+    "id": "335400",
+    "name": "Lüchow-Dannenberg",
+    "cell_type": 1,
+    "lng": 11.17672,
+    "lat": 53.04795
+  },
+  "335500": {
+    "id": "335500",
+    "name": "Lüneburg, Landkreis",
+    "cell_type": 1,
+    "lng": 10.54457,
+    "lat": 53.21452
+  },
+  "335600": {
+    "id": "335600",
+    "name": "Osterholz",
+    "cell_type": 1,
+    "lng": 8.74339,
+    "lat": 53.26074
+  },
+  "335700": {
+    "id": "335700",
+    "name": "Rotenburg (Wümme)",
+    "cell_type": 1,
+    "lng": 9.30845,
+    "lat": 53.25587
+  },
+  "335800": {
+    "id": "335800",
+    "name": "Heidekreis",
+    "cell_type": 1,
+    "lng": 9.78162,
+    "lat": 52.90991
+  },
+  "335900": {
+    "id": "335900",
+    "name": "Stade",
+    "cell_type": 1,
+    "lng": 9.36039,
+    "lat": 53.59869
+  },
+  "336000": {
+    "id": "336000",
+    "name": "Uelzen",
+    "cell_type": 1,
+    "lng": 10.53591,
+    "lat": 52.98267
+  },
+  "336100": {
+    "id": "336100",
+    "name": "Verden",
+    "cell_type": 1,
+    "lng": 9.18147,
+    "lat": 52.97788
+  },
+  "340100": {
+    "id": "340100",
+    "name": "Delmenhorst, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.64741,
+    "lat": 53.04845
+  },
+  "340200": {
+    "id": "340200",
+    "name": "Emden, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.19526,
+    "lat": 53.36482
+  },
+  "340300": {
+    "id": "340300",
+    "name": "Oldenburg (Oldenburg), Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.22312,
+    "lat": 53.14245
+  },
+  "340400": {
+    "id": "340400",
+    "name": "Osnabrück, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.05912,
+    "lat": 52.27788
+  },
+  "340500": {
+    "id": "340500",
+    "name": "Wilhelmshaven, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.09472,
+    "lat": 53.56883
+  },
+  "345100": {
+    "id": "345100",
+    "name": "Ammerland",
+    "cell_type": 1,
+    "lng": 8.00559,
+    "lat": 53.2084
+  },
+  "345200": {
+    "id": "345200",
+    "name": "Aurich",
+    "cell_type": 1,
+    "lng": 7.35711,
+    "lat": 53.50958
+  },
+  "345300": {
+    "id": "345300",
+    "name": "Cloppenburg",
+    "cell_type": 1,
+    "lng": 7.96331,
+    "lat": 52.93132
+  },
+  "345400": {
+    "id": "345400",
+    "name": "Emsland",
+    "cell_type": 1,
+    "lng": 7.36871,
+    "lat": 52.69765
+  },
+  "345500": {
+    "id": "345500",
+    "name": "Friesland (DE)",
+    "cell_type": 1,
+    "lng": 7.99059,
+    "lat": 53.51116
+  },
+  "345600": {
+    "id": "345600",
+    "name": "Grafschaft Bentheim",
+    "cell_type": 1,
+    "lng": 7.10843,
+    "lat": 52.44702
+  },
+  "345700": {
+    "id": "345700",
+    "name": "Leer",
+    "cell_type": 1,
+    "lng": 7.45929,
+    "lat": 53.20495
+  },
+  "345800": {
+    "id": "345800",
+    "name": "Oldenburg, Landkreis",
+    "cell_type": 1,
+    "lng": 8.38229,
+    "lat": 52.98393
+  },
+  "345900": {
+    "id": "345900",
+    "name": "Osnabrück, Landkreis",
+    "cell_type": 1,
+    "lng": 8.15641,
+    "lat": 52.37529
+  },
+  "346000": {
+    "id": "346000",
+    "name": "Vechta",
+    "cell_type": 1,
+    "lng": 8.1734,
+    "lat": 52.66034
+  },
+  "346100": {
+    "id": "346100",
+    "name": "Wesermarsch",
+    "cell_type": 1,
+    "lng": 8.34638,
+    "lat": 53.35955
+  },
+  "346200": {
+    "id": "346200",
+    "name": "Wittmund",
+    "cell_type": 1,
+    "lng": 7.74498,
+    "lat": 53.53668
+  },
+  "350900": {
+    "id": "350900",
+    "name": "Flughafen Hannover",
+    "cell_type": 3,
+    "lng": 9.685,
+    "lat": 52.46113
+  },
+  "360166": {
+    "id": "360166",
+    "name": "Seehafen Papenburg",
+    "cell_type": 4,
+    "lng": 7.37543,
+    "lat": 53.09272
+  },
+  "360266": {
+    "id": "360266",
+    "name": "Seehafen Emden",
+    "cell_type": 4,
+    "lng": 7.18128,
+    "lat": 53.33712
+  },
+  "360366": {
+    "id": "360366",
+    "name": "Seehafen Norden (Norddeich)",
+    "cell_type": 4,
+    "lng": 7.15814,
+    "lat": 53.62662
+  },
+  "360466": {
+    "id": "360466",
+    "name": "Seehafen Esens (Bensersiel)",
+    "cell_type": 4,
+    "lng": 7.57091,
+    "lat": 53.67782
+  },
+  "360566": {
+    "id": "360566",
+    "name": "Seehafen Neuharlingersiel",
+    "cell_type": 4,
+    "lng": 7.70605,
+    "lat": 53.70162
+  },
+  "360666": {
+    "id": "360666",
+    "name": "Seehafen Wittmund (Harlesiel)",
+    "cell_type": 4,
+    "lng": 7.80852,
+    "lat": 53.70532
+  },
+  "360766": {
+    "id": "360766",
+    "name": "Seehafen Wilhelmshaven",
+    "cell_type": 4,
+    "lng": 8.14173,
+    "lat": 53.51602
+  },
+  "360866": {
+    "id": "360866",
+    "name": "Seehafen Nordenham",
+    "cell_type": 4,
+    "lng": 8.49149,
+    "lat": 53.48622
+  },
+  "360966": {
+    "id": "360966",
+    "name": "Seehafen Brake",
+    "cell_type": 4,
+    "lng": 8.48464,
+    "lat": 53.33032
+  },
+  "361066": {
+    "id": "361066",
+    "name": "Seehafen Cuxhaven",
+    "cell_type": 4,
+    "lng": 8.71139,
+    "lat": 53.87102
+  },
+  "361166": {
+    "id": "361166",
+    "name": "Seehafen Stade",
+    "cell_type": 4,
+    "lng": 9.5085,
+    "lat": 53.65312
+  },
+  "361266": {
+    "id": "361266",
+    "name": "Seehafen Wischhafen",
+    "cell_type": 4,
+    "lng": 9.34548,
+    "lat": 53.78801
+  },
+  "370177": {
+    "id": "370177",
+    "name": "Insel Borkum",
+    "cell_type": 5,
+    "lng": 6.66334,
+    "lat": 53.59013
+  },
+  "370277": {
+    "id": "370277",
+    "name": "Insel Juist",
+    "cell_type": 5,
+    "lng": 6.99533,
+    "lat": 53.67891
+  },
+  "370377": {
+    "id": "370377",
+    "name": "Insel Norderney",
+    "cell_type": 5,
+    "lng": 7.15344,
+    "lat": 53.70517
+  },
+  "370477": {
+    "id": "370477",
+    "name": "Insel Baltrum",
+    "cell_type": 5,
+    "lng": 7.37459,
+    "lat": 53.72776
+  },
+  "370577": {
+    "id": "370577",
+    "name": "Insel Langeoog",
+    "cell_type": 5,
+    "lng": 7.4828,
+    "lat": 53.74719
+  },
+  "370677": {
+    "id": "370677",
+    "name": "Insel Spiekeroog",
+    "cell_type": 5,
+    "lng": 7.69607,
+    "lat": 53.77031
+  },
+  "370777": {
+    "id": "370777",
+    "name": "Insel Wangerooge",
+    "cell_type": 5,
+    "lng": 7.90093,
+    "lat": 53.79132
+  },
+  "401100": {
+    "id": "401100",
+    "name": "Bremen, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.80909,
+    "lat": 53.12065
+  },
+  "401200": {
+    "id": "401200",
+    "name": "Bremerhaven, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.60823,
+    "lat": 53.53939
+  },
+  "410900": {
+    "id": "410900",
+    "name": "Flughafen Bremen",
+    "cell_type": 3,
+    "lng": 8.78667,
+    "lat": 53.04752
+  },
+  "460166": {
+    "id": "460166",
+    "name": "Seehafen Bremen",
+    "cell_type": 4,
+    "lng": 8.73417,
+    "lat": 53.11252
+  },
+  "460266": {
+    "id": "460266",
+    "name": "Seehafen Bremerhaven",
+    "cell_type": 4,
+    "lng": 8.55831,
+    "lat": 53.56212
+  },
+  "511100": {
+    "id": "511100",
+    "name": "Düsseldorf, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 6.78721,
+    "lat": 51.23779
+  },
+  "511200": {
+    "id": "511200",
+    "name": "Duisburg, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 6.74264,
+    "lat": 51.44918
+  },
+  "511300": {
+    "id": "511300",
+    "name": "Essen, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.04432,
+    "lat": 51.44072
+  },
+  "511400": {
+    "id": "511400",
+    "name": "Krefeld, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 6.58839,
+    "lat": 51.34393
+  },
+  "511600": {
+    "id": "511600",
+    "name": "Mönchengladbach, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 6.41288,
+    "lat": 51.1661
+  },
+  "511700": {
+    "id": "511700",
+    "name": "Mülheim an der Ruhr, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 6.88086,
+    "lat": 51.41287
+  },
+  "511900": {
+    "id": "511900",
+    "name": "Oberhausen, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 6.85338,
+    "lat": 51.51167
+  },
+  "512000": {
+    "id": "512000",
+    "name": "Remscheid, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.22709,
+    "lat": 51.18239
+  },
+  "512200": {
+    "id": "512200",
+    "name": "Solingen, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.05812,
+    "lat": 51.16922
+  },
+  "512400": {
+    "id": "512400",
+    "name": "Wuppertal, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.16558,
+    "lat": 51.24059
+  },
+  "515400": {
+    "id": "515400",
+    "name": "Kleve",
+    "cell_type": 1,
+    "lng": 6.20097,
+    "lat": 51.62905
+  },
+  "515800": {
+    "id": "515800",
+    "name": "Mettmann",
+    "cell_type": 1,
+    "lng": 6.95828,
+    "lat": 51.22528
+  },
+  "516200": {
+    "id": "516200",
+    "name": "Rhein-Kreis Neuss",
+    "cell_type": 1,
+    "lng": 6.65978,
+    "lat": 51.17446
+  },
+  "516600": {
+    "id": "516600",
+    "name": "Viersen",
+    "cell_type": 1,
+    "lng": 6.31831,
+    "lat": 51.29534
+  },
+  "517000": {
+    "id": "517000",
+    "name": "Wesel",
+    "cell_type": 1,
+    "lng": 6.60351,
+    "lat": 51.60252
+  },
+  "520900": {
+    "id": "520900",
+    "name": "Flughafen Münster-Osnabrück",
+    "cell_type": 3,
+    "lng": 7.68472,
+    "lat": 52.13474
+  },
+  "521900": {
+    "id": "521900",
+    "name": "Flughafen Paderborn",
+    "cell_type": 3,
+    "lng": 8.61639,
+    "lat": 51.61419
+  },
+  "522900": {
+    "id": "522900",
+    "name": "Flughafen Niederrhein-Weeze",
+    "cell_type": 3,
+    "lng": 6.14222,
+    "lat": 51.60252
+  },
+  "523900": {
+    "id": "523900",
+    "name": "Flughafen Düsseldorf",
+    "cell_type": 3,
+    "lng": 6.76667,
+    "lat": 51.28946
+  },
+  "524900": {
+    "id": "524900",
+    "name": "Flughafen Dortmund",
+    "cell_type": 3,
+    "lng": 7.61222,
+    "lat": 51.51835
+  },
+  "526900": {
+    "id": "526900",
+    "name": "Flughafen Köln/Bonn",
+    "cell_type": 3,
+    "lng": 7.14278,
+    "lat": 50.86585
+  },
+  "531400": {
+    "id": "531400",
+    "name": "Bonn, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.09821,
+    "lat": 50.70399
+  },
+  "531500": {
+    "id": "531500",
+    "name": "Köln, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 6.95688,
+    "lat": 50.95245
+  },
+  "531600": {
+    "id": "531600",
+    "name": "Leverkusen, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.01306,
+    "lat": 51.05441
+  },
+  "533400": {
+    "id": "533400",
+    "name": "Städteregion Aachen",
+    "cell_type": 1,
+    "lng": 6.19344,
+    "lat": 50.72285
+  },
+  "535800": {
+    "id": "535800",
+    "name": "Düren",
+    "cell_type": 1,
+    "lng": 6.52575,
+    "lat": 50.8212
+  },
+  "536200": {
+    "id": "536200",
+    "name": "Rhein-Erft-Kreis",
+    "cell_type": 1,
+    "lng": 6.73542,
+    "lat": 50.88756
+  },
+  "536600": {
+    "id": "536600",
+    "name": "Euskirchen",
+    "cell_type": 1,
+    "lng": 6.64465,
+    "lat": 50.55563
+  },
+  "537000": {
+    "id": "537000",
+    "name": "Heinsberg",
+    "cell_type": 1,
+    "lng": 6.20722,
+    "lat": 51.04411
+  },
+  "537400": {
+    "id": "537400",
+    "name": "Oberbergischer Kreis",
+    "cell_type": 1,
+    "lng": 7.5254,
+    "lat": 51.03799
+  },
+  "537800": {
+    "id": "537800",
+    "name": "Rheinisch-Bergischer Kreis",
+    "cell_type": 1,
+    "lng": 7.17237,
+    "lat": 51.01442
+  },
+  "538200": {
+    "id": "538200",
+    "name": "Rhein-Sieg-Kreis",
+    "cell_type": 1,
+    "lng": 7.3795,
+    "lat": 50.75374
+  },
+  "551200": {
+    "id": "551200",
+    "name": "Bottrop, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 6.88767,
+    "lat": 51.5729
+  },
+  "551300": {
+    "id": "551300",
+    "name": "Gelsenkirchen, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.08166,
+    "lat": 51.55682
+  },
+  "551500": {
+    "id": "551500",
+    "name": "Münster, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.61296,
+    "lat": 51.95132
+  },
+  "555400": {
+    "id": "555400",
+    "name": "Borken",
+    "cell_type": 1,
+    "lng": 6.95073,
+    "lat": 51.98355
+  },
+  "555800": {
+    "id": "555800",
+    "name": "Coesfeld",
+    "cell_type": 1,
+    "lng": 7.32083,
+    "lat": 51.86204
+  },
+  "556200": {
+    "id": "556200",
+    "name": "Recklinghausen",
+    "cell_type": 1,
+    "lng": 7.14477,
+    "lat": 51.67257
+  },
+  "556600": {
+    "id": "556600",
+    "name": "Steinfurt",
+    "cell_type": 1,
+    "lng": 7.51304,
+    "lat": 52.238
+  },
+  "557000": {
+    "id": "557000",
+    "name": "Warendorf",
+    "cell_type": 1,
+    "lng": 7.93937,
+    "lat": 51.88077
+  },
+  "571100": {
+    "id": "571100",
+    "name": "Bielefeld, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.55871,
+    "lat": 52.0143
+  },
+  "575400": {
+    "id": "575400",
+    "name": "Gütersloh",
+    "cell_type": 1,
+    "lng": 8.33489,
+    "lat": 51.92565
+  },
+  "575800": {
+    "id": "575800",
+    "name": "Herford",
+    "cell_type": 1,
+    "lng": 8.632,
+    "lat": 52.16547
+  },
+  "576200": {
+    "id": "576200",
+    "name": "Höxter",
+    "cell_type": 1,
+    "lng": 9.18429,
+    "lat": 51.67823
+  },
+  "576600": {
+    "id": "576600",
+    "name": "Lippe",
+    "cell_type": 1,
+    "lng": 8.91931,
+    "lat": 51.99346
+  },
+  "577000": {
+    "id": "577000",
+    "name": "Minden-Lübbecke",
+    "cell_type": 1,
+    "lng": 8.75703,
+    "lat": 52.34841
+  },
+  "577400": {
+    "id": "577400",
+    "name": "Paderborn",
+    "cell_type": 1,
+    "lng": 8.76952,
+    "lat": 51.6642
+  },
+  "591100": {
+    "id": "591100",
+    "name": "Bochum, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.22862,
+    "lat": 51.47593
+  },
+  "591300": {
+    "id": "591300",
+    "name": "Dortmund, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.45057,
+    "lat": 51.50676
+  },
+  "591400": {
+    "id": "591400",
+    "name": "Hagen, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.48753,
+    "lat": 51.34288
+  },
+  "591500": {
+    "id": "591500",
+    "name": "Hamm, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.81487,
+    "lat": 51.66048
+  },
+  "591600": {
+    "id": "591600",
+    "name": "Herne, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.21258,
+    "lat": 51.53657
+  },
+  "595400": {
+    "id": "595400",
+    "name": "Ennepe-Ruhr-Kreis",
+    "cell_type": 1,
+    "lng": 7.26665,
+    "lat": 51.35062
+  },
+  "595800": {
+    "id": "595800",
+    "name": "Hochsauerlandkreis",
+    "cell_type": 1,
+    "lng": 8.26572,
+    "lat": 51.31857
+  },
+  "596200": {
+    "id": "596200",
+    "name": "Märkischer Kreis",
+    "cell_type": 1,
+    "lng": 7.72892,
+    "lat": 51.27298
+  },
+  "596600": {
+    "id": "596600",
+    "name": "Olpe",
+    "cell_type": 1,
+    "lng": 8.02339,
+    "lat": 51.08623
+  },
+  "597000": {
+    "id": "597000",
+    "name": "Siegen-Wittgenstein",
+    "cell_type": 1,
+    "lng": 8.13307,
+    "lat": 50.91335
+  },
+  "597400": {
+    "id": "597400",
+    "name": "Soest",
+    "cell_type": 1,
+    "lng": 8.15581,
+    "lat": 51.5605
+  },
+  "597800": {
+    "id": "597800",
+    "name": "Unna",
+    "cell_type": 1,
+    "lng": 7.72056,
+    "lat": 51.56222
+  },
+  "611900": {
+    "id": "611900",
+    "name": "Flughafen Frankfurt/Main",
+    "cell_type": 3,
+    "lng": 8.57056,
+    "lat": 50.03308
+  },
+  "641100": {
+    "id": "641100",
+    "name": "Darmstadt, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.66282,
+    "lat": 49.87637
+  },
+  "641200": {
+    "id": "641200",
+    "name": "Frankfurt am Main, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.6573,
+    "lat": 50.11874
+  },
+  "641300": {
+    "id": "641300",
+    "name": "Offenbach am Main, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.78617,
+    "lat": 50.08975
+  },
+  "641400": {
+    "id": "641400",
+    "name": "Wiesbaden, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.25329,
+    "lat": 50.07219
+  },
+  "643100": {
+    "id": "643100",
+    "name": "Bergstraße",
+    "cell_type": 1,
+    "lng": 8.52811,
+    "lat": 49.62327
+  },
+  "643200": {
+    "id": "643200",
+    "name": "Darmstadt-Dieburg",
+    "cell_type": 1,
+    "lng": 8.8801,
+    "lat": 49.86277
+  },
+  "643300": {
+    "id": "643300",
+    "name": "Groß-Gerau",
+    "cell_type": 1,
+    "lng": 8.4529,
+    "lat": 49.90024
+  },
+  "643400": {
+    "id": "643400",
+    "name": "Hochtaunuskreis",
+    "cell_type": 1,
+    "lng": 8.50397,
+    "lat": 50.28531
+  },
+  "643500": {
+    "id": "643500",
+    "name": "Main-Kinzig-Kreis",
+    "cell_type": 1,
+    "lng": 9.40558,
+    "lat": 50.26501
+  },
+  "643600": {
+    "id": "643600",
+    "name": "Main-Taunus-Kreis",
+    "cell_type": 1,
+    "lng": 8.42715,
+    "lat": 50.1001
+  },
+  "643700": {
+    "id": "643700",
+    "name": "Odenwaldkreis",
+    "cell_type": 1,
+    "lng": 8.96955,
+    "lat": 49.66238
+  },
+  "643800": {
+    "id": "643800",
+    "name": "Offenbach, Landkreis",
+    "cell_type": 1,
+    "lng": 8.81664,
+    "lat": 50.0417
+  },
+  "643900": {
+    "id": "643900",
+    "name": "Rheingau-Taunus-Kreis",
+    "cell_type": 1,
+    "lng": 8.07669,
+    "lat": 50.13687
+  },
+  "644000": {
+    "id": "644000",
+    "name": "Wetteraukreis",
+    "cell_type": 1,
+    "lng": 8.93458,
+    "lat": 50.33118
+  },
+  "653100": {
+    "id": "653100",
+    "name": "Gießen, Landkreis",
+    "cell_type": 1,
+    "lng": 8.86953,
+    "lat": 50.56077
+  },
+  "653200": {
+    "id": "653200",
+    "name": "Lahn-Dill-Kreis",
+    "cell_type": 1,
+    "lng": 8.3268,
+    "lat": 50.64103
+  },
+  "653300": {
+    "id": "653300",
+    "name": "Limburg-Weilburg",
+    "cell_type": 1,
+    "lng": 8.21193,
+    "lat": 50.43245
+  },
+  "653400": {
+    "id": "653400",
+    "name": "Marburg-Biedenkopf",
+    "cell_type": 1,
+    "lng": 8.77285,
+    "lat": 50.8348
+  },
+  "653500": {
+    "id": "653500",
+    "name": "Vogelsbergkreis",
+    "cell_type": 1,
+    "lng": 9.25309,
+    "lat": 50.61331
+  },
+  "661100": {
+    "id": "661100",
+    "name": "Kassel, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 9.45423,
+    "lat": 51.30844
+  },
+  "663100": {
+    "id": "663100",
+    "name": "Fulda",
+    "cell_type": 1,
+    "lng": 9.76384,
+    "lat": 50.58054
+  },
+  "663200": {
+    "id": "663200",
+    "name": "Hersfeld-Rotenburg",
+    "cell_type": 1,
+    "lng": 9.76499,
+    "lat": 50.9016
+  },
+  "663300": {
+    "id": "663300",
+    "name": "Kassel, Landkreis",
+    "cell_type": 1,
+    "lng": 9.3904,
+    "lat": 51.41353
+  },
+  "663400": {
+    "id": "663400",
+    "name": "Schwalm-Eder-Kreis",
+    "cell_type": 1,
+    "lng": 9.3298,
+    "lat": 51.01727
+  },
+  "663500": {
+    "id": "663500",
+    "name": "Waldeck-Frankenberg",
+    "cell_type": 1,
+    "lng": 8.93312,
+    "lat": 51.2268
+  },
+  "663600": {
+    "id": "663600",
+    "name": "Werra-Meißner-Kreis",
+    "cell_type": 1,
+    "lng": 9.89302,
+    "lat": 51.20821
+  },
+  "700900": {
+    "id": "700900",
+    "name": "Flughafen Hahn",
+    "cell_type": 3,
+    "lng": 7.26389,
+    "lat": 49.94863
+  },
+  "711100": {
+    "id": "711100",
+    "name": "Koblenz, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.58373,
+    "lat": 50.34891
+  },
+  "713100": {
+    "id": "713100",
+    "name": "Ahrweiler",
+    "cell_type": 1,
+    "lng": 7.12126,
+    "lat": 50.47843
+  },
+  "713200": {
+    "id": "713200",
+    "name": "Altenkirchen (Westerwald)",
+    "cell_type": 1,
+    "lng": 7.79863,
+    "lat": 50.75075
+  },
+  "713300": {
+    "id": "713300",
+    "name": "Bad Kreuznach",
+    "cell_type": 1,
+    "lng": 7.67163,
+    "lat": 49.8191
+  },
+  "713400": {
+    "id": "713400",
+    "name": "Birkenfeld",
+    "cell_type": 1,
+    "lng": 7.28976,
+    "lat": 49.72658
+  },
+  "713500": {
+    "id": "713500",
+    "name": "Cochem-Zell",
+    "cell_type": 1,
+    "lng": 7.13972,
+    "lat": 50.12259
+  },
+  "713700": {
+    "id": "713700",
+    "name": "Mayen-Koblenz",
+    "cell_type": 1,
+    "lng": 7.25598,
+    "lat": 50.31455
+  },
+  "713800": {
+    "id": "713800",
+    "name": "Neuwied",
+    "cell_type": 1,
+    "lng": 7.40128,
+    "lat": 50.56523
+  },
+  "714000": {
+    "id": "714000",
+    "name": "Rhein-Hunsrück-Kreis",
+    "cell_type": 1,
+    "lng": 7.51111,
+    "lat": 50.05436
+  },
+  "714100": {
+    "id": "714100",
+    "name": "Rhein-Lahn-Kreis",
+    "cell_type": 1,
+    "lng": 7.815,
+    "lat": 50.24191
+  },
+  "714300": {
+    "id": "714300",
+    "name": "Westerwaldkreis",
+    "cell_type": 1,
+    "lng": 7.86353,
+    "lat": 50.54433
+  },
+  "721100": {
+    "id": "721100",
+    "name": "Trier, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 6.66927,
+    "lat": 49.7793
+  },
+  "723100": {
+    "id": "723100",
+    "name": "Bernkastel-Wittlich",
+    "cell_type": 1,
+    "lng": 6.96496,
+    "lat": 49.90253
+  },
+  "723200": {
+    "id": "723200",
+    "name": "Eifelkreis Bitburg-Prüm",
+    "cell_type": 1,
+    "lng": 6.40881,
+    "lat": 50.06694
+  },
+  "723300": {
+    "id": "723300",
+    "name": "Vulkaneifel",
+    "cell_type": 1,
+    "lng": 6.76834,
+    "lat": 50.23181
+  },
+  "723500": {
+    "id": "723500",
+    "name": "Trier-Saarburg",
+    "cell_type": 1,
+    "lng": 6.83759,
+    "lat": 49.71639
+  },
+  "731100": {
+    "id": "731100",
+    "name": "Frankenthal (Pfalz), Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.34677,
+    "lat": 49.53352
+  },
+  "731200": {
+    "id": "731200",
+    "name": "Kaiserslautern, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.7592,
+    "lat": 49.42734
+  },
+  "731300": {
+    "id": "731300",
+    "name": "Landau in der Pfalz, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.09455,
+    "lat": 49.19449
+  },
+  "731400": {
+    "id": "731400",
+    "name": "Ludwigshafen am Rhein, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.38796,
+    "lat": 49.4879
+  },
+  "731500": {
+    "id": "731500",
+    "name": "Mainz, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.25547,
+    "lat": 49.96589
+  },
+  "731600": {
+    "id": "731600",
+    "name": "Neustadt an der Weinstraße, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.11552,
+    "lat": 49.34956
+  },
+  "731700": {
+    "id": "731700",
+    "name": "Pirmasens, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.59362,
+    "lat": 49.18819
+  },
+  "731800": {
+    "id": "731800",
+    "name": "Speyer, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.42844,
+    "lat": 49.33021
+  },
+  "731900": {
+    "id": "731900",
+    "name": "Worms, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 8.32196,
+    "lat": 49.65905
+  },
+  "732000": {
+    "id": "732000",
+    "name": "Zweibrücken, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 7.36861,
+    "lat": 49.25355
+  },
+  "733100": {
+    "id": "733100",
+    "name": "Alzey-Worms",
+    "cell_type": 1,
+    "lng": 8.20448,
+    "lat": 49.74525
+  },
+  "733200": {
+    "id": "733200",
+    "name": "Bad Dürkheim",
+    "cell_type": 1,
+    "lng": 8.11377,
+    "lat": 49.47061
+  },
+  "733300": {
+    "id": "733300",
+    "name": "Donnersbergkreis",
+    "cell_type": 1,
+    "lng": 7.9366,
+    "lat": 49.6274
+  },
+  "733400": {
+    "id": "733400",
+    "name": "Germersheim",
+    "cell_type": 1,
+    "lng": 8.31465,
+    "lat": 49.13104
+  },
+  "733500": {
+    "id": "733500",
+    "name": "Kaiserslautern, Landkreis",
+    "cell_type": 1,
+    "lng": 7.57515,
+    "lat": 49.45207
+  },
+  "733600": {
+    "id": "733600",
+    "name": "Kusel",
+    "cell_type": 1,
+    "lng": 7.45568,
+    "lat": 49.54035
+  },
+  "733700": {
+    "id": "733700",
+    "name": "Südliche Weinstraße",
+    "cell_type": 1,
+    "lng": 7.95097,
+    "lat": 49.17145
+  },
+  "733800": {
+    "id": "733800",
+    "name": "Rhein-Pfalz-Kreis",
+    "cell_type": 1,
+    "lng": 8.31412,
+    "lat": 49.4291
+  },
+  "733900": {
+    "id": "733900",
+    "name": "Mainz-Bingen",
+    "cell_type": 1,
+    "lng": 8.06732,
+    "lat": 49.91673
+  },
+  "734000": {
+    "id": "734000",
+    "name": "Südwestpfalz",
+    "cell_type": 1,
+    "lng": 7.78747,
+    "lat": 49.20372
+  },
+  "801900": {
+    "id": "801900",
+    "name": "Flughafen Karlsruhe/Baden-Baden",
+    "cell_type": 3,
+    "lng": 8.08056,
+    "lat": 48.77946
+  },
+  "802900": {
+    "id": "802900",
+    "name": "Flughafen Stuttgart",
+    "cell_type": 3,
+    "lng": 9.22194,
+    "lat": 48.69002
+  },
+  "804900": {
+    "id": "804900",
+    "name": "Flughafen Friedrichshafen",
+    "cell_type": 3,
+    "lng": 9.51139,
+    "lat": 47.67141
+  },
+  "811100": {
+    "id": "811100",
+    "name": "Stuttgart, Stadtkreis",
+    "cell_type": 1,
+    "lng": 9.19988,
+    "lat": 48.77711
+  },
+  "811500": {
+    "id": "811500",
+    "name": "Böblingen",
+    "cell_type": 1,
+    "lng": 8.96324,
+    "lat": 48.68286
+  },
+  "811600": {
+    "id": "811600",
+    "name": "Esslingen",
+    "cell_type": 1,
+    "lng": 9.35639,
+    "lat": 48.65042
+  },
+  "811700": {
+    "id": "811700",
+    "name": "Göppingen",
+    "cell_type": 1,
+    "lng": 9.7404,
+    "lat": 48.6515
+  },
+  "811800": {
+    "id": "811800",
+    "name": "Ludwigsburg",
+    "cell_type": 1,
+    "lng": 9.14094,
+    "lat": 48.90981
+  },
+  "811900": {
+    "id": "811900",
+    "name": "Rems-Murr-Kreis",
+    "cell_type": 1,
+    "lng": 9.54559,
+    "lat": 48.90997
+  },
+  "812100": {
+    "id": "812100",
+    "name": "Heilbronn, Stadtkreis",
+    "cell_type": 1,
+    "lng": 9.204,
+    "lat": 49.15164
+  },
+  "812500": {
+    "id": "812500",
+    "name": "Heilbronn, Landkreis",
+    "cell_type": 1,
+    "lng": 9.29355,
+    "lat": 49.20477
+  },
+  "812600": {
+    "id": "812600",
+    "name": "Hohenlohekreis",
+    "cell_type": 1,
+    "lng": 9.62168,
+    "lat": 49.26062
+  },
+  "812700": {
+    "id": "812700",
+    "name": "Schwäbisch Hall",
+    "cell_type": 1,
+    "lng": 9.95192,
+    "lat": 49.15495
+  },
+  "812800": {
+    "id": "812800",
+    "name": "Main-Tauber-Kreis",
+    "cell_type": 1,
+    "lng": 9.67172,
+    "lat": 49.57199
+  },
+  "813500": {
+    "id": "813500",
+    "name": "Heidenheim",
+    "cell_type": 1,
+    "lng": 10.09672,
+    "lat": 48.65004
+  },
+  "813600": {
+    "id": "813600",
+    "name": "Ostalbkreis",
+    "cell_type": 1,
+    "lng": 10.098,
+    "lat": 48.88831
+  },
+  "821100": {
+    "id": "821100",
+    "name": "Baden-Baden, Stadtkreis",
+    "cell_type": 1,
+    "lng": 8.24286,
+    "lat": 48.7591
+  },
+  "821200": {
+    "id": "821200",
+    "name": "Karlsruhe, Stadtkreis",
+    "cell_type": 1,
+    "lng": 8.40957,
+    "lat": 49.01595
+  },
+  "821500": {
+    "id": "821500",
+    "name": "Karlsruhe, Landkreis",
+    "cell_type": 1,
+    "lng": 8.66527,
+    "lat": 49.05081
+  },
+  "821600": {
+    "id": "821600",
+    "name": "Rastatt",
+    "cell_type": 1,
+    "lng": 8.35837,
+    "lat": 48.78492
+  },
+  "822100": {
+    "id": "822100",
+    "name": "Heidelberg, Stadtkreis",
+    "cell_type": 1,
+    "lng": 8.7123,
+    "lat": 49.40793
+  },
+  "822200": {
+    "id": "822200",
+    "name": "Mannheim, Stadtkreis",
+    "cell_type": 1,
+    "lng": 8.51048,
+    "lat": 49.49968
+  },
+  "822500": {
+    "id": "822500",
+    "name": "Neckar-Odenwald-Kreis",
+    "cell_type": 1,
+    "lng": 9.27163,
+    "lat": 49.46698
+  },
+  "822600": {
+    "id": "822600",
+    "name": "Rhein-Neckar-Kreis",
+    "cell_type": 1,
+    "lng": 8.56231,
+    "lat": 49.39916
+  },
+  "823100": {
+    "id": "823100",
+    "name": "Pforzheim, Stadtkreis",
+    "cell_type": 1,
+    "lng": 8.71992,
+    "lat": 48.87934
+  },
+  "823500": {
+    "id": "823500",
+    "name": "Calw",
+    "cell_type": 1,
+    "lng": 8.62968,
+    "lat": 48.66266
+  },
+  "823600": {
+    "id": "823600",
+    "name": "Enzkreis",
+    "cell_type": 1,
+    "lng": 8.84389,
+    "lat": 48.91854
+  },
+  "823700": {
+    "id": "823700",
+    "name": "Freudenstadt",
+    "cell_type": 1,
+    "lng": 8.541,
+    "lat": 48.47257
+  },
+  "831100": {
+    "id": "831100",
+    "name": "Freiburg im Breisgau, Stadtkreis",
+    "cell_type": 1,
+    "lng": 7.80352,
+    "lat": 47.98418
+  },
+  "831500": {
+    "id": "831500",
+    "name": "Breisgau-Hochschwarzwald",
+    "cell_type": 1,
+    "lng": 8.13273,
+    "lat": 47.92997
+  },
+  "831600": {
+    "id": "831600",
+    "name": "Emmendingen",
+    "cell_type": 1,
+    "lng": 7.86152,
+    "lat": 48.13326
+  },
+  "831700": {
+    "id": "831700",
+    "name": "Ortenaukreis",
+    "cell_type": 1,
+    "lng": 8.01195,
+    "lat": 48.44252
+  },
+  "832500": {
+    "id": "832500",
+    "name": "Rottweil",
+    "cell_type": 1,
+    "lng": 8.49938,
+    "lat": 48.23779
+  },
+  "832600": {
+    "id": "832600",
+    "name": "Schwarzwald-Baar-Kreis",
+    "cell_type": 1,
+    "lng": 8.4873,
+    "lat": 47.97895
+  },
+  "832700": {
+    "id": "832700",
+    "name": "Tuttlingen",
+    "cell_type": 1,
+    "lng": 8.8215,
+    "lat": 48.01548
+  },
+  "833500": {
+    "id": "833500",
+    "name": "Konstanz",
+    "cell_type": 1,
+    "lng": 8.85215,
+    "lat": 47.79594
+  },
+  "833600": {
+    "id": "833600",
+    "name": "Lörrach",
+    "cell_type": 1,
+    "lng": 7.75003,
+    "lat": 47.70681
+  },
+  "833700": {
+    "id": "833700",
+    "name": "Waldshut",
+    "cell_type": 1,
+    "lng": 8.19488,
+    "lat": 47.70382
+  },
+  "841500": {
+    "id": "841500",
+    "name": "Reutlingen",
+    "cell_type": 1,
+    "lng": 9.37832,
+    "lat": 48.40098
+  },
+  "841600": {
+    "id": "841600",
+    "name": "Tübingen, Landkreis",
+    "cell_type": 1,
+    "lng": 8.9613,
+    "lat": 48.49576
+  },
+  "841700": {
+    "id": "841700",
+    "name": "Zollernalbkreis",
+    "cell_type": 1,
+    "lng": 8.91148,
+    "lat": 48.26027
+  },
+  "842100": {
+    "id": "842100",
+    "name": "Ulm, Stadtkreis",
+    "cell_type": 1,
+    "lng": 9.92675,
+    "lat": 48.38556
+  },
+  "842500": {
+    "id": "842500",
+    "name": "Alb-Donau-Kreis",
+    "cell_type": 1,
+    "lng": 9.72911,
+    "lat": 48.38806
+  },
+  "842600": {
+    "id": "842600",
+    "name": "Biberach",
+    "cell_type": 1,
+    "lng": 9.71676,
+    "lat": 48.12435
+  },
+  "843500": {
+    "id": "843500",
+    "name": "Bodenseekreis",
+    "cell_type": 1,
+    "lng": 9.37218,
+    "lat": 47.73266
+  },
+  "843600": {
+    "id": "843600",
+    "name": "Ravensburg",
+    "cell_type": 1,
+    "lng": 9.77634,
+    "lat": 47.80221
+  },
+  "843700": {
+    "id": "843700",
+    "name": "Sigmaringen",
+    "cell_type": 1,
+    "lng": 9.23815,
+    "lat": 48.05187
+  },
+  "901900": {
+    "id": "901900",
+    "name": "Flughafen Nürnberg",
+    "cell_type": 3,
+    "lng": 11.06694,
+    "lat": 49.49863
+  },
+  "903900": {
+    "id": "903900",
+    "name": "Flughafen Memmingen",
+    "cell_type": 3,
+    "lng": 10.24361,
+    "lat": 47.99252
+  },
+  "904900": {
+    "id": "904900",
+    "name": "Flughafen München",
+    "cell_type": 3,
+    "lng": 11.78611,
+    "lat": 48.35391
+  },
+  "916100": {
+    "id": "916100",
+    "name": "Ingolstadt, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 11.39197,
+    "lat": 48.75575
+  },
+  "916200": {
+    "id": "916200",
+    "name": "München, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 11.5286,
+    "lat": 48.15223
+  },
+  "916300": {
+    "id": "916300",
+    "name": "Rosenheim, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 12.11433,
+    "lat": 47.85005
+  },
+  "917100": {
+    "id": "917100",
+    "name": "Altötting",
+    "cell_type": 1,
+    "lng": 12.72319,
+    "lat": 48.19933
+  },
+  "917200": {
+    "id": "917200",
+    "name": "Berchtesgadener Land",
+    "cell_type": 1,
+    "lng": 12.81776,
+    "lat": 47.71404
+  },
+  "917300": {
+    "id": "917300",
+    "name": "Bad Tölz-Wolfratshausen",
+    "cell_type": 1,
+    "lng": 11.52228,
+    "lat": 47.7362
+  },
+  "917400": {
+    "id": "917400",
+    "name": "Dachau",
+    "cell_type": 1,
+    "lng": 11.36979,
+    "lat": 48.33065
+  },
+  "917500": {
+    "id": "917500",
+    "name": "Ebersberg",
+    "cell_type": 1,
+    "lng": 11.92962,
+    "lat": 48.07783
+  },
+  "917600": {
+    "id": "917600",
+    "name": "Eichstätt",
+    "cell_type": 1,
+    "lng": 11.38966,
+    "lat": 48.91102
+  },
+  "917700": {
+    "id": "917700",
+    "name": "Erding",
+    "cell_type": 1,
+    "lng": 12.00949,
+    "lat": 48.29855
+  },
+  "917800": {
+    "id": "917800",
+    "name": "Freising",
+    "cell_type": 1,
+    "lng": 11.7252,
+    "lat": 48.44396
+  },
+  "917900": {
+    "id": "917900",
+    "name": "Fürstenfeldbruck",
+    "cell_type": 1,
+    "lng": 11.21154,
+    "lat": 48.18803
+  },
+  "918000": {
+    "id": "918000",
+    "name": "Garmisch-Partenkirchen",
+    "cell_type": 1,
+    "lng": 11.08363,
+    "lat": 47.56418
+  },
+  "918100": {
+    "id": "918100",
+    "name": "Landsberg am Lech",
+    "cell_type": 1,
+    "lng": 10.92852,
+    "lat": 48.04319
+  },
+  "918200": {
+    "id": "918200",
+    "name": "Miesbach",
+    "cell_type": 1,
+    "lng": 11.82368,
+    "lat": 47.76225
+  },
+  "918300": {
+    "id": "918300",
+    "name": "Mühldorf a. Inn",
+    "cell_type": 1,
+    "lng": 12.39814,
+    "lat": 48.25735
+  },
+  "918400": {
+    "id": "918400",
+    "name": "München, Landkreis",
+    "cell_type": 1,
+    "lng": 11.43295,
+    "lat": 48.10678
+  },
+  "918500": {
+    "id": "918500",
+    "name": "Neuburg-Schrobenhausen",
+    "cell_type": 1,
+    "lng": 11.23232,
+    "lat": 48.64401
+  },
+  "918600": {
+    "id": "918600",
+    "name": "Pfaffenhofen a. d. Ilm",
+    "cell_type": 1,
+    "lng": 11.52378,
+    "lat": 48.60854
+  },
+  "918700": {
+    "id": "918700",
+    "name": "Rosenheim, Landkreis",
+    "cell_type": 1,
+    "lng": 11.97298,
+    "lat": 47.87195
+  },
+  "918800": {
+    "id": "918800",
+    "name": "Starnberg",
+    "cell_type": 1,
+    "lng": 11.28368,
+    "lat": 48.00463
+  },
+  "918900": {
+    "id": "918900",
+    "name": "Traunstein",
+    "cell_type": 1,
+    "lng": 12.70213,
+    "lat": 47.89499
+  },
+  "919000": {
+    "id": "919000",
+    "name": "Weilheim-Schongau",
+    "cell_type": 1,
+    "lng": 11.0871,
+    "lat": 47.78294
+  },
+  "926100": {
+    "id": "926100",
+    "name": "Landshut, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 12.2048,
+    "lat": 48.55401
+  },
+  "926200": {
+    "id": "926200",
+    "name": "Passau, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 13.42545,
+    "lat": 48.57885
+  },
+  "926300": {
+    "id": "926300",
+    "name": "Straubing, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 12.59543,
+    "lat": 48.88367
+  },
+  "927100": {
+    "id": "927100",
+    "name": "Deggendorf",
+    "cell_type": 1,
+    "lng": 13.00054,
+    "lat": 48.77758
+  },
+  "927200": {
+    "id": "927200",
+    "name": "Freyung-Grafenau",
+    "cell_type": 1,
+    "lng": 13.4834,
+    "lat": 48.83291
+  },
+  "927300": {
+    "id": "927300",
+    "name": "Kelheim",
+    "cell_type": 1,
+    "lng": 11.92144,
+    "lat": 48.80145
+  },
+  "927400": {
+    "id": "927400",
+    "name": "Landshut, Landkreis",
+    "cell_type": 1,
+    "lng": 12.30827,
+    "lat": 48.54494
+  },
+  "927500": {
+    "id": "927500",
+    "name": "Passau, Landkreis",
+    "cell_type": 1,
+    "lng": 13.27072,
+    "lat": 48.52729
+  },
+  "927600": {
+    "id": "927600",
+    "name": "Regen",
+    "cell_type": 1,
+    "lng": 13.11557,
+    "lat": 49.01567
+  },
+  "927700": {
+    "id": "927700",
+    "name": "Rottal-Inn",
+    "cell_type": 1,
+    "lng": 12.84597,
+    "lat": 48.41167
+  },
+  "927800": {
+    "id": "927800",
+    "name": "Straubing-Bogen",
+    "cell_type": 1,
+    "lng": 12.71919,
+    "lat": 48.91678
+  },
+  "927900": {
+    "id": "927900",
+    "name": "Dingolfing-Landau",
+    "cell_type": 1,
+    "lng": 12.66088,
+    "lat": 48.63784
+  },
+  "936100": {
+    "id": "936100",
+    "name": "Amberg, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 11.84776,
+    "lat": 49.45518
+  },
+  "936200": {
+    "id": "936200",
+    "name": "Regensburg, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 12.10092,
+    "lat": 49.02199
+  },
+  "936300": {
+    "id": "936300",
+    "name": "Weiden i. d. Opf, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 12.17147,
+    "lat": 49.66382
+  },
+  "937100": {
+    "id": "937100",
+    "name": "Amberg-Sulzbach",
+    "cell_type": 1,
+    "lng": 11.71813,
+    "lat": 49.48856
+  },
+  "937200": {
+    "id": "937200",
+    "name": "Cham",
+    "cell_type": 1,
+    "lng": 12.71784,
+    "lat": 49.25766
+  },
+  "937300": {
+    "id": "937300",
+    "name": "Neumarkt i. d. OPf.",
+    "cell_type": 1,
+    "lng": 11.60335,
+    "lat": 49.19207
+  },
+  "937400": {
+    "id": "937400",
+    "name": "Neustadt a. d. Waldnaab",
+    "cell_type": 1,
+    "lng": 11.86397,
+    "lat": 49.68077
+  },
+  "937500": {
+    "id": "937500",
+    "name": "Regensburg, Landkreis",
+    "cell_type": 1,
+    "lng": 12.3361,
+    "lat": 48.99342
+  },
+  "937600": {
+    "id": "937600",
+    "name": "Schwandorf",
+    "cell_type": 1,
+    "lng": 12.27541,
+    "lat": 49.37003
+  },
+  "937700": {
+    "id": "937700",
+    "name": "Tirschenreuth",
+    "cell_type": 1,
+    "lng": 12.19322,
+    "lat": 49.90947
+  },
+  "946100": {
+    "id": "946100",
+    "name": "Bamberg, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.89257,
+    "lat": 49.88759
+  },
+  "946200": {
+    "id": "946200",
+    "name": "Bayreuth, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 11.58508,
+    "lat": 49.93209
+  },
+  "946300": {
+    "id": "946300",
+    "name": "Coburg, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.98484,
+    "lat": 50.26239
+  },
+  "946400": {
+    "id": "946400",
+    "name": "Hof, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 11.88299,
+    "lat": 50.31164
+  },
+  "947100": {
+    "id": "947100",
+    "name": "Bamberg, Landkreis",
+    "cell_type": 1,
+    "lng": 11.06654,
+    "lat": 49.9059
+  },
+  "947200": {
+    "id": "947200",
+    "name": "Bayreuth, Landkreis",
+    "cell_type": 1,
+    "lng": 11.54985,
+    "lat": 49.87356
+  },
+  "947300": {
+    "id": "947300",
+    "name": "Coburg, Landkreis",
+    "cell_type": 1,
+    "lng": 11.09406,
+    "lat": 50.242
+  },
+  "947400": {
+    "id": "947400",
+    "name": "Forchheim",
+    "cell_type": 1,
+    "lng": 11.14548,
+    "lat": 49.73112
+  },
+  "947500": {
+    "id": "947500",
+    "name": "Hof, Landkreis",
+    "cell_type": 1,
+    "lng": 11.86538,
+    "lat": 50.26456
+  },
+  "947600": {
+    "id": "947600",
+    "name": "Kronach",
+    "cell_type": 1,
+    "lng": 11.40513,
+    "lat": 50.34519
+  },
+  "947700": {
+    "id": "947700",
+    "name": "Kulmbach",
+    "cell_type": 1,
+    "lng": 11.49096,
+    "lat": 50.10094
+  },
+  "947800": {
+    "id": "947800",
+    "name": "Lichtenfels",
+    "cell_type": 1,
+    "lng": 11.09342,
+    "lat": 50.10385
+  },
+  "947900": {
+    "id": "947900",
+    "name": "Wunsiedel i. Fichtelgebirge",
+    "cell_type": 1,
+    "lng": 12.01445,
+    "lat": 50.09993
+  },
+  "956100": {
+    "id": "956100",
+    "name": "Ansbach, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.56097,
+    "lat": 49.29001
+  },
+  "956200": {
+    "id": "956200",
+    "name": "Erlangen, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.98207,
+    "lat": 49.58906
+  },
+  "956300": {
+    "id": "956300",
+    "name": "Fürth, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.96246,
+    "lat": 49.48341
+  },
+  "956400": {
+    "id": "956400",
+    "name": "Nürnberg, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 11.06359,
+    "lat": 49.43752
+  },
+  "956500": {
+    "id": "956500",
+    "name": "Schwabach, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 11.02968,
+    "lat": 49.33528
+  },
+  "957100": {
+    "id": "957100",
+    "name": "Ansbach, Landkreis",
+    "cell_type": 1,
+    "lng": 10.37563,
+    "lat": 49.23623
+  },
+  "957200": {
+    "id": "957200",
+    "name": "Erlangen-Höchstadt",
+    "cell_type": 1,
+    "lng": 10.85085,
+    "lat": 49.63064
+  },
+  "957300": {
+    "id": "957300",
+    "name": "Fürth, Landkreis",
+    "cell_type": 1,
+    "lng": 10.83176,
+    "lat": 49.45352
+  },
+  "957400": {
+    "id": "957400",
+    "name": "Nürnberger Land",
+    "cell_type": 1,
+    "lng": 11.35816,
+    "lat": 49.50933
+  },
+  "957500": {
+    "id": "957500",
+    "name": "Neustadt a. d. Aisch-Bad Windsheim",
+    "cell_type": 1,
+    "lng": 10.41535,
+    "lat": 49.58277
+  },
+  "957600": {
+    "id": "957600",
+    "name": "Roth",
+    "cell_type": 1,
+    "lng": 11.05296,
+    "lat": 49.19655
+  },
+  "957700": {
+    "id": "957700",
+    "name": "Weißenburg-Gunzenhausen",
+    "cell_type": 1,
+    "lng": 10.9289,
+    "lat": 49.03012
+  },
+  "966100": {
+    "id": "966100",
+    "name": "Aschaffenburg, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 9.13808,
+    "lat": 49.97072
+  },
+  "966200": {
+    "id": "966200",
+    "name": "Schweinfurt, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.22121,
+    "lat": 50.05179
+  },
+  "966300": {
+    "id": "966300",
+    "name": "Würzburg, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 9.93545,
+    "lat": 49.77693
+  },
+  "967100": {
+    "id": "967100",
+    "name": "Aschaffenburg, Landkreis",
+    "cell_type": 1,
+    "lng": 9.29845,
+    "lat": 49.99117
+  },
+  "967200": {
+    "id": "967200",
+    "name": "Bad Kissingen",
+    "cell_type": 1,
+    "lng": 10.00203,
+    "lat": 50.22786
+  },
+  "967300": {
+    "id": "967300",
+    "name": "Rhön-Grabfeld",
+    "cell_type": 1,
+    "lng": 10.20692,
+    "lat": 50.38123
+  },
+  "967400": {
+    "id": "967400",
+    "name": "Haßberge",
+    "cell_type": 1,
+    "lng": 10.58891,
+    "lat": 50.04459
+  },
+  "967500": {
+    "id": "967500",
+    "name": "Kitzingen",
+    "cell_type": 1,
+    "lng": 10.27481,
+    "lat": 49.753
+  },
+  "967600": {
+    "id": "967600",
+    "name": "Miltenberg",
+    "cell_type": 1,
+    "lng": 9.21726,
+    "lat": 49.75739
+  },
+  "967700": {
+    "id": "967700",
+    "name": "Main-Spessart",
+    "cell_type": 1,
+    "lng": 9.70874,
+    "lat": 49.99559
+  },
+  "967800": {
+    "id": "967800",
+    "name": "Schweinfurt, Landkreis",
+    "cell_type": 1,
+    "lng": 10.10486,
+    "lat": 50.02625
+  },
+  "967900": {
+    "id": "967900",
+    "name": "Würzburg, Landkreis",
+    "cell_type": 1,
+    "lng": 9.87651,
+    "lat": 49.71673
+  },
+  "976100": {
+    "id": "976100",
+    "name": "Augsburg, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.90282,
+    "lat": 48.36013
+  },
+  "976200": {
+    "id": "976200",
+    "name": "Kaufbeuren, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.60546,
+    "lat": 47.88077
+  },
+  "976300": {
+    "id": "976300",
+    "name": "Kempten (Allgäu), Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.31186,
+    "lat": 47.73441
+  },
+  "976400": {
+    "id": "976400",
+    "name": "Memmingen, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.16999,
+    "lat": 47.98186
+  },
+  "977100": {
+    "id": "977100",
+    "name": "Aichach-Friedberg",
+    "cell_type": 1,
+    "lng": 11.06236,
+    "lat": 48.40625
+  },
+  "977200": {
+    "id": "977200",
+    "name": "Augsburg, Landkreis",
+    "cell_type": 1,
+    "lng": 10.68663,
+    "lat": 48.36249
+  },
+  "977300": {
+    "id": "977300",
+    "name": "Dillingen a.d. Donau",
+    "cell_type": 1,
+    "lng": 10.549,
+    "lat": 48.61252
+  },
+  "977400": {
+    "id": "977400",
+    "name": "Günzburg",
+    "cell_type": 1,
+    "lng": 10.38768,
+    "lat": 48.34447
+  },
+  "977500": {
+    "id": "977500",
+    "name": "Neu-Ulm",
+    "cell_type": 1,
+    "lng": 10.17104,
+    "lat": 48.29159
+  },
+  "977600": {
+    "id": "977600",
+    "name": "Lindau (Bodensee)",
+    "cell_type": 1,
+    "lng": 9.90714,
+    "lat": 47.60784
+  },
+  "977700": {
+    "id": "977700",
+    "name": "Ostallgäu",
+    "cell_type": 1,
+    "lng": 10.55786,
+    "lat": 47.81392
+  },
+  "977800": {
+    "id": "977800",
+    "name": "Unterallgäu",
+    "cell_type": 1,
+    "lng": 10.4563,
+    "lat": 48.02536
+  },
+  "977900": {
+    "id": "977900",
+    "name": "Donau-Ries",
+    "cell_type": 1,
+    "lng": 10.69759,
+    "lat": 48.81011
+  },
+  "978000": {
+    "id": "978000",
+    "name": "Oberallgäu",
+    "cell_type": 1,
+    "lng": 10.22158,
+    "lat": 47.56696
+  },
+  "1004100": {
+    "id": "1004100",
+    "name": "Regionalverband Saarbrücken",
+    "cell_type": 1,
+    "lng": 6.97041,
+    "lat": 49.2454
+  },
+  "1004200": {
+    "id": "1004200",
+    "name": "Merzig-Wadern",
+    "cell_type": 1,
+    "lng": 6.63077,
+    "lat": 49.49201
+  },
+  "1004300": {
+    "id": "1004300",
+    "name": "Neunkirchen",
+    "cell_type": 1,
+    "lng": 7.09086,
+    "lat": 49.36323
+  },
+  "1004400": {
+    "id": "1004400",
+    "name": "Saarlouis",
+    "cell_type": 1,
+    "lng": 6.75469,
+    "lat": 49.36226
+  },
+  "1004500": {
+    "id": "1004500",
+    "name": "Saarpfalz-Kreis",
+    "cell_type": 1,
+    "lng": 7.19928,
+    "lat": 49.26176
+  },
+  "1004600": {
+    "id": "1004600",
+    "name": "St. Wendel",
+    "cell_type": 1,
+    "lng": 7.12931,
+    "lat": 49.52743
+  },
+  "1010900": {
+    "id": "1010900",
+    "name": "Flughafen Saarbrücken",
+    "cell_type": 3,
+    "lng": 7.11408,
+    "lat": 49.21864
+  },
+  "1100000": {
+    "id": "1100000",
+    "name": "Berlin",
+    "cell_type": 1,
+    "lng": 13.39478,
+    "lat": 52.50609
+  },
+  "1101900": {
+    "id": "1101900",
+    "name": "Flughafen Berlin-Schönefeld",
+    "cell_type": 3,
+    "lng": 13.52056,
+    "lat": 52.37863
+  },
+  "1103900": {
+    "id": "1103900",
+    "name": "Flughafen Berlin Tegel",
+    "cell_type": 3,
+    "lng": 13.28778,
+    "lat": 52.55974
+  },
+  "1104900": {
+    "id": "1104900",
+    "name": "Flughafen Berlin-Brandenburg",
+    "cell_type": 3,
+    "lng": 13.52056,
+    "lat": 52.37863
+  },
+  "1205100": {
+    "id": "1205100",
+    "name": "Brandenburg an der Havel, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 12.51124,
+    "lat": 52.39413
+  },
+  "1205200": {
+    "id": "1205200",
+    "name": "Cottbus, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 14.38198,
+    "lat": 51.77702
+  },
+  "1205300": {
+    "id": "1205300",
+    "name": "Frankfurt (Oder), Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 14.49276,
+    "lat": 52.32507
+  },
+  "1205400": {
+    "id": "1205400",
+    "name": "Potsdam, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 13.02485,
+    "lat": 52.42931
+  },
+  "1206000": {
+    "id": "1206000",
+    "name": "Barnim",
+    "cell_type": 1,
+    "lng": 13.67677,
+    "lat": 52.79961
+  },
+  "1206100": {
+    "id": "1206100",
+    "name": "Dahme-Spreewald",
+    "cell_type": 1,
+    "lng": 13.8669,
+    "lat": 52.07372
+  },
+  "1206200": {
+    "id": "1206200",
+    "name": "Elbe-Elster",
+    "cell_type": 1,
+    "lng": 13.48155,
+    "lat": 51.62438
+  },
+  "1206300": {
+    "id": "1206300",
+    "name": "Havelland",
+    "cell_type": 1,
+    "lng": 12.68512,
+    "lat": 52.62496
+  },
+  "1206400": {
+    "id": "1206400",
+    "name": "Märkisch-Oderland",
+    "cell_type": 1,
+    "lng": 14.17657,
+    "lat": 52.6422
+  },
+  "1206500": {
+    "id": "1206500",
+    "name": "Oberhavel",
+    "cell_type": 1,
+    "lng": 13.2304,
+    "lat": 52.92099
+  },
+  "1206600": {
+    "id": "1206600",
+    "name": "Oberspreewald-Lausitz",
+    "cell_type": 1,
+    "lng": 14.03409,
+    "lat": 51.633
+  },
+  "1206700": {
+    "id": "1206700",
+    "name": "Oder-Spree",
+    "cell_type": 1,
+    "lng": 14.26634,
+    "lat": 52.25165
+  },
+  "1206800": {
+    "id": "1206800",
+    "name": "Ostprignitz-Ruppin",
+    "cell_type": 1,
+    "lng": 12.70503,
+    "lat": 53.00241
+  },
+  "1206900": {
+    "id": "1206900",
+    "name": "Potsdam-Mittelmark",
+    "cell_type": 1,
+    "lng": 12.69874,
+    "lat": 52.2657
+  },
+  "1207000": {
+    "id": "1207000",
+    "name": "Prignitz",
+    "cell_type": 1,
+    "lng": 11.90161,
+    "lat": 53.12374
+  },
+  "1207100": {
+    "id": "1207100",
+    "name": "Spree-Neiße",
+    "cell_type": 1,
+    "lng": 14.19655,
+    "lat": 51.78321
+  },
+  "1207200": {
+    "id": "1207200",
+    "name": "Teltow-Fläming",
+    "cell_type": 1,
+    "lng": 13.26559,
+    "lat": 52.1007
+  },
+  "1207300": {
+    "id": "1207300",
+    "name": "Uckermark",
+    "cell_type": 1,
+    "lng": 13.91393,
+    "lat": 53.245
+  },
+  "1300300": {
+    "id": "1300300",
+    "name": "Rostock, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 12.14344,
+    "lat": 54.14789
+  },
+  "1300400": {
+    "id": "1300400",
+    "name": "Schwerin, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 11.4305,
+    "lat": 53.61628
+  },
+  "1307100": {
+    "id": "1307100",
+    "name": "Mecklenburgische Seenplatte",
+    "cell_type": 1,
+    "lng": 13.06167,
+    "lat": 53.58442
+  },
+  "1307200": {
+    "id": "1307200",
+    "name": "Landkreis Rostock",
+    "cell_type": 1,
+    "lng": 12.29711,
+    "lat": 53.92137
+  },
+  "1307300": {
+    "id": "1307300",
+    "name": "Vorpommern-Rügen",
+    "cell_type": 1,
+    "lng": 12.80506,
+    "lat": 54.23166
+  },
+  "1307400": {
+    "id": "1307400",
+    "name": "Nordwestmecklenburg",
+    "cell_type": 1,
+    "lng": 11.28484,
+    "lat": 53.80511
+  },
+  "1307500": {
+    "id": "1307500",
+    "name": "Vorpommern-Greifswald",
+    "cell_type": 1,
+    "lng": 13.89049,
+    "lat": 53.72336
+  },
+  "1307600": {
+    "id": "1307600",
+    "name": "Ludwigslust-Parchim",
+    "cell_type": 1,
+    "lng": 11.47848,
+    "lat": 53.45376
+  },
+  "1311900": {
+    "id": "1311900",
+    "name": "Flughafen Rostock",
+    "cell_type": 3,
+    "lng": 12.27833,
+    "lat": 53.91808
+  },
+  "1360166": {
+    "id": "1360166",
+    "name": "Seehafen Wismar",
+    "cell_type": 4,
+    "lng": 11.4578,
+    "lat": 53.90112
+  },
+  "1360266": {
+    "id": "1360266",
+    "name": "Seehafen Rostock",
+    "cell_type": 4,
+    "lng": 12.1145,
+    "lat": 54.15492
+  },
+  "1360366": {
+    "id": "1360366",
+    "name": "Seehafen Stralsund",
+    "cell_type": 4,
+    "lng": 13.0963,
+    "lat": 54.31652
+  },
+  "1360466": {
+    "id": "1360466",
+    "name": "Seehafen Sassnitz-Mukran",
+    "cell_type": 4,
+    "lng": 13.6348,
+    "lat": 54.51022
+  },
+  "1410900": {
+    "id": "1410900",
+    "name": "Flughafen Leipzig/Halle",
+    "cell_type": 3,
+    "lng": 12.24167,
+    "lat": 51.43252
+  },
+  "1411900": {
+    "id": "1411900",
+    "name": "Flughafen Dresden",
+    "cell_type": 3,
+    "lng": 13.76806,
+    "lat": 51.13446
+  },
+  "1451100": {
+    "id": "1451100",
+    "name": "Chemnitz, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 12.88782,
+    "lat": 50.82249
+  },
+  "1452100": {
+    "id": "1452100",
+    "name": "Erzgebirgskreis",
+    "cell_type": 1,
+    "lng": 12.95663,
+    "lat": 50.602
+  },
+  "1452200": {
+    "id": "1452200",
+    "name": "Mittelsachsen",
+    "cell_type": 1,
+    "lng": 13.04253,
+    "lat": 50.93462
+  },
+  "1452300": {
+    "id": "1452300",
+    "name": "Vogtlandkreis",
+    "cell_type": 1,
+    "lng": 12.25222,
+    "lat": 50.4243
+  },
+  "1452400": {
+    "id": "1452400",
+    "name": "Zwickau",
+    "cell_type": 1,
+    "lng": 12.46503,
+    "lat": 50.73549
+  },
+  "1461200": {
+    "id": "1461200",
+    "name": "Dresden, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 13.74108,
+    "lat": 51.07604
+  },
+  "1462500": {
+    "id": "1462500",
+    "name": "Bautzen",
+    "cell_type": 1,
+    "lng": 14.20956,
+    "lat": 51.28576
+  },
+  "1462600": {
+    "id": "1462600",
+    "name": "Görlitz",
+    "cell_type": 1,
+    "lng": 14.8465,
+    "lat": 51.20598
+  },
+  "1462700": {
+    "id": "1462700",
+    "name": "Meißen",
+    "cell_type": 1,
+    "lng": 13.50278,
+    "lat": 51.2292
+  },
+  "1462800": {
+    "id": "1462800",
+    "name": "Sächsische Schweiz-Osterzgebirge",
+    "cell_type": 1,
+    "lng": 13.92342,
+    "lat": 50.90882
+  },
+  "1471300": {
+    "id": "1471300",
+    "name": "Leipzig, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 12.38691,
+    "lat": 51.34492
+  },
+  "1472900": {
+    "id": "1472900",
+    "name": "Leipzig",
+    "cell_type": 1,
+    "lng": 12.55392,
+    "lat": 51.22467
+  },
+  "1473000": {
+    "id": "1473000",
+    "name": "Nordsachsen",
+    "cell_type": 1,
+    "lng": 13.03875,
+    "lat": 51.44259
+  },
+  "1500100": {
+    "id": "1500100",
+    "name": "Dessau-Roßlau, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 12.21798,
+    "lat": 51.85546
+  },
+  "1500200": {
+    "id": "1500200",
+    "name": "Halle (Saale), Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 11.96763,
+    "lat": 51.47323
+  },
+  "1500300": {
+    "id": "1500300",
+    "name": "Magdeburg, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 11.6309,
+    "lat": 52.13117
+  },
+  "1508100": {
+    "id": "1508100",
+    "name": "Altmarkkreis Salzwedel",
+    "cell_type": 1,
+    "lng": 11.17802,
+    "lat": 52.66682
+  },
+  "1508200": {
+    "id": "1508200",
+    "name": "Anhalt-Bitterfeld",
+    "cell_type": 1,
+    "lng": 12.0097,
+    "lat": 51.81717
+  },
+  "1508300": {
+    "id": "1508300",
+    "name": "Börde",
+    "cell_type": 1,
+    "lng": 11.3347,
+    "lat": 52.20114
+  },
+  "1508400": {
+    "id": "1508400",
+    "name": "Burgenlandkreis",
+    "cell_type": 1,
+    "lng": 11.85048,
+    "lat": 51.12808
+  },
+  "1508500": {
+    "id": "1508500",
+    "name": "Harz",
+    "cell_type": 1,
+    "lng": 10.91319,
+    "lat": 51.81224
+  },
+  "1508600": {
+    "id": "1508600",
+    "name": "Jerichower Land",
+    "cell_type": 1,
+    "lng": 12.01181,
+    "lat": 52.29139
+  },
+  "1508700": {
+    "id": "1508700",
+    "name": "Mansfeld-Südharz",
+    "cell_type": 1,
+    "lng": 11.33462,
+    "lat": 51.53563
+  },
+  "1508800": {
+    "id": "1508800",
+    "name": "Saalekreis",
+    "cell_type": 1,
+    "lng": 11.84959,
+    "lat": 51.45516
+  },
+  "1508900": {
+    "id": "1508900",
+    "name": "Salzlandkreis",
+    "cell_type": 1,
+    "lng": 11.60283,
+    "lat": 51.85091
+  },
+  "1509000": {
+    "id": "1509000",
+    "name": "Stendal",
+    "cell_type": 1,
+    "lng": 11.85277,
+    "lat": 52.68537
+  },
+  "1509100": {
+    "id": "1509100",
+    "name": "Wittenberg",
+    "cell_type": 1,
+    "lng": 12.72849,
+    "lat": 51.83261
+  },
+  "1605100": {
+    "id": "1605100",
+    "name": "Erfurt, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 11.02715,
+    "lat": 50.9857
+  },
+  "1605200": {
+    "id": "1605200",
+    "name": "Gera, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 12.08052,
+    "lat": 50.88802
+  },
+  "1605300": {
+    "id": "1605300",
+    "name": "Jena, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 11.5869,
+    "lat": 50.92726
+  },
+  "1605400": {
+    "id": "1605400",
+    "name": "Suhl, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.66964,
+    "lat": 50.61387
+  },
+  "1605500": {
+    "id": "1605500",
+    "name": "Weimar, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 11.32891,
+    "lat": 50.97485
+  },
+  "1605600": {
+    "id": "1605600",
+    "name": "Eisenach, Kreisfreie Stadt",
+    "cell_type": 1,
+    "lng": 10.2862,
+    "lat": 50.9929
+  },
+  "1606100": {
+    "id": "1606100",
+    "name": "Eichsfeld",
+    "cell_type": 1,
+    "lng": 10.22905,
+    "lat": 51.39215
+  },
+  "1606200": {
+    "id": "1606200",
+    "name": "Nordhausen",
+    "cell_type": 1,
+    "lng": 10.73309,
+    "lat": 51.50968
+  },
+  "1606300": {
+    "id": "1606300",
+    "name": "Wartburgkreis",
+    "cell_type": 1,
+    "lng": 10.23716,
+    "lat": 50.88355
+  },
+  "1606400": {
+    "id": "1606400",
+    "name": "Unstrut-Hainich-Kreis",
+    "cell_type": 1,
+    "lng": 10.56454,
+    "lat": 51.18852
+  },
+  "1606500": {
+    "id": "1606500",
+    "name": "Kyffhäuserkreis",
+    "cell_type": 1,
+    "lng": 10.83701,
+    "lat": 51.31409
+  },
+  "1606600": {
+    "id": "1606600",
+    "name": "Schmalkalden-Meiningen",
+    "cell_type": 1,
+    "lng": 10.40674,
+    "lat": 50.62158
+  },
+  "1606700": {
+    "id": "1606700",
+    "name": "Gotha",
+    "cell_type": 1,
+    "lng": 10.71597,
+    "lat": 50.91378
+  },
+  "1606800": {
+    "id": "1606800",
+    "name": "Sömmerda",
+    "cell_type": 1,
+    "lng": 11.19378,
+    "lat": 51.16562
+  },
+  "1606900": {
+    "id": "1606900",
+    "name": "Hildburghausen",
+    "cell_type": 1,
+    "lng": 10.70648,
+    "lat": 50.40926
+  },
+  "1607000": {
+    "id": "1607000",
+    "name": "Ilm-Kreis",
+    "cell_type": 1,
+    "lng": 10.93225,
+    "lat": 50.73039
+  },
+  "1607100": {
+    "id": "1607100",
+    "name": "Weimarer Land",
+    "cell_type": 1,
+    "lng": 11.20539,
+    "lat": 50.95486
+  },
+  "1607200": {
+    "id": "1607200",
+    "name": "Sonneberg",
+    "cell_type": 1,
+    "lng": 11.10625,
+    "lat": 50.4061
+  },
+  "1607300": {
+    "id": "1607300",
+    "name": "Saalfeld-Rudolstadt",
+    "cell_type": 1,
+    "lng": 11.28803,
+    "lat": 50.62971
+  },
+  "1607400": {
+    "id": "1607400",
+    "name": "Saale-Holzland-Kreis",
+    "cell_type": 1,
+    "lng": 11.80816,
+    "lat": 50.91759
+  },
+  "1607500": {
+    "id": "1607500",
+    "name": "Saale-Orla-Kreis",
+    "cell_type": 1,
+    "lng": 11.78149,
+    "lat": 50.58836
+  },
+  "1607600": {
+    "id": "1607600",
+    "name": "Greiz",
+    "cell_type": 1,
+    "lng": 12.0891,
+    "lat": 50.76353
+  },
+  "1607700": {
+    "id": "1607700",
+    "name": "Altenburger Land",
+    "cell_type": 1,
+    "lng": 12.4331,
+    "lat": 50.95687
+  },
+  "1610900": {
+    "id": "1610900",
+    "name": "Flughafen Erfurt",
+    "cell_type": 3,
+    "lng": 10.95806,
+    "lat": 50.97974
+  },
+  "2100011": {
+    "id": "2100011",
+    "name": "Kopenhagen",
+    "cell_type": 2,
+    "lng": 12.3441,
+    "lat": 55.74425
+  },
+  "2100012": {
+    "id": "2100012",
+    "name": "Seeland West u. Süd",
+    "cell_type": 2,
+    "lng": 11.41153,
+    "lat": 54.78094
+  },
+  "2100013": {
+    "id": "2100013",
+    "name": "Bornholm",
+    "cell_type": 2,
+    "lng": 14.92699,
+    "lat": 55.13782
+  },
+  "2100014": {
+    "id": "2100014",
+    "name": "Fünen",
+    "cell_type": 2,
+    "lng": 10.34656,
+    "lat": 55.32578
+  },
+  "2100015": {
+    "id": "2100015",
+    "name": "Jütland Süd",
+    "cell_type": 2,
+    "lng": 9.13108,
+    "lat": 55.3816
+  },
+  "2100016": {
+    "id": "2100016",
+    "name": "Jütland Nord",
+    "cell_type": 2,
+    "lng": 9.5557,
+    "lat": 56.3747
+  },
+  "2102000": {
+    "id": "2102000",
+    "name": "Flughafen Kopenhagen",
+    "cell_type": 3,
+    "lng": 12.58333,
+    "lat": 55.73335
+  },
+  "2104000": {
+    "id": "2104000",
+    "name": "Flughafen Billund",
+    "cell_type": 3,
+    "lng": 9.15167,
+    "lat": 55.7403
+  },
+  "2200001": {
+    "id": "2200001",
+    "name": "Norwegen",
+    "cell_type": 2,
+    "lng": 12.66509,
+    "lat": 64.55763
+  },
+  "2300011": {
+    "id": "2300011",
+    "name": "Stockholm/Mittelschweden Ost",
+    "cell_type": 2,
+    "lng": 16.20174,
+    "lat": 59.32069
+  },
+  "2300012": {
+    "id": "2300012",
+    "name": "Göteborg/Mittelschweden West",
+    "cell_type": 2,
+    "lng": 12.88335,
+    "lat": 58.68967
+  },
+  "2300013": {
+    "id": "2300013",
+    "name": "Malmö/Südschweden",
+    "cell_type": 2,
+    "lng": 13.55174,
+    "lat": 55.93636
+  },
+  "2300014": {
+    "id": "2300014",
+    "name": "Nordschweden",
+    "cell_type": 2,
+    "lng": 17.95548,
+    "lat": 65.312
+  },
+  "2400001": {
+    "id": "2400001",
+    "name": "Finnland",
+    "cell_type": 2,
+    "lng": 27.53816,
+    "lat": 64.9499
+  },
+  "2900001": {
+    "id": "2900001",
+    "name": "Island",
+    "cell_type": 2,
+    "lng": -18.43295,
+    "lat": 64.96478
+  },
+  "3100011": {
+    "id": "3100011",
+    "name": "Amsterdam/Nordholland",
+    "cell_type": 2,
+    "lng": 4.85947,
+    "lat": 52.59381
+  },
+  "3100012": {
+    "id": "3100012",
+    "name": "Utrecht",
+    "cell_type": 2,
+    "lng": 5.14409,
+    "lat": 52.07981
+  },
+  "3100013": {
+    "id": "3100013",
+    "name": "Rotterdam/Südholland",
+    "cell_type": 2,
+    "lng": 4.46749,
+    "lat": 51.98582
+  },
+  "3100014": {
+    "id": "3100014",
+    "name": "Zeeland",
+    "cell_type": 2,
+    "lng": 3.88654,
+    "lat": 51.30362
+  },
+  "3100021": {
+    "id": "3100021",
+    "name": "Groningen",
+    "cell_type": 2,
+    "lng": 6.66543,
+    "lat": 53.26827
+  },
+  "3100022": {
+    "id": "3100022",
+    "name": "Winschoten",
+    "cell_type": 2,
+    "lng": 7.02505,
+    "lat": 53.05122
+  },
+  "3100023": {
+    "id": "3100023",
+    "name": "Emmen",
+    "cell_type": 2,
+    "lng": 6.87873,
+    "lat": 52.80896
+  },
+  "3100024": {
+    "id": "3100024",
+    "name": "Drenthe West",
+    "cell_type": 2,
+    "lng": 6.53248,
+    "lat": 52.90823
+  },
+  "3100025": {
+    "id": "3100025",
+    "name": "Friesland",
+    "cell_type": 2,
+    "lng": 5.83513,
+    "lat": 53.08717
+  },
+  "3100031": {
+    "id": "3100031",
+    "name": "Arnhem/Nijmegen",
+    "cell_type": 2,
+    "lng": 5.91856,
+    "lat": 51.91515
+  },
+  "3100032": {
+    "id": "3100032",
+    "name": "Apeldoorn",
+    "cell_type": 2,
+    "lng": 5.77765,
+    "lat": 52.127
+  },
+  "3100033": {
+    "id": "3100033",
+    "name": "Flevoland",
+    "cell_type": 2,
+    "lng": 5.46682,
+    "lat": 52.54763
+  },
+  "3100034": {
+    "id": "3100034",
+    "name": "Zwolle",
+    "cell_type": 2,
+    "lng": 6.27709,
+    "lat": 52.53578
+  },
+  "3100035": {
+    "id": "3100035",
+    "name": "Enschede",
+    "cell_type": 2,
+    "lng": 6.68557,
+    "lat": 52.30547
+  },
+  "3100036": {
+    "id": "3100036",
+    "name": "Gelderland Ost",
+    "cell_type": 2,
+    "lng": 6.4499,
+    "lat": 52.03678
+  },
+  "3100041": {
+    "id": "3100041",
+    "name": "Eindhoven/Nordbrabant Ost",
+    "cell_type": 2,
+    "lng": 5.54001,
+    "lat": 51.52413
+  },
+  "3100042": {
+    "id": "3100042",
+    "name": "Venlo",
+    "cell_type": 2,
+    "lng": 6.03168,
+    "lat": 51.51115
+  },
+  "3100043": {
+    "id": "3100043",
+    "name": "Roermond",
+    "cell_type": 2,
+    "lng": 5.91334,
+    "lat": 51.18659
+  },
+  "3100044": {
+    "id": "3100044",
+    "name": "Maastricht",
+    "cell_type": 2,
+    "lng": 5.90524,
+    "lat": 50.91232
+  },
+  "3100045": {
+    "id": "3100045",
+    "name": "Nordbrabant West",
+    "cell_type": 2,
+    "lng": 4.69933,
+    "lat": 51.59059
+  },
+  "3102000": {
+    "id": "3102000",
+    "name": "Flughafen Amsterdam",
+    "cell_type": 3,
+    "lng": 4.76417,
+    "lat": 52.30808
+  },
+  "3104000": {
+    "id": "3104000",
+    "name": "Flughafen Eindhoven",
+    "cell_type": 3,
+    "lng": 5.37444,
+    "lat": 51.45002
+  },
+  "3106000": {
+    "id": "3106000",
+    "name": "Flughafen Maastricht",
+    "cell_type": 3,
+    "lng": 5.77694,
+    "lat": 50.91585
+  },
+  "3160166": {
+    "id": "3160166",
+    "name": "Seehafen Rotterdam",
+    "cell_type": 4,
+    "lng": 4.44981,
+    "lat": 51.89602
+  },
+  "3160266": {
+    "id": "3160266",
+    "name": "Seehafen Amsterdam",
+    "cell_type": 4,
+    "lng": 4.81682,
+    "lat": 52.40922
+  },
+  "3160366": {
+    "id": "3160366",
+    "name": "Seehafen Groningen Seaports",
+    "cell_type": 4,
+    "lng": 6.83543,
+    "lat": 53.44564
+  },
+  "3200011": {
+    "id": "3200011",
+    "name": "Brüssel",
+    "cell_type": 2,
+    "lng": 4.61482,
+    "lat": 50.86994
+  },
+  "3200012": {
+    "id": "3200012",
+    "name": "Antwerpen",
+    "cell_type": 2,
+    "lng": 4.75704,
+    "lat": 51.24809
+  },
+  "3200013": {
+    "id": "3200013",
+    "name": "Hasselt",
+    "cell_type": 2,
+    "lng": 5.44438,
+    "lat": 51.00321
+  },
+  "3200014": {
+    "id": "3200014",
+    "name": "Ostflandern",
+    "cell_type": 2,
+    "lng": 3.8102,
+    "lat": 51.03812
+  },
+  "3200015": {
+    "id": "3200015",
+    "name": "Westflandern",
+    "cell_type": 2,
+    "lng": 3.0038,
+    "lat": 51.02572
+  },
+  "3200021": {
+    "id": "3200021",
+    "name": "Hainaut",
+    "cell_type": 2,
+    "lng": 4.12469,
+    "lat": 50.36264
+  },
+  "3200022": {
+    "id": "3200022",
+    "name": "Brabant Süd",
+    "cell_type": 2,
+    "lng": 4.54754,
+    "lat": 50.66691
+  },
+  "3200023": {
+    "id": "3200023",
+    "name": "Namur",
+    "cell_type": 2,
+    "lng": 4.80517,
+    "lat": 50.21949
+  },
+  "3200024": {
+    "id": "3200024",
+    "name": "Lüttich",
+    "cell_type": 2,
+    "lng": 5.77166,
+    "lat": 50.47155
+  },
+  "3200026": {
+    "id": "3200026",
+    "name": "Belgisch-Luxembourg",
+    "cell_type": 2,
+    "lng": 5.44066,
+    "lat": 49.9645
+  },
+  "3202000": {
+    "id": "3202000",
+    "name": "Flughafen Bruessel",
+    "cell_type": 3,
+    "lng": 4.48444,
+    "lat": 50.90141
+  },
+  "3204000": {
+    "id": "3204000",
+    "name": "Flughafen Lüttich",
+    "cell_type": 3,
+    "lng": 5.44333,
+    "lat": 50.63752
+  },
+  "3260166": {
+    "id": "3260166",
+    "name": "Seehafen Zeebrugge",
+    "cell_type": 4,
+    "lng": 3.20801,
+    "lat": 51.33462
+  },
+  "3260266": {
+    "id": "3260266",
+    "name": "Seehafen Antwerpen",
+    "cell_type": 4,
+    "lng": 4.38423,
+    "lat": 51.25652
+  },
+  "3300001": {
+    "id": "3300001",
+    "name": "Luxemburg",
+    "cell_type": 2,
+    "lng": 6.08712,
+    "lat": 49.81475
+  },
+  "3302000": {
+    "id": "3302000",
+    "name": "Flughafen Luxemburg",
+    "cell_type": 3,
+    "lng": 6.20444,
+    "lat": 49.62335
+  },
+  "3600011": {
+    "id": "3600011",
+    "name": "London/Südostengland",
+    "cell_type": 2,
+    "lng": -0.35443,
+    "lat": 51.84695
+  },
+  "3600012": {
+    "id": "3600012",
+    "name": "Großbritannien Rest",
+    "cell_type": 2,
+    "lng": -1.91972,
+    "lat": 54.31845
+  },
+  "3700001": {
+    "id": "3700001",
+    "name": "Irland",
+    "cell_type": 2,
+    "lng": -7.99925,
+    "lat": 53.41709
+  },
+  "4100011": {
+    "id": "4100011",
+    "name": "Paris",
+    "cell_type": 2,
+    "lng": 2.53058,
+    "lat": 48.68089
+  },
+  "4100021": {
+    "id": "4100021",
+    "name": "Picardie",
+    "cell_type": 2,
+    "lng": 2.87124,
+    "lat": 49.60248
+  },
+  "4100022": {
+    "id": "4100022",
+    "name": "Champagne/Ardenne",
+    "cell_type": 2,
+    "lng": 4.20812,
+    "lat": 48.87211
+  },
+  "4100023": {
+    "id": "4100023",
+    "name": "Bourgogne",
+    "cell_type": 2,
+    "lng": 4.22214,
+    "lat": 47.27818
+  },
+  "4100024": {
+    "id": "4100024",
+    "name": "Normandie/Centre",
+    "cell_type": 2,
+    "lng": 1.61853,
+    "lat": 48.20836
+  },
+  "4100031": {
+    "id": "4100031",
+    "name": "Lille",
+    "cell_type": 2,
+    "lng": 2.45442,
+    "lat": 50.52922
+  },
+  "4100041": {
+    "id": "4100041",
+    "name": "Nancy/Lothringen Süd/West",
+    "cell_type": 2,
+    "lng": 5.81006,
+    "lat": 48.7152
+  },
+  "4100042": {
+    "id": "4100042",
+    "name": "Metz/Moselle",
+    "cell_type": 2,
+    "lng": 6.53758,
+    "lat": 49.02093
+  },
+  "4100043": {
+    "id": "4100043",
+    "name": "Strasbourg/ Bas Rhin",
+    "cell_type": 2,
+    "lng": 7.53448,
+    "lat": 48.59658
+  },
+  "4100044": {
+    "id": "4100044",
+    "name": "Mulhouse/ Haut Rhin",
+    "cell_type": 2,
+    "lng": 7.23212,
+    "lat": 47.86752
+  },
+  "4100045": {
+    "id": "4100045",
+    "name": "Franche Comte",
+    "cell_type": 2,
+    "lng": 6.13155,
+    "lat": 47.14228
+  },
+  "4100051": {
+    "id": "4100051",
+    "name": "Auvergne/Rhone-Alpes",
+    "cell_type": 2,
+    "lng": 4.80065,
+    "lat": 45.46002
+  },
+  "4100052": {
+    "id": "4100052",
+    "name": "Frankreich Mittelmeerküste",
+    "cell_type": 2,
+    "lng": 5.23288,
+    "lat": 43.73053
+  },
+  "4100053": {
+    "id": "4100053",
+    "name": "Südwestfrankreich",
+    "cell_type": 2,
+    "lng": 0.91033,
+    "lat": 44.512
+  },
+  "4100054": {
+    "id": "4100054",
+    "name": "Westfrankreich",
+    "cell_type": 2,
+    "lng": -0.87224,
+    "lat": 46.98642
+  },
+  "4102000": {
+    "id": "4102000",
+    "name": "Flughafen Paris CdG",
+    "cell_type": 3,
+    "lng": 2.54778,
+    "lat": 49.00974
+  },
+  "4106000": {
+    "id": "4106000",
+    "name": "Flughafen Strasbourg",
+    "cell_type": 3,
+    "lng": 7.63444,
+    "lat": 48.54196
+  },
+  "4160166": {
+    "id": "4160166",
+    "name": "Seehafen Le Havre",
+    "cell_type": 4,
+    "lng": 0.13638,
+    "lat": 49.47462
+  },
+  "4200001": {
+    "id": "4200001",
+    "name": "Spanien",
+    "cell_type": 2,
+    "lng": -3.46664,
+    "lat": 39.89572
+  },
+  "4300001": {
+    "id": "4300001",
+    "name": "Portugal",
+    "cell_type": 2,
+    "lng": -8.27777,
+    "lat": 39.55462
+  },
+  "5100011": {
+    "id": "5100011",
+    "name": "Basel-Stadt (Nordwestschweiz)",
+    "cell_type": 2,
+    "lng": 7.59246,
+    "lat": 47.55922
+  },
+  "5100012": {
+    "id": "5100012",
+    "name": "Basel-Landschaft (Nordwestschweiz)",
+    "cell_type": 2,
+    "lng": 7.82291,
+    "lat": 47.45099
+  },
+  "5100013": {
+    "id": "5100013",
+    "name": "Aargau (Nordwestschweiz)",
+    "cell_type": 2,
+    "lng": 8.21299,
+    "lat": 47.37799
+  },
+  "5100014": {
+    "id": "5100014",
+    "name": "Zürich",
+    "cell_type": 2,
+    "lng": 8.64512,
+    "lat": 47.44765
+  },
+  "5100015": {
+    "id": "5100015",
+    "name": "Schaffhausen (Ostschweiz)",
+    "cell_type": 2,
+    "lng": 8.58556,
+    "lat": 47.7259
+  },
+  "5100016": {
+    "id": "5100016",
+    "name": "Thurgau (Ostschweiz)",
+    "cell_type": 2,
+    "lng": 9.12444,
+    "lat": 47.53423
+  },
+  "5100017": {
+    "id": "5100017",
+    "name": "St. Gallen (Ostschweiz)",
+    "cell_type": 2,
+    "lng": 9.2299,
+    "lat": 47.20301
+  },
+  "5100018": {
+    "id": "5100018",
+    "name": "Chur (Ostschweiz)",
+    "cell_type": 2,
+    "lng": 9.53264,
+    "lat": 46.67156
+  },
+  "5100019": {
+    "id": "5100019",
+    "name": "Zentralschweiz",
+    "cell_type": 2,
+    "lng": 8.2372,
+    "lat": 46.90795
+  },
+  "5100021": {
+    "id": "5100021",
+    "name": "Bern",
+    "cell_type": 2,
+    "lng": 7.61799,
+    "lat": 46.82252
+  },
+  "5100022": {
+    "id": "5100022",
+    "name": "Fribourg/Freiburg",
+    "cell_type": 2,
+    "lng": 7.11082,
+    "lat": 46.72271
+  },
+  "5100023": {
+    "id": "5100023",
+    "name": "Neuchâtel",
+    "cell_type": 2,
+    "lng": 6.81108,
+    "lat": 47.00729
+  },
+  "5100024": {
+    "id": "5100024",
+    "name": "Jura (CH)",
+    "cell_type": 2,
+    "lng": 7.28906,
+    "lat": 47.32794
+  },
+  "5100025": {
+    "id": "5100025",
+    "name": "Solothurn",
+    "cell_type": 2,
+    "lng": 7.57544,
+    "lat": 47.28641
+  },
+  "5100026": {
+    "id": "5100026",
+    "name": "Genf/Lausanne/Wallis (Genferseeregion)",
+    "cell_type": 2,
+    "lng": 7.92586,
+    "lat": 46.39705
+  },
+  "5100027": {
+    "id": "5100027",
+    "name": "Tessin",
+    "cell_type": 2,
+    "lng": 8.75185,
+    "lat": 46.27913
+  },
+  "5102000": {
+    "id": "5102000",
+    "name": "Flughafen Zürich",
+    "cell_type": 3,
+    "lng": 8.54917,
+    "lat": 47.46474
+  },
+  "5103000": {
+    "id": "5103000",
+    "name": "Flughafen Basel/Mulhouse",
+    "cell_type": 3,
+    "lng": 7.52991,
+    "lat": 47.5896
+  },
+  "5190001": {
+    "id": "5190001",
+    "name": "Liechtenstein",
+    "cell_type": 2,
+    "lng": 9.54698,
+    "lat": 47.1591
+  },
+  "5200011": {
+    "id": "5200011",
+    "name": "Wien/Österreich Ost",
+    "cell_type": 2,
+    "lng": 15.92077,
+    "lat": 47.92464
+  },
+  "5200012": {
+    "id": "5200012",
+    "name": "Steiermark",
+    "cell_type": 2,
+    "lng": 14.97224,
+    "lat": 47.22326
+  },
+  "5200013": {
+    "id": "5200013",
+    "name": "Kärnten",
+    "cell_type": 2,
+    "lng": 13.93874,
+    "lat": 46.75291
+  },
+  "5200021": {
+    "id": "5200021",
+    "name": "Linz-Wels",
+    "cell_type": 2,
+    "lng": 14.19339,
+    "lat": 48.24222
+  },
+  "5200022": {
+    "id": "5200022",
+    "name": "Mühlviertel",
+    "cell_type": 2,
+    "lng": 14.60253,
+    "lat": 48.46353
+  },
+  "5200023": {
+    "id": "5200023",
+    "name": "Steyr-Kirchdorf",
+    "cell_type": 2,
+    "lng": 14.40251,
+    "lat": 47.87163
+  },
+  "5200024": {
+    "id": "5200024",
+    "name": "Traunviertel",
+    "cell_type": 2,
+    "lng": 13.76614,
+    "lat": 47.79681
+  },
+  "5200025": {
+    "id": "5200025",
+    "name": "Braunau",
+    "cell_type": 2,
+    "lng": 13.06293,
+    "lat": 48.13288
+  },
+  "5200026": {
+    "id": "5200026",
+    "name": "Ried im Innkreis",
+    "cell_type": 2,
+    "lng": 13.47302,
+    "lat": 48.21248
+  },
+  "5200027": {
+    "id": "5200027",
+    "name": "Schärding",
+    "cell_type": 2,
+    "lng": 13.56509,
+    "lat": 48.41848
+  },
+  "5200028": {
+    "id": "5200028",
+    "name": "Grieskirchen",
+    "cell_type": 2,
+    "lng": 13.7728,
+    "lat": 48.28029
+  },
+  "5200031": {
+    "id": "5200031",
+    "name": "Salzburg und Umgebung",
+    "cell_type": 2,
+    "lng": 13.14142,
+    "lat": 47.83727
+  },
+  "5200032": {
+    "id": "5200032",
+    "name": "Hallein",
+    "cell_type": 2,
+    "lng": 13.29278,
+    "lat": 47.60876
+  },
+  "5200033": {
+    "id": "5200033",
+    "name": "Sankt Johann im Pongau",
+    "cell_type": 2,
+    "lng": 13.33931,
+    "lat": 47.28414
+  },
+  "5200034": {
+    "id": "5200034",
+    "name": "Zell am See",
+    "cell_type": 2,
+    "lng": 12.77189,
+    "lat": 47.35917
+  },
+  "5200035": {
+    "id": "5200035",
+    "name": "Tamsweg",
+    "cell_type": 2,
+    "lng": 13.62209,
+    "lat": 47.11968
+  },
+  "5200041": {
+    "id": "5200041",
+    "name": "Innsbruck",
+    "cell_type": 2,
+    "lng": 11.38703,
+    "lat": 47.20919
+  },
+  "5200042": {
+    "id": "5200042",
+    "name": "Tiroler Oberland",
+    "cell_type": 2,
+    "lng": 10.61012,
+    "lat": 47.08135
+  },
+  "5200043": {
+    "id": "5200043",
+    "name": "Außerfern",
+    "cell_type": 2,
+    "lng": 10.54658,
+    "lat": 47.36156
+  },
+  "5200044": {
+    "id": "5200044",
+    "name": "Schwaz",
+    "cell_type": 2,
+    "lng": 11.83544,
+    "lat": 47.28153
+  },
+  "5200045": {
+    "id": "5200045",
+    "name": "Kufstein",
+    "cell_type": 2,
+    "lng": 12.07921,
+    "lat": 47.53239
+  },
+  "5200046": {
+    "id": "5200046",
+    "name": "Kitzbühel",
+    "cell_type": 2,
+    "lng": 12.50769,
+    "lat": 47.48215
+  },
+  "5200047": {
+    "id": "5200047",
+    "name": "Osttirol",
+    "cell_type": 2,
+    "lng": 12.51243,
+    "lat": 46.90377
+  },
+  "5200051": {
+    "id": "5200051",
+    "name": "Bregenz",
+    "cell_type": 2,
+    "lng": 9.75071,
+    "lat": 47.37224
+  },
+  "5200052": {
+    "id": "5200052",
+    "name": "Vorarlberg Ost",
+    "cell_type": 2,
+    "lng": 9.91601,
+    "lat": 47.17584
+  },
+  "5203000": {
+    "id": "5203000",
+    "name": "Flughafen Salzburg",
+    "cell_type": 3,
+    "lng": 13.00444,
+    "lat": 47.79335
+  },
+  "5205000": {
+    "id": "5205000",
+    "name": "Flughafen Innsbruck",
+    "cell_type": 3,
+    "lng": 11.34389,
+    "lat": 47.2603
+  },
+  "5300011": {
+    "id": "5300011",
+    "name": "Mailand",
+    "cell_type": 2,
+    "lng": 9.30528,
+    "lat": 45.65946
+  },
+  "5300012": {
+    "id": "5300012",
+    "name": "Lombardei Ost",
+    "cell_type": 2,
+    "lng": 10.28632,
+    "lat": 45.63698
+  },
+  "5300013": {
+    "id": "5300013",
+    "name": "Genua",
+    "cell_type": 2,
+    "lng": 9.6864,
+    "lat": 44.2256
+  },
+  "5300014": {
+    "id": "5300014",
+    "name": "Turin",
+    "cell_type": 2,
+    "lng": 7.8351,
+    "lat": 45.26052
+  },
+  "5300021": {
+    "id": "5300021",
+    "name": "Bozen",
+    "cell_type": 2,
+    "lng": 11.23099,
+    "lat": 46.65622
+  },
+  "5300022": {
+    "id": "5300022",
+    "name": "Trient",
+    "cell_type": 2,
+    "lng": 11.12979,
+    "lat": 46.1028
+  },
+  "5300023": {
+    "id": "5300023",
+    "name": "Verona",
+    "cell_type": 2,
+    "lng": 10.97567,
+    "lat": 45.44338
+  },
+  "5300024": {
+    "id": "5300024",
+    "name": "Venedig",
+    "cell_type": 2,
+    "lng": 12.09495,
+    "lat": 45.73612
+  },
+  "5300025": {
+    "id": "5300025",
+    "name": "Triest",
+    "cell_type": 2,
+    "lng": 13.0461,
+    "lat": 46.11378
+  },
+  "5300026": {
+    "id": "5300026",
+    "name": "Emilia-Romagna Ost",
+    "cell_type": 2,
+    "lng": 11.4641,
+    "lat": 44.36927
+  },
+  "5300027": {
+    "id": "5300027",
+    "name": "Emilia-Romagna West",
+    "cell_type": 2,
+    "lng": 10.05821,
+    "lat": 44.68257
+  },
+  "5300031": {
+    "id": "5300031",
+    "name": "Rom/Mittelitalien",
+    "cell_type": 2,
+    "lng": 12.23985,
+    "lat": 42.83698
+  },
+  "5300032": {
+    "id": "5300032",
+    "name": "Italien Süd",
+    "cell_type": 2,
+    "lng": 14.13929,
+    "lat": 37.4719
+  },
+  "5360166": {
+    "id": "5360166",
+    "name": "Seehafen Genua",
+    "cell_type": 4,
+    "lng": 8.90417,
+    "lat": 44.40422
+  },
+  "5360266": {
+    "id": "5360266",
+    "name": "Seehafen Livorno",
+    "cell_type": 4,
+    "lng": 10.3128,
+    "lat": 43.56942
+  },
+  "5360366": {
+    "id": "5360366",
+    "name": "Seehafen Gioia Tauro",
+    "cell_type": 4,
+    "lng": 15.9,
+    "lat": 38.43332
+  },
+  "5360466": {
+    "id": "5360466",
+    "name": "Seehafen Venedig",
+    "cell_type": 4,
+    "lng": 12.3116,
+    "lat": 45.43952
+  },
+  "5360566": {
+    "id": "5360566",
+    "name": "Seehafen Trieste",
+    "cell_type": 4,
+    "lng": 13.7757,
+    "lat": 45.64502
+  },
+  "5500001": {
+    "id": "5500001",
+    "name": "Slowenien",
+    "cell_type": 2,
+    "lng": 14.62993,
+    "lat": 46.15039
+  },
+  "5560166": {
+    "id": "5560166",
+    "name": "Seehafen Koper",
+    "cell_type": 4,
+    "lng": 13.7454,
+    "lat": 45.55162
+  },
+  "5600001": {
+    "id": "5600001",
+    "name": "Kroatien",
+    "cell_type": 2,
+    "lng": 15.34252,
+    "lat": 44.74602
+  },
+  "5660166": {
+    "id": "5660166",
+    "name": "Seehafen Rijeka",
+    "cell_type": 4,
+    "lng": 14.4256,
+    "lat": 45.32752
+  },
+  "5700001": {
+    "id": "5700001",
+    "name": "Griechenland",
+    "cell_type": 2,
+    "lng": 21.95282,
+    "lat": 39.06742
+  },
+  "5910001": {
+    "id": "5910001",
+    "name": "Serbien",
+    "cell_type": 2,
+    "lng": 21.00833,
+    "lat": 44.21095
+  },
+  "5920001": {
+    "id": "5920001",
+    "name": "Kosovo",
+    "cell_type": 2,
+    "lng": 20.9294,
+    "lat": 42.5271
+  },
+  "5930001": {
+    "id": "5930001",
+    "name": "Bosnien Herzegowina",
+    "cell_type": 2,
+    "lng": 17.97456,
+    "lat": 43.90626
+  },
+  "5940001": {
+    "id": "5940001",
+    "name": "Nordmazedonien",
+    "cell_type": 2,
+    "lng": 21.74923,
+    "lat": 41.61342
+  },
+  "5950001": {
+    "id": "5950001",
+    "name": "Montenegro",
+    "cell_type": 2,
+    "lng": 19.29633,
+    "lat": 42.69963
+  },
+  "5990001": {
+    "id": "5990001",
+    "name": "Albanien",
+    "cell_type": 2,
+    "lng": 20.02345,
+    "lat": 41.15316
+  },
+  "6100011": {
+    "id": "6100011",
+    "name": "Budapest",
+    "cell_type": 2,
+    "lng": 19.24135,
+    "lat": 47.49925
+  },
+  "6100012": {
+    "id": "6100012",
+    "name": "Ungarn West",
+    "cell_type": 2,
+    "lng": 17.53663,
+    "lat": 46.88086
+  },
+  "6100013": {
+    "id": "6100013",
+    "name": "Ungarn Ost",
+    "cell_type": 2,
+    "lng": 20.93901,
+    "lat": 47.24566
+  },
+  "6200001": {
+    "id": "6200001",
+    "name": "Rumänien",
+    "cell_type": 2,
+    "lng": 24.30246,
+    "lat": 45.94004
+  },
+  "6300001": {
+    "id": "6300001",
+    "name": "Bulgarien",
+    "cell_type": 2,
+    "lng": 25.19667,
+    "lat": 42.7317
+  },
+  "6800001": {
+    "id": "6800001",
+    "name": "Zypern",
+    "cell_type": 2,
+    "lng": 33.22985,
+    "lat": 35.12868
+  },
+  "6900001": {
+    "id": "6900001",
+    "name": "Türkei",
+    "cell_type": 2,
+    "lng": 35.48879,
+    "lat": 38.95754
+  },
+  "7100011": {
+    "id": "7100011",
+    "name": "Prag",
+    "cell_type": 2,
+    "lng": 14.39551,
+    "lat": 50.05806
+  },
+  "7100012": {
+    "id": "7100012",
+    "name": "Budweis",
+    "cell_type": 2,
+    "lng": 14.60009,
+    "lat": 49.08754
+  },
+  "7100013": {
+    "id": "7100013",
+    "name": "Pilsen",
+    "cell_type": 2,
+    "lng": 13.20513,
+    "lat": 49.51852
+  },
+  "7100014": {
+    "id": "7100014",
+    "name": "Karlsbad",
+    "cell_type": 2,
+    "lng": 12.80527,
+    "lat": 50.17334
+  },
+  "7100015": {
+    "id": "7100015",
+    "name": "Aussig",
+    "cell_type": 2,
+    "lng": 13.82297,
+    "lat": 50.56754
+  },
+  "7100016": {
+    "id": "7100016",
+    "name": "Liberec",
+    "cell_type": 2,
+    "lng": 14.98905,
+    "lat": 50.74773
+  },
+  "7100017": {
+    "id": "7100017",
+    "name": "Hradec-Kralove",
+    "cell_type": 2,
+    "lng": 15.97109,
+    "lat": 50.17846
+  },
+  "7100018": {
+    "id": "7100018",
+    "name": "Brünn",
+    "cell_type": 2,
+    "lng": 16.13661,
+    "lat": 49.23825
+  },
+  "7100019": {
+    "id": "7100019",
+    "name": "Ostrava",
+    "cell_type": 2,
+    "lng": 17.80575,
+    "lat": 49.65399
+  },
+  "7102000": {
+    "id": "7102000",
+    "name": "Flughafen Prag",
+    "cell_type": 3,
+    "lng": 14.26,
+    "lat": 50.10085
+  },
+  "7200011": {
+    "id": "7200011",
+    "name": "Bratislava/Slowakei West",
+    "cell_type": 2,
+    "lng": 17.7245,
+    "lat": 48.52404
+  },
+  "7200012": {
+    "id": "7200012",
+    "name": "Slowakei Mitte/Ost",
+    "cell_type": 2,
+    "lng": 20.55183,
+    "lat": 48.83368
+  },
+  "7300011": {
+    "id": "7300011",
+    "name": "Warschau",
+    "cell_type": 2,
+    "lng": 21.58066,
+    "lat": 52.62412
+  },
+  "7300012": {
+    "id": "7300012",
+    "name": "Lublin",
+    "cell_type": 2,
+    "lng": 21.98212,
+    "lat": 50.64472
+  },
+  "7300013": {
+    "id": "7300013",
+    "name": "Krakau/Kattowitz",
+    "cell_type": 2,
+    "lng": 19.60951,
+    "lat": 50.13939
+  },
+  "7300021": {
+    "id": "7300021",
+    "name": "Oppeln",
+    "cell_type": 2,
+    "lng": 17.85026,
+    "lat": 50.58196
+  },
+  "7300022": {
+    "id": "7300022",
+    "name": "Breslau",
+    "cell_type": 2,
+    "lng": 16.79764,
+    "lat": 50.94818
+  },
+  "7300023": {
+    "id": "7300023",
+    "name": "Liegnitz",
+    "cell_type": 2,
+    "lng": 15.65682,
+    "lat": 51.06432
+  },
+  "7300031": {
+    "id": "7300031",
+    "name": "Posen",
+    "cell_type": 2,
+    "lng": 17.3142,
+    "lat": 52.3801
+  },
+  "7300032": {
+    "id": "7300032",
+    "name": "Grünberg (PL)",
+    "cell_type": 2,
+    "lng": 15.42545,
+    "lat": 51.87161
+  },
+  "7300033": {
+    "id": "7300033",
+    "name": "Landsberg (PL)",
+    "cell_type": 2,
+    "lng": 15.2086,
+    "lat": 52.5977
+  },
+  "7300034": {
+    "id": "7300034",
+    "name": "Stettin",
+    "cell_type": 2,
+    "lng": 14.5929,
+    "lat": 53.43042
+  },
+  "7300035": {
+    "id": "7300035",
+    "name": "Stettin-Umland",
+    "cell_type": 2,
+    "lng": 15.16593,
+    "lat": 53.41717
+  },
+  "7300036": {
+    "id": "7300036",
+    "name": "Köslin",
+    "cell_type": 2,
+    "lng": 15.97496,
+    "lat": 53.59602
+  },
+  "7300041": {
+    "id": "7300041",
+    "name": "Danzig/Nordpolen",
+    "cell_type": 2,
+    "lng": 19.57986,
+    "lat": 53.58647
+  },
+  "7307000": {
+    "id": "7307000",
+    "name": "Flughafen Stettin",
+    "cell_type": 3,
+    "lng": 14.90222,
+    "lat": 53.58474
+  },
+  "7360166": {
+    "id": "7360166",
+    "name": "Seehafen Swinoujscie",
+    "cell_type": 4,
+    "lng": 14.2584,
+    "lat": 53.89882
+  },
+  "7360266": {
+    "id": "7360266",
+    "name": "Seehafen Szczecin",
+    "cell_type": 4,
+    "lng": 14.5786,
+    "lat": 53.42582
+  },
+  "7360366": {
+    "id": "7360366",
+    "name": "Seehafen Gdynia",
+    "cell_type": 4,
+    "lng": 18.5336,
+    "lat": 54.53372
+  },
+  "7360466": {
+    "id": "7360466",
+    "name": "Seehafen Gdansk",
+    "cell_type": 4,
+    "lng": 18.6477,
+    "lat": 54.36572
+  },
+  "7410001": {
+    "id": "7410001",
+    "name": "Litauen",
+    "cell_type": 2,
+    "lng": 24.18099,
+    "lat": 55.17515
+  },
+  "7420001": {
+    "id": "7420001",
+    "name": "Lettland",
+    "cell_type": 2,
+    "lng": 24.40586,
+    "lat": 56.8784
+  },
+  "7430001": {
+    "id": "7430001",
+    "name": "Estland",
+    "cell_type": 2,
+    "lng": 25.37069,
+    "lat": 58.59133
+  },
+  "7500011": {
+    "id": "7500011",
+    "name": "Russland (ohne Kaliningrad)",
+    "cell_type": 2,
+    "lng": 45.10489,
+    "lat": 55.56365
+  },
+  "7500012": {
+    "id": "7500012",
+    "name": "Kaliningrad",
+    "cell_type": 2,
+    "lng": 21.42002,
+    "lat": 54.80715
+  },
+  "7610001": {
+    "id": "7610001",
+    "name": "Weißrussland",
+    "cell_type": 2,
+    "lng": 27.97795,
+    "lat": 53.7173
+  },
+  "7620001": {
+    "id": "7620001",
+    "name": "Ukraine",
+    "cell_type": 2,
+    "lng": 33.90009,
+    "lat": 48.38243
+  },
+  "7630001": {
+    "id": "7630001",
+    "name": "Moldawien",
+    "cell_type": 2,
+    "lng": 28.84608,
+    "lat": 46.97724
+  },
+  "7710001": {
+    "id": "7710001",
+    "name": "Georgien",
+    "cell_type": 2,
+    "lng": 43.68152,
+    "lat": 42.32198
+  },
+  "7720001": {
+    "id": "7720001",
+    "name": "Armendien",
+    "cell_type": 2,
+    "lng": 44.84599,
+    "lat": 40.0711
+  },
+  "7730001": {
+    "id": "7730001",
+    "name": "Aserbaidschan",
+    "cell_type": 2,
+    "lng": 47.71702,
+    "lat": 40.14405
+  }
+}

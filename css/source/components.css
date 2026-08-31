@@ -1,0 +1,757 @@
+/* Module Layout Grid: Tall Map on Left (Full Height), Analytics Stack on Right */
+.module-loading-status {
+  margin: 0 0 10px;
+  padding: 9px 12px;
+  border: 1px solid #bfdbfe;
+  border-radius: 8px;
+  background: #eff6ff;
+  color: #1e40af;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.module-loading-status[hidden] {
+  display: none;
+}
+
+.module-layout-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 14px;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  margin-bottom: 0;
+}
+
+.map-card-tall {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.right-analytics-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+  min-height: 0;
+}
+
+/* Relations Table Card: takes ~56-58% of vertical right column */
+.table-card-compact {
+  flex: 1.35;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.table-wrapper-compact {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  max-height: none;
+}
+
+/* Bottom Split Charts Row: takes ~42-44% of vertical right column */
+.bottom-split-charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  flex: 1.0;
+  min-height: 0;
+}
+
+.sub-chart-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  container-type: inline-size;
+}
+
+/* Split charts can be narrow even on a wide screen (for example next to a
+   large map).  Switch their header by the actual card width, not by viewport
+   width, so the title, information icon and view toggle never overlap. */
+@container (max-width: 300px) {
+  .sub-chart-card .card-header {
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+  .sub-chart-card .card-title {
+    flex: 1 1 100%;
+    width: 100%;
+    max-width: none;
+    flex-wrap: nowrap;
+  }
+  .sub-chart-card .card-actions {
+    flex: 1 1 100%;
+    width: 100%;
+    margin-left: 0;
+    justify-content: flex-start;
+  }
+}
+
+.chart-card-single {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.chart-canvas-wrap {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  padding: 4px 10px 8px 10px;
+}
+
+/* Fine-grained classifications retain the chart scale of the 7-group view.
+   The plot itself scrolls instead of shrinking labels and bars to illegibility. */
+.chart-canvas-wrap.chart-canvas-scroll {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  overflow-x: hidden;
+}
+.chart-scroll-content {
+  position: relative;
+  min-width: 100%;
+  min-height: 0;
+  flex: 1 1 0;
+  overflow-y: auto;
+}
+.chart-scroll-content canvas {
+  display: block !important;
+}
+.chart-scroll-plot {
+  position: relative;
+  min-width: 100%;
+}
+.chart-scroll-plot canvas {
+  display: block !important;
+}
+.chart-canvas-wrap.chart-with-scroll-legend {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) minmax(68px, 96px);
+  overflow: hidden;
+  padding-bottom: 4px;
+}
+.chart-plot-content {
+  position: relative;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.chart-plot-content canvas {
+  max-height: 100% !important;
+}
+.chart-sticky-axis {
+  position: relative;
+  flex: 0 0 34px;
+  order: 2;
+  z-index: 5;
+  height: 34px;
+  padding: 3px 10px 2px;
+  background: #ffffff;
+  border-top: 1px solid #e2e8f0;
+  color: #475569;
+  font-size: 0.66rem;
+  font-weight: 600;
+}
+.chart-sticky-axis-title {
+  display: block;
+  margin: 0 var(--chart-axis-right) 1px var(--chart-axis-left);
+  text-align: center;
+}
+.chart-sticky-axis-ticks {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  margin-left: var(--chart-axis-left);
+  margin-right: var(--chart-axis-right);
+}
+.chart-sticky-axis-ticks span {
+  text-align: center;
+}
+.chart-scroll-legend {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px 9px;
+  max-height: none;
+  overflow-y: auto;
+  margin: 2px 2px 4px;
+  padding: 6px 4px 2px;
+  border-top: 1px solid #e2e8f0;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #334155;
+}
+.chart-scroll-legend span {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  line-height: 1.25;
+}
+.chart-scroll-legend i {
+  display: inline-block;
+  flex: 0 0 9px;
+  height: 9px;
+  margin-top: 2px;
+  border-radius: 50%;
+}
+
+.forecast-chart-controls {
+  display: grid;
+  gap: 6px;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--border-color);
+  background: #f8fafc;
+}
+.forecast-chart-control-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: #475569;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+.forecast-chart-control-row label {
+  flex: 0 0 auto;
+}
+.forecast-chart-control-row .select-input-sm {
+  min-width: 0;
+  max-width: 175px;
+}
+#selectForecastCommodityLevel {
+  min-width: 195px;
+  max-width: 195px;
+}
+.maritime-reset-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 92px;
+  min-height: 28px;
+  padding: 4px 12px;
+  color: #276749;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+  background: #f0fdf4;
+  border-color: #86cfa0;
+  box-shadow: 0 1px 2px rgba(22, 101, 52, 0.08);
+}
+.maritime-reset-button:hover,
+.maritime-reset-button:focus-visible {
+  color: #ffffff;
+  background: #4c7f83;
+  border-color: #4c7f83;
+}
+.forecast-chart-control-row[hidden] {
+  display: none;
+}
+
+.modal-dialog-lg {
+  max-width: 760px;
+  width: 92%;
+}
+
+.steckbrief-modal-section {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--text-main);
+  background: #f8fafc;
+  border-left: 4px solid var(--primary-color);
+  padding: 12px 16px;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  margin-bottom: 16px;
+}
+
+.steckbrief-kpi-pill-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+.steckbrief-kpi-pill {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  box-shadow: var(--shadow-sm);
+}
+.steckbrief-kpi-pill .kpi-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 3px;
+}
+.steckbrief-kpi-pill .kpi-num {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+.steckbrief-kpi-pill .kpi-detail {
+  font-size: 0.75rem;
+  color: #16a34a;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.control-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  padding: 5px 10px;
+  background: #f8fafc;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+  user-select: none;
+  transition: var(--transition);
+}
+.control-checkbox-label:hover {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+}
+.control-checkbox-label input {
+  accent-color: var(--primary-color);
+  cursor: pointer;
+  width: 14px;
+  height: 14px;
+}
+
+/* Choropleth & Spider Legend Box */
+.choropleth-legend {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(8px);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  z-index: 800;
+  font-size: 0.72rem;
+  width: 240px;
+  min-width: 240px;
+  max-width: 240px;
+  transition: all 0.2s ease;
+}
+
+/* Leaflet's default tooltip pane sits below the custom map legend. Regional
+   and relation hovers are primary reading information and must cover it. */
+.leaflet-tooltip-pane,
+.leaflet-popup-pane {
+  z-index: 1100 !important;
+}
+/* Leaflet controls live in their own high stacking context. While a hover card
+   is open, lower the control rails so neither legends nor zoom controls can
+   cover labels at the edge of the map. */
+.leaflet-container.wbp-tooltip-open .leaflet-top,
+.leaflet-container.wbp-tooltip-open .leaflet-bottom {
+  z-index: 350;
+}
+.choropleth-legend.collapsed {
+  width: auto;
+  min-width: auto;
+  padding: 6px 10px;
+}
+.choropleth-legend.collapsed .legend-body {
+  display: none !important;
+}
+.legend-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.legend-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-weight: 700;
+  color: var(--text-main);
+  font-size: 0.75rem;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: break-word;
+  margin-bottom: 0;
+}
+.btn-legend-toggle {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  border-radius: 4px;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+}
+.btn-legend-toggle:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+.legend-body {
+  margin-top: 6px;
+}
+.legend-scale {
+  display: flex;
+  height: 8px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+.legend-scale span {
+  flex: 1;
+}
+.legend-labels {
+  display: flex;
+  justify-content: space-between;
+  color: var(--text-muted);
+  font-size: 0.66rem;
+  font-variant-numeric: tabular-nums;
+}
+.legend-spider-section {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid #e2e8f0;
+}
+.legend-subtitle {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #475569;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+.legend-spider-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.legend-spider-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.68rem;
+  color: #334155;
+}
+.legend-line {
+  display: inline-block;
+  width: 30px;
+  border-radius: 2px;
+  flex-shrink: 0;
+  background: #059669;
+}
+.legend-line-thin { height: 2px; }
+.legend-line-med { height: 4px; }
+.legend-line-thick { height: 7px; }
+.legend-spider-val {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Tables with Strict Tabular Alignment */
+.data-table-wrapper {
+  overflow-y: auto;
+  overflow-x: auto;
+}
+.data-table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+.data-table th {
+  background: #f8fafc;
+  padding: 10px 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  box-sizing: border-box;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: auto;
+  line-height: 1.25;
+  vertical-align: middle;
+}
+.data-table th:first-child {
+  padding-left: 10px;
+}
+.data-table th:last-child {
+  padding-right: 10px;
+}
+
+/* Measure and change headings may contain compact technical terms. They can
+   also break within a segment before the table itself needs horizontal scroll. */
+.data-table .table-measure-header,
+.data-table .table-change-header {
+  overflow-wrap: anywhere;
+}
+.data-table td {
+  padding: 9.5px 12px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-main);
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.4;
+}
+.data-table td:first-child {
+  padding-left: 16px;
+}
+.data-table td:last-child {
+  padding-right: 16px;
+}
+.data-table td:nth-last-child(1),
+.data-table td:nth-last-child(2) {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  padding-left: 6px;
+  padding-right: 6px;
+  line-height: 1.25;
+}
+.data-table td:last-child {
+  padding-right: 8px;
+}
+.data-table tbody tr {
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+.data-table tbody tr:hover {
+  background-color: #ecfdf5;
+  box-shadow: inset 3px 0 0 var(--primary-color);
+}
+.data-table tbody tr.row-highlight {
+  background-color: #ecfdf5 !important;
+  box-shadow: inset 3px 0 0 var(--primary-color);
+}
+.data-table tbody tr.row-highlight td {
+  color: #065f46;
+}
+
+.table-empty-state {
+  min-height: 185px;
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 5px;
+  color: #475569;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.table-empty-state[hidden] {
+  display: none;
+}
+
+.table-empty-state img {
+  width: 27px;
+  height: 27px;
+  margin-bottom: 3px;
+  opacity: 0.72;
+}
+
+.table-empty-state strong {
+  color: #1e293b;
+  font-size: 0.87rem;
+}
+
+/* Data Availability Notice Banner */
+.data-notice-banner {
+  background: #f0f9ff;
+  border-left: 3px solid #4f46e5;
+  color: #0369a1;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  padding: 8px 12px;
+  border-radius: 0 4px 4px 0;
+  margin: 8px 16px 4px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+.data-notice-banner svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: #4f46e5;
+}
+
+/* Mode Badges in Relation Tables */
+.badge-mode {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-left: 6px;
+  display: inline-block;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+}
+.badge-mode-road {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+.badge-mode-rail {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+.badge-mode-iww {
+  background: #f0fdfa;
+  color: #0f766e;
+  border: 1px solid #99f6e4;
+}
+.relation-mode-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 3px;
+}
+.relation-mode-badges .badge-mode {
+  margin-left: 0;
+}
+
+/* Interactive Info Tooltips (Informations-i) */
+.info-tooltip-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 6px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.info-tooltip-wrap:hover,
+.info-tooltip-wrap:focus-within {
+  z-index: 999999 !important;
+}
+.info-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  border: 1px solid #cbd5e1;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: 'Inter', sans-serif;
+  transition: var(--transition);
+}
+.info-tooltip-wrap:hover .info-icon-btn,
+.info-tooltip-wrap:focus-within .info-icon-btn {
+  background: #4f46e5;
+  color: #ffffff;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+}
+.info-tooltip-box {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  width: 330px;
+  max-width: 85vw;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-md);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.2), 0 6px 12px rgba(15, 23, 42, 0.08);
+  padding: 12px 14px;
+  font-size: 0.76rem;
+  line-height: 1.48;
+  color: var(--text-main);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  z-index: 999999 !important;
+  text-align: left;
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.info-tooltip-wrap.tooltip-align-right .info-tooltip-box {
+  left: auto;
+  right: 0;
+}
+.info-tooltip-wrap.tooltip-align-right .info-tooltip-box::before {
+  left: auto;
+  right: 12px;
+}
+.info-tooltip-wrap.tooltip-open-up .info-tooltip-box {
+  top: auto;
+  bottom: calc(100% + 8px);
+}
+.info-tooltip-wrap.tooltip-open-up .info-tooltip-box::before {
+  top: auto;
+  bottom: -6px;
+  border-top: none;
+  border-left: none;
+  border-bottom: 1px solid #cbd5e1;
+  border-right: 1px solid #cbd5e1;
+}
+.info-tooltip-box::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 12px;
+  transform: rotate(45deg);
+  width: 10px;
+  height: 10px;
+  background: #ffffff;
+  border-top: 1px solid #cbd5e1;
+  border-left: 1px solid #cbd5e1;
+}
+.info-tooltip-wrap:hover .info-tooltip-box,
+.info-tooltip-wrap:focus-within .info-tooltip-box {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.info-tooltip-title {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}

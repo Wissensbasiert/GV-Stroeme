@@ -1,0 +1,675 @@
+﻿cell_id;cell_name;cell_type;cell_type_label;nuts3_2016;nuts2_2016;nuts1_2016;nuts0_2016;nuts3_2024;ags_5digit;un_locode;iata_code;country_iso2;population_2019;notes
+100100;Flensburg, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEF01;DEF0;DEF;DE;DEF01;01001;;;DE;;
+100200;Kiel, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEF02;DEF0;DEF;DE;DEF02;01002;;;DE;;
+100300;Lübeck, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEF03;DEF0;DEF;DE;DEF03;01003;;;DE;;
+100400;Neumünster, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEF04;DEF0;DEF;DE;DEF04;01004;;;DE;;
+105100;Dithmarschen;1;Kreis / Kreisfreie Stadt (DE);DEF05;DEF0;DEF;DE;DEF05;01051;;;DE;;
+105300;Herzogtum Lauenburg;1;Kreis / Kreisfreie Stadt (DE);DEF06;DEF0;DEF;DE;DEF06;01053;;;DE;;
+105400;Nordfriesland;1;Kreis / Kreisfreie Stadt (DE);DEF07;DEF0;DEF;DE;DEF07;01054;;;DE;;
+105500;Ostholstein;1;Kreis / Kreisfreie Stadt (DE);DEF08;DEF0;DEF;DE;DEF08;01055;;;DE;;
+105600;Pinneberg;1;Kreis / Kreisfreie Stadt (DE);DEF09;DEF0;DEF;DE;DEF09;01056;;;DE;;
+105700;Plön;1;Kreis / Kreisfreie Stadt (DE);DEF0A;DEF0;DEF;DE;DEF0A;01057;;;DE;;
+105800;Rendsburg-Eckernförde;1;Kreis / Kreisfreie Stadt (DE);DEF0B;DEF0;DEF;DE;DEF0B;01058;;;DE;;
+105900;Schleswig-Flensburg;1;Kreis / Kreisfreie Stadt (DE);DEF0C;DEF0;DEF;DE;DEF0C;01059;;;DE;;
+106000;Segeberg;1;Kreis / Kreisfreie Stadt (DE);DEF0D;DEF0;DEF;DE;DEF0D;01060;;;DE;;
+106100;Steinburg;1;Kreis / Kreisfreie Stadt (DE);DEF0E;DEF0;DEF;DE;DEF0E;01061;;;DE;;
+106200;Stormarn;1;Kreis / Kreisfreie Stadt (DE);DEF0F;DEF0;DEF;DE;DEF0F;01062;;;DE;;
+110900;Flughafen Sylt-Westerland;3;Flughafen;;;;;;11;;GWT;DE;;
+160166;Seehafen Glückstadt;4;Seehafen;;;;;;;DEGLU;;DE;;Deutscher Seehafen (Bundesland-Prefix 01)
+160266;Seehafen Brunsbüttel;4;Seehafen;;;;;;;DEBRB;;DE;;Deutscher Seehafen (Bundesland-Prefix 01)
+160366;Seehafen Büsum;4;Seehafen;;;;;;;DEBUS;;DE;;Deutscher Seehafen (Bundesland-Prefix 01)
+160466;Seehafen Nordstrand (Husum);4;Seehafen;;;;;;;;;DE;;Deutscher Seehafen (Bundesland-Prefix 01)
+160566;Seehafen Dagebüll;4;Seehafen;;;;;;;;;DE;;Deutscher Seehafen (Bundesland-Prefix 01)
+160666;Seehafen Flensburg;4;Seehafen;;;;;;;DEFLF;;DE;;Deutscher Seehafen (Bundesland-Prefix 01)
+160766;Seehafen Glücksburg;4;Seehafen;;;;;;;;;DE;;Deutscher Seehafen (Bundesland-Prefix 01)
+160866;Seehafen Eckernförde;4;Seehafen;;;;;;;;;DE;;Deutscher Seehafen (Bundesland-Prefix 01)
+160966;Seehafen Strande;4;Seehafen;;;;;;;;;DE;;Deutscher Seehafen (Bundesland-Prefix 01)
+161066;Seehafen Kiel;4;Seehafen;;;;;;;DEKEL;;DE;;Deutscher Seehafen (Bundesland-Prefix 01)
+161166;Seehafen Laboe;4;Seehafen;;;;;;;;;DE;;Deutscher Seehafen (Bundesland-Prefix 01)
+161266;Seehafen Puttgarden;4;Seehafen;;;;;;;DEPUT;;DE;;Deutscher Seehafen (Bundesland-Prefix 01)
+161366;Seehafen Neustadt in Holstein;4;Seehafen;;;;;;;;;DE;;Deutscher Seehafen (Bundesland-Prefix 01)
+161466;Seehafen Lübeck-Travemünde;4;Seehafen;;;;;;;DELBC;;DE;;Deutscher Seehafen (Bundesland-Prefix 01)
+170177;Insel Pellworm;5;Insel;;;;;;;;;DE;;Deutsche Nord- oder Ostseeinsel
+170277;Insel Amrum;5;Insel;;;;;;;;;DE;;Deutsche Nord- oder Ostseeinsel
+170377;Insel Föhr;5;Insel;;;;;;;;;DE;;Deutsche Nord- oder Ostseeinsel
+170477;Insel Sylt;5;Insel;;;;;;;;;DE;;Deutsche Nord- oder Ostseeinsel
+200000;Hamburg;1;Kreis / Kreisfreie Stadt (DE);DE600;DE60;DE6;DE;DE600;02000;;;DE;;
+210900;Flughafen Hamburg;3;Flughafen;;;;;;21;;HAM;DE;;
+260166;Seehafen Hamburg;4;Seehafen;;;;;;;DEHAM;;DE;;Deutscher Seehafen (Bundesland-Prefix 02)
+310100;Braunschweig, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE911;DE91;DE9;DE;DE911;03101;;;DE;;
+310200;Salzgitter, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE912;DE91;DE9;DE;DE912;03102;;;DE;;
+310300;Wolfsburg, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE913;DE91;DE9;DE;DE913;03103;;;DE;;
+315100;Gifhorn;1;Kreis / Kreisfreie Stadt (DE);DE914;DE91;DE9;DE;DE914;03151;;;DE;;
+315300;Goslar;1;Kreis / Kreisfreie Stadt (DE);DE916;DE91;DE9;DE;DE916;03153;;;DE;;
+315400;Helmstedt;1;Kreis / Kreisfreie Stadt (DE);DE917;DE91;DE9;DE;DE917;03154;;;DE;;
+315500;Northeim;1;Kreis / Kreisfreie Stadt (DE);DE918;DE91;DE9;DE;DE918;03155;;;DE;;
+315700;Peine;1;Kreis / Kreisfreie Stadt (DE);DE91A;DE91;DE9;DE;DE91A;03157;;;DE;;
+315800;Wolfenbüttel;1;Kreis / Kreisfreie Stadt (DE);DE91B;DE91;DE9;DE;DE91B;03158;;;DE;;
+315900;Göttingen;1;Kreis / Kreisfreie Stadt (DE);DE91C;DE91;DE9;DE;DE91C;03159;;;DE;;
+324100;Region Hannover;1;Kreis / Kreisfreie Stadt (DE);DE929;DE92;DE9;DE;DE929;03241;;;DE;;
+325100;Diepholz;1;Kreis / Kreisfreie Stadt (DE);DE922;DE92;DE9;DE;DE922;03251;;;DE;;
+325200;Hameln-Pyrmont;1;Kreis / Kreisfreie Stadt (DE);DE923;DE92;DE9;DE;DE923;03252;;;DE;;
+325400;Hildesheim;1;Kreis / Kreisfreie Stadt (DE);DE925;DE92;DE9;DE;DE925;03254;;;DE;;
+325500;Holzminden;1;Kreis / Kreisfreie Stadt (DE);DE926;DE92;DE9;DE;DE926;03255;;;DE;;
+325600;Nienburg (Weser);1;Kreis / Kreisfreie Stadt (DE);DE927;DE92;DE9;DE;DE927;03256;;;DE;;
+325700;Schaumburg;1;Kreis / Kreisfreie Stadt (DE);DE928;DE92;DE9;DE;DE928;03257;;;DE;;
+335100;Celle;1;Kreis / Kreisfreie Stadt (DE);DE931;DE93;DE9;DE;DE931;03351;;;DE;;
+335200;Cuxhaven;1;Kreis / Kreisfreie Stadt (DE);DE932;DE93;DE9;DE;DE932;03352;;;DE;;
+335300;Harburg;1;Kreis / Kreisfreie Stadt (DE);DE933;DE93;DE9;DE;DE933;03353;;;DE;;
+335400;Lüchow-Dannenberg;1;Kreis / Kreisfreie Stadt (DE);DE934;DE93;DE9;DE;DE934;03354;;;DE;;
+335500;Lüneburg, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE935;DE93;DE9;DE;DE935;03355;;;DE;;
+335600;Osterholz;1;Kreis / Kreisfreie Stadt (DE);DE936;DE93;DE9;DE;DE936;03356;;;DE;;
+335700;Rotenburg (Wümme);1;Kreis / Kreisfreie Stadt (DE);DE937;DE93;DE9;DE;DE937;03357;;;DE;;
+335800;Heidekreis;1;Kreis / Kreisfreie Stadt (DE);DE938;DE93;DE9;DE;DE938;03358;;;DE;;
+335900;Stade;1;Kreis / Kreisfreie Stadt (DE);DE939;DE93;DE9;DE;DE939;03359;;;DE;;
+336000;Uelzen;1;Kreis / Kreisfreie Stadt (DE);DE93A;DE93;DE9;DE;DE93A;03360;;;DE;;
+336100;Verden;1;Kreis / Kreisfreie Stadt (DE);DE93B;DE93;DE9;DE;DE93B;03361;;;DE;;
+340100;Delmenhorst, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE941;DE94;DE9;DE;DE941;03401;;;DE;;
+340200;Emden, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE942;DE94;DE9;DE;DE942;03402;;;DE;;
+340300;Oldenburg (Oldenburg), Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE943;DE94;DE9;DE;DE943;03403;;;DE;;
+340400;Osnabrück, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE944;DE94;DE9;DE;DE944;03404;;;DE;;
+340500;Wilhelmshaven, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE945;DE94;DE9;DE;DE945;03405;;;DE;;
+345100;Ammerland;1;Kreis / Kreisfreie Stadt (DE);DE946;DE94;DE9;DE;DE946;03451;;;DE;;
+345200;Aurich;1;Kreis / Kreisfreie Stadt (DE);DE947;DE94;DE9;DE;DE947;03452;;;DE;;
+345300;Cloppenburg;1;Kreis / Kreisfreie Stadt (DE);DE948;DE94;DE9;DE;DE948;03453;;;DE;;
+345400;Emsland;1;Kreis / Kreisfreie Stadt (DE);DE949;DE94;DE9;DE;DE949;03454;;;DE;;
+345500;Friesland (DE);1;Kreis / Kreisfreie Stadt (DE);DE94A;DE94;DE9;DE;DE94A;03455;;;DE;;
+345600;Grafschaft Bentheim;1;Kreis / Kreisfreie Stadt (DE);DE94B;DE94;DE9;DE;DE94B;03456;;;DE;;
+345700;Leer;1;Kreis / Kreisfreie Stadt (DE);DE94C;DE94;DE9;DE;DE94C;03457;;;DE;;
+345800;Oldenburg, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE94D;DE94;DE9;DE;DE94D;03458;;;DE;;
+345900;Osnabrück, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE94E;DE94;DE9;DE;DE94E;03459;;;DE;;
+346000;Vechta;1;Kreis / Kreisfreie Stadt (DE);DE94F;DE94;DE9;DE;DE94F;03460;;;DE;;
+346100;Wesermarsch;1;Kreis / Kreisfreie Stadt (DE);DE94G;DE94;DE9;DE;DE94G;03461;;;DE;;
+346200;Wittmund;1;Kreis / Kreisfreie Stadt (DE);DE94H;DE94;DE9;DE;DE94H;03462;;;DE;;
+350900;Flughafen Hannover;3;Flughafen;;;;;;35;;HAJ;DE;;
+360166;Seehafen Papenburg;4;Seehafen;;;;;;;DEBRE;;DE;;Deutscher Seehafen (Bundesland-Prefix 03)
+360266;Seehafen Emden;4;Seehafen;;;;;;;DEBRV;;DE;;Deutscher Seehafen (Bundesland-Prefix 03)
+360366;Seehafen Norden (Norddeich);4;Seehafen;;;;;;;DECUX;;DE;;Deutscher Seehafen (Bundesland-Prefix 03)
+360466;Seehafen Esens (Bensersiel);4;Seehafen;;;;;;;DESTA;;DE;;Deutscher Seehafen (Bundesland-Prefix 03)
+360566;Seehafen Neuharlingersiel;4;Seehafen;;;;;;;DENOH;;DE;;Deutscher Seehafen (Bundesland-Prefix 03)
+360666;Seehafen Wittmund (Harlesiel);4;Seehafen;;;;;;;DEBKE;;DE;;Deutscher Seehafen (Bundesland-Prefix 03)
+360766;Seehafen Wilhelmshaven;4;Seehafen;;;;;;;DEWVN;;DE;;Deutscher Seehafen (Bundesland-Prefix 03)
+360866;Seehafen Nordenham;4;Seehafen;;;;;;;DEEME;;DE;;Deutscher Seehafen (Bundesland-Prefix 03)
+360966;Seehafen Brake;4;Seehafen;;;;;;;DEPAP;;DE;;Deutscher Seehafen (Bundesland-Prefix 03)
+361066;Seehafen Cuxhaven;4;Seehafen;;;;;;;;;DE;;Deutscher Seehafen (Bundesland-Prefix 03)
+361166;Seehafen Stade;4;Seehafen;;;;;;;;;DE;;Deutscher Seehafen (Bundesland-Prefix 03)
+361266;Seehafen Wischhafen;4;Seehafen;;;;;;;;;DE;;Deutscher Seehafen (Bundesland-Prefix 03)
+370177;Insel Borkum;5;Insel;;;;;;;;;DE;;Deutsche Nord- oder Ostseeinsel
+370277;Insel Juist;5;Insel;;;;;;;;;DE;;Deutsche Nord- oder Ostseeinsel
+370377;Insel Norderney;5;Insel;;;;;;;;;DE;;Deutsche Nord- oder Ostseeinsel
+370477;Insel Baltrum;5;Insel;;;;;;;;;DE;;Deutsche Nord- oder Ostseeinsel
+370577;Insel Langeoog;5;Insel;;;;;;;;;DE;;Deutsche Nord- oder Ostseeinsel
+370677;Insel Spiekeroog;5;Insel;;;;;;;;;DE;;Deutsche Nord- oder Ostseeinsel
+370777;Insel Wangerooge  ;5;Insel;;;;;;;;;DE;;Deutsche Nord- oder Ostseeinsel
+401100;Bremen, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE501;DE50;DE5;DE;DE501;04011;;;DE;;
+401200;Bremerhaven, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE502;DE50;DE5;DE;DE502;04012;;;DE;;
+410900;Flughafen Bremen;3;Flughafen;;;;;;41;;BRE;DE;;
+460166;Seehafen Bremen;4;Seehafen;;;;;;;;;DE;;Deutscher Seehafen (Bundesland-Prefix 04)
+460266;Seehafen Bremerhaven;4;Seehafen;;;;;;;;;DE;;Deutscher Seehafen (Bundesland-Prefix 04)
+511100;Düsseldorf, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA11;DEA1;DEA;DE;DEA11;05111;;;DE;;
+511200;Duisburg, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA12;DEA1;DEA;DE;DEA12;05112;;;DE;;
+511300;Essen, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA13;DEA1;DEA;DE;DEA13;05113;;;DE;;
+511400;Krefeld, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA14;DEA1;DEA;DE;DEA14;05114;;;DE;;
+511600;Mönchengladbach, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA15;DEA1;DEA;DE;DEA15;05116;;;DE;;
+511700;Mülheim an der Ruhr, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA16;DEA1;DEA;DE;DEA16;05117;;;DE;;
+511900;Oberhausen, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA17;DEA1;DEA;DE;DEA17;05119;;;DE;;
+512000;Remscheid, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA18;DEA1;DEA;DE;DEA18;05120;;;DE;;
+512200;Solingen, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA19;DEA1;DEA;DE;DEA19;05122;;;DE;;
+512400;Wuppertal, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA1A;DEA1;DEA;DE;DEA1A;05124;;;DE;;
+515400;Kleve;1;Kreis / Kreisfreie Stadt (DE);DEA1B;DEA1;DEA;DE;DEA1B;05154;;;DE;;
+515800;Mettmann;1;Kreis / Kreisfreie Stadt (DE);DEA1C;DEA1;DEA;DE;DEA1C;05158;;;DE;;
+516200;Rhein-Kreis Neuss;1;Kreis / Kreisfreie Stadt (DE);DEA1D;DEA1;DEA;DE;DEA1D;05162;;;DE;;
+516600;Viersen;1;Kreis / Kreisfreie Stadt (DE);DEA1E;DEA1;DEA;DE;DEA1E;05166;;;DE;;
+517000;Wesel;1;Kreis / Kreisfreie Stadt (DE);DEA1F;DEA1;DEA;DE;DEA1F;05170;;;DE;;
+520900;Flughafen Münster-Osnabrück;3;Flughafen;;;;;;52;;FMO;DE;;
+521900;Flughafen Paderborn/Lippstadt;3;Flughafen;;;;;;52;;PAD;DE;;
+522900;Flughafen Niederrhein;3;Flughafen;;;;;;52;;NRN;DE;;
+523900;Flughafen Düsseldorf;3;Flughafen;;;;;;52;;DUS;DE;;
+524900;Flughafen Dortmund;3;Flughafen;;;;;;52;;DTM;DE;;
+526900;Flughafen Köln/Bonn;3;Flughafen;;;;;;52;;CGN;DE;;
+531400;Bonn, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA22;DEA2;DEA;DE;DEA22;05314;;;DE;;
+531500;Köln, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA23;DEA2;DEA;DE;DEA23;05315;;;DE;;
+531600;Leverkusen, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA24;DEA2;DEA;DE;DEA24;05316;;;DE;;
+533400;Städteregion Aachen;1;Kreis / Kreisfreie Stadt (DE);DEA2D;DEA2;DEA;DE;DEA2D;05334;;;DE;;
+535800;Düren;1;Kreis / Kreisfreie Stadt (DE);DEA26;DEA2;DEA;DE;DEA26;05358;;;DE;;
+536200;Rhein-Erft-Kreis;1;Kreis / Kreisfreie Stadt (DE);DEA27;DEA2;DEA;DE;DEA27;05362;;;DE;;
+536600;Euskirchen;1;Kreis / Kreisfreie Stadt (DE);DEA28;DEA2;DEA;DE;DEA28;05366;;;DE;;
+537000;Heinsberg;1;Kreis / Kreisfreie Stadt (DE);DEA29;DEA2;DEA;DE;DEA29;05370;;;DE;;
+537400;Oberbergischer Kreis;1;Kreis / Kreisfreie Stadt (DE);DEA2A;DEA2;DEA;DE;DEA2A;05374;;;DE;;
+537800;Rheinisch-Bergischer Kreis;1;Kreis / Kreisfreie Stadt (DE);DEA2B;DEA2;DEA;DE;DEA2B;05378;;;DE;;
+538200;Rhein-Sieg-Kreis;1;Kreis / Kreisfreie Stadt (DE);DEA2C;DEA2;DEA;DE;DEA2C;05382;;;DE;;
+551200;Bottrop, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA31;DEA3;DEA;DE;DEA31;05512;;;DE;;
+551300;Gelsenkirchen, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA32;DEA3;DEA;DE;DEA32;05513;;;DE;;
+551500;Münster, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA33;DEA3;DEA;DE;DEA33;05515;;;DE;;
+555400;Borken;1;Kreis / Kreisfreie Stadt (DE);DEA34;DEA3;DEA;DE;DEA34;05554;;;DE;;
+555800;Coesfeld;1;Kreis / Kreisfreie Stadt (DE);DEA35;DEA3;DEA;DE;DEA35;05558;;;DE;;
+556200;Recklinghausen;1;Kreis / Kreisfreie Stadt (DE);DEA36;DEA3;DEA;DE;DEA36;05562;;;DE;;
+556600;Steinfurt;1;Kreis / Kreisfreie Stadt (DE);DEA37;DEA3;DEA;DE;DEA37;05566;;;DE;;
+557000;Warendorf;1;Kreis / Kreisfreie Stadt (DE);DEA38;DEA3;DEA;DE;DEA38;05570;;;DE;;
+571100;Bielefeld, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA41;DEA4;DEA;DE;DEA41;05711;;;DE;;
+575400;Gütersloh;1;Kreis / Kreisfreie Stadt (DE);DEA42;DEA4;DEA;DE;DEA42;05754;;;DE;;
+575800;Herford;1;Kreis / Kreisfreie Stadt (DE);DEA43;DEA4;DEA;DE;DEA43;05758;;;DE;;
+576200;Höxter;1;Kreis / Kreisfreie Stadt (DE);DEA44;DEA4;DEA;DE;DEA44;05762;;;DE;;
+576600;Lippe;1;Kreis / Kreisfreie Stadt (DE);DEA45;DEA4;DEA;DE;DEA45;05766;;;DE;;
+577000;Minden-Lübbecke;1;Kreis / Kreisfreie Stadt (DE);DEA46;DEA4;DEA;DE;DEA46;05770;;;DE;;
+577400;Paderborn;1;Kreis / Kreisfreie Stadt (DE);DEA47;DEA4;DEA;DE;DEA47;05774;;;DE;;
+591100;Bochum, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA51;DEA5;DEA;DE;DEA51;05911;;;DE;;
+591300;Dortmund, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA52;DEA5;DEA;DE;DEA52;05913;;;DE;;
+591400;Hagen, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA53;DEA5;DEA;DE;DEA53;05914;;;DE;;
+591500;Hamm, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA54;DEA5;DEA;DE;DEA54;05915;;;DE;;
+591600;Herne, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEA55;DEA5;DEA;DE;DEA55;05916;;;DE;;
+595400;Ennepe-Ruhr-Kreis;1;Kreis / Kreisfreie Stadt (DE);DEA56;DEA5;DEA;DE;DEA56;05954;;;DE;;
+595800;Hochsauerlandkreis;1;Kreis / Kreisfreie Stadt (DE);DEA57;DEA5;DEA;DE;DEA57;05958;;;DE;;
+596200;Märkischer Kreis;1;Kreis / Kreisfreie Stadt (DE);DEA58;DEA5;DEA;DE;DEA58;05962;;;DE;;
+596600;Olpe;1;Kreis / Kreisfreie Stadt (DE);DEA59;DEA5;DEA;DE;DEA59;05966;;;DE;;
+597000;Siegen-Wittgenstein;1;Kreis / Kreisfreie Stadt (DE);DEA5A;DEA5;DEA;DE;DEA5A;05970;;;DE;;
+597400;Soest;1;Kreis / Kreisfreie Stadt (DE);DEA5B;DEA5;DEA;DE;DEA5B;05974;;;DE;;
+597800;Unna;1;Kreis / Kreisfreie Stadt (DE);DEA5C;DEA5;DEA;DE;DEA5C;05978;;;DE;;
+611900;Flughafen Frankfurt/Main;3;Flughafen;;;;;;61;;FRA;DE;;
+641100;Darmstadt, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE711;DE71;DE7;DE;DE711;06411;;;DE;;
+641200;Frankfurt am Main, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE712;DE71;DE7;DE;DE712;06412;;;DE;;
+641300;Offenbach am Main, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE713;DE71;DE7;DE;DE713;06413;;;DE;;
+641400;Wiesbaden, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE714;DE71;DE7;DE;DE714;06414;;;DE;;
+643100;Bergstraße;1;Kreis / Kreisfreie Stadt (DE);DE715;DE71;DE7;DE;DE715;06431;;;DE;;
+643200;Darmstadt-Dieburg;1;Kreis / Kreisfreie Stadt (DE);DE716;DE71;DE7;DE;DE716;06432;;;DE;;
+643300;Groß-Gerau;1;Kreis / Kreisfreie Stadt (DE);DE717;DE71;DE7;DE;DE717;06433;;;DE;;
+643400;Hochtaunuskreis;1;Kreis / Kreisfreie Stadt (DE);DE718;DE71;DE7;DE;DE718;06434;;;DE;;
+643500;Main-Kinzig-Kreis;1;Kreis / Kreisfreie Stadt (DE);DE719;DE71;DE7;DE;DE719;06435;;;DE;;
+643600;Main-Taunus-Kreis;1;Kreis / Kreisfreie Stadt (DE);DE71A;DE71;DE7;DE;DE71A;06436;;;DE;;
+643700;Odenwaldkreis;1;Kreis / Kreisfreie Stadt (DE);DE71B;DE71;DE7;DE;DE71B;06437;;;DE;;
+643800;Offenbach, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE71C;DE71;DE7;DE;DE71C;06438;;;DE;;
+643900;Rheingau-Taunus-Kreis;1;Kreis / Kreisfreie Stadt (DE);DE71D;DE71;DE7;DE;DE71D;06439;;;DE;;
+644000;Wetteraukreis;1;Kreis / Kreisfreie Stadt (DE);DE71E;DE71;DE7;DE;DE71E;06440;;;DE;;
+653100;Gießen, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE721;DE72;DE7;DE;DE721;06531;;;DE;;
+653200;Lahn-Dill-Kreis;1;Kreis / Kreisfreie Stadt (DE);DE722;DE72;DE7;DE;DE722;06532;;;DE;;
+653300;Limburg-Weilburg;1;Kreis / Kreisfreie Stadt (DE);DE723;DE72;DE7;DE;DE723;06533;;;DE;;
+653400;Marburg-Biedenkopf;1;Kreis / Kreisfreie Stadt (DE);DE724;DE72;DE7;DE;DE724;06534;;;DE;;
+653500;Vogelsbergkreis;1;Kreis / Kreisfreie Stadt (DE);DE725;DE72;DE7;DE;DE725;06535;;;DE;;
+661100;Kassel, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE731;DE73;DE7;DE;DE731;06611;;;DE;;
+663100;Fulda;1;Kreis / Kreisfreie Stadt (DE);DE732;DE73;DE7;DE;DE732;06631;;;DE;;
+663200;Hersfeld-Rotenburg;1;Kreis / Kreisfreie Stadt (DE);DE733;DE73;DE7;DE;DE733;06632;;;DE;;
+663300;Kassel, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE734;DE73;DE7;DE;DE734;06633;;;DE;;
+663400;Schwalm-Eder-Kreis;1;Kreis / Kreisfreie Stadt (DE);DE735;DE73;DE7;DE;DE735;06634;;;DE;;
+663500;Waldeck-Frankenberg;1;Kreis / Kreisfreie Stadt (DE);DE736;DE73;DE7;DE;DE736;06635;;;DE;;
+663600;Werra-Meißner-Kreis;1;Kreis / Kreisfreie Stadt (DE);DE737;DE73;DE7;DE;DE737;06636;;;DE;;
+700900;Flughafen Hahn;3;Flughafen;;;;;;70;;HHN;DE;;
+711100;Koblenz, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEB11;DEB1;DEB;DE;DEB11;07111;;;DE;;
+713100;Ahrweiler;1;Kreis / Kreisfreie Stadt (DE);DEB12;DEB1;DEB;DE;DEB12;07131;;;DE;;
+713200;Altenkirchen (Westerwald);1;Kreis / Kreisfreie Stadt (DE);DEB13;DEB1;DEB;DE;DEB13;07132;;;DE;;
+713300;Bad Kreuznach;1;Kreis / Kreisfreie Stadt (DE);DEB14;DEB1;DEB;DE;DEB14;07133;;;DE;;
+713400;Birkenfeld;1;Kreis / Kreisfreie Stadt (DE);DEB15;DEB1;DEB;DE;DEB15;07134;;;DE;;
+713500;Cochem-Zell;1;Kreis / Kreisfreie Stadt (DE);DEB1C;DEB1;DEB;DE;DEB1C;07135;;;DE;;
+713700;Mayen-Koblenz;1;Kreis / Kreisfreie Stadt (DE);DEB17;DEB1;DEB;DE;DEB17;07137;;;DE;;
+713800;Neuwied;1;Kreis / Kreisfreie Stadt (DE);DEB18;DEB1;DEB;DE;DEB18;07138;;;DE;;
+714000;Rhein-Hunsrück-Kreis;1;Kreis / Kreisfreie Stadt (DE);DEB1D;DEB1;DEB;DE;DEB1D;07140;;;DE;;
+714100;Rhein-Lahn-Kreis;1;Kreis / Kreisfreie Stadt (DE);DEB1A;DEB1;DEB;DE;DEB1A;07141;;;DE;;
+714300;Westerwaldkreis;1;Kreis / Kreisfreie Stadt (DE);DEB1B;DEB1;DEB;DE;DEB1B;07143;;;DE;;
+721100;Trier, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEB21;DEB2;DEB;DE;DEB21;07211;;;DE;;
+723100;Bernkastel-Wittlich;1;Kreis / Kreisfreie Stadt (DE);DEB22;DEB2;DEB;DE;DEB22;07231;;;DE;;
+723200;Eifelkreis Bitburg-Prüm;1;Kreis / Kreisfreie Stadt (DE);DEB23;DEB2;DEB;DE;DEB23;07232;;;DE;;
+723300;Vulkaneifel;1;Kreis / Kreisfreie Stadt (DE);DEB24;DEB2;DEB;DE;DEB24;07233;;;DE;;
+723500;Trier-Saarburg;1;Kreis / Kreisfreie Stadt (DE);DEB25;DEB2;DEB;DE;DEB25;07235;;;DE;;
+731100;Frankenthal (Pfalz), Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEB31;DEB3;DEB;DE;DEB31;07311;;;DE;;
+731200;Kaiserslautern, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEB32;DEB3;DEB;DE;DEB32;07312;;;DE;;
+731300;Landau in der Pfalz, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEB33;DEB3;DEB;DE;DEB33;07313;;;DE;;
+731400;Ludwigshafen am Rhein, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEB34;DEB3;DEB;DE;DEB34;07314;;;DE;;
+731500;Mainz, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEB35;DEB3;DEB;DE;DEB35;07315;;;DE;;
+731600;Neustadt an der Weinstraße, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEB36;DEB3;DEB;DE;DEB36;07316;;;DE;;
+731700;Pirmasens, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEB37;DEB3;DEB;DE;DEB37;07317;;;DE;;
+731800;Speyer, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEB38;DEB3;DEB;DE;DEB38;07318;;;DE;;
+731900;Worms, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEB39;DEB3;DEB;DE;DEB39;07319;;;DE;;
+732000;Zweibrücken, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEB3A;DEB3;DEB;DE;DEB3A;07320;;;DE;;
+733100;Alzey-Worms;1;Kreis / Kreisfreie Stadt (DE);DEB3B;DEB3;DEB;DE;DEB3B;07331;;;DE;;
+733200;Bad Dürkheim;1;Kreis / Kreisfreie Stadt (DE);DEB3C;DEB3;DEB;DE;DEB3C;07332;;;DE;;
+733300;Donnersbergkreis;1;Kreis / Kreisfreie Stadt (DE);DEB3D;DEB3;DEB;DE;DEB3D;07333;;;DE;;
+733400;Germersheim;1;Kreis / Kreisfreie Stadt (DE);DEB3E;DEB3;DEB;DE;DEB3E;07334;;;DE;;
+733500;Kaiserslautern, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DEB3F;DEB3;DEB;DE;DEB3F;07335;;;DE;;
+733600;Kusel;1;Kreis / Kreisfreie Stadt (DE);DEB3G;DEB3;DEB;DE;DEB3G;07336;;;DE;;
+733700;Südliche Weinstraße;1;Kreis / Kreisfreie Stadt (DE);DEB3H;DEB3;DEB;DE;DEB3H;07337;;;DE;;
+733800;Rhein-Pfalz-Kreis;1;Kreis / Kreisfreie Stadt (DE);DEB3I;DEB3;DEB;DE;DEB3I;07338;;;DE;;
+733900;Mainz-Bingen;1;Kreis / Kreisfreie Stadt (DE);DEB3J;DEB3;DEB;DE;DEB3J;07339;;;DE;;
+734000;Südwestpfalz;1;Kreis / Kreisfreie Stadt (DE);DEB3K;DEB3;DEB;DE;DEB3K;07340;;;DE;;
+801900;Flughafen Karlsruhe/Baden-Baden;3;Flughafen;;;;;;80;;FKB;DE;;
+802900;Flughafen Stuttgart;3;Flughafen;;;;;;80;;STR;DE;;
+804900;Flughafen Friedrichshafen;3;Flughafen;;;;;;80;;FDH;DE;;
+811100;Stuttgart, Stadtkreis;1;Kreis / Kreisfreie Stadt (DE);DE111;DE11;DE1;DE;DE111;08111;;;DE;;
+811500;Böblingen;1;Kreis / Kreisfreie Stadt (DE);DE112;DE11;DE1;DE;DE112;08115;;;DE;;
+811600;Esslingen;1;Kreis / Kreisfreie Stadt (DE);DE113;DE11;DE1;DE;DE113;08116;;;DE;;
+811700;Göppingen;1;Kreis / Kreisfreie Stadt (DE);DE114;DE11;DE1;DE;DE114;08117;;;DE;;
+811800;Ludwigsburg;1;Kreis / Kreisfreie Stadt (DE);DE115;DE11;DE1;DE;DE115;08118;;;DE;;
+811900;Rems-Murr-Kreis;1;Kreis / Kreisfreie Stadt (DE);DE116;DE11;DE1;DE;DE116;08119;;;DE;;
+812100;Heilbronn, Stadtkreis;1;Kreis / Kreisfreie Stadt (DE);DE117;DE11;DE1;DE;DE117;08121;;;DE;;
+812500;Heilbronn, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE118;DE11;DE1;DE;DE118;08125;;;DE;;
+812600;Hohenlohekreis;1;Kreis / Kreisfreie Stadt (DE);DE119;DE11;DE1;DE;DE119;08126;;;DE;;
+812700;Schwäbisch Hall;1;Kreis / Kreisfreie Stadt (DE);DE11A;DE11;DE1;DE;DE11A;08127;;;DE;;
+812800;Main-Tauber-Kreis;1;Kreis / Kreisfreie Stadt (DE);DE11B;DE11;DE1;DE;DE11B;08128;;;DE;;
+813500;Heidenheim;1;Kreis / Kreisfreie Stadt (DE);DE11C;DE11;DE1;DE;DE11C;08135;;;DE;;
+813600;Ostalbkreis;1;Kreis / Kreisfreie Stadt (DE);DE11D;DE11;DE1;DE;DE11D;08136;;;DE;;
+821100;Baden-Baden, Stadtkreis;1;Kreis / Kreisfreie Stadt (DE);DE121;DE12;DE1;DE;DE121;08211;;;DE;;
+821200;Karlsruhe, Stadtkreis;1;Kreis / Kreisfreie Stadt (DE);DE122;DE12;DE1;DE;DE122;08212;;;DE;;
+821500;Karlsruhe, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE123;DE12;DE1;DE;DE123;08215;;;DE;;
+821600;Rastatt;1;Kreis / Kreisfreie Stadt (DE);DE124;DE12;DE1;DE;DE124;08216;;;DE;;
+822100;Heidelberg, Stadtkreis;1;Kreis / Kreisfreie Stadt (DE);DE125;DE12;DE1;DE;DE125;08221;;;DE;;
+822200;Mannheim, Stadtkreis;1;Kreis / Kreisfreie Stadt (DE);DE126;DE12;DE1;DE;DE126;08222;;;DE;;
+822500;Neckar-Odenwald-Kreis;1;Kreis / Kreisfreie Stadt (DE);DE127;DE12;DE1;DE;DE127;08225;;;DE;;
+822600;Rhein-Neckar-Kreis;1;Kreis / Kreisfreie Stadt (DE);DE128;DE12;DE1;DE;DE128;08226;;;DE;;
+823100;Pforzheim, Stadtkreis;1;Kreis / Kreisfreie Stadt (DE);DE129;DE12;DE1;DE;DE129;08231;;;DE;;
+823500;Calw;1;Kreis / Kreisfreie Stadt (DE);DE12A;DE12;DE1;DE;DE12A;08235;;;DE;;
+823600;Enzkreis;1;Kreis / Kreisfreie Stadt (DE);DE12B;DE12;DE1;DE;DE12B;08236;;;DE;;
+823700;Freudenstadt;1;Kreis / Kreisfreie Stadt (DE);DE12C;DE12;DE1;DE;DE12C;08237;;;DE;;
+831100;Freiburg im Breisgau, Stadtkreis;1;Kreis / Kreisfreie Stadt (DE);DE131;DE13;DE1;DE;DE131;08311;;;DE;;
+831500;Breisgau-Hochschwarzwald;1;Kreis / Kreisfreie Stadt (DE);DE132;DE13;DE1;DE;DE132;08315;;;DE;;
+831600;Emmendingen;1;Kreis / Kreisfreie Stadt (DE);DE133;DE13;DE1;DE;DE133;08316;;;DE;;
+831700;Ortenaukreis;1;Kreis / Kreisfreie Stadt (DE);DE134;DE13;DE1;DE;DE134;08317;;;DE;;
+832500;Rottweil;1;Kreis / Kreisfreie Stadt (DE);DE135;DE13;DE1;DE;DE135;08325;;;DE;;
+832600;Schwarzwald-Baar-Kreis;1;Kreis / Kreisfreie Stadt (DE);DE136;DE13;DE1;DE;DE136;08326;;;DE;;
+832700;Tuttlingen;1;Kreis / Kreisfreie Stadt (DE);DE137;DE13;DE1;DE;DE137;08327;;;DE;;
+833500;Konstanz;1;Kreis / Kreisfreie Stadt (DE);DE138;DE13;DE1;DE;DE138;08335;;;DE;;
+833600;Lörrach;1;Kreis / Kreisfreie Stadt (DE);DE139;DE13;DE1;DE;DE139;08336;;;DE;;
+833700;Waldshut;1;Kreis / Kreisfreie Stadt (DE);DE13A;DE13;DE1;DE;DE13A;08337;;;DE;;
+841500;Reutlingen;1;Kreis / Kreisfreie Stadt (DE);DE141;DE14;DE1;DE;DE141;08415;;;DE;;
+841600;Tübingen, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE142;DE14;DE1;DE;DE142;08416;;;DE;;
+841700;Zollernalbkreis;1;Kreis / Kreisfreie Stadt (DE);DE143;DE14;DE1;DE;DE143;08417;;;DE;;
+842100;Ulm, Stadtkreis;1;Kreis / Kreisfreie Stadt (DE);DE144;DE14;DE1;DE;DE144;08421;;;DE;;
+842500;Alb-Donau-Kreis;1;Kreis / Kreisfreie Stadt (DE);DE145;DE14;DE1;DE;DE145;08425;;;DE;;
+842600;Biberach;1;Kreis / Kreisfreie Stadt (DE);DE146;DE14;DE1;DE;DE146;08426;;;DE;;
+843500;Bodenseekreis;1;Kreis / Kreisfreie Stadt (DE);DE147;DE14;DE1;DE;DE147;08435;;;DE;;
+843600;Ravensburg;1;Kreis / Kreisfreie Stadt (DE);DE148;DE14;DE1;DE;DE148;08436;;;DE;;
+843700;Sigmaringen;1;Kreis / Kreisfreie Stadt (DE);DE149;DE14;DE1;DE;DE149;08437;;;DE;;
+901900;Flughafen Nürnberg;3;Flughafen;;;;;;90;;NUE;DE;;
+903900;Flughafen Memmingen;3;Flughafen;;;;;;90;;FMM;DE;;
+904900;Flughafen München;3;Flughafen;;;;;;90;;MUC;DE;;
+916100;Ingolstadt, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE211;DE21;DE2;DE;DE211;09161;;;DE;;
+916200;München, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE212;DE21;DE2;DE;DE212;09162;;;DE;;
+916300;Rosenheim, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE213;DE21;DE2;DE;DE213;09163;;;DE;;
+917100;Altötting;1;Kreis / Kreisfreie Stadt (DE);DE214;DE21;DE2;DE;DE214;09171;;;DE;;
+917200;Berchtesgadener Land;1;Kreis / Kreisfreie Stadt (DE);DE215;DE21;DE2;DE;DE215;09172;;;DE;;
+917300;Bad Tölz-Wolfratshausen;1;Kreis / Kreisfreie Stadt (DE);DE216;DE21;DE2;DE;DE216;09173;;;DE;;
+917400;Dachau;1;Kreis / Kreisfreie Stadt (DE);DE217;DE21;DE2;DE;DE217;09174;;;DE;;
+917500;Ebersberg;1;Kreis / Kreisfreie Stadt (DE);DE218;DE21;DE2;DE;DE218;09175;;;DE;;
+917600;Eichstätt;1;Kreis / Kreisfreie Stadt (DE);DE219;DE21;DE2;DE;DE219;09176;;;DE;;
+917700;Erding;1;Kreis / Kreisfreie Stadt (DE);DE21A;DE21;DE2;DE;DE21A;09177;;;DE;;
+917800;Freising;1;Kreis / Kreisfreie Stadt (DE);DE21B;DE21;DE2;DE;DE21B;09178;;;DE;;
+917900;Fürstenfeldbruck;1;Kreis / Kreisfreie Stadt (DE);DE21C;DE21;DE2;DE;DE21C;09179;;;DE;;
+918000;Garmisch-Partenkirchen;1;Kreis / Kreisfreie Stadt (DE);DE21D;DE21;DE2;DE;DE21D;09180;;;DE;;
+918100;Landsberg am Lech;1;Kreis / Kreisfreie Stadt (DE);DE21E;DE21;DE2;DE;DE21E;09181;;;DE;;
+918200;Miesbach;1;Kreis / Kreisfreie Stadt (DE);DE21F;DE21;DE2;DE;DE21F;09182;;;DE;;
+918300;Mühldorf a. Inn;1;Kreis / Kreisfreie Stadt (DE);DE21G;DE21;DE2;DE;DE21G;09183;;;DE;;
+918400;München, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE21H;DE21;DE2;DE;DE21H;09184;;;DE;;
+918500;Neuburg-Schrobenhausen;1;Kreis / Kreisfreie Stadt (DE);DE21I;DE21;DE2;DE;DE21I;09185;;;DE;;
+918600;Pfaffenhofen a. d. Ilm;1;Kreis / Kreisfreie Stadt (DE);DE21J;DE21;DE2;DE;DE21J;09186;;;DE;;
+918700;Rosenheim, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE21K;DE21;DE2;DE;DE21K;09187;;;DE;;
+918800;Starnberg;1;Kreis / Kreisfreie Stadt (DE);DE21L;DE21;DE2;DE;DE21L;09188;;;DE;;
+918900;Traunstein;1;Kreis / Kreisfreie Stadt (DE);DE21M;DE21;DE2;DE;DE21M;09189;;;DE;;
+919000;Weilheim-Schongau;1;Kreis / Kreisfreie Stadt (DE);DE21N;DE21;DE2;DE;DE21N;09190;;;DE;;
+926100;Landshut, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE221;DE22;DE2;DE;DE221;09261;;;DE;;
+926200;Passau, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE222;DE22;DE2;DE;DE222;09262;;;DE;;
+926300;Straubing, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE223;DE22;DE2;DE;DE223;09263;;;DE;;
+927100;Deggendorf;1;Kreis / Kreisfreie Stadt (DE);DE224;DE22;DE2;DE;DE224;09271;;;DE;;
+927200;Freyung-Grafenau;1;Kreis / Kreisfreie Stadt (DE);DE225;DE22;DE2;DE;DE225;09272;;;DE;;
+927300;Kelheim;1;Kreis / Kreisfreie Stadt (DE);DE226;DE22;DE2;DE;DE226;09273;;;DE;;
+927400;Landshut, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE227;DE22;DE2;DE;DE227;09274;;;DE;;
+927500;Passau, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE228;DE22;DE2;DE;DE228;09275;;;DE;;
+927600;Regen;1;Kreis / Kreisfreie Stadt (DE);DE229;DE22;DE2;DE;DE229;09276;;;DE;;
+927700;Rottal-Inn;1;Kreis / Kreisfreie Stadt (DE);DE22A;DE22;DE2;DE;DE22A;09277;;;DE;;
+927800;Straubing-Bogen;1;Kreis / Kreisfreie Stadt (DE);DE22B;DE22;DE2;DE;DE22B;09278;;;DE;;
+927900;Dingolfing-Landau;1;Kreis / Kreisfreie Stadt (DE);DE22C;DE22;DE2;DE;DE22C;09279;;;DE;;
+936100;Amberg, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE231;DE23;DE2;DE;DE231;09361;;;DE;;
+936200;Regensburg, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE232;DE23;DE2;DE;DE232;09362;;;DE;;
+936300;Weiden i. d. Opf, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE233;DE23;DE2;DE;DE233;09363;;;DE;;
+937100;Amberg-Sulzbach;1;Kreis / Kreisfreie Stadt (DE);DE234;DE23;DE2;DE;DE234;09371;;;DE;;
+937200;Cham;1;Kreis / Kreisfreie Stadt (DE);DE235;DE23;DE2;DE;DE235;09372;;;DE;;
+937300;Neumarkt i. d. OPf.;1;Kreis / Kreisfreie Stadt (DE);DE236;DE23;DE2;DE;DE236;09373;;;DE;;
+937400;Neustadt a. d. Waldnaab;1;Kreis / Kreisfreie Stadt (DE);DE237;DE23;DE2;DE;DE237;09374;;;DE;;
+937500;Regensburg, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE238;DE23;DE2;DE;DE238;09375;;;DE;;
+937600;Schwandorf;1;Kreis / Kreisfreie Stadt (DE);DE239;DE23;DE2;DE;DE239;09376;;;DE;;
+937700;Tirschenreuth;1;Kreis / Kreisfreie Stadt (DE);DE23A;DE23;DE2;DE;DE23A;09377;;;DE;;
+946100;Bamberg, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE241;DE24;DE2;DE;DE241;09461;;;DE;;
+946200;Bayreuth, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE242;DE24;DE2;DE;DE242;09462;;;DE;;
+946300;Coburg, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE243;DE24;DE2;DE;DE243;09463;;;DE;;
+946400;Hof, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE244;DE24;DE2;DE;DE244;09464;;;DE;;
+947100;Bamberg, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE245;DE24;DE2;DE;DE245;09471;;;DE;;
+947200;Bayreuth, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE246;DE24;DE2;DE;DE246;09472;;;DE;;
+947300;Coburg, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE247;DE24;DE2;DE;DE247;09473;;;DE;;
+947400;Forchheim;1;Kreis / Kreisfreie Stadt (DE);DE248;DE24;DE2;DE;DE248;09474;;;DE;;
+947500;Hof, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE249;DE24;DE2;DE;DE249;09475;;;DE;;
+947600;Kronach;1;Kreis / Kreisfreie Stadt (DE);DE24A;DE24;DE2;DE;DE24A;09476;;;DE;;
+947700;Kulmbach;1;Kreis / Kreisfreie Stadt (DE);DE24B;DE24;DE2;DE;DE24B;09477;;;DE;;
+947800;Lichtenfels;1;Kreis / Kreisfreie Stadt (DE);DE24C;DE24;DE2;DE;DE24C;09478;;;DE;;
+947900;Wunsiedel i. Fichtelgebirge;1;Kreis / Kreisfreie Stadt (DE);DE24D;DE24;DE2;DE;DE24D;09479;;;DE;;
+956100;Ansbach, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE251;DE25;DE2;DE;DE251;09561;;;DE;;
+956200;Erlangen, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE252;DE25;DE2;DE;DE252;09562;;;DE;;
+956300;Fürth, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE253;DE25;DE2;DE;DE253;09563;;;DE;;
+956400;Nürnberg, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE254;DE25;DE2;DE;DE254;09564;;;DE;;
+956500;Schwabach, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE255;DE25;DE2;DE;DE255;09565;;;DE;;
+957100;Ansbach, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE256;DE25;DE2;DE;DE256;09571;;;DE;;
+957200;Erlangen-Höchstadt;1;Kreis / Kreisfreie Stadt (DE);DE257;DE25;DE2;DE;DE257;09572;;;DE;;
+957300;Fürth, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE258;DE25;DE2;DE;DE258;09573;;;DE;;
+957400;Nürnberger Land;1;Kreis / Kreisfreie Stadt (DE);DE259;DE25;DE2;DE;DE259;09574;;;DE;;
+957500;Neustadt a. d. Aisch-Bad Windsheim;1;Kreis / Kreisfreie Stadt (DE);DE25A;DE25;DE2;DE;DE25A;09575;;;DE;;
+957600;Roth;1;Kreis / Kreisfreie Stadt (DE);DE25B;DE25;DE2;DE;DE25B;09576;;;DE;;
+957700;Weißenburg-Gunzenhausen;1;Kreis / Kreisfreie Stadt (DE);DE25C;DE25;DE2;DE;DE25C;09577;;;DE;;
+966100;Aschaffenburg, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE261;DE26;DE2;DE;DE261;09661;;;DE;;
+966200;Schweinfurt, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE262;DE26;DE2;DE;DE262;09662;;;DE;;
+966300;Würzburg, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE263;DE26;DE2;DE;DE263;09663;;;DE;;
+967100;Aschaffenburg, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE264;DE26;DE2;DE;DE264;09671;;;DE;;
+967200;Bad Kissingen;1;Kreis / Kreisfreie Stadt (DE);DE265;DE26;DE2;DE;DE265;09672;;;DE;;
+967300;Rhön-Grabfeld;1;Kreis / Kreisfreie Stadt (DE);DE266;DE26;DE2;DE;DE266;09673;;;DE;;
+967400;Haßberge;1;Kreis / Kreisfreie Stadt (DE);DE267;DE26;DE2;DE;DE267;09674;;;DE;;
+967500;Kitzingen;1;Kreis / Kreisfreie Stadt (DE);DE268;DE26;DE2;DE;DE268;09675;;;DE;;
+967600;Miltenberg;1;Kreis / Kreisfreie Stadt (DE);DE269;DE26;DE2;DE;DE269;09676;;;DE;;
+967700;Main-Spessart;1;Kreis / Kreisfreie Stadt (DE);DE26A;DE26;DE2;DE;DE26A;09677;;;DE;;
+967800;Schweinfurt, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE26B;DE26;DE2;DE;DE26B;09678;;;DE;;
+967900;Würzburg, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE26C;DE26;DE2;DE;DE26C;09679;;;DE;;
+976100;Augsburg, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE271;DE27;DE2;DE;DE271;09761;;;DE;;
+976200;Kaufbeuren, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE272;DE27;DE2;DE;DE272;09762;;;DE;;
+976300;Kempten (Allgäu), Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE273;DE27;DE2;DE;DE273;09763;;;DE;;
+976400;Memmingen, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE274;DE27;DE2;DE;DE274;09764;;;DE;;
+977100;Aichach-Friedberg;1;Kreis / Kreisfreie Stadt (DE);DE275;DE27;DE2;DE;DE275;09771;;;DE;;
+977200;Augsburg, Landkreis;1;Kreis / Kreisfreie Stadt (DE);DE276;DE27;DE2;DE;DE276;09772;;;DE;;
+977300;Dillingen a.d. Donau;1;Kreis / Kreisfreie Stadt (DE);DE277;DE27;DE2;DE;DE277;09773;;;DE;;
+977400;Günzburg;1;Kreis / Kreisfreie Stadt (DE);DE278;DE27;DE2;DE;DE278;09774;;;DE;;
+977500;Neu-Ulm;1;Kreis / Kreisfreie Stadt (DE);DE279;DE27;DE2;DE;DE279;09775;;;DE;;
+977600;Lindau (Bodensee);1;Kreis / Kreisfreie Stadt (DE);DE27A;DE27;DE2;DE;DE27A;09776;;;DE;;
+977700;Ostallgäu;1;Kreis / Kreisfreie Stadt (DE);DE27B;DE27;DE2;DE;DE27B;09777;;;DE;;
+977800;Unterallgäu;1;Kreis / Kreisfreie Stadt (DE);DE27C;DE27;DE2;DE;DE27C;09778;;;DE;;
+977900;Donau-Ries;1;Kreis / Kreisfreie Stadt (DE);DE27D;DE27;DE2;DE;DE27D;09779;;;DE;;
+978000;Oberallgäu;1;Kreis / Kreisfreie Stadt (DE);DE27E;DE27;DE2;DE;DE27E;09780;;;DE;;
+1004100;Regionalverband Saarbrücken;1;Kreis / Kreisfreie Stadt (DE);DEC01;DEC0;DEC;DE;DEC01;10041;;;DE;;
+1004200;Merzig-Wadern;1;Kreis / Kreisfreie Stadt (DE);DEC02;DEC0;DEC;DE;DEC02;10042;;;DE;;
+1004300;Neunkirchen;1;Kreis / Kreisfreie Stadt (DE);DEC03;DEC0;DEC;DE;DEC03;10043;;;DE;;
+1004400;Saarlouis;1;Kreis / Kreisfreie Stadt (DE);DEC04;DEC0;DEC;DE;DEC04;10044;;;DE;;
+1004500;Saarpfalz-Kreis;1;Kreis / Kreisfreie Stadt (DE);DEC05;DEC0;DEC;DE;DEC05;10045;;;DE;;
+1004600;St. Wendel;1;Kreis / Kreisfreie Stadt (DE);DEC06;DEC0;DEC;DE;DEC06;10046;;;DE;;
+1010900;Flughafen Saarbrücken;3;Flughafen;;;;;;101;;SCN;DE;;
+1100000;Berlin;1;Kreis / Kreisfreie Stadt (DE);DE300;DE30;DE3;DE;DE300;11000;;;DE;;
+1101900;Flughafen Berlin-Schönefeld;3;Flughafen;;;;;;110;;SXF;DE;;
+1103900;Flughafen Berlin-Tegel;3;Flughafen;;;;;;110;;TXL;DE;;
+1104900;Flughafen Berlin-Brandenburg;3;Flughafen;;;;;;110;;BER;DE;;
+1205100;Brandenburg an der Havel, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE401;DE40;DE4;DE;DE401;12051;;;DE;;
+1205200;Cottbus, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE402;DE40;DE4;DE;DE402;12052;;;DE;;
+1205300;Frankfurt (Oder), Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE403;DE40;DE4;DE;DE403;12053;;;DE;;
+1205400;Potsdam, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE404;DE40;DE4;DE;DE404;12054;;;DE;;
+1206000;Barnim;1;Kreis / Kreisfreie Stadt (DE);DE405;DE40;DE4;DE;DE405;12060;;;DE;;
+1206100;Dahme-Spreewald;1;Kreis / Kreisfreie Stadt (DE);DE406;DE40;DE4;DE;DE406;12061;;;DE;;
+1206200;Elbe-Elster;1;Kreis / Kreisfreie Stadt (DE);DE407;DE40;DE4;DE;DE407;12062;;;DE;;
+1206300;Havelland;1;Kreis / Kreisfreie Stadt (DE);DE408;DE40;DE4;DE;DE408;12063;;;DE;;
+1206400;Märkisch-Oderland;1;Kreis / Kreisfreie Stadt (DE);DE409;DE40;DE4;DE;DE409;12064;;;DE;;
+1206500;Oberhavel;1;Kreis / Kreisfreie Stadt (DE);DE40A;DE40;DE4;DE;DE40A;12065;;;DE;;
+1206600;Oberspreewald-Lausitz;1;Kreis / Kreisfreie Stadt (DE);DE40B;DE40;DE4;DE;DE40B;12066;;;DE;;
+1206700;Oder-Spree;1;Kreis / Kreisfreie Stadt (DE);DE40C;DE40;DE4;DE;DE40C;12067;;;DE;;
+1206800;Ostprignitz-Ruppin;1;Kreis / Kreisfreie Stadt (DE);DE40D;DE40;DE4;DE;DE40D;12068;;;DE;;
+1206900;Potsdam-Mittelmark;1;Kreis / Kreisfreie Stadt (DE);DE40E;DE40;DE4;DE;DE40E;12069;;;DE;;
+1207000;Prignitz;1;Kreis / Kreisfreie Stadt (DE);DE40F;DE40;DE4;DE;DE40F;12070;;;DE;;
+1207100;Spree-Neiße;1;Kreis / Kreisfreie Stadt (DE);DE40G;DE40;DE4;DE;DE40G;12071;;;DE;;
+1207200;Teltow-Fläming;1;Kreis / Kreisfreie Stadt (DE);DE40H;DE40;DE4;DE;DE40H;12072;;;DE;;
+1207300;Uckermark;1;Kreis / Kreisfreie Stadt (DE);DE40I;DE40;DE4;DE;DE40I;12073;;;DE;;
+1300300;Rostock, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE803;DE80;DE8;DE;DE803;13003;;;DE;;
+1300400;Schwerin, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DE804;DE80;DE8;DE;DE804;13004;;;DE;;
+1307100;Mecklenburgische Seenplatte;1;Kreis / Kreisfreie Stadt (DE);DE80J;DE80;DE8;DE;DE80J;13071;;;DE;;
+1307200;Landkreis Rostock;1;Kreis / Kreisfreie Stadt (DE);DE80K;DE80;DE8;DE;DE80K;13072;;;DE;;
+1307300;Vorpommern-Rügen;1;Kreis / Kreisfreie Stadt (DE);DE80L;DE80;DE8;DE;DE80L;13073;;;DE;;
+1307400;Nordwestmecklenburg;1;Kreis / Kreisfreie Stadt (DE);DE80M;DE80;DE8;DE;DE80M;13074;;;DE;;
+1307500;Vorpommern-Greifswald;1;Kreis / Kreisfreie Stadt (DE);DE80N;DE80;DE8;DE;DE80N;13075;;;DE;;
+1307600;Ludwigslust-Parchim;1;Kreis / Kreisfreie Stadt (DE);DE80O;DE80;DE8;DE;DE80O;13076;;;DE;;
+1311900;Flughafen Rostock-Laage;3;Flughafen;;;;;;131;;RLG;DE;;
+1360166;Seehafen Wismar;4;Seehafen;;;;;;;DERSK;;DE;;Deutscher Seehafen (Bundesland-Prefix 13)
+1360266;Seehafen Rostock;4;Seehafen;;;;;;;DEWIS;;DE;;Deutscher Seehafen (Bundesland-Prefix 13)
+1360366;Seehafen Stralsund;4;Seehafen;;;;;;;DESAS;;DE;;Deutscher Seehafen (Bundesland-Prefix 13)
+1360466;Seehafen Sassnitz-Mukran;4;Seehafen;;;;;;;DESTR;;DE;;Deutscher Seehafen (Bundesland-Prefix 13)
+1410900;Flughafen Leipzig/Halle;3;Flughafen;;;;;;141;;LEJ;DE;;
+1411900;Flughafen Dresden;3;Flughafen;;;;;;141;;DRS;DE;;
+1451100;Chemnitz, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DED41;DED4;DED;DE;DED41;14511;;;DE;;
+1452100;Erzgebirgskreis;1;Kreis / Kreisfreie Stadt (DE);DED42;DED4;DED;DE;DED42;14521;;;DE;;
+1452200;Mittelsachsen;1;Kreis / Kreisfreie Stadt (DE);DED43;DED4;DED;DE;DED43;14522;;;DE;;
+1452300;Vogtlandkreis;1;Kreis / Kreisfreie Stadt (DE);DED44;DED4;DED;DE;DED44;14523;;;DE;;
+1452400;Zwickau;1;Kreis / Kreisfreie Stadt (DE);DED45;DED4;DED;DE;DED45;14524;;;DE;;
+1461200;Dresden, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DED21;DED2;DED;DE;DED21;14612;;;DE;;
+1462500;Bautzen;1;Kreis / Kreisfreie Stadt (DE);DED2C;DED2;DED;DE;DED2C;14625;;;DE;;
+1462600;Görlitz;1;Kreis / Kreisfreie Stadt (DE);DED2D;DED2;DED;DE;DED2D;14626;;;DE;;
+1462700;Meißen;1;Kreis / Kreisfreie Stadt (DE);DED2E;DED2;DED;DE;DED2E;14627;;;DE;;
+1462800;Sächsische Schweiz-Osterzgebirge;1;Kreis / Kreisfreie Stadt (DE);DED2F;DED2;DED;DE;DED2F;14628;;;DE;;
+1471300;Leipzig, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DED51;DED5;DED;DE;DED51;14713;;;DE;;
+1472900;Leipzig;1;Kreis / Kreisfreie Stadt (DE);DED52;DED5;DED;DE;DED52;14729;;;DE;;
+1473000;Nordsachsen;1;Kreis / Kreisfreie Stadt (DE);DED53;DED5;DED;DE;DED53;14730;;;DE;;
+1500100;Dessau-Roßlau, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEE01;DEE0;DEE;DE;DEE01;15001;;;DE;;
+1500200;Halle (Saale), Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEE02;DEE0;DEE;DE;DEE02;15002;;;DE;;
+1500300;Magdeburg, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEE03;DEE0;DEE;DE;DEE03;15003;;;DE;;
+1508100;Altmarkkreis Salzwedel;1;Kreis / Kreisfreie Stadt (DE);DEE04;DEE0;DEE;DE;DEE04;15081;;;DE;;
+1508200;Anhalt-Bitterfeld;1;Kreis / Kreisfreie Stadt (DE);DEE05;DEE0;DEE;DE;DEE05;15082;;;DE;;
+1508300;Börde;1;Kreis / Kreisfreie Stadt (DE);DEE07;DEE0;DEE;DE;DEE07;15083;;;DE;;
+1508400;Burgenlandkreis;1;Kreis / Kreisfreie Stadt (DE);DEE08;DEE0;DEE;DE;DEE08;15084;;;DE;;
+1508500;Harz;1;Kreis / Kreisfreie Stadt (DE);DEE09;DEE0;DEE;DE;DEE09;15085;;;DE;;
+1508600;Jerichower Land;1;Kreis / Kreisfreie Stadt (DE);DEE06;DEE0;DEE;DE;DEE06;15086;;;DE;;
+1508700;Mansfeld-Südharz;1;Kreis / Kreisfreie Stadt (DE);DEE0A;DEE0;DEE;DE;DEE0A;15087;;;DE;;
+1508800;Saalekreis;1;Kreis / Kreisfreie Stadt (DE);DEE0B;DEE0;DEE;DE;DEE0B;15088;;;DE;;
+1508900;Salzlandkreis;1;Kreis / Kreisfreie Stadt (DE);DEE0C;DEE0;DEE;DE;DEE0C;15089;;;DE;;
+1509000;Stendal;1;Kreis / Kreisfreie Stadt (DE);DEE0D;DEE0;DEE;DE;DEE0D;15090;;;DE;;
+1509100;Wittenberg;1;Kreis / Kreisfreie Stadt (DE);DEE0E;DEE0;DEE;DE;DEE0E;15091;;;DE;;
+1605100;Erfurt, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEG01;DEG0;DEG;DE;DEG01;16051;;;DE;;
+1605200;Gera, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEG02;DEG0;DEG;DE;DEG02;16052;;;DE;;
+1605300;Jena, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEG03;DEG0;DEG;DE;DEG03;16053;;;DE;;
+1605400;Suhl, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEG04;DEG0;DEG;DE;DEG04;16054;;;DE;;
+1605500;Weimar, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEG05;DEG0;DEG;DE;DEG05;16055;;;DE;;
+1605600;Eisenach, Kreisfreie Stadt;1;Kreis / Kreisfreie Stadt (DE);DEG0N;DEG0;DEG;DE;DEG0P;16056;;;DE;;Eisenach wurde zum 01.07.2021 in den Wartburgkreis (DEG0P) eingegliedert.
+1606100;Eichsfeld;1;Kreis / Kreisfreie Stadt (DE);DEG06;DEG0;DEG;DE;DEG06;16061;;;DE;;
+1606200;Nordhausen;1;Kreis / Kreisfreie Stadt (DE);DEG07;DEG0;DEG;DE;DEG07;16062;;;DE;;
+1606300;Wartburgkreis;1;Kreis / Kreisfreie Stadt (DE);DEG0P;DEG0;DEG;DE;DEG0P;16063;;;DE;;
+1606400;Unstrut-Hainich-Kreis;1;Kreis / Kreisfreie Stadt (DE);DEG09;DEG0;DEG;DE;DEG09;16064;;;DE;;
+1606500;Kyffhäuserkreis;1;Kreis / Kreisfreie Stadt (DE);DEG0A;DEG0;DEG;DE;DEG0A;16065;;;DE;;
+1606600;Schmalkalden-Meiningen;1;Kreis / Kreisfreie Stadt (DE);DEG0B;DEG0;DEG;DE;DEG0B;16066;;;DE;;
+1606700;Gotha;1;Kreis / Kreisfreie Stadt (DE);DEG0C;DEG0;DEG;DE;DEG0C;16067;;;DE;;
+1606800;Sömmerda;1;Kreis / Kreisfreie Stadt (DE);DEG0D;DEG0;DEG;DE;DEG0D;16068;;;DE;;
+1606900;Hildburghausen;1;Kreis / Kreisfreie Stadt (DE);DEG0E;DEG0;DEG;DE;DEG0E;16069;;;DE;;
+1607000;Ilm-Kreis;1;Kreis / Kreisfreie Stadt (DE);DEG0F;DEG0;DEG;DE;DEG0F;16070;;;DE;;
+1607100;Weimarer Land;1;Kreis / Kreisfreie Stadt (DE);DEG0G;DEG0;DEG;DE;DEG0G;16071;;;DE;;
+1607200;Sonneberg;1;Kreis / Kreisfreie Stadt (DE);DEG0H;DEG0;DEG;DE;DEG0H;16072;;;DE;;
+1607300;Saalfeld-Rudolstadt;1;Kreis / Kreisfreie Stadt (DE);DEG0I;DEG0;DEG;DE;DEG0I;16073;;;DE;;
+1607400;Saale-Holzland-Kreis;1;Kreis / Kreisfreie Stadt (DE);DEG0J;DEG0;DEG;DE;DEG0J;16074;;;DE;;
+1607500;Saale-Orla-Kreis;1;Kreis / Kreisfreie Stadt (DE);DEG0K;DEG0;DEG;DE;DEG0K;16075;;;DE;;
+1607600;Greiz;1;Kreis / Kreisfreie Stadt (DE);DEG0L;DEG0;DEG;DE;DEG0L;16076;;;DE;;
+1607700;Altenburger Land;1;Kreis / Kreisfreie Stadt (DE);DEG0M;DEG0;DEG;DE;DEG0M;16077;;;DE;;
+1610900;Flughafen Erfurt;3;Flughafen;;;;;;161;;ERF;DE;;
+2100011;Kopenhagen;2;Region Europa (Ausland);;;;DK;;;;;DK;2045259.0;Umfasst 4 NUTS3-Regionen (2016)
+2100012;Seeland West u. Süd;2;Region Europa (Ausland);DK022;;;DK;DK022;;;;DK;541563.0;Umfasst 1 NUTS3-Regionen (2016)
+2100013;Bornholm;2;Region Europa (Ausland);DK014;;;DK;DK014;;;;DK;39662.0;Umfasst 1 NUTS3-Regionen (2016)
+2100014;Fünen;2;Region Europa (Ausland);DK031;;;DK;DK031;;;;DK;498481.0;Umfasst 1 NUTS3-Regionen (2016)
+2100015;Jütland Süd;2;Region Europa (Ausland);DK032;;;DK;DK032;;;;DK;724867.0;Umfasst 1 NUTS3-Regionen (2016)
+2100016;Jütland Nord;2;Region Europa (Ausland);;;;DK;;;;;DK;1910433.0;Umfasst 3 NUTS3-Regionen (2016)
+2102000;Flughafen Kopenhagen;3;Flughafen;;;;;;;;CPH;;;
+2104000;Flughafen Billund;3;Flughafen;;;;;;;;BLL;;;
+2200001;Norwegen;2;Region Europa (Ausland);;;;NO;;;;;NO;5328212.0;Umfasst 19 NUTS3-Regionen (2016)
+2300011;Stockholm/Mittelschweden Ost;2;Region Europa (Ausland);;;;SE;;;;;SE;5491305.0;Umfasst 12 NUTS3-Regionen (2016)
+2300012;Göteborg/Mittelschweden West;2;Region Europa (Ausland);;;;SE;;;;;SE;2320648.0;Umfasst 3 NUTS3-Regionen (2016)
+2300013;Malmö/Südschweden;2;Region Europa (Ausland);;;;SE;;;;;SE;1521848.0;Umfasst 2 NUTS3-Regionen (2016)
+2300014;Nordschweden;2;Region Europa (Ausland);;;;SE;;;;;SE;896384.0;Umfasst 4 NUTS3-Regionen (2016)
+2400001;Finnland;2;Region Europa (Ausland);;;;FI;;;;;FI;5517919.0;Umfasst 19 NUTS3-Regionen (2016)
+2900001;Island;2;Region Europa (Ausland);;;;IS;;;;;IS;356991.0;Umfasst 2 NUTS3-Regionen (2016)
+3100011;Amsterdam/Nordholland;2;Region Europa (Ausland);;;;NL;;;;;NL;2859528.0;Umfasst 7 NUTS3-Regionen (2016)
+3100012;Utrecht;2;Region Europa (Ausland);NL310;;;NL;NL310;;;;NL;1342158.0;Umfasst 1 NUTS3-Regionen (2016)
+3100013;Rotterdam/Südholland;2;Region Europa (Ausland);;;;NL;;;;;NL;3709139.0;Umfasst 6 NUTS3-Regionen (2016)
+3100014;Zeeland;2;Region Europa (Ausland);;;;NL;;;;;NL;383032.0;Umfasst 2 NUTS3-Regionen (2016)
+3100021;Groningen;2;Region Europa (Ausland);;;;NL;;;;;NL;437187.0;Umfasst 2 NUTS3-Regionen (2016)
+3100022;Winschoten;2;Region Europa (Ausland);NL111;;;NL;NL111;;;;NL;146803.0;Umfasst 1 NUTS3-Regionen (2016)
+3100023;Emmen;2;Region Europa (Ausland);NL132;;;NL;NL132;;;;NL;167968.0;Umfasst 1 NUTS3-Regionen (2016)
+3100024;Drenthe West;2;Region Europa (Ausland);;;;NL;;;;;NL;324199.0;Umfasst 2 NUTS3-Regionen (2016)
+3100025;Friesland;2;Region Europa (Ausland);;;;NL;;;;;NL;647672.0;Umfasst 3 NUTS3-Regionen (2016)
+3100031;Arnhem/Nijmegen;2;Region Europa (Ausland);NL226;;;NL;NL226;;;;NL;738436.0;Umfasst 1 NUTS3-Regionen (2016)
+3100032;Apeldoorn;2;Region Europa (Ausland);;;;NL;;;;;NL;932851.0;Umfasst 2 NUTS3-Regionen (2016)
+3100033;Flevoland;2;Region Europa (Ausland);NL230;;;NL;NL230;;;;NL;416546.0;Umfasst 1 NUTS3-Regionen (2016)
+3100034;Zwolle;2;Region Europa (Ausland);;;;NL;;;;;NL;527147.0;Umfasst 2 NUTS3-Regionen (2016)
+3100035;Enschede;2;Region Europa (Ausland);NL213;;;NL;NL213;;;;NL;629284.0;Umfasst 1 NUTS3-Regionen (2016)
+3100036;Gelderland Ost;2;Region Europa (Ausland);NL225;;;NL;NL225;;;;NL;400685.0;Umfasst 1 NUTS3-Regionen (2016)
+3100041;Eindhoven/Nordbrabant Ost;2;Region Europa (Ausland);;;;NL;;;;;NL;1431819.0;Umfasst 2 NUTS3-Regionen (2016)
+3100042;Venlo;2;Region Europa (Ausland);NL421;;;NL;NL421;;;;NL;282067.0;Umfasst 1 NUTS3-Regionen (2016)
+3100043;Roermond;2;Region Europa (Ausland);NL422;;;NL;NL422;;;;NL;236702.0;Umfasst 1 NUTS3-Regionen (2016)
+3100044;Maastricht;2;Region Europa (Ausland);NL423;;;NL;NL423;;;;NL;597368.0;Umfasst 1 NUTS3-Regionen (2016)
+3100045;Nordbrabant West;2;Region Europa (Ausland);;;;NL;;;;;NL;1112987.0;Umfasst 2 NUTS3-Regionen (2016)
+3102000;Flughafen Amsterdam;3;Flughafen;;;;;;;;AMS;;;
+3104000;Flughafen Eindhoven;3;Flughafen;;;;;;;;EIN;;;
+3106000;Flughafen Maastricht;3;Flughafen;;;;;;;;MST;;;
+3160166;Seehafen Rotterdam;4;Seehafen;;;;;;;;;NL;;Ausländischer Seehafen in den Niederlanden
+3160266;Seehafen Amsterdam;4;Seehafen;;;;;;;;;NL;;Ausländischer Seehafen in den Niederlanden
+3160366;Seehafen Groningen Seaports;4;Seehafen;;;;;;;;;NL;;Ausländischer Seehafen in den Niederlanden
+3200011;Brüssel;2;Region Europa (Ausland);;;;BE;;;;;BE;2361344.0;Umfasst 3 NUTS3-Regionen (2016)
+3200012;Antwerpen;2;Region Europa (Ausland);;;;BE;;;;;BE;1860470.0;Umfasst 3 NUTS3-Regionen (2016)
+3200013;Hasselt;2;Region Europa (Ausland);;;;BE;;;;;BE;875842.0;Umfasst 3 NUTS3-Regionen (2016)
+3200014;Ostflandern;2;Region Europa (Ausland);;;;BE;;;;;BE;1516283.0;Umfasst 6 NUTS3-Regionen (2016)
+3200015;Westflandern;2;Region Europa (Ausland);;;;BE;;;;;BE;1196995.0;Umfasst 8 NUTS3-Regionen (2016)
+3200021;Hainaut;2;Region Europa (Ausland);;;;BE;;;;;BE;1346082.0;Umfasst 7 NUTS3-Regionen (2016)
+3200022;Brabant Süd;2;Region Europa (Ausland);BE310;;;BE;BE310;;;;BE;404270.0;Umfasst 1 NUTS3-Regionen (2016)
+3200023;Namur;2;Region Europa (Ausland);;;;BE;;;;;BE;496891.0;Umfasst 3 NUTS3-Regionen (2016)
+3200024;Lüttich;2;Region Europa (Ausland);;;;BE;;;;;BE;1110068.0;Umfasst 5 NUTS3-Regionen (2016)
+3200026;Belgisch-Luxembourg;2;Region Europa (Ausland);;;;BE;;;;;BE;286685.0;Umfasst 5 NUTS3-Regionen (2016)
+3202000;Flughafen Brüssel;3;Flughafen;;;;;;;;BRU;;;
+3204000;Flughafen Lüttich;3;Flughafen;;;;;;;;LGG;;;
+3260166;Seehafen Zeebrugge;4;Seehafen;;;;;;;;;BE;;Ausländischer Seehafen in Belgien
+3260266;Seehafen Antwerpen;4;Seehafen;;;;;;;;;BE;;Ausländischer Seehafen in Belgien
+3300001;Luxemburg;2;Region Europa (Ausland);LU000;;;LU;LU000;;;;LU;613894.0;Umfasst 1 NUTS3-Regionen (2016)
+3302000;Flughafen Luxembourg;3;Flughafen;;;;;;;;LUX;;;
+3600011;London/Südostengland;2;Region Europa (Ausland);;;;UK;;;;;UK;24392699.0;Umfasst 58 NUTS3-Regionen (2016)
+3600012;Großbritannien Rest;2;Region Europa (Ausland);;;;UK;;;;;UK;42254413.0;Umfasst 121 NUTS3-Regionen (2016)
+3700001;Irland;2;Region Europa (Ausland);;;;IE;;;;;IE;4904240.0;Umfasst 8 NUTS3-Regionen (2016)
+4100011;Paris;2;Region Europa (Ausland);;;;FR;;;;;FR;12252917.0;Umfasst 8 NUTS3-Regionen (2016)
+4100021;Picardie;2;Region Europa (Ausland);;;;FR;;;;;FR;1929189.0;Umfasst 3 NUTS3-Regionen (2016)
+4100022;Champagne/Ardenne;2;Region Europa (Ausland);;;;FR;;;;;FR;1317548.0;Umfasst 4 NUTS3-Regionen (2016)
+4100023;Bourgogne;2;Region Europa (Ausland);;;;FR;;;;;FR;1623815.0;Umfasst 4 NUTS3-Regionen (2016)
+4100024;Normandie/Centre;2;Region Europa (Ausland);;;;FR;;;;;FR;5890342.0;Umfasst 11 NUTS3-Regionen (2016)
+4100031;Lille;2;Region Europa (Ausland);;;;FR;;;;;FR;4066719.0;Umfasst 2 NUTS3-Regionen (2016)
+4100041;Nancy/Lothringen Süd/West;2;Region Europa (Ausland);;;;FR;;;;;FR;1279987.0;Umfasst 3 NUTS3-Regionen (2016)
+4100042;Metz/Moselle;2;Region Europa (Ausland);FRF33;;;FR;FRF33;;;;FR;1042226.0;Umfasst 1 NUTS3-Regionen (2016)
+4100043;Strasbourg/ Bas Rhin;2;Region Europa (Ausland);FRF11;;;FR;FRF11;;;;FR;1138467.0;Umfasst 1 NUTS3-Regionen (2016)
+4100044;Mulhouse/ Haut Rhin;2;Region Europa (Ausland);FRF12;;;FR;FRF12;;;;FR;765179.0;Umfasst 1 NUTS3-Regionen (2016)
+4100045;Franche Comte;2;Region Europa (Ausland);;;;FR;;;;;FR;1177762.0;Umfasst 4 NUTS3-Regionen (2016)
+4100051;Auvergne/Rhone-Alpes;2;Region Europa (Ausland);;;;FR;;;;;FR;8030533.0;Umfasst 12 NUTS3-Regionen (2016)
+4100052;Frankreich Mittelmeerküste;2;Region Europa (Ausland);;;;FR;;;;;FR;8255506.0;Umfasst 13 NUTS3-Regionen (2016)
+4100053;Südwestfrankreich;2;Region Europa (Ausland);;;;FR;;;;;FR;7258327.0;Umfasst 16 NUTS3-Regionen (2016)
+4100054;Westfrankreich;2;Region Europa (Ausland);;;;FR;;;;;FR;8959705.0;Umfasst 13 NUTS3-Regionen (2016)
+4102000;Flughafen Paris Charles-de-Gaulle;3;Flughafen;;;;;;;;CDG;;;
+4106000;Flughafen Strasbourg;3;Flughafen;;;;;;;;SXB;;;
+4160166;Seehafen Le Havre;4;Seehafen;;;;;;;FRLEH;;FR;;Ausländischer Seehafen in Frankreich
+4200001;Spanien;2;Region Europa (Ausland);;;;ES;;;;;ES;46767542.0;Umfasst 57 NUTS3-Regionen (2016)
+4300001;Portugal;2;Region Europa (Ausland);;;;PT;;;;;PT;10276617.0;Umfasst 26 NUTS3-Regionen (2016)
+5100011;Basel-Stadt (Nordwestschweiz);2;Region Europa (Ausland);CH031;;;CH;CH031;;;;CH;194766.0;Umfasst 1 NUTS3-Regionen (2016)
+5100012;Basel-Landschaft (Nordwestschweiz);2;Region Europa (Ausland);CH032;;;CH;CH032;;;;CH;288132.0;Umfasst 1 NUTS3-Regionen (2016)
+5100013;Aargau (Nordwestschweiz);2;Region Europa (Ausland);CH033;;;CH;CH033;;;;CH;678207.0;Umfasst 1 NUTS3-Regionen (2016)
+5100014;Zürich;2;Region Europa (Ausland);CH040;;;CH;CH040;;;;CH;1520968.0;Umfasst 1 NUTS3-Regionen (2016)
+5100015;Schaffhausen (Ostschweiz);2;Region Europa (Ausland);CH052;;;CH;CH052;;;;CH;81991.0;Umfasst 1 NUTS3-Regionen (2016)
+5100016;Thurgau (Ostschweiz);2;Region Europa (Ausland);CH057;;;CH;CH057;;;;CH;276472.0;Umfasst 1 NUTS3-Regionen (2016)
+5100017;St. Gallen (Ostschweiz);2;Region Europa (Ausland);;;;CH;;;;;CH;579076.0;Umfasst 3 NUTS3-Regionen (2016)
+5100018;Chur (Ostschweiz);2;Region Europa (Ausland);;;;CH;;;;;CH;238782.0;Umfasst 2 NUTS3-Regionen (2016)
+5100019;Zentralschweiz;2;Region Europa (Ausland);;;;CH;;;;;CH;813056.0;Umfasst 6 NUTS3-Regionen (2016)
+5100021;Bern;2;Region Europa (Ausland);CH021;;;CH;CH021;;;;CH;1034977.0;Umfasst 1 NUTS3-Regionen (2016)
+5100022;Fribourg/Freiburg;2;Region Europa (Ausland);CH022;;;CH;CH022;;;;CH;318714.0;Umfasst 1 NUTS3-Regionen (2016)
+5100023;Neuchâtel;2;Region Europa (Ausland);CH024;;;CH;CH024;;;;CH;176850.0;Umfasst 1 NUTS3-Regionen (2016)
+5100024;Jura (CH);2;Region Europa (Ausland);CH025;;;CH;CH025;;;;CH;73419.0;Umfasst 1 NUTS3-Regionen (2016)
+5100025;Solothurn;2;Region Europa (Ausland);CH023;;;CH;CH023;;;;CH;273194.0;Umfasst 1 NUTS3-Regionen (2016)
+5100026;Genf/Lausanne/Wallis (Genferseeregion);2;Region Europa (Ausland);;;;CH;;;;;CH;1642580.0;Umfasst 3 NUTS3-Regionen (2016)
+5100027;Tessin;2;Region Europa (Ausland);CH070;;;CH;CH070;;;;CH;353343.0;Umfasst 1 NUTS3-Regionen (2016)
+5102000;Flughafen Zürich;3;Flughafen;;;;;;;;ZRH;;;
+5103000;Flughafen Basel/Mulhouse;3;Flughafen;;;;;;;;EAP;;;
+5190001;Liechtenstein;2;Region Europa (Ausland);LI000;;;LI;LI000;;;;LI;38378.0;Umfasst 1 NUTS3-Regionen (2016)
+5200011;Wien/Österreich Ost;2;Region Europa (Ausland);;;;AT;;;;;AT;3868466.0;Umfasst 11 NUTS3-Regionen (2016)
+5200012;Steiermark;2;Region Europa (Ausland);;;;AT;;;;;AT;1243052.0;Umfasst 6 NUTS3-Regionen (2016)
+5200013;Kärnten;2;Region Europa (Ausland);;;;AT;;;;;AT;560939.0;Umfasst 3 NUTS3-Regionen (2016)
+5200021;Linz-Wels;2;Region Europa (Ausland);AT312;;;AT;AT312;;;;AT;591781.0;Umfasst 1 NUTS3-Regionen (2016)
+5200022;Mühlviertel;2;Region Europa (Ausland);AT313;;;AT;AT313;;;;AT;209304.0;Umfasst 1 NUTS3-Regionen (2016)
+5200023;Steyr-Kirchdorf;2;Region Europa (Ausland);AT314;;;AT;AT314;;;;AT;155486.0;Umfasst 1 NUTS3-Regionen (2016)
+5200024;Traunviertel;2;Region Europa (Ausland);AT315;;;AT;AT315;;;;AT;237884.0;Umfasst 1 NUTS3-Regionen (2016)
+5200025;Braunau;2;Region Europa (Ausland);AT311;;;AT;AT311;;;;AT;104408.0;Umfasst 1 NUTS3-Regionen (2016)
+5200026;Ried im Innkreis;2;Region Europa (Ausland);AT311;;;AT;AT311;;;;AT;61204.0;Umfasst 1 NUTS3-Regionen (2016)
+5200027;Schärding;2;Region Europa (Ausland);AT311;;;AT;AT311;;;;AT;57307.0;Umfasst 1 NUTS3-Regionen (2016)
+5200028;Grieskirchen;2;Region Europa (Ausland);AT311;;;AT;AT311;;;;AT;64721.0;Umfasst 1 NUTS3-Regionen (2016)
+5200031;Salzburg und Umgebung;2;Region Europa (Ausland);AT323;;;AT;AT323;;;;AT;306492.0;Umfasst 1 NUTS3-Regionen (2016)
+5200032;Hallein;2;Region Europa (Ausland);AT323;;;AT;AT323;;;;AT;60374.0;Umfasst 1 NUTS3-Regionen (2016)
+5200033;Sankt Johann im Pongau;2;Region Europa (Ausland);AT322;;;AT;AT322;;;;AT;80573.0;Umfasst 1 NUTS3-Regionen (2016)
+5200034;Zell am See;2;Region Europa (Ausland);AT322;;;AT;AT322;;;;AT;87462.0;Umfasst 1 NUTS3-Regionen (2016)
+5200035;Tamsweg;2;Region Europa (Ausland);AT321;;;AT;AT321;;;;AT;20320.0;Umfasst 1 NUTS3-Regionen (2016)
+5200041;Innsbruck;2;Region Europa (Ausland);AT332;;;AT;AT332;;;;AT;311428.0;Umfasst 1 NUTS3-Regionen (2016)
+5200042;Tiroler Oberland;2;Region Europa (Ausland);AT334;;;AT;AT334;;;;AT;104418.0;Umfasst 1 NUTS3-Regionen (2016)
+5200043;Außerfern;2;Region Europa (Ausland);AT331;;;AT;AT331;;;;AT;32670.0;Umfasst 1 NUTS3-Regionen (2016)
+5200044;Schwaz;2;Region Europa (Ausland);AT335;;;AT;AT335;;;;AT;83873.0;Umfasst 1 NUTS3-Regionen (2016)
+5200045;Kufstein;2;Region Europa (Ausland);AT335;;;AT;AT335;;;;AT;109682.0;Umfasst 1 NUTS3-Regionen (2016)
+5200046;Kitzbühel;2;Region Europa (Ausland);AT335;;;AT;AT335;;;;AT;63881.0;Umfasst 1 NUTS3-Regionen (2016)
+5200047;Osttirol;2;Region Europa (Ausland);AT333;;;AT;AT333;;;;AT;48753.0;Umfasst 1 NUTS3-Regionen (2016)
+5200051;Bregenz;2;Region Europa (Ausland);AT342;;;AT;AT342;;;;AT;302408.0;Umfasst 1 NUTS3-Regionen (2016)
+5200052;Vorarlberg Ost;2;Region Europa (Ausland);AT341;;;AT;AT341;;;;AT;91889.0;Umfasst 1 NUTS3-Regionen (2016)
+5203000;Flughafen Salzburg;3;Flughafen;;;;;;;;SZG;;;
+5205000;Flughafen Innsbruck;3;Flughafen;;;;;;;;INN;;;
+5300011;Mailand;2;Region Europa (Ausland);;;;IT;;;;;IT;7992413.0;Umfasst 9 NUTS3-Regionen (2016)
+5300012;Lombardei Ost;2;Region Europa (Ausland);;;;IT;;;;;IT;2018420.0;Umfasst 3 NUTS3-Regionen (2016)
+5300013;Genua;2;Region Europa (Ausland);;;;IT;;;;;IT;1532980.0;Umfasst 4 NUTS3-Regionen (2016)
+5300014;Turin;2;Region Europa (Ausland);;;;IT;;;;;IT;4454218.0;Umfasst 9 NUTS3-Regionen (2016)
+5300021;Bozen;2;Region Europa (Ausland);ITH10;;;IT;ITH10;;;;IT;530313.0;Umfasst 1 NUTS3-Regionen (2016)
+5300022;Trient;2;Region Europa (Ausland);ITH20;;;IT;ITH20;;;;IT;543721.0;Umfasst 1 NUTS3-Regionen (2016)
+5300023;Verona;2;Region Europa (Ausland);ITH31;;;IT;ITH31;;;;IT;922857.0;Umfasst 1 NUTS3-Regionen (2016)
+5300024;Venedig;2;Region Europa (Ausland);;;;IT;;;;;IT;3961733.0;Umfasst 6 NUTS3-Regionen (2016)
+5300025;Triest;2;Region Europa (Ausland);;;;IT;;;;;IT;1210414.0;Umfasst 4 NUTS3-Regionen (2016)
+5300026;Emilia-Romagna Ost;2;Region Europa (Ausland);;;;IT;;;;;IT;3190751.0;Umfasst 6 NUTS3-Regionen (2016)
+5300027;Emilia-Romagna West;2;Region Europa (Ausland);;;;IT;;;;;IT;1268702.0;Umfasst 3 NUTS3-Regionen (2016)
+5300031;Rom/Mittelitalien;2;Region Europa (Ausland);;;;IT;;;;;IT;11868484.0;Umfasst 22 NUTS3-Regionen (2016)
+5300032;Italien Süd;2;Region Europa (Ausland);;;;IT;;;;;IT;20815226.0;Umfasst 43 NUTS3-Regionen (2016)
+5360166;Seehafen Genua;4;Seehafen;;;;;;;;;IT;;Ausländischer Seehafen in Italien
+5360266;Seehafen Livorno;4;Seehafen;;;;;;;;;IT;;Ausländischer Seehafen in Italien
+5360366;Seehafen Gioia Tauro;4;Seehafen;;;;;;;;;IT;;Ausländischer Seehafen in Italien
+5360466;Seehafen Venedig;4;Seehafen;;;;;;;;;IT;;Ausländischer Seehafen in Italien
+5360566;Seehafen Trieste;4;Seehafen;;;;;;;;;IT;;Ausländischer Seehafen in Italien
+5500001;Slowenien;2;Region Europa (Ausland);;;;SI;;;;;SI;2080908.0;Umfasst 12 NUTS3-Regionen (2016)
+5560166;Seehafen Koper;4;Seehafen;;;;;;;;;SI;;Ausländischer Seehafen in Slowenien
+5600001;Kroatien;2;Region Europa (Ausland);;;;HR;;;;;HR;4076246.0;Umfasst 21 NUTS3-Regionen (2016)
+5660166;Seehafen Rijeka;4;Seehafen;;;;;;;;;HR;;Ausländischer Seehafen in Kroatien
+5700001;Griechenland;2;Region Europa (Ausland);;;;EL;;;;;EL;10724599.0;Umfasst 52 NUTS3-Regionen (2016)
+5910001;Serbien;2;Region Europa (Ausland);;;;RS;;;;;RS;6963764.0;Umfasst 25 NUTS3-Regionen (2016)
+5920001;Kosovo;2;Region Europa (Ausland);;;;XK;;;;;XK;1782000.0;Umfasst 0 NUTS3-Regionen (2016)
+5930001;Bosnien Herzegowina;2;Region Europa (Ausland);;;;BA;;;;;BA;3301000.0;Umfasst 0 NUTS3-Regionen (2016)
+5940001;Nordmazedonien;2;Region Europa (Ausland);;;;MK;;;;;MK;2076953.0;Umfasst 8 NUTS3-Regionen (2016)
+5950001;Montenegro;2;Region Europa (Ausland);ME000;;;ME;ME000;;;;ME;622182.0;Umfasst 1 NUTS3-Regionen (2016)
+5990001;Albanien;2;Region Europa (Ausland);;;;AL;;;;;AL;2862427.0;Umfasst 12 NUTS3-Regionen (2016)
+6100011;Budapest;2;Region Europa (Ausland);;;;HU;;;;;HU;3031160.0;Umfasst 2 NUTS3-Regionen (2016)
+6100012;Ungarn West;2;Region Europa (Ausland);;;;HU;;;;;HU;2927175.0;Umfasst 9 NUTS3-Regionen (2016)
+6100013;Ungarn Ost;2;Region Europa (Ausland);;;;HU;;;;;HU;3814421.0;Umfasst 9 NUTS3-Regionen (2016)
+6200001;Rumänien;2;Region Europa (Ausland);;;;RO;;;;;RO;19414458.0;Umfasst 42 NUTS3-Regionen (2016)
+6300001;Bulgarien;2;Region Europa (Ausland);;;;BG;;;;;BG;7000039.0;Umfasst 28 NUTS3-Regionen (2016)
+6800001;Zypern;2;Region Europa (Ausland);CY000;;;CY;CY000;;;;CY;875899.0;Umfasst 1 NUTS3-Regionen (2016)
+6900001;Türkei;2;Region Europa (Ausland);;;;TR;;;;;TR;82003882.0;Umfasst 81 NUTS3-Regionen (2016)
+7100011;Prag;2;Region Europa (Ausland);;;;CZ;;;;;CZ;2677964.0;Umfasst 2 NUTS3-Regionen (2016)
+7100012;Budweis;2;Region Europa (Ausland);CZ031;;;CZ;CZ031;;;;CZ;642133.0;Umfasst 1 NUTS3-Regionen (2016)
+7100013;Pilsen;2;Region Europa (Ausland);;;;CZ;;;;;CZ;584672.0;Umfasst 4 NUTS3-Regionen (2016)
+7100014;Karlsbad;2;Region Europa (Ausland);CZ041;;;CZ;CZ041;;;;CZ;294896.0;Umfasst 1 NUTS3-Regionen (2016)
+7100015;Aussig;2;Region Europa (Ausland);CZ042;;;CZ;CZ042;;;;CZ;820789.0;Umfasst 1 NUTS3-Regionen (2016)
+7100016;Liberec;2;Region Europa (Ausland);CZ051;;;CZ;CZ051;;;;CZ;442356.0;Umfasst 1 NUTS3-Regionen (2016)
+7100017;Hradec-Kralove;2;Region Europa (Ausland);;;;CZ;;;;;CZ;1071337.0;Umfasst 2 NUTS3-Regionen (2016)
+7100018;Brünn;2;Region Europa (Ausland);;;;CZ;;;;;CZ;1696941.0;Umfasst 2 NUTS3-Regionen (2016)
+7100019;Ostrava;2;Region Europa (Ausland);;;;CZ;;;;;CZ;2418712.0;Umfasst 3 NUTS3-Regionen (2016)
+7102000;Flughafen Prag;3;Flughafen;;;;;;;;PRG;;;
+7200011;Bratislava/Slowakei West;2;Region Europa (Ausland);;;;SK;;;;;SK;2485743.0;Umfasst 4 NUTS3-Regionen (2016)
+7200012;Slowakei Mitte/Ost;2;Region Europa (Ausland);;;;SK;;;;;SK;2964678.0;Umfasst 4 NUTS3-Regionen (2016)
+7300011;Warschau;2;Region Europa (Ausland);;;;PL;;;;;PL;8985552.0;Umfasst 17 NUTS3-Regionen (2016)
+7300012;Lublin;2;Region Europa (Ausland);;;;PL;;;;;PL;5409672.0;Umfasst 10 NUTS3-Regionen (2016)
+7300013;Krakau/Kattowitz;2;Region Europa (Ausland);;;;PL;;;;;PL;7849543.0;Umfasst 14 NUTS3-Regionen (2016)
+7300021;Oppeln;2;Region Europa (Ausland);;;;PL;;;;;PL;946038.0;Umfasst 2 NUTS3-Regionen (2016)
+7300022;Breslau;2;Region Europa (Ausland);;;;PL;;;;;PL;2312496.0;Umfasst 4 NUTS3-Regionen (2016)
+7300023;Liegnitz;2;Region Europa (Ausland);PL515;;;PL;PL515;;;;PL;552576.0;Umfasst 1 NUTS3-Regionen (2016)
+7300031;Posen;2;Region Europa (Ausland);;;;PL;;;;;PL;3473172.0;Umfasst 6 NUTS3-Regionen (2016)
+7300032;Grünberg (PL);2;Region Europa (Ausland);PL432;;;PL;PL432;;;;PL;622872.0;Umfasst 1 NUTS3-Regionen (2016)
+7300033;Landsberg (PL);2;Region Europa (Ausland);PL431;;;PL;PL431;;;;PL;380438.0;Umfasst 1 NUTS3-Regionen (2016)
+7300034;Stettin;2;Region Europa (Ausland);PL424;;;PL;PL424;;;;PL;400859.0;Umfasst 1 NUTS3-Regionen (2016)
+7300035;Stettin-Umland;2;Region Europa (Ausland);PL428;;;PL;PL428;;;;PL;506021.0;Umfasst 1 NUTS3-Regionen (2016)
+7300036;Köslin;2;Region Europa (Ausland);;;;PL;;;;;PL;768622.0;Umfasst 2 NUTS3-Regionen (2016)
+7300041;Danzig/Nordpolen;2;Region Europa (Ausland);;;;PL;;;;;PL;5764951.0;Umfasst 13 NUTS3-Regionen (2016)
+7307000;Flughafen Stettin;3;Flughafen;;;;;;;;SZZ;;;
+7360166;Seehafen Swinoujscie;4;Seehafen;;;;;;;;;PL;;Ausländischer Seehafen in Polen
+7360266;Seehafen Szczecin;4;Seehafen;;;;;;;;;PL;;Ausländischer Seehafen in Polen
+7360366;Seehafen Gdynia;4;Seehafen;;;;;;;;;PL;;Ausländischer Seehafen in Polen
+7360466;Seehafen Gdansk;4;Seehafen;;;;;;;;;PL;;Ausländischer Seehafen in Polen
+7410001;Litauen;2;Region Europa (Ausland);;;;LT;;;;;LT;2794184.0;Umfasst 10 NUTS3-Regionen (2016)
+7420001;Lettland;2;Region Europa (Ausland);;;;LV;;;;;LV;1919968.0;Umfasst 6 NUTS3-Regionen (2016)
+7430001;Estland;2;Region Europa (Ausland);;;;EE;;;;;EE;1324820.0;Umfasst 5 NUTS3-Regionen (2016)
+7500011;Russland (ohne Kaliningrad);2;Region Europa (Ausland);;;;RU;;;;;RU;143939300.0;Umfasst 0 NUTS3-Regionen (2016)
+7500012;Kaliningrad;2;Region Europa (Ausland);;;;RU;;;;;RU;467000.0;Umfasst 0 NUTS3-Regionen (2016)
+7610001;Weißrussland;2;Region Europa (Ausland);;;;BY;;;;;BY;9417800.0;Umfasst 0 NUTS3-Regionen (2016)
+7620001;Ukraine;2;Region Europa (Ausland);;;;UA;;;;;UA;44386200.0;Umfasst 0 NUTS3-Regionen (2016)
+7630001;Moldawien;2;Region Europa (Ausland);;;;MD;;;;;MD;2663300.0;Umfasst 0 NUTS3-Regionen (2016)
+7710001;Georgien;2;Region Europa (Ausland);;;;GE;;;;;GE;3720200.0;Umfasst 0 NUTS3-Regionen (2016)
+7720001;Armendien;2;Region Europa (Ausland);;;;AM;;;;;AM;2957700.0;Umfasst 0 NUTS3-Regionen (2016)
+7730001;Aserbaidschan;2;Region Europa (Ausland);;;;AZ;;;;;AZ;10024300.0;Umfasst 0 NUTS3-Regionen (2016)
