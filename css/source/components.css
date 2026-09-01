@@ -647,6 +647,21 @@
 .relation-mode-badges .badge-mode {
   margin-left: 0;
 }
+.relation-rank {
+  display: inline-block;
+  min-width: 2.25em;
+  margin-right: 4px;
+  color: #64748b;
+  font-size: 0.78em;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+.relation-rank-separator {
+  margin-left: 0.28em;
+  color: #94a3b8;
+}
 
 /* Interactive Info Tooltips (Informations-i) */
 .info-tooltip-wrap {

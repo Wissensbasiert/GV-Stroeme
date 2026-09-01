@@ -5,6 +5,50 @@
        MODALS
        ============================================================ -->
 
+  <!-- Analyseassistent: interaction prototype without model or data connection -->
+  <div class="modal-backdrop" id="modalAi" role="presentation">
+    <div class="modal-dialog ki-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="aiModalTitle" aria-describedby="aiPrototypeNotice">
+      <button class="modal-close" data-close="modalAi" aria-label="Analyseassistent schließen">&times;</button>
+      <div class="ki-modal-header">
+        <div class="ki-modal-brand">
+          <span class="ki-modal-logo"><img src="assets/icons/gueterstrom-ki-variante-c-datenkorridor.svg" alt=""></span>
+          <div>
+            <div class="ki-modal-overline">Fragen an die Güterverkehrsdaten</div>
+            <h3 id="aiModalTitle">Analyseassistent</h3>
+          </div>
+        </div>
+      </div>
+      <div class="ki-modal-body">
+        <div class="ki-modal-main">
+          <section class="ki-start-panel" id="aiStartPanel">
+            <h4>Was möchten Sie über die Güterverkehrsströme wissen?</h4>
+          </section>
+          <div class="ki-conversation" id="aiConversation" aria-live="polite"></div>
+        </div>
+        <div class="ki-composer-area">
+          <form class="ki-question-form" id="aiQuestionForm">
+            <label class="sr-only" for="aiQuestionInput">Frage an den Analyseassistenten</label>
+            <textarea id="aiQuestionInput" rows="1" maxlength="600" placeholder="Analyseassistenten fragen"></textarea>
+            <button type="submit" class="ki-send-button" aria-label="Frage testen">
+              <span>Frage testen</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline></svg>
+            </button>
+          </form>
+          <button type="button" class="ki-examples-toggle" id="aiExamplesToggle" aria-expanded="false" aria-controls="aiExamples">Was kann ich fragen?</button>
+          <div class="ki-examples-panel" id="aiExamples" hidden>
+            <p>Beispielfragen</p>
+            <div class="ki-suggestions" aria-label="Beispielfragen">
+              <button type="button" class="ki-suggestion" data-ai-question="Welche Regionen haben bis 2040 den stärksten Zuwachs im Schienengüterverkehr?">Wo wächst der Schienengüterverkehr bis 2040 am stärksten?</button>
+              <button type="button" class="ki-suggestion" data-ai-question="Welche Gütergruppen prägen die aktuell ausgewählte Region?">Welche Gütergruppen prägen die ausgewählte Region?</button>
+              <button type="button" class="ki-suggestion" data-ai-question="Welches sind die wichtigsten Verkehrsrelationen von und nach Berlin?">Welches sind die wichtigsten Verkehrsrelationen von und nach Berlin?</button>
+            </div>
+          </div>
+          <p class="ki-prototype-note" id="aiPrototypeNotice"><strong>Interface-Prototyp:</strong> Noch keine echte KI- oder Datenabfrage; Zahlen werden nicht simuliert.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Regional Profile / Steckbrief Modal Dialog -->
   <div class="modal-backdrop" id="modalSteckbrief" role="presentation">
     <div class="modal-dialog modal-dialog-xl" role="dialog" aria-modal="true" aria-labelledby="steckbriefModalTitle">
@@ -87,6 +131,6 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=20260831-legend-titles-v23"></script>
+  <script src="js/app.js?v=20260901-maritime-icons-v28"></script>
 </body>
 </html>

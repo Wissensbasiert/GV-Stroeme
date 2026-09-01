@@ -376,7 +376,7 @@
       } else if (!tableRelations.length) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b; padding:24px;">Für diese Auswahl liegen keine qualifizierten KV-Relationen mit Ladeeinheit (Schiene) oder Containerklasse (Binnenschiff) vor.</td></tr>';
       } else {
-        tableRelations.forEach(relation => {
+        tableRelations.forEach((relation, rank) => {
           const origin = fullCentroids[relation.origin_id];
           const destination = fullCentroids[relation.destination_id];
           if (!origin || !destination) return;
@@ -395,7 +395,7 @@
             : '<span class="intermodal-mode-badge iww">Binnenschiff</span>'
           ).join('');
           row.setAttribute('data-partner-id', relation.partner_id);
-          row.innerHTML = `<td><strong>${fullCentroids[relation.partner_id]?.name || relation.partner_id}</strong></td><td><span class="intermodal-mode-badges">${modeBadges}</span></td><td style="text-align:right;"><strong>${direction === 'balance' && relation.current > 0 ? '+' : ''}${formatQuantity(relation.current / divisor, 1)}</strong></td><td style="text-align:right;">${change(relation.yoy)}</td><td style="text-align:right;">${change(relation.trend)}</td>`;
+          row.innerHTML = `<td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${fullCentroids[relation.partner_id]?.name || relation.partner_id}</strong></td><td><span class="intermodal-mode-badges">${modeBadges}</span></td><td style="text-align:right;"><strong>${direction === 'balance' && relation.current > 0 ? '+' : ''}${formatQuantity(relation.current / divisor, 1)}</strong></td><td style="text-align:right;">${change(relation.yoy)}</td><td style="text-align:right;">${change(relation.trend)}</td>`;
           row.addEventListener('mouseenter', () => setIntermodalPartnerHighlight(relation.partner_id));
           row.addEventListener('mouseleave', () => clearAllHighlights('intermodal'));
           tbody.appendChild(row);

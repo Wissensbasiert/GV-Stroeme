@@ -604,11 +604,10 @@
     }
   }
 
-  function applyMobileLegendDefaults() {
-    if (!window.matchMedia('(max-width: 900px)').matches) return;
+  function applyResponsiveLegendDefaults(isMobile = window.matchMedia('(max-width: 900px)').matches) {
     document.querySelectorAll('.choropleth-legend').forEach(legend => {
       if (legend.dataset.legendUserToggled === 'true') return;
-      setLegendCollapsedState(legend, true);
+      setLegendCollapsedState(legend, isMobile);
     });
   }
 
@@ -1364,10 +1363,10 @@
         });
       }
     });
-    applyMobileLegendDefaults();
+    applyResponsiveLegendDefaults();
     const mobileLegendQuery = window.matchMedia('(max-width: 900px)');
     mobileLegendQuery.addEventListener?.('change', event => {
-      if (event.matches) applyMobileLegendDefaults();
+      applyResponsiveLegendDefaults(event.matches);
     });
 
     // Maritime Selected Port Reset Button
@@ -1488,6 +1487,68 @@
       });
     });
 
+    // Analyseassistent interaction prototype. It deliberately demonstrates the
+    // intended workflow without inventing values or contacting a model.
+    const appendAiMessage = (kind, content) => {
+      const conversation = document.getElementById('aiConversation');
+      if (!conversation) return;
+
+      conversation.closest('.ki-modal-body')?.classList.add('has-conversation');
+
+      const message = document.createElement('article');
+      message.className = `ki-message ki-message-${kind}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = 'ki-message-avatar';
+      if (kind === 'assistant') {
+        const icon = document.createElement('img');
+        icon.src = 'assets/icons/gueterstrom-ki-variante-c-datenkorridor.svg';
+        icon.alt = '';
+        avatar.appendChild(icon);
+      } else {
+        avatar.textContent = 'Sie';
+      }
+
+      const body = document.createElement('div');
+      body.className = 'ki-message-content';
+      if (typeof content === 'string') {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = content;
+        body.appendChild(paragraph);
+      } else {
+        body.appendChild(content);
+      }
+
+      message.append(avatar, body);
+      conversation.appendChild(message);
+      conversation.scrollTop = conversation.scrollHeight;
+    };
+
+    const submitAiPrototypeQuestion = () => {
+      const input = document.getElementById('aiQuestionInput');
+      const question = input?.value.trim();
+      if (!question) {
+        input?.focus();
+        return;
+      }
+
+      appendAiMessage('user', question);
+      input.value = '';
+      input.style.height = '';
+
+      const response = document.createDocumentFragment();
+      const title = document.createElement('strong');
+      title.textContent = 'Frage erkannt – Datenabfrage noch nicht verbunden.';
+      const explanation = document.createElement('p');
+      explanation.textContent = 'Im späteren Ausbau würde der Analyseassistent für Ihre Frage passende geprüfte Abfragen auswählen, die Daten auswerten und das Ergebnis mit Quellen und Einschränkungen erläutern. Dieser Interface-Test erzeugt bewusst keine Zahlen.';
+      const meta = document.createElement('span');
+      meta.className = 'ki-message-meta';
+      meta.textContent = 'Prototyp-Antwort · keine Modell- oder Datenverbindung';
+      response.append(title, explanation, meta);
+      appendAiMessage('assistant', response);
+      input.focus();
+    };
+
     // Modals Handling
     const setupModal = (btnId, modalId) => {
       const btn = document.getElementById(btnId);
@@ -1498,6 +1559,9 @@
           modal.querySelector('.modal-close')?.focus();
           if (modalId === 'modalSteckbrief') await prepareSteckbriefModal();
           if (modalId === 'modalHelp' || modalId === 'modalLicenses') await refreshDataCoverage();
+          if (modalId === 'modalAi') {
+            requestAnimationFrame(() => document.getElementById('aiQuestionInput')?.focus());
+          }
         });
         modal.querySelectorAll('.modal-close, [data-close]')?.forEach(c => {
           c.addEventListener('click', () => {
@@ -1520,10 +1584,48 @@
       }
     };
 
+    setupModal('btnAiModal', 'modalAi');
     setupModal('btnSteckbriefModal', 'modalSteckbrief');
     setupModal('btnHelpModal', 'modalHelp');
     setupModal('btnLicensesModal', 'modalLicenses');
     setupModal('brandLogoBtn', 'modalLicenses');
+
+    document.getElementById('aiQuestionForm')?.addEventListener('submit', event => {
+      event.preventDefault();
+      submitAiPrototypeQuestion();
+    });
+    document.getElementById('aiQuestionInput')?.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        submitAiPrototypeQuestion();
+      }
+    });
+    document.getElementById('aiQuestionInput')?.addEventListener('input', event => {
+      const input = event.currentTarget;
+      input.style.height = 'auto';
+      input.style.height = `${Math.min(input.scrollHeight, 118)}px`;
+    });
+    document.getElementById('aiExamplesToggle')?.addEventListener('click', event => {
+      const button = event.currentTarget;
+      const examples = document.getElementById('aiExamples');
+      if (!examples) return;
+      const willOpen = examples.hidden;
+      examples.hidden = !willOpen;
+      button.setAttribute('aria-expanded', String(willOpen));
+    });
+    document.querySelectorAll('[data-ai-question]').forEach(button => {
+      button.addEventListener('click', () => {
+        const input = document.getElementById('aiQuestionInput');
+        if (!input) return;
+        input.value = button.getAttribute('data-ai-question') || '';
+        input.dispatchEvent(new Event('input'));
+        const examples = document.getElementById('aiExamples');
+        const toggle = document.getElementById('aiExamplesToggle');
+        if (examples) examples.hidden = true;
+        toggle?.setAttribute('aria-expanded', 'false');
+        input.focus();
+      });
+    });
 
     document.getElementById('btnPrintSteckbrief')?.addEventListener('click', () => {
       window.print();
@@ -3916,7 +4018,7 @@
       return;
     }
 
-    filtered.forEach(r => {
+    filtered.forEach((r, rank) => {
       const partnerId = r.dest_id || r.origin_id || '';
       const partnerName = r.dest_name || r.origin_name || regionsData[partnerId]?.name || fullCentroids[partnerId]?.name || partnerId;
       const rawValue = isTkm ? (r.tkm || 0) / 1e6 : (r.tonnes || 0) / 1e3;
@@ -3960,7 +4062,7 @@
       const row = document.createElement('tr');
       row.setAttribute('data-partner-id', partnerId);
       row.innerHTML = `
-        <td><strong>${partnerName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${partnerId})</span>${binnenBadge}${modeBadge}</td>
+        <td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${partnerName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${partnerId})</span>${binnenBadge}${modeBadge}</td>
         <td style="text-align: right;"><strong>${cleanValNum}</strong></td>
         <td style="text-align: right;">${yoy}</td>
         <td style="text-align: right;">${trend10}</td>
@@ -4451,7 +4553,7 @@
           }
           tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b; padding:24px; font-size:0.85rem; line-height:1.5;">${emptyMsg}</td></tr>`;
         } else {
-          list.slice(0, state.topX).forEach(r => {
+          list.slice(0, state.topX).forEach((r, rank) => {
             const partnerId = r.dest_id || r.origin_id;
             const partnerName = r.dest_name || r.origin_name || regionsData[partnerId]?.name || fullCentroids[partnerId]?.name || partnerId;
             const gName = (groupFilter && groupFilter !== 'ALL') ? (NST_GROUPS_7[groupFilter] || groupFilter) : ((r.group_7 && r.group_7 !== 'ALL') ? (NST_GROUPS_7[r.group_7] || `Gruppe ${r.group_7}`) : 'Alle Güterarten');
@@ -4483,7 +4585,7 @@
             const row = document.createElement('tr');
             row.setAttribute('data-partner-id', partnerId);
             row.innerHTML = `
-              <td><strong>${partnerName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${partnerId})</span>${binnenBadge}</td>
+              <td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${partnerName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${partnerId})</span>${binnenBadge}</td>
               <td>${gName}</td>
               <td style="text-align: right;"><strong>${cleanValNum}</strong></td>
               <td style="text-align: right;">${yoy}</td>

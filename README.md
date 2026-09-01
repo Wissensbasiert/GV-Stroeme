@@ -19,3 +19,5 @@ python scripts/build_frontend.py all
 ```
 
 Weitere Hinweise stehen in `HANDBUCH_SYSTEMDOKUMENTATION.md`, `README_MAINTENANCE.md` und `ANLEITUNG_DATENAKTUALISIERUNG.md`.
+
+Das technische Grobkonzept für die geplante Portalintegration, den Analyseassistenten und die Basis-/Premiumlogik steht in [`ROADMAP_ANALYSEASSISTENT_PORTAL.md`](ROADMAP_ANALYSEASSISTENT_PORTAL.md).

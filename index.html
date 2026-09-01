@@ -14,7 +14,7 @@
   <!-- Leaflet CSS for Real Geographic Vector Maps -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <!-- Custom App Styles -->
-  <link rel="stylesheet" href="css/style.css?v=20260831-legend-titles-v23">
+  <link rel="stylesheet" href="css/style.css?v=20260831-ki-minimal-v27">
   
   <!-- Leaflet JS & Chart.js -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -36,6 +36,11 @@
 
       <!-- Header Action Modals -->
       <div class="header-buttons">
+        <button class="btn-header btn-header-ai" id="btnAiModal" title="Analyseassistent öffnen">
+          <img src="assets/icons/gueterstrom-ki-variante-c-datenkorridor.svg" alt="" class="header-ai-icon" aria-hidden="true">
+          KI fragen
+          <span class="header-ai-badge">Test</span>
+        </button>
         <button class="btn-header" id="btnHelpModal" title="Hinweise zur Nutzung">
           <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><circle cx="12" cy="8" r="0.8" fill="currentColor"></circle></svg>
           Hinweise
@@ -201,8 +206,8 @@
           <span class="nav-label">Binnenschifffahrt</span>
         </li>
         <li class="nav-item" data-tab="tab-maritime" title="Seeverkehr & Häfen">
-          <!-- Maritime Cargo Ship / Anchor SVG -->
-          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"></circle><line x1="12" y1="22" x2="12" y2="8"></line><path d="M5 12H2a10 10 0 0 0 20 0h-3"></path></svg>
+          <!-- Maritime harbour symbol -->
+          <svg class="nav-svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M178-80h-58v-60h58q40 0 79-11t76-34q35 22 72 32.5t75 10.5q38 0 75-10.5t72-32.5q38 23 77.5 34t78.5 11h57v60h-57q-39 0-78-9t-77-28q-38 19-75 28t-73 9q-36 0-73-9.5T333-117q-38 18-77.5 27.5T178-80Zm226.5-169.5Q365-270 330-307q-33 33-71 52.5T182-230l-71-245q-4-12 2-22.5t18-14.5l55-16v-190q0-25 17.5-42.5T246-778h132v-103h204v103h132q25 0 42.5 17.5T774-718v190l55 16q12 4 18 14.5t2 22.5l-71 245q-39-5-77-24.5T630-307q-35 37-74.5 57.5T480-229q-36 0-75.5-20.5ZM481-289q32 0 58.5-18t47.5-43l41-48 36 38q16 17 34 31t38 25l48-159-304-92-304 92 48 159q20-11 38-25t34-31l36-38 41 48q22 25 49 43t59 18ZM246-547l234-71 234 72v-172H246v171Zm234 125Z"/></svg>
           <span class="nav-label">Seeverkehr & Häfen</span>
         </li>
         <li class="nav-item" data-tab="tab-intermodal" title="Intermodaler Verkehr & KV">
@@ -255,7 +260,7 @@
           <div class="card map-card-tall">
             <div class="card-header">
               <div class="card-title" id="overviewMapCardTitle">
-                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                 <span id="overviewMapTitleText">Gesamter Güterverkehr in Beförderungsmenge im Jahr 2024</span>
               </div>
               <div class="card-actions">
@@ -828,7 +833,7 @@
           <div class="card map-card-tall">
             <div class="card-header">
               <div class="card-title">
-                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="3"></circle><line x1="12" y1="22" x2="12" y2="8"></line><path d="M5 12H2a10 10 0 0 0 20 0h-3"></path></svg>
+                <svg class="section-icon" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M178-80h-58v-60h58q40 0 79-11t76-34q35 22 72 32.5t75 10.5q38 0 75-10.5t72-32.5q38 23 77.5 34t78.5 11h57v60h-57q-39 0-78-9t-77-28q-38 19-75 28t-73 9q-36 0-73-9.5T333-117q-38 18-77.5 27.5T178-80Zm226.5-169.5Q365-270 330-307q-33 33-71 52.5T182-230l-71-245q-4-12 2-22.5t18-14.5l55-16v-190q0-25 17.5-42.5T246-778h132v-103h204v103h132q25 0 42.5 17.5T774-718v190l55 16q12 4 18 14.5t2 22.5l-71 245q-39-5-77-24.5T630-307q-35 37-74.5 57.5T480-229q-36 0-75.5-20.5ZM481-289q32 0 58.5-18t47.5-43l41-48 36 38q16 17 34 31t38 25l48-159-304-92-304 92 48 159q20-11 38-25t34-31l36-38 41 48q22 25 49 43t59 18ZM246-547l234-71 234 72v-172H246v171Zm234 125Z"/></svg>
                 <span id="maritimeMapTitle">Deutsche Seehäfen – Gesamt</span>
                 <span class="info-tooltip-wrap" tabindex="0">
                   <span class="info-icon-btn" title="Informationen zur Standortauswahl">i</span>
@@ -976,7 +981,7 @@
           <div class="card map-card-tall">
             <div class="card-header">
               <div class="card-title">
-                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="1.5"></rect><line x1="7" y1="5" x2="7" y2="19"></line><line x1="12" y1="5" x2="12" y2="19"></line><line x1="17" y1="5" x2="17" y2="19"></line><circle cx="4.5" cy="7.5" r="0.75" fill="currentColor"></circle><circle cx="19.5" cy="7.5" r="0.75" fill="currentColor"></circle><circle cx="4.5" cy="16.5" r="0.75" fill="currentColor"></circle><circle cx="19.5" cy="16.5" r="0.75" fill="currentColor"></circle></svg>
                 <span id="intermodalMapTitle">Kombinierter Verkehr nach Region</span>
                 <span class="info-tooltip-wrap" tabindex="0">
                   <span class="info-icon-btn" title="Informationen zur Kartenbasis">i</span>
@@ -1098,7 +1103,7 @@
           <div class="card map-card-tall">
             <div class="card-header">
               <div class="card-title" id="forecastMapCardTitle">
-                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
                 <span id="forecastMapTitleText">Verkehrsprognose 2040: Güterverkehrsverflechtungen (Basisprognose P1)</span>
               </div>
               <div class="card-actions">
@@ -1261,6 +1266,50 @@
        MODALS
        ============================================================ -->
 
+  <!-- Analyseassistent: interaction prototype without model or data connection -->
+  <div class="modal-backdrop" id="modalAi" role="presentation">
+    <div class="modal-dialog ki-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="aiModalTitle" aria-describedby="aiPrototypeNotice">
+      <button class="modal-close" data-close="modalAi" aria-label="Analyseassistent schließen">&times;</button>
+      <div class="ki-modal-header">
+        <div class="ki-modal-brand">
+          <span class="ki-modal-logo"><img src="assets/icons/gueterstrom-ki-variante-c-datenkorridor.svg" alt=""></span>
+          <div>
+            <div class="ki-modal-overline">Fragen an die Güterverkehrsdaten</div>
+            <h3 id="aiModalTitle">Analyseassistent</h3>
+          </div>
+        </div>
+      </div>
+      <div class="ki-modal-body">
+        <div class="ki-modal-main">
+          <section class="ki-start-panel" id="aiStartPanel">
+            <h4>Was möchten Sie über die Güterverkehrsströme wissen?</h4>
+          </section>
+          <div class="ki-conversation" id="aiConversation" aria-live="polite"></div>
+        </div>
+        <div class="ki-composer-area">
+          <form class="ki-question-form" id="aiQuestionForm">
+            <label class="sr-only" for="aiQuestionInput">Frage an den Analyseassistenten</label>
+            <textarea id="aiQuestionInput" rows="1" maxlength="600" placeholder="Analyseassistenten fragen"></textarea>
+            <button type="submit" class="ki-send-button" aria-label="Frage testen">
+              <span>Frage testen</span>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline></svg>
+            </button>
+          </form>
+          <button type="button" class="ki-examples-toggle" id="aiExamplesToggle" aria-expanded="false" aria-controls="aiExamples">Was kann ich fragen?</button>
+          <div class="ki-examples-panel" id="aiExamples" hidden>
+            <p>Beispielfragen</p>
+            <div class="ki-suggestions" aria-label="Beispielfragen">
+              <button type="button" class="ki-suggestion" data-ai-question="Welche Regionen haben bis 2040 den stärksten Zuwachs im Schienengüterverkehr?">Wo wächst der Schienengüterverkehr bis 2040 am stärksten?</button>
+              <button type="button" class="ki-suggestion" data-ai-question="Welche Gütergruppen prägen die aktuell ausgewählte Region?">Welche Gütergruppen prägen die ausgewählte Region?</button>
+              <button type="button" class="ki-suggestion" data-ai-question="Welches sind die wichtigsten Verkehrsrelationen von und nach Berlin?">Welches sind die wichtigsten Verkehrsrelationen von und nach Berlin?</button>
+            </div>
+          </div>
+          <p class="ki-prototype-note" id="aiPrototypeNotice"><strong>Interface-Prototyp:</strong> Noch keine echte KI- oder Datenabfrage; Zahlen werden nicht simuliert.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Regional Profile / Steckbrief Modal Dialog -->
   <div class="modal-backdrop" id="modalSteckbrief" role="presentation">
     <div class="modal-dialog modal-dialog-xl" role="dialog" aria-modal="true" aria-labelledby="steckbriefModalTitle">
@@ -1343,6 +1392,6 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=20260831-legend-titles-v23"></script>
+  <script src="js/app.js?v=20260901-maritime-icons-v28"></script>
 </body>
 </html>

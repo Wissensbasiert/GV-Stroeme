@@ -761,8 +761,13 @@
         </div>
       `;
 
-      line.bindTooltip(tipHtml, { sticky: true, opacity: 0.98 });
-      marker.bindTooltip(tipHtml, { sticky: true, opacity: 0.98 });
+      const relationTooltipOptions = {
+        sticky: true,
+        opacity: 0.98,
+        className: 'forecast-relation-leaflet-tooltip'
+      };
+      line.bindTooltip(tipHtml, relationTooltipOptions);
+      marker.bindTooltip(tipHtml, relationTooltipOptions);
 
       line.on('mouseover', event => {
         openActiveRelationTooltip('forecast', line, event);
@@ -843,7 +848,7 @@
       return;
     }
 
-    relations.forEach(r => {
+    relations.forEach((r, rank) => {
       const pId = r.partner_id || r.dest_id || r.orig_id;
       const pName = getForecastRelationCellName(pId, r);
       const groupName = (state.selectedGroup && state.selectedGroup !== 'ALL') 
@@ -879,7 +884,7 @@
       const row = document.createElement('tr');
       row.setAttribute('data-partner-id', pId);
       row.innerHTML = `
-        <td><strong>${pName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${pId})</span>${binnenBadge}${modeBadge ? `<span class="relation-mode-badges">${modeBadge}</span>` : ''}</td>
+        <td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${pName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${pId})</span>${binnenBadge}${modeBadge ? `<span class="relation-mode-badges">${modeBadge}</span>` : ''}</td>
         <td>${groupName}</td>
         <td style="text-align: right;"><strong>${cleanValNum}</strong></td>
         <td style="text-align: right;">${growthHtml}</td>

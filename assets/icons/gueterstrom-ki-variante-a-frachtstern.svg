@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Güterstrom-KI – Frachtstern</title>
+  <desc id="desc">Ein abstrahierter Frachtcontainer mit einem großen, zentralen KI-Stern.</desc>
+  <path d="M13 13h38l7 7v24l-7 7H13l-7-7V20Z" fill="#63B472"/>
+  <path d="M16 18v28M48 18v28" fill="none" stroke="#4C7F83" stroke-linecap="round" stroke-width="3" opacity="0.8"/>
+  <path d="M32 18.5c1.45 8.3 5.2 12.05 13.5 13.5C37.2 33.45 33.45 37.2 32 45.5 30.55 37.2 26.8 33.45 18.5 32 26.8 30.55 30.55 26.8 32 18.5Z" fill="#FFFFFF"/>
+</svg>

@@ -367,7 +367,7 @@
         tbody.innerHTML = `
           <tr>
             <td colspan="5" style="text-align:center; color:#475569; padding:28px 16px; font-size:0.86rem; line-height:1.6;">
-              <div class="empty-state-icon"><img src="assets/icons/directions_boat.svg" alt="" aria-hidden="true"></div>
+              <div class="empty-state-icon"><img src="assets/icons/map.svg" alt="" aria-hidden="true"></div>
               <strong style="color:#0f172a; font-size:0.95rem;">Deutschland aktiv</strong><br>
               <span style="color:#475569; font-size:0.79rem;">Die vier Kennzahlen oben beziehen sich auf die nationale Destatis-Aggregation des deutschen Seeverkehrs im Berichtsjahr ${yr} (${scopeFilterText}) – nicht auf die Summe der ${Object.keys(yearPorts).length} kartierten Seehäfen.</span><br><br>
               <span style="color:#64748b; font-size:0.81rem;">Bitte wählen Sie auf der Karte einen <strong>Seehafen</strong> aus, um dessen wichtigste internationale Seeverkehrsbeziehungen anzuzeigen.</span>
@@ -407,7 +407,7 @@
       } else {
         const gName = (groupFilter && groupFilter !== 'ALL') ? (NST_GROUPS_7[groupFilter] || `Gruppe ${groupFilter}`) : 'Alle Güterarten';
 
-        partnersList.slice(0, state.topX).forEach(p => {
+        partnersList.slice(0, state.topX).forEach((p, rank) => {
           // Dynamic formatting so small amounts e.g. 1.700 t are shown as 0,0017 rather than 0,00
           const cleanValNum = formatSmartMioTonnes(p.flowVal, '');
           const yoyVal = (p.yoy_pct !== null && p.yoy_pct !== undefined) ? p.yoy_pct : null;
@@ -432,7 +432,7 @@
           const row = document.createElement('tr');
           row.setAttribute('data-partner-id', p.iso);
           row.innerHTML = `
-            <td><strong>${p.name}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${p.iso})</span></td>
+            <td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${p.name}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${p.iso})</span></td>
             <td>${gName}</td>
             <td style="text-align: right;"><strong>${cleanValNum}</strong></td>
             <td style="text-align: right;">${yoy}</td>

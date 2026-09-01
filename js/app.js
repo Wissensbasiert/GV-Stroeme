@@ -604,11 +604,10 @@
     }
   }
 
-  function applyMobileLegendDefaults() {
-    if (!window.matchMedia('(max-width: 900px)').matches) return;
+  function applyResponsiveLegendDefaults(isMobile = window.matchMedia('(max-width: 900px)').matches) {
     document.querySelectorAll('.choropleth-legend').forEach(legend => {
       if (legend.dataset.legendUserToggled === 'true') return;
-      setLegendCollapsedState(legend, true);
+      setLegendCollapsedState(legend, isMobile);
     });
   }
 
@@ -1364,10 +1363,10 @@
         });
       }
     });
-    applyMobileLegendDefaults();
+    applyResponsiveLegendDefaults();
     const mobileLegendQuery = window.matchMedia('(max-width: 900px)');
     mobileLegendQuery.addEventListener?.('change', event => {
-      if (event.matches) applyMobileLegendDefaults();
+      applyResponsiveLegendDefaults(event.matches);
     });
 
     // Maritime Selected Port Reset Button
@@ -1488,6 +1487,68 @@
       });
     });
 
+    // Analyseassistent interaction prototype. It deliberately demonstrates the
+    // intended workflow without inventing values or contacting a model.
+    const appendAiMessage = (kind, content) => {
+      const conversation = document.getElementById('aiConversation');
+      if (!conversation) return;
+
+      conversation.closest('.ki-modal-body')?.classList.add('has-conversation');
+
+      const message = document.createElement('article');
+      message.className = `ki-message ki-message-${kind}`;
+
+      const avatar = document.createElement('div');
+      avatar.className = 'ki-message-avatar';
+      if (kind === 'assistant') {
+        const icon = document.createElement('img');
+        icon.src = 'assets/icons/gueterstrom-ki-variante-c-datenkorridor.svg';
+        icon.alt = '';
+        avatar.appendChild(icon);
+      } else {
+        avatar.textContent = 'Sie';
+      }
+
+      const body = document.createElement('div');
+      body.className = 'ki-message-content';
+      if (typeof content === 'string') {
+        const paragraph = document.createElement('p');
+        paragraph.textContent = content;
+        body.appendChild(paragraph);
+      } else {
+        body.appendChild(content);
+      }
+
+      message.append(avatar, body);
+      conversation.appendChild(message);
+      conversation.scrollTop = conversation.scrollHeight;
+    };
+
+    const submitAiPrototypeQuestion = () => {
+      const input = document.getElementById('aiQuestionInput');
+      const question = input?.value.trim();
+      if (!question) {
+        input?.focus();
+        return;
+      }
+
+      appendAiMessage('user', question);
+      input.value = '';
+      input.style.height = '';
+
+      const response = document.createDocumentFragment();
+      const title = document.createElement('strong');
+      title.textContent = 'Frage erkannt – Datenabfrage noch nicht verbunden.';
+      const explanation = document.createElement('p');
+      explanation.textContent = 'Im späteren Ausbau würde der Analyseassistent für Ihre Frage passende geprüfte Abfragen auswählen, die Daten auswerten und das Ergebnis mit Quellen und Einschränkungen erläutern. Dieser Interface-Test erzeugt bewusst keine Zahlen.';
+      const meta = document.createElement('span');
+      meta.className = 'ki-message-meta';
+      meta.textContent = 'Prototyp-Antwort · keine Modell- oder Datenverbindung';
+      response.append(title, explanation, meta);
+      appendAiMessage('assistant', response);
+      input.focus();
+    };
+
     // Modals Handling
     const setupModal = (btnId, modalId) => {
       const btn = document.getElementById(btnId);
@@ -1498,6 +1559,9 @@
           modal.querySelector('.modal-close')?.focus();
           if (modalId === 'modalSteckbrief') await prepareSteckbriefModal();
           if (modalId === 'modalHelp' || modalId === 'modalLicenses') await refreshDataCoverage();
+          if (modalId === 'modalAi') {
+            requestAnimationFrame(() => document.getElementById('aiQuestionInput')?.focus());
+          }
         });
         modal.querySelectorAll('.modal-close, [data-close]')?.forEach(c => {
           c.addEventListener('click', () => {
@@ -1520,10 +1584,48 @@
       }
     };
 
+    setupModal('btnAiModal', 'modalAi');
     setupModal('btnSteckbriefModal', 'modalSteckbrief');
     setupModal('btnHelpModal', 'modalHelp');
     setupModal('btnLicensesModal', 'modalLicenses');
     setupModal('brandLogoBtn', 'modalLicenses');
+
+    document.getElementById('aiQuestionForm')?.addEventListener('submit', event => {
+      event.preventDefault();
+      submitAiPrototypeQuestion();
+    });
+    document.getElementById('aiQuestionInput')?.addEventListener('keydown', event => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        submitAiPrototypeQuestion();
+      }
+    });
+    document.getElementById('aiQuestionInput')?.addEventListener('input', event => {
+      const input = event.currentTarget;
+      input.style.height = 'auto';
+      input.style.height = `${Math.min(input.scrollHeight, 118)}px`;
+    });
+    document.getElementById('aiExamplesToggle')?.addEventListener('click', event => {
+      const button = event.currentTarget;
+      const examples = document.getElementById('aiExamples');
+      if (!examples) return;
+      const willOpen = examples.hidden;
+      examples.hidden = !willOpen;
+      button.setAttribute('aria-expanded', String(willOpen));
+    });
+    document.querySelectorAll('[data-ai-question]').forEach(button => {
+      button.addEventListener('click', () => {
+        const input = document.getElementById('aiQuestionInput');
+        if (!input) return;
+        input.value = button.getAttribute('data-ai-question') || '';
+        input.dispatchEvent(new Event('input'));
+        const examples = document.getElementById('aiExamples');
+        const toggle = document.getElementById('aiExamplesToggle');
+        if (examples) examples.hidden = true;
+        toggle?.setAttribute('aria-expanded', 'false');
+        input.focus();
+      });
+    });
 
     document.getElementById('btnPrintSteckbrief')?.addEventListener('click', () => {
       window.print();
@@ -3916,7 +4018,7 @@
       return;
     }
 
-    filtered.forEach(r => {
+    filtered.forEach((r, rank) => {
       const partnerId = r.dest_id || r.origin_id || '';
       const partnerName = r.dest_name || r.origin_name || regionsData[partnerId]?.name || fullCentroids[partnerId]?.name || partnerId;
       const rawValue = isTkm ? (r.tkm || 0) / 1e6 : (r.tonnes || 0) / 1e3;
@@ -3960,7 +4062,7 @@
       const row = document.createElement('tr');
       row.setAttribute('data-partner-id', partnerId);
       row.innerHTML = `
-        <td><strong>${partnerName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${partnerId})</span>${binnenBadge}${modeBadge}</td>
+        <td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${partnerName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${partnerId})</span>${binnenBadge}${modeBadge}</td>
         <td style="text-align: right;"><strong>${cleanValNum}</strong></td>
         <td style="text-align: right;">${yoy}</td>
         <td style="text-align: right;">${trend10}</td>
@@ -4451,7 +4553,7 @@
           }
           tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b; padding:24px; font-size:0.85rem; line-height:1.5;">${emptyMsg}</td></tr>`;
         } else {
-          list.slice(0, state.topX).forEach(r => {
+          list.slice(0, state.topX).forEach((r, rank) => {
             const partnerId = r.dest_id || r.origin_id;
             const partnerName = r.dest_name || r.origin_name || regionsData[partnerId]?.name || fullCentroids[partnerId]?.name || partnerId;
             const gName = (groupFilter && groupFilter !== 'ALL') ? (NST_GROUPS_7[groupFilter] || groupFilter) : ((r.group_7 && r.group_7 !== 'ALL') ? (NST_GROUPS_7[r.group_7] || `Gruppe ${r.group_7}`) : 'Alle Güterarten');
@@ -4483,7 +4585,7 @@
             const row = document.createElement('tr');
             row.setAttribute('data-partner-id', partnerId);
             row.innerHTML = `
-              <td><strong>${partnerName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${partnerId})</span>${binnenBadge}</td>
+              <td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${partnerName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${partnerId})</span>${binnenBadge}</td>
               <td>${gName}</td>
               <td style="text-align: right;"><strong>${cleanValNum}</strong></td>
               <td style="text-align: right;">${yoy}</td>
@@ -5207,7 +5309,7 @@
         tbody.innerHTML = `
           <tr>
             <td colspan="5" style="text-align:center; color:#475569; padding:28px 16px; font-size:0.86rem; line-height:1.6;">
-              <div class="empty-state-icon"><img src="assets/icons/directions_boat.svg" alt="" aria-hidden="true"></div>
+              <div class="empty-state-icon"><img src="assets/icons/map.svg" alt="" aria-hidden="true"></div>
               <strong style="color:#0f172a; font-size:0.95rem;">Deutschland aktiv</strong><br>
               <span style="color:#475569; font-size:0.79rem;">Die vier Kennzahlen oben beziehen sich auf die nationale Destatis-Aggregation des deutschen Seeverkehrs im Berichtsjahr ${yr} (${scopeFilterText}) – nicht auf die Summe der ${Object.keys(yearPorts).length} kartierten Seehäfen.</span><br><br>
               <span style="color:#64748b; font-size:0.81rem;">Bitte wählen Sie auf der Karte einen <strong>Seehafen</strong> aus, um dessen wichtigste internationale Seeverkehrsbeziehungen anzuzeigen.</span>
@@ -5247,7 +5349,7 @@
       } else {
         const gName = (groupFilter && groupFilter !== 'ALL') ? (NST_GROUPS_7[groupFilter] || `Gruppe ${groupFilter}`) : 'Alle Güterarten';
 
-        partnersList.slice(0, state.topX).forEach(p => {
+        partnersList.slice(0, state.topX).forEach((p, rank) => {
           // Dynamic formatting so small amounts e.g. 1.700 t are shown as 0,0017 rather than 0,00
           const cleanValNum = formatSmartMioTonnes(p.flowVal, '');
           const yoyVal = (p.yoy_pct !== null && p.yoy_pct !== undefined) ? p.yoy_pct : null;
@@ -5272,7 +5374,7 @@
           const row = document.createElement('tr');
           row.setAttribute('data-partner-id', p.iso);
           row.innerHTML = `
-            <td><strong>${p.name}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${p.iso})</span></td>
+            <td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${p.name}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${p.iso})</span></td>
             <td>${gName}</td>
             <td style="text-align: right;"><strong>${cleanValNum}</strong></td>
             <td style="text-align: right;">${yoy}</td>
@@ -5831,7 +5933,7 @@
       } else if (!tableRelations.length) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b; padding:24px;">Für diese Auswahl liegen keine qualifizierten KV-Relationen mit Ladeeinheit (Schiene) oder Containerklasse (Binnenschiff) vor.</td></tr>';
       } else {
-        tableRelations.forEach(relation => {
+        tableRelations.forEach((relation, rank) => {
           const origin = fullCentroids[relation.origin_id];
           const destination = fullCentroids[relation.destination_id];
           if (!origin || !destination) return;
@@ -5850,7 +5952,7 @@
             : '<span class="intermodal-mode-badge iww">Binnenschiff</span>'
           ).join('');
           row.setAttribute('data-partner-id', relation.partner_id);
-          row.innerHTML = `<td><strong>${fullCentroids[relation.partner_id]?.name || relation.partner_id}</strong></td><td><span class="intermodal-mode-badges">${modeBadges}</span></td><td style="text-align:right;"><strong>${direction === 'balance' && relation.current > 0 ? '+' : ''}${formatQuantity(relation.current / divisor, 1)}</strong></td><td style="text-align:right;">${change(relation.yoy)}</td><td style="text-align:right;">${change(relation.trend)}</td>`;
+          row.innerHTML = `<td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${fullCentroids[relation.partner_id]?.name || relation.partner_id}</strong></td><td><span class="intermodal-mode-badges">${modeBadges}</span></td><td style="text-align:right;"><strong>${direction === 'balance' && relation.current > 0 ? '+' : ''}${formatQuantity(relation.current / divisor, 1)}</strong></td><td style="text-align:right;">${change(relation.yoy)}</td><td style="text-align:right;">${change(relation.trend)}</td>`;
           row.addEventListener('mouseenter', () => setIntermodalPartnerHighlight(relation.partner_id));
           row.addEventListener('mouseleave', () => clearAllHighlights('intermodal'));
           tbody.appendChild(row);
@@ -6729,8 +6831,13 @@
         </div>
       `;
 
-      line.bindTooltip(tipHtml, { sticky: true, opacity: 0.98 });
-      marker.bindTooltip(tipHtml, { sticky: true, opacity: 0.98 });
+      const relationTooltipOptions = {
+        sticky: true,
+        opacity: 0.98,
+        className: 'forecast-relation-leaflet-tooltip'
+      };
+      line.bindTooltip(tipHtml, relationTooltipOptions);
+      marker.bindTooltip(tipHtml, relationTooltipOptions);
 
       line.on('mouseover', event => {
         openActiveRelationTooltip('forecast', line, event);
@@ -6811,7 +6918,7 @@
       return;
     }
 
-    relations.forEach(r => {
+    relations.forEach((r, rank) => {
       const pId = r.partner_id || r.dest_id || r.orig_id;
       const pName = getForecastRelationCellName(pId, r);
       const groupName = (state.selectedGroup && state.selectedGroup !== 'ALL') 
@@ -6847,7 +6954,7 @@
       const row = document.createElement('tr');
       row.setAttribute('data-partner-id', pId);
       row.innerHTML = `
-        <td><strong>${pName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${pId})</span>${binnenBadge}${modeBadge ? `<span class="relation-mode-badges">${modeBadge}</span>` : ''}</td>
+        <td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${pName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${pId})</span>${binnenBadge}${modeBadge ? `<span class="relation-mode-badges">${modeBadge}</span>` : ''}</td>
         <td>${groupName}</td>
         <td style="text-align: right;"><strong>${cleanValNum}</strong></td>
         <td style="text-align: right;">${growthHtml}</td>
