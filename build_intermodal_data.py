@@ -98,9 +98,11 @@ def build_dataset() -> dict[str, object]:
         """
     ).fetchdf().to_dict("records")
 
-    # Inländische NUTS-3-Relationen für Karte und Rangtabelle. Die beiden
-    # Teilmärkte werden auch hier getrennt geführt; eine Addition wäre wegen
-    # möglicher Kettenüberschneidungen fachlich nicht belastbar.
+    # NUTS-3-Relationen mit deutschem Bezug für Karte und Rangtabelle. Die
+    # Partnerregion kann im In- oder Ausland liegen; reiner Auslandstransit
+    # bleibt ausgeschlossen. Die beiden Teilmärkte werden auch hier getrennt
+    # geführt; eine Addition wäre wegen möglicher Kettenüberschneidungen
+    # fachlich nicht belastbar.
     rail_relation_rows = con.execute(
         f"""
         WITH source AS (
@@ -115,8 +117,10 @@ def build_dataset() -> dict[str, object]:
             FROM read_csv('{rail_pattern}', delim=';', header=true, encoding='latin-1', union_by_name=true)
             WHERE CAST(Referenzzeitraum_Jahr AS INTEGER) >= {MIN_YEAR}
               AND Ladeeinheit IS NOT NULL AND Ladeeinheit <> 'Keine'
-              AND Versandregion_NUTS2024 LIKE 'DE%'
-              AND Empfangsregion_NUTS2024 LIKE 'DE%'
+              AND (
+                (Versandregion_NUTS2024 LIKE 'DE%' AND Empfangsregion_NUTS2024 IS NOT NULL AND Empfangsregion_NUTS2024 <> '')
+                OR (Empfangsregion_NUTS2024 LIKE 'DE%' AND Versandregion_NUTS2024 IS NOT NULL AND Versandregion_NUTS2024 <> '')
+              )
         )
         SELECT year_ref, origin_id, destination_id,
             SUM(tonnes) AS tonnes, SUM(tkm) AS tkm,
@@ -141,8 +145,10 @@ def build_dataset() -> dict[str, object]:
             FROM read_csv('{iww_pattern}', delim=';', header=true, encoding='utf-8', union_by_name=true)
             WHERE CAST(Referenzzeitraum_Jahr AS INTEGER) >= {MIN_YEAR}
               AND Container_Groesse IS NOT NULL
-              AND Einladeregion_NUTS3 LIKE 'DE%'
-              AND Ausladeregion_NUTS3 LIKE 'DE%'
+              AND (
+                (Einladeregion_NUTS3 LIKE 'DE%' AND Ausladeregion_NUTS3 IS NOT NULL AND Ausladeregion_NUTS3 <> '')
+                OR (Ausladeregion_NUTS3 LIKE 'DE%' AND Einladeregion_NUTS3 IS NOT NULL AND Einladeregion_NUTS3 <> '')
+              )
         )
         SELECT year_ref, origin_id, destination_id,
             SUM(tonnes) AS tonnes, SUM(tkm) AS tkm,
@@ -353,7 +359,7 @@ def build_dataset() -> dict[str, object]:
         "schema_version": 3,
         "years": years,
         "not_additive": True,
-        "relation_scope": "Inländische NUTS-3-Relationen mit ausgewiesener Ladeeinheit (Schiene) bzw. Containergrößenklasse (Binnenschiff).",
+        "relation_scope": "NUTS-3-Relationen mit deutscher Quelle oder deutschem Ziel und ausgewiesener Ladeeinheit (Schiene) bzw. Containergrößenklasse (Binnenschiff); reine Auslandstransite sind ausgeschlossen.",
         "sources": {
             "rail": f"Statistisches Bundesamt (Destatis), Güterverkehrsstatistik der Eisenbahn, EVAS 46131, gemeinsame Jahresdateien {years[0]}–{years[-1]}.",
             "iww": f"Statistisches Bundesamt (Destatis), Binnenschifffahrt, EVAS 46321, gemeinsame Jahresdateien {years[0]}–{years[-1]}.",

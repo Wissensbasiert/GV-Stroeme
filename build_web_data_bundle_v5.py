@@ -669,9 +669,11 @@ top_out = con.execute("""
     WITH yearly AS (
         SELECT origin_nuts, dest_nuts, year_ref, SUM(tonnes) as tonnes, SUM(tkm) as tkm, SUM(trips) as trips
         FROM fact_od_view
-        -- Historical relation maps have coordinates only for German NUTS-3
-        -- regions.  Keep the relation candidates within that visible scope.
-        WHERE origin_nuts LIKE 'DE%' AND dest_nuts LIKE 'DE%'
+        -- A regional relation needs a German origin, but its partner may be
+        -- domestic or foreign.  Pure foreign transit is not a regional
+        -- German relation and is therefore still outside this view.
+        WHERE origin_nuts LIKE 'DE%'
+          AND dest_nuts IS NOT NULL AND dest_nuts <> ''
         GROUP BY origin_nuts, dest_nuts, year_ref
     ),
     ranked AS (
@@ -693,9 +695,11 @@ top_in = con.execute("""
     WITH yearly AS (
         SELECT dest_nuts, origin_nuts, year_ref, SUM(tonnes) as tonnes, SUM(tkm) as tkm, SUM(trips) as trips
         FROM fact_od_view
-        -- See the corresponding outbound query: an otherwise valid foreign
-        -- partner cannot be rendered on the German regional map.
-        WHERE origin_nuts LIKE 'DE%' AND dest_nuts LIKE 'DE%'
+        -- Mirror the outbound scope: German destinations retain domestic and
+        -- foreign origins.  Map rendering handles partners without a usable
+        -- coordinate separately, but they remain visible in the ranking.
+        WHERE dest_nuts LIKE 'DE%'
+          AND origin_nuts IS NOT NULL AND origin_nuts <> ''
         GROUP BY dest_nuts, origin_nuts, year_ref
     ),
     ranked AS (
@@ -723,10 +727,11 @@ by_mode = con.execute("""
     WITH yearly_mode AS (
         SELECT origin_nuts, dest_nuts, year_ref, mode_transport, group_7_id, SUM(tonnes) as tonnes, SUM(tkm) as tkm
         FROM fact_od_view
-        -- The relation modules are German NUTS-3 maps.  Ranking foreign
-        -- partners here would consume Top-X slots although those rows have no
-        -- map geometry and would hide visible domestic relations.
-        WHERE origin_nuts LIKE 'DE%' AND dest_nuts LIKE 'DE%'
+        -- Keep every relation with a German side.  This includes imports and
+        -- exports, while excluding pure foreign transit.  Partners without a
+        -- usable coordinate stay in the table with an explicit map note.
+        WHERE (origin_nuts LIKE 'DE%' AND dest_nuts IS NOT NULL AND dest_nuts <> '')
+           OR (dest_nuts LIKE 'DE%' AND origin_nuts IS NOT NULL AND origin_nuts <> '')
         GROUP BY origin_nuts, dest_nuts, year_ref, mode_transport, group_7_id
     ),
     ranked_out AS (

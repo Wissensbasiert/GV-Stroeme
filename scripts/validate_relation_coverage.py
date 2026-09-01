@@ -4,7 +4,7 @@ The dashboard applies its Top-X selection only after the user chooses tonnes
 or tonne-kilometres.  This check therefore verifies that every retained
 NST-7-specific relation file contains the top 25 candidates for *both*
 measures.  It also guards the separate intermodal path, which intentionally
-has no NST filter but must retain all qualified domestic relations.
+has no NST filter but must retain every qualified relation with a German side.
 """
 
 from __future__ import annotations
@@ -39,7 +39,10 @@ def validate_grouped_historical_relations(failures: list[str]) -> int:
                SUM(tonnes) AS tonnes, SUM(tkm) AS tkm
         FROM read_parquet('{FACT_PATH.as_posix()}')
         WHERE mode_transport IN ('rail', 'iww')
-          AND origin_nuts LIKE 'DE%' AND dest_nuts LIKE 'DE%'
+          AND (
+            (origin_nuts LIKE 'DE%' AND dest_nuts IS NOT NULL AND dest_nuts <> '')
+            OR (dest_nuts LIKE 'DE%' AND origin_nuts IS NOT NULL AND origin_nuts <> '')
+          )
         GROUP BY 1, 2, 3, 4, 5
         """
     ).fetchall()
@@ -47,12 +50,17 @@ def validate_grouped_historical_relations(failures: list[str]) -> int:
 
     source: dict[tuple[str, int, str, str, str], list[tuple[str, float, float]]] = defaultdict(list)
     for year, mode, group, origin, destination, tonnes, tkm in rows:
-        source[(str(origin), int(year), str(mode), "outbound", str(group))].append(
-            (str(destination), float(tonnes or 0), float(tkm or 0))
-        )
-        source[(str(destination), int(year), str(mode), "inbound", str(group))].append(
-            (str(origin), float(tonnes or 0), float(tkm or 0))
-        )
+        # A German origin is a published outbound relation; a German
+        # destination is a published inbound relation.  Do not create
+        # fictitious regional files for the foreign partner side.
+        if str(origin).startswith("DE"):
+            source[(str(origin), int(year), str(mode), "outbound", str(group))].append(
+                (str(destination), float(tonnes or 0), float(tkm or 0))
+            )
+        if str(destination).startswith("DE"):
+            source[(str(destination), int(year), str(mode), "inbound", str(group))].append(
+                (str(origin), float(tonnes or 0), float(tkm or 0))
+            )
 
     cache: dict[str, dict] = {}
 
@@ -109,6 +117,54 @@ def validate_grouped_historical_relations(failures: list[str]) -> int:
     return checked
 
 
+def validate_nuernberg_international_regression(failures: list[str]) -> int:
+    """Keep the reported Nuremberg waterway exports in the published bundle.
+
+    The values are deliberately read from the fact table instead of being
+    hard-coded, so a legitimate future data revision remains possible while
+    the two foreign partners stay a non-negotiable coverage case.
+    """
+    expected_partners = {"BE211", "NL366"}
+    con = duckdb.connect()
+    rows = con.execute(
+        f"""
+        SELECT dest_nuts, SUM(tonnes) AS tonnes, SUM(tkm) AS tkm
+        FROM read_parquet('{FACT_PATH.as_posix()}')
+        WHERE year_ref = 2025
+          AND mode_transport = 'iww'
+          AND group_7_id = '4'
+          AND origin_nuts = 'DE254'
+          AND dest_nuts IN ('BE211', 'NL366')
+        GROUP BY dest_nuts
+        """
+    ).fetchall()
+    con.close()
+    raw = {str(partner): (float(tonnes or 0), float(tkm or 0)) for partner, tonnes, tkm in rows}
+    if set(raw) != expected_partners:
+        failures.append("Nürnberg/2025/IWW/NST-4: erwartete Auslandspartner BE211 und NL366 fehlen bereits in der Faktentabelle.")
+        return 0
+
+    relation_path = RELATIONS_DIR / "DE254.json"
+    bundle = json.loads(relation_path.read_text(encoding="utf-8")) if relation_path.exists() else {}
+    published = (
+        bundle.get("2025", {})
+        .get("by_mode", {})
+        .get("iww", {})
+        .get("by_group", {})
+        .get("4", {})
+        .get("outbound", [])
+    )
+    by_partner = {str(row.get("dest_id")): row for row in published}
+    for partner, (expected_tonnes, expected_tkm) in raw.items():
+        row = by_partner.get(partner)
+        if row is None:
+            failures.append(f"Nürnberg/2025/IWW/NST-4: Auslandspartner {partner} fehlt in der veröffentlichten Versandliste.")
+            continue
+        if abs(float(row.get("tonnes", 0)) - expected_tonnes) > 0.05 or abs(float(row.get("tkm", 0)) - expected_tkm) > 0.05:
+            failures.append(f"Nürnberg/2025/IWW/NST-4: Wert für {partner} stimmt nicht mit der Faktentabelle überein.")
+    return len(raw)
+
+
 def validate_intermodal_completeness(failures: list[str]) -> int:
     con = duckdb.connect()
     rail_pattern = str(RAW_DIR / "SGV OpenData" / "eb_opendata_*.csv").replace("\\", "/")
@@ -122,7 +178,10 @@ def validate_intermodal_completeness(failures: list[str]) -> int:
             FROM read_csv('{rail_pattern}', delim=';', header=true, encoding='latin-1', union_by_name=true)
             WHERE CAST(Referenzzeitraum_Jahr AS INTEGER) BETWEEN 2016 AND 2025
               AND Ladeeinheit IS NOT NULL AND Ladeeinheit <> 'Keine'
-              AND Versandregion_NUTS2024 LIKE 'DE%' AND Empfangsregion_NUTS2024 LIKE 'DE%'
+              AND (
+                (Versandregion_NUTS2024 LIKE 'DE%' AND Empfangsregion_NUTS2024 IS NOT NULL AND Empfangsregion_NUTS2024 <> '')
+                OR (Empfangsregion_NUTS2024 LIKE 'DE%' AND Versandregion_NUTS2024 IS NOT NULL AND Versandregion_NUTS2024 <> '')
+              )
         ), iww AS (
             SELECT CAST(Referenzzeitraum_Jahr AS INTEGER) AS year,
                    CAST(Einladeregion_NUTS3 AS VARCHAR) AS origin,
@@ -130,7 +189,10 @@ def validate_intermodal_completeness(failures: list[str]) -> int:
             FROM read_csv('{iww_pattern}', delim=';', header=true, encoding='utf-8', union_by_name=true)
             WHERE CAST(Referenzzeitraum_Jahr AS INTEGER) BETWEEN 2016 AND 2025
               AND Container_Groesse IS NOT NULL
-              AND Einladeregion_NUTS3 LIKE 'DE%' AND Ausladeregion_NUTS3 LIKE 'DE%'
+              AND (
+                (Einladeregion_NUTS3 LIKE 'DE%' AND Ausladeregion_NUTS3 IS NOT NULL AND Ausladeregion_NUTS3 <> '')
+                OR (Ausladeregion_NUTS3 LIKE 'DE%' AND Einladeregion_NUTS3 IS NOT NULL AND Einladeregion_NUTS3 <> '')
+              )
         )
         SELECT 'rail' AS mode, year, origin, destination FROM rail GROUP BY ALL
         UNION ALL
@@ -153,7 +215,7 @@ def validate_intermodal_completeness(failures: list[str]) -> int:
         }
         missing = expected_pairs - published_pairs
         if missing:
-            failures.append(f"Intermodal {year}/{mode}: {len(missing)} qualifizierte Binnenrelation(en) fehlen.")
+            failures.append(f"Intermodal {year}/{mode}: {len(missing)} qualifizierte Relation(en) mit deutschem Bezug fehlen.")
         checked += 1
     return checked
 
@@ -161,6 +223,7 @@ def validate_intermodal_completeness(failures: list[str]) -> int:
 def main() -> None:
     failures: list[str] = []
     grouped_cases = validate_grouped_historical_relations(failures)
+    regression_cases = validate_nuernberg_international_regression(failures)
     intermodal_cases = validate_intermodal_completeness(failures)
     if failures:
         raise SystemExit("RELATIONS-VALIDIERUNG FEHLGESCHLAGEN:\n- " + "\n- ".join(failures[:100]))
@@ -168,6 +231,7 @@ def main() -> None:
         "BESTANDEN: "
         f"{grouped_cases} NST-7-Relationsgruppen enthalten die Top-{TOP_LIMIT}-Kandidaten "
         "für Tonnen und Tonnenkilometer sowie ihre vorhandenen Vorjahreswerte; "
+        f"{regression_cases} Nürnberg-Auslandsrelation(en) stimmen; "
         f"{intermodal_cases} Intermodal-Jahr/Teilmärkte sind vollständig."
     )
 

@@ -1,7 +1,7 @@
 # Qualitätssicherungsplan für das Güterströme-Dashboard
 
-**Stand:** 25.08.2026  
-**Status:** Automatisierte und browserseitige Korrekturregression bestanden; acht manuelle Nutzerfälle noch offen  
+**Stand:** 01.09.2026  
+**Status:** Automatisierte, browserseitige und manuelle Korrekturregression bestanden; die unabhängige externe Zweitprüfung ist aus Datenschutzgründen noch nicht erfolgt  
 **Zweck:** Dieser Plan dient zugleich als Arbeitsplan der aktuellen Gesamtprüfung und als verbindliche Vorlage für spätere Datenaktualisierungen.
 
 ## 1. Prüfziel und Freigabegrenze
@@ -301,9 +301,11 @@ Nach der kritischen Neubewertung gelten folgende Festlegungen und Korrekturen:
 - QS-04: Die Richtungsauswahl bleibt auch in der nationalen VP2040-Ansicht aktiv. Bei „Gesamt“ werden die vollständigen nationalen Matrizen einschließlich Transit und Sonderzellen verwendet. Bei Versand, Empfang und Saldo werden Karte und KPI aus den räumlich zuordenbaren NUTS-3-Werten gebildet; Transit und nicht regional zuordenbare Sonderzellen sind in diesem Richtungsumfang ausdrücklich ausgeschlossen.
 - QS-06 und QS-08: Nationale Tonnen- und Tonnenkilometerwerte werden aus der vollständigen nationalen Rohgrundgesamtheit berechnet, nicht aus der Summe vollständig NUTS-zuordenbarer Relationen.
 - QS-07: Die NST-2007-Zuordnung der Relationstabellen entspricht derselben sieben Hauptgruppen umfassenden Zuordnung wie Karten und Diagramme. Bei den dreistelligen Schlüsseln handelt es sich nicht um eine alte NST-Systematik, sondern um die feinere NST-2007-Untergliederung; führende Nullen sind Bestandteil des Schlüssels.
+- Feinpositions-Regression: `scripts/validate_nst_fine_codes.py` muss alle tatsächlich vorkommenden NST-2007-Feinpositionen von Schiene und Binnenschiff einer Abteilung 01–20 zuordnen und deren C1–C7-Summen unabhängig gegen `fact_od_flows.parquet` nachrechnen. Unbekannte Formate, fehlende Abteilungen, abweichende Summen oder abweichende sichtbare NST-20-/C1–C7-Bezeichnungen verhindern die Freigabe.
 - VP2040-Güterschlüssel: `scripts/validate_vp2040_bundle.py` prüft beide gelieferten Dateien `nst2007.csv`, die Begriffe der VP-Positionen gegen `nsz-2007.pdf` sowie den Crosswalk. Erwartet werden genau 25 Originalcodes und die amtliche C1–C7-Gliederung des KBA-Produkts VE13: C1 = Abteilungen 01–03, C2 = 04–06, C3 = 07–09, C4 = 10, C5 = 11–13, C6 = 14, C7 = 15–20. Die VP2040-Zellen-Exceldateien sind keine Quelle für Güterschlüssel.
 - Crosswalk-Vertrag: Die CSV- und JSON-Fassung müssen jeweils genau 25 eindeutige VP-Codes enthalten und in allen fachlichen Feldern identisch sein: Code, VP-Begriff, NST-Abteilung mit Bezeichnung sowie C-Gruppe mit Bezeichnung. Der Validator prüft diese Gleichheit unabhängig von der Verarbeitung und prüft zusätzlich die C-Gruppe aus der NST-Abteilung. Abweichungen, doppelte Codes oder abweichende Gruppenbezeichnungen verhindern die Freigabe.
 - Ranglisten-Regression: `scripts/validate_relation_coverage.py` muss für jede veröffentlichte NST-7-Relation von Schiene und Binnenschiff die Top-25-Kandidaten nach Tonnen **und** Tonnenkilometern abdecken. Der Test prüft außerdem, dass vorhandene Vorjahreswerte für alle aktuell sichtbaren Gütergruppenrelationen bereitstehen; eine erst im aktuellen Jahr sichtbare Relation darf daher nicht fälschlich `--` erhalten.
+- Auslandsrelationen: Für regionale Relationstabellen werden alle Datensätze mit deutscher Quelle oder deutschem Ziel veröffentlicht; nur reiner Auslandstransit bleibt ausgeschlossen. `scripts/validate_relation_coverage.py` prüft diese Regel auch für das Intermodalmodul und enthält Nürnberg (DE254), Binnenschiff, Versand, NST-4, 2025 mit Antwerpen (BE211) und Groot-Rijnmond/Rotterdam (NL366) als festen Regressionsfall. Partner ohne belastbare Koordinate bleiben als Ranglisteneintrag sichtbar und werden in der Oberfläche mit **„ohne Kartenpunkt“** gekennzeichnet.
 - QS-10: Die Intermodalkarte zeigt ohne Teilmarkt-Umschalter die Summe der erfassten KV-Teilmärkte als räumliches Intensitätsmaß. Der Tooltip schlüsselt Schiene und Binnenschiff getrennt auf; KPI und Anteile bleiben getrennt. Die Kartensumme wird nicht als eindeutige nationale KV-Gesamtmenge oder Zahl unterschiedlicher Sendungen interpretiert.
 - QS-12: Der Saldo-Tooltip verwendet die tatsächlich berechneten Modalwerte und keine undefinierten Variablen.
 - QS-14: Alle 40 in den sechs Landmatrizen verwendeten deutschen Flughafen- und Seehafen-Sonderzellen sind in `data/crosswalks/vp2040_special_cells_nuts3.json` genau einem Standortkreis zugeordnet. Die nationale Matrix bleibt unverändert vollständig.
@@ -312,7 +314,7 @@ Nach der kritischen Neubewertung gelten folgende Festlegungen und Korrekturen:
 - Übersicht-Hover: Für mindestens eine straßen-dominierte und eine nicht straßen-dominierte Gütergruppe ist im gemeinsamen Basisjahr 2019 zu prüfen, ob amtliche Istreihe und VP2040-Reihe dieselbe fachliche Abgrenzung besitzen. Dieser Test ist **kein Gleichheitstest der Werte**: Die amtliche Istreihe und die VP-Basis können wegen Quelle, Erhebungsumfang und Modellabgrenzung abweichen. Ein Vergleich ist nur bei gleicher Region, Richtung, Kennzahl, Verkehrsträger und C-Gruppe aussagekräftig. Jede verbleibende Abweichung ist mit Quelle, Grundgesamtheit und Einheit im Datenkatalog bzw. der Methodik zu dokumentieren; das Diagramm darf keine Fortschreibung behaupten.
 - Ausländische VP2040-Partnerzellen sind in der Relationstabelle mit dem im Crosswalk vorhandenen Namen statt nur mit der numerischen Zell-ID auszuweisen.
 
-Nach jeder Neuerzeugung sind mindestens zu prüfen: nationale Werte 2024 für Schiene und Binnenschiff in Tonnen und Tonnenkilometern, die Seeverkehrsrandsummen und NST-Schlüssel aller Jahre, unveränderte nationale VP2040-Summen, die 25 VP2040-Crosswalk-Positionen gegen beide Referenzquellen, regionale Werte der von Sonderzellen besonders betroffenen Kreise Bremen, Bremerhaven, Emsland und Emden, die Filterkombination Richtung plus Gütergruppe sowie die sichtbaren Methodenhinweise aller sieben Module.
+Nach jeder Neuerzeugung sind mindestens zu prüfen: nationale Werte 2024 für Schiene und Binnenschiff in Tonnen und Tonnenkilometern, die Seeverkehrsrandsummen und NST-Schlüssel aller Jahre einschließlich `scripts/validate_nst_fine_codes.py`, unveränderte nationale VP2040-Summen, die 25 VP2040-Crosswalk-Positionen gegen beide Referenzquellen, regionale Werte der von Sonderzellen besonders betroffenen Kreise Bremen, Bremerhaven, Emsland und Emden, die Filterkombination Richtung plus Gütergruppe sowie die sichtbaren Methodenhinweise aller sieben Module.
 
 ### 10.7 Ergebnis der Korrekturregression vom 24./25.08.2026
 
@@ -344,4 +346,36 @@ Nach weiteren Korrekturen an Datenverfügbarkeit und Modulzuständen wurde die a
 - Im Intermodalmodul blieben die KPI beim Darstellungsfilter für Binnenverkehr unverändert: 98,2 Mio. t Schiene, 16,6 Mio. t Binnenschiff, 30,0 Prozent KV-Anteil Schiene und 9,7 Prozent KV-Anteil Binnenschiff.
 - In VP2040 wurden für 2040, Versand und Gütergruppe 5 erneut 194,55 Mio. t sowie für den Saldo derselben Gütergruppe −1,05 Mio. t angezeigt; Überschriften und Einstellungsanzeige folgten den wirksamen Filtern.
 
-Die automatisierte und browserseitige Regression ist damit für den aktuellen Build bestanden. In der manuellen Prüftabelle sind H-01 und H-02 bereits bestanden; H-03 bis H-10 bleiben als acht nutzerseitige Freigabefälle offen.
+Die automatisierte und browserseitige Regression ist damit für den damaligen Build bestanden. Der Status der manuellen Prüftabelle wurde mit der Abschlussprüfung vom 01.09.2026 fortgeschrieben.
+
+### 10.9 Manuelle Nutzerprüfung und abschließende Daten-/Sichtprüfung vom 01.09.2026
+
+Die manuelle Nutzerprüfung in `outputs/01a0346f-9c94-7c73-9e36-4338961574a1/Manuelle_Prüffälle_Güterströme.xlsx` wurde nach Rückmeldung der fachlich prüfenden Person vollständig durchgeführt; alle zehn Zeilen sind als **bestanden** bewertet.
+
+Die erneute technische Prüfung des ausgelieferten Datenstands ergab folgende bestandene automatisierte Kontrollen:
+
+- `scripts/validate_nst_fine_codes.py`: 73 Schienen- und 80 Binnenschiffs-Feinpositionen sowie sämtliche geprüften NST-7-Summen stimmen mit den Rohdaten überein.
+- `scripts/validate_relation_coverage.py`: 49.137 veröffentlichte NST-7-Relationsgruppen, die Nürnberg-Auslandsfälle Binnenschiff (BE211 und NL366) sowie alle 20 Intermodal-Jahr/Teilmarkt-Kombinationen sind vollständig abgedeckt.
+- `scripts/validate_maritime_bundle.py`: alle zehn Berichtsjahre, nationale Tonnen-/TEU-Randsummen und NST-Schlüssel stimmen.
+- `scripts/validate_maritime_port_profiles.py`: 189 Hafenprofile und 6.784 Partnerrelationen stimmen in Richtungen, Tonnen, TEU und Güterstruktur mit den Rohdaten überein.
+
+Zusätzlich wurde die lokale Auslieferung unter `http://127.0.0.1:8000/` mit dem tatsächlich geladenen Datenpaket visuell geprüft. Alle sieben Module ließen sich ohne Konsolenfehler öffnen. Zehn sichtbare Relationseinträge wurden gegen die Rohdaten beziehungsweise die dafür erzeugte Ausgabedatei geprüft:
+
+| Nr. | Modul und Einstellung | Erwarteter Wert | Sichtbarer Befund | Ergebnis |
+|---|---|---:|---:|---|
+| 1 | Straße, Nürnberg, Versand 2024, alle Güter, Linz-Wels (AT312) | 44.888.001 tkm | 44,9 Mio. tkm | bestanden |
+| 2 | Straße, Nürnberg, Versand 2024, alle Güter, Wien (AT130) | 43.119.882 tkm | 43,1 Mio. tkm | bestanden |
+| 3 | Straße, Nürnberg, Versand 2024, alle Güter, Duisburg (DEA12) | 40.056.614 tkm | 40,1 Mio. tkm | bestanden |
+| 4 | Schiene, Nürnberg, Versand 2025, NST-4, Vereinigtes Königreich (UK00) | 4.428.376 tkm | 4,4 Mio. tkm | bestanden |
+| 5 | Schiene, Nürnberg, Versand 2025, NST-4, Ortenaukreis (DE134) | 1.499.896 tkm | 1,5 Mio. tkm | bestanden |
+| 6 | Binnenschiff, Nürnberg, Versand 2025, NST-4, Berlin (DE300) | 420.840 tkm | 0,4 Mio. tkm | bestanden |
+| 7 | Binnenschiff, Nürnberg, Versand 2025, NST-4, Arrondissement Antwerpen (BE211) | 261.208 tkm | 0,3 Mio. tkm | bestanden |
+| 8 | Binnenschiff, Nürnberg, Versand 2025, NST-4, Groot-Rijnmond (NL366) | 42.848 tkm | 0,04 Mio. tkm | bestanden |
+| 9 | Intermodal, Nürnberg, Versand 2025, Linz-Wels (AT312), Teilmarkt Binnenschiff | Relation vorhanden | als Auslandspartner sichtbar | bestanden |
+| 10 | Verkehrsprognose 2040, Nürnberg, P1, Metalle, Heilbronn Landkreis (DE118) | Relation vorhanden | 19,8 Tsd. t sichtbar | bestanden |
+
+Die Karten- und Tabellenprüfung bestätigte insbesondere die Wiederherstellung der grenzüberschreitenden Fälle: Ausländische Partner erscheinen in der Rangliste und – bei vorhandener Georeferenz – mit Verbindungslinie auf der Karte. Die erwarteten Auslandsrelationen der Binnenschifffahrt und des intermodalen Verkehrs für Nürnberg sind damit im aktuell ausgelieferten Dashboard sichtbar. Bei sehr kleinen Werten kann die Anzeige in Mrd. tkm auf `0,000` runden; das ist rechnerisch korrekt, verringert aber die Ablesbarkeit und bleibt als kleiner Usability-Hinweis bestehen.
+
+Die auf ausdrücklichen Wunsch vorgesehene Gemini-Zweitprüfung wurde vorbereitet und die lokale Anmeldung geprüft. Ihre Ausführung wurde nicht freigegeben, weil dabei Projektinhalte an einen externen Dienst übertragen würden. Dies ist kein Befund zur Datenqualität, sondern ein noch nicht ausgeführter zusätzlicher Prüfschritt. Die hier dokumentierte Freigabeempfehlung stützt sich deshalb auf die lokale automatisierte, manuelle und browserseitige Prüfung.
+
+**Freigabeempfehlung für den geprüften lokalen Datenstand:** Die dokumentierten Tests ergeben keinen offenen Daten- oder Darstellungsfehler für die geprüften Funktionen. Der Stand ist damit für den nächsten kontrollierten Produktionsschritt geeignet. Vor einer endgültigen externen Veröffentlichung bleiben die üblichen produktiven Betriebsprüfungen (Deployment, Berechtigungen und Live-Ansicht) erforderlich; die optionale externe Zweitprüfung kann nach einer gesonderten Freigabe zur Datenübertragung ergänzt werden.

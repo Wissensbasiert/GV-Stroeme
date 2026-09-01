@@ -100,11 +100,7 @@
     const relationValue = relation => Number(relation?.[metric] || 0);
     const allRelationsForYear = year => ['rail', 'iww'].flatMap(mode =>
       (relationLists[String(year)]?.[mode] || []).map(item => ({ ...item, mode }))
-    ).filter(relation =>
-      fullCentroids[relation.origin_id] &&
-      fullCentroids[relation.destination_id] &&
-      relationValue(relation) > 0
-    );
+    ).filter(relation => relationValue(relation) > 0);
     const allRelations = allRelationsForYear(activeYear);
     const direction = state.direction || 'all';
 
@@ -304,17 +300,21 @@
     }
 
     closeRelationTooltip();
+    const drawableTopRelations = topRelations.filter(relation =>
+      hasUsableMapLocation(fullCentroids[relation.origin_id]) &&
+      hasUsableMapLocation(fullCentroids[relation.destination_id])
+    );
     const spider = mapLayers.intermodal?.spiderGroup;
     if (spider) spider.clearLayers();
     mapLayers.intermodal.spiderLookup = {};
     if (map && state.region && state.showIntermodalRelations) {
       bindMapHighlightReset('intermodal');
-      const maxRelation = Math.max(1, ...topRelations.map(relation => Math.abs(relation.current)));
-      topRelations.forEach(relation => {
+      const maxRelation = Math.max(1, ...drawableTopRelations.map(relation => Math.abs(relation.current)));
+      drawableTopRelations.forEach(relation => {
         const origin = fullCentroids[relation.origin_id];
         const destination = fullCentroids[relation.destination_id];
         const partner = fullCentroids[relation.partner_id];
-        if (!origin || !destination || !partner) return;
+        if (!hasUsableMapLocation(origin) || !hasUsableMapLocation(destination) || !hasUsableMapLocation(partner)) return;
         const relationModes = tableRelations.find(item => item.partner_id === relation.partner_id)?.modes || new Set([relation.mode]);
         const hasBothMarkets = relationModes.has('rail') && relationModes.has('iww');
         const isCombinedMarketLine = !isBalance && hasBothMarkets;
@@ -365,7 +365,7 @@
       });
     }
 
-    updateIntermodalLegend(maxChoro, topRelations, unit, divisor, activeYear, isTkm, mapMarketLabel, intermodalLegendTitle);
+    updateIntermodalLegend(maxChoro, drawableTopRelations, unit, divisor, activeYear, isTkm, mapMarketLabel, intermodalLegendTitle);
     drawSelectedRegionOutline('intermodal');
 
     const tbody = document.getElementById('tableIntermodalRelationsBody');
@@ -379,7 +379,8 @@
         tableRelations.forEach((relation, rank) => {
           const origin = fullCentroids[relation.origin_id];
           const destination = fullCentroids[relation.destination_id];
-          if (!origin || !destination) return;
+          const partnerName = fullCentroids[relation.partner_id]?.name || relation.partner_id;
+          const locationBadge = mapLocationBadge(relation.partner_id);
           const change = amount => direction === 'balance'
             ? '<span style="color:#64748b;" title="Für Salden wird kein prozentualer Zeitvergleich ausgewiesen.">—</span>'
             : amount === null
@@ -395,7 +396,7 @@
             : '<span class="intermodal-mode-badge iww">Binnenschiff</span>'
           ).join('');
           row.setAttribute('data-partner-id', relation.partner_id);
-          row.innerHTML = `<td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${fullCentroids[relation.partner_id]?.name || relation.partner_id}</strong></td><td><span class="intermodal-mode-badges">${modeBadges}</span></td><td style="text-align:right;"><strong>${direction === 'balance' && relation.current > 0 ? '+' : ''}${formatQuantity(relation.current / divisor, 1)}</strong></td><td style="text-align:right;">${change(relation.yoy)}</td><td style="text-align:right;">${change(relation.trend)}</td>`;
+          row.innerHTML = `<td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${partnerName}</strong>${locationBadge}</td><td><span class="intermodal-mode-badges">${modeBadges}</span></td><td style="text-align:right;"><strong>${direction === 'balance' && relation.current > 0 ? '+' : ''}${formatQuantity(relation.current / divisor, 1)}</strong></td><td style="text-align:right;">${change(relation.yoy)}</td><td style="text-align:right;">${change(relation.trend)}</td>`;
           row.addEventListener('mouseenter', () => setIntermodalPartnerHighlight(relation.partner_id));
           row.addEventListener('mouseleave', () => clearAllHighlights('intermodal'));
           tbody.appendChild(row);
