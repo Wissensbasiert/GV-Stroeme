@@ -299,6 +299,7 @@
   let nstData = {};
   let maritimeData = null;
   let geojsonNuts3 = null;
+  let geojsonStateBoundaries = null;
   let forecastData = null;
   let geojsonVp2040 = null;
   let centroidsVp2040 = {};
@@ -311,13 +312,13 @@
   // Leaflet Map Instances & Layers
   const maps = { overview: null, road: null, rail: null, iww: null, intermodal: null, maritime: null, forecast: null };
   const mapLayers = {
-    overview: { geojson: null, selection: null, spiderGroup: null, spiderLookup: {} },
-    road: { geojson: null, selection: null, spiderGroup: null, spiderLookup: {} },
-    rail: { geojson: null, selection: null, spiderGroup: null, spiderLookup: {} },
-    iww: { geojson: null, selection: null, spiderGroup: null, spiderLookup: {} },
-    intermodal: { geojson: null, selection: null, spiderGroup: null, spiderLookup: {} },
+    overview: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
+    road: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
+    rail: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
+    iww: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
+    intermodal: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
     maritime: { geojson: null, portsGroup: null, portsLookup: {} },
-    forecast: { geojson: null, selection: null, spiderGroup: null, spiderLookup: {} }
+    forecast: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} }
   };
 
   // Central highlight tracking
@@ -440,6 +441,33 @@
     return formatDeNum(val, decimals, decimals);
   }
 
+  // Verkehrsleistungen behalten in einer Ansicht die etablierte Einheit. Bei
+  // sehr kleinen positiven tkm-Werten wird nur so weit präzisiert, wie es
+  // lesbar bleibt; darunter steht ein begrenzter, aber nicht irreführend
+  // gerundeter Wert.
+  function formatTkmQuantity(val, standardDecimals = 1, fixedDecimals = false) {
+    if (val === null || val === undefined || isNaN(val)) return '--';
+    const numeric = Number(val);
+    const absolute = Math.abs(numeric);
+    if (absolute === 0) return formatDeNum(0, standardDecimals, fixedDecimals ? standardDecimals : 0);
+    if (absolute < 0.000001) {
+      return `${numeric < 0 ? '−' : ''}<${formatDeNum(0.000001, 6, 6)}`;
+    }
+    const decimals = absolute < 0.00001 ? 6
+      : absolute < 0.0001 ? 5
+      : absolute < 0.001 ? 4
+      : absolute < 0.01 ? 3
+      : absolute < 0.1 ? 2
+      : standardDecimals;
+    const finalDecimals = Math.max(standardDecimals, decimals);
+    return formatDeNum(numeric, finalDecimals, fixedDecimals ? finalDecimals : 0);
+  }
+
+  function formatTrafficValue(val, unit, standardDecimals = 1) {
+    return String(unit).includes('tkm')
+      ? formatTkmQuantity(val, standardDecimals)
+      : formatDeNum(val, standardDecimals);
+  }
   // Composition charts must calculate their share from the visible values of
   // the hovered year. This keeps the percentage consistent with all filters.
   function formatDynamicChartShare(context, unitText, suffix = '') {
@@ -449,7 +477,7 @@
       .filter(Number.isFinite);
     const total = valuesAtYear.reduce((sum, item) => sum + Math.abs(item), 0);
     const share = total > 0 ? formatDeNum(Math.abs(value) / total * 100, 1) : '0,0';
-    return ` ${context.dataset.label}: ${formatDeNum(value, 2)} ${unitText} (${share} %${suffix})`;
+    return ` ${context.dataset.label}: ${formatTrafficValue(value, unitText, 2)} ${unitText} (${share} %${suffix})`;
   }
 
   function getLatestConsolidatedOverviewYear(regYears, isTkm) {
@@ -998,13 +1026,14 @@
       });
 
     try {
-      const [regRes, centRes, choroRes, benRes, nstRes, geoRes] = await Promise.all([
+      const [regRes, centRes, choroRes, benRes, nstRes, geoRes, stateBoundaryRes] = await Promise.all([
         fetchSafe('data/processed/web_regions.json', {}),
         fetchSafe('data/processed/nuts_centroids_full.json', {}),
         fetchSafe('data/processed/web_choropleth.json', {}),
         fetchSafe('data/processed/national_benchmarks.json', {}),
         fetchSafe('data/processed/dim_nst2007.json', {}),
-        fetchSafe('data/processed/nuts3_de_2024.geojson', null)
+        fetchSafe('data/processed/nuts3_de_2024_display.geojson', null),
+        fetchSafe('data/processed/nuts1_de_boundaries.geojson', null)
       ]);
 
       regionsData = regRes;
@@ -1013,6 +1042,7 @@
       benchmarkData = benRes;
       nstData = nstRes;
       geojsonNuts3 = geoRes;
+      geojsonStateBoundaries = stateBoundaryRes;
 
       nationalSummaryData = Object.fromEntries(Object.entries(benchmarkData).map(([year, benchmark]) => {
         const modes = benchmark.modes || {};
@@ -1285,9 +1315,9 @@
     document.getElementById('selectYear')?.addEventListener('change', async e => {
       state.year = e.target.value;
       
-      let geojsonFile = 'data/processed/nuts3_de_2024.geojson';
-      if (parseInt(state.year) <= 2020) geojsonFile = 'data/processed/nuts3_de_2016.geojson';
-      else if (parseInt(state.year) <= 2023) geojsonFile = 'data/processed/nuts3_de_2021.geojson';
+      let geojsonFile = 'data/processed/nuts3_de_2024_display.geojson';
+      if (parseInt(state.year) <= 2020) geojsonFile = 'data/processed/nuts3_de_2016_display.geojson';
+      else if (parseInt(state.year) <= 2023) geojsonFile = 'data/processed/nuts3_de_2021_display.geojson';
 
       try {
         geojsonNuts3 = await fetch(geojsonFile).then(r => r.json());
@@ -1675,6 +1705,45 @@
   // ============================================================
   // LEAFLET MAPS INITIALIZATION (GERMAN BASEMAP & PROPER BOUNDS)
   // ============================================================
+  // Regional hover cards are deliberately delayed: this leaves a short moment
+  // to identify a Kreisfläche before its detailed card is shown.
+  const REGION_TOOLTIP_DELAY_MS = 400;
+  function delayRegionTooltip(layer) {
+    const tooltip = layer?.getTooltip?.();
+    if (!tooltip || layer._wbpRegionTooltipDelayBound) return;
+    layer._wbpRegionTooltipDelayBound = true;
+    const visibleOpacity = tooltip.options.opacity ?? 0.9;
+    let timer = null;
+    let latestEvent = null;
+    tooltip.setOpacity(0);
+    const cancel = () => {
+      if (timer) window.clearTimeout(timer);
+      timer = null;
+      tooltip.setOpacity(0);
+      layer.closeTooltip?.();
+    };
+    layer.on('mouseover', event => {
+      latestEvent = event;
+      if (timer) window.clearTimeout(timer);
+      tooltip.setOpacity(0);
+      timer = window.setTimeout(() => {
+        timer = null;
+        if (!latestEvent) return;
+        layer.openTooltip?.(latestEvent.latlng);
+        tooltip.setOpacity(visibleOpacity);
+      }, REGION_TOOLTIP_DELAY_MS);
+    });
+    layer.on('mousemove', event => { latestEvent = event; });
+    layer.on('mouseout', () => { latestEvent = null; cancel(); });
+  }
+
+  // Canvas draws neighbouring NUTS polygons in one rendering surface. This
+  // avoids the fine SVG anti-alias seams without changing their source geometry.
+  function getNutsRegionRenderer(map) {
+    if (!map) return null;
+    if (!map._wbpNutsRegionRenderer) map._wbpNutsRegionRenderer = L.canvas({ padding: 0.5 });
+    return map._wbpNutsRegionRenderer;
+  }
   function fitLeafletTooltipToMap(map, tooltip, inset = 8) {
     const tooltipEl = tooltip?.getElement?.();
     const mapEl = map?.getContainer?.();
@@ -1766,6 +1835,8 @@
       });
       map.createPane('connectionPane');
       map.getPane('connectionPane').style.zIndex = 450;
+      map.createPane('stateBoundaryPane');
+      map.getPane('stateBoundaryPane').style.zIndex = 440;
       map.createPane('selectionPane');
       map.getPane('selectionPane').style.zIndex = 460;
 
@@ -2136,6 +2207,7 @@
     updateMapLegend(mapKey, modeFilter, isBalance, maxVal);
 
     mapLayers[mapKey].geojson = L.geoJSON(geojsonNuts3, {
+      renderer: getNutsRegionRenderer(map),
       style: feature => {
         const nutsId = feature.properties.NUTS_ID;
         const isSelected = nutsId === state.region;
@@ -2172,7 +2244,7 @@
         const formatTooltipValue = value => {
           const sign = isBalance && value > 0 ? '+' : '';
           const status = isBalance ? `<br><span style="font-size:0.75rem; color:#64748b;">${value > 0 ? 'Netto-Versand' : (value < 0 ? 'Netto-Empfang' : 'Ausgeglichen')}</span>` : '';
-          return `<span style="white-space:normal; overflow-wrap:break-word;">${measureLabel}: <strong>${sign}${formatDeNum(value / divisor, 2)} ${unit}</strong></span>${status}`;
+          return `<span style="white-space:normal; overflow-wrap:break-word;">${measureLabel}: <strong>${sign}${formatTrafficValue(value / divisor, unit, 2)} ${unit}</strong></span>${status}`;
         };
         const displayVal = formatTooltipValue(val);
         const forecastInfo = getOverviewForecastTooltipInfo(nutsId);
@@ -2180,7 +2252,7 @@
           ? formatTooltipValue(forecastInfo.forecastValue)
           : `${measureLabel}: <strong style="color:#64748b;">nicht verfügbar</strong>`;
         const forecastBaselineDisplay = Number.isFinite(forecastInfo.baselineValue)
-          ? `• VP2040-Basisjahr 2019: <strong>${formatDeNum(forecastInfo.baselineValue / divisor, 2)} ${unit}</strong>`
+          ? `• VP2040-Basisjahr 2019: <strong>${formatTrafficValue(forecastInfo.baselineValue / divisor, unit, 2)} ${unit}</strong>`
           : '• VP2040-Basisjahr 2019: <strong style="color:#64748b;">nicht verfügbar</strong>';
         const growthDisplay = isBalance
           ? '<div style="font-size:0.72rem; color:#64748b; margin-top:3px;">Für Salden wird kein prozentualer Prognosevergleich ausgewiesen.</div>'
@@ -2208,6 +2280,7 @@
             <div class="map-tooltip-filter-hint" style="display:block; max-width:none; margin-top:7px; white-space:normal; overflow-wrap:anywhere; line-height:1.3;">Klicken Sie, um diese Region/diesen Kreis als Filter zu aktivieren.</div>
           </div>
         `, { sticky: true });
+        delayRegionTooltip(layer);
 
         if (isSelected && layer.bringToFront) {
           setTimeout(() => { if (layer.bringToFront) layer.bringToFront(); }, 0);
@@ -2219,6 +2292,8 @@
         });
       }
     }).addTo(map);
+
+    renderStateBoundaries(mapKey);
 
     if (state.region && mapLayers[mapKey].geojson) {
       mapLayers[mapKey].geojson.eachLayer(l => {
@@ -2233,6 +2308,25 @@
     drawSelectedRegionOutline(mapKey);
   }
 
+  function renderStateBoundaries(mapKey) {
+    const map = maps[mapKey];
+    const layerState = mapLayers[mapKey];
+    if (!map || !layerState) return;
+    if (layerState.stateBoundaries) map.removeLayer(layerState.stateBoundaries);
+    if (!geojsonStateBoundaries?.features?.length) return;
+    layerState.stateBoundaries = L.geoJSON(geojsonStateBoundaries, {
+      pane: 'stateBoundaryPane',
+      interactive: false,
+      style: {
+        color: '#475569',
+        weight: 1.15,
+        opacity: 0.64,
+        lineCap: 'round',
+        lineJoin: 'round',
+        fill: false
+      }
+    }).addTo(map);
+  }
   function drawSelectedRegionOutline(mapKey) {
     const map = maps[mapKey];
     if (!map || !geojsonNuts3) return;
@@ -2308,7 +2402,9 @@
     const t1Raw = t1Unit * divF;
     const t2Raw = t2Unit * divF;
 
-    const fmt = (v) => formatDeNum(v, (v % 1 !== 0) ? 1 : 0);
+    const fmt = (v) => isTkm
+      ? formatTkmQuantity(v, 1)
+      : formatDeNum(v, (v % 1 !== 0) ? 1 : 0);
 
     const labelThin = `< ${fmt(t1Unit)} ${uF}`;
     const labelMed = `${fmt(t1Unit)} – ${fmt(t2Unit)} ${uF}`;
@@ -2428,13 +2524,13 @@
     let labelsHtml = '';
     if (isBalance) {
       labelsHtml = `
-        <span title="Stärkste Klasse mit Empfangsüberschuss">≤ −${formatDeNum(maxVal * 0.8 / divisor, 1)} ${unit}</span>
-        <span title="Stärkste Klasse mit Versandüberschuss">≥ +${formatDeNum(maxVal * 0.8 / divisor, 1)} ${unit}</span>
+        <span title="Stärkste Klasse mit Empfangsüberschuss">≤ −${formatTrafficValue(maxVal * 0.8 / divisor, unit, 1)} ${unit}</span>
+        <span title="Stärkste Klasse mit Versandüberschuss">≥ +${formatTrafficValue(maxVal * 0.8 / divisor, unit, 1)} ${unit}</span>
       `;
     } else {
       labelsHtml = `
-        <span>&lt; ${formatDeNum(maxVal * 0.1 / divisor, 1)} ${unit}</span>
-        <span>&gt; ${formatDeNum(maxVal * 0.8 / divisor, 1)} ${unit}</span>
+        <span>&lt; ${formatTrafficValue(maxVal * 0.1 / divisor, unit, 1)} ${unit}</span>
+        <span>&gt; ${formatTrafficValue(maxVal * 0.8 / divisor, unit, 1)} ${unit}</span>
       `;
     }
 
@@ -3213,7 +3309,7 @@
       const partnerName = pMeta.name || partnerId;
       const isBalance = state.direction === 'balance';
       const displayValue = isTkm ? (r.tkm || 0) / 1e6 : (r.tonnes || 0) / 1e3;
-      const valStr = `${isBalance && displayValue > 0 ? '+' : ''}${formatQuantity(displayValue, 1)}`;
+      const valStr = `${isBalance && displayValue > 0 ? '+' : ''}${isTkm ? formatTkmQuantity(displayValue, 1, true) : formatQuantity(displayValue, 1)}`;
       const unitStr = isTkm ? 'Mio. tkm' : 'Tsd. t';
 
       let dirLabel = 'Güterverbindung (gesamt)';
@@ -3259,8 +3355,8 @@
       const balanceStatus = displayValue >= 0 ? 'Versandüberschuss' : 'Empfangsüberschuss';
       const balanceDetailHtml = isBalance ? `
         <div style="margin-top:4px; padding-top:4px; border-top:1px solid #f1f5f9;">
-          <div><strong>Versand:</strong> ${formatQuantity(outboundValue, 1)} ${unitStr}</div>
-          <div><strong>Empfang:</strong> ${formatQuantity(inboundValue, 1)} ${unitStr}</div>
+          <div><strong>Versand:</strong> ${isTkm ? formatTkmQuantity(outboundValue, 1, true) : formatQuantity(outboundValue, 1)} ${unitStr}</div>
+          <div><strong>Empfang:</strong> ${isTkm ? formatTkmQuantity(inboundValue, 1, true) : formatQuantity(inboundValue, 1)} ${unitStr}</div>
           <div style="font-weight:800; color:${displayValue >= 0 ? '#16a34a' : '#7c3aed'};"><strong>Saldo:</strong> ${valStr} ${unitStr} · ${balanceStatus}</div>
         </div>` : '';
 
@@ -3408,10 +3504,10 @@
       iwwValNum = getOverallValue(curr, 'iww');
     }
 
-    const totMetric = formatDeNum(totBase / divisor, 2);
-    const roadVal = formatDeNum(roadValNum / divisor, 2);
-    const railVal = formatDeNum(railValNum / divisor, 2);
-    const iwwVal = formatDeNum(iwwValNum / divisor, 2);
+    const totMetric = formatTrafficValue(totBase / divisor, metricLabel, 2);
+    const roadVal = formatTrafficValue(roadValNum / divisor, metricLabel, 2);
+    const railVal = formatTrafficValue(railValNum / divisor, metricLabel, 2);
+    const iwwVal = formatTrafficValue(iwwValNum / divisor, metricLabel, 2);
 
     const prevYearNum = parseInt(state.year, 10) - 1;
     const prevYearStr = String(prevYearNum);
@@ -3456,7 +3552,7 @@
     const roadUnavailable = state.year === '2025';
     const nationalGroupWithoutTransit = !state.region && state.selectedGroup && state.selectedGroup !== 'ALL';
     const directionSuffix = dir === 'balance' ? ' (Saldo)' : dir === 'outbound' ? ' (Versand)' : dir === 'inbound' ? ' (Empfang)' : '';
-    const formatKpiValue = value => `${dir === 'balance' && value > 0 ? '+' : ''}${formatDeNum(value / divisor, 2)} ${metricLabel}`;
+    const formatKpiValue = value => `${dir === 'balance' && value > 0 ? '+' : ''}${formatTrafficValue(value / divisor, metricLabel, 2)} ${metricLabel}`;
     const scopeSuffix = nationalGroupWithoutTransit ? ' ohne Transit' : '';
     setTxt('kpiTotalTitle', `${roadUnavailable ? 'Aufkommen ohne Straße' : 'Gesamtaufkommen'}${scopeSuffix}${directionSuffix}`);
     setTxt('kpiRoadTitle', `${roadUnavailable ? 'Straße (LKW) · NV' : 'Straße (LKW)'}${scopeSuffix}${directionSuffix}`);
@@ -4048,14 +4144,14 @@
       const partnerName = r.dest_name || r.origin_name || regionsData[partnerId]?.name || fullCentroids[partnerId]?.name || partnerId;
       const locationBadge = mapLocationBadge(partnerId);
       const rawValue = isTkm ? (r.tkm || 0) / 1e6 : (r.tonnes || 0) / 1e3;
-      const cleanValNum = `${state.direction === 'balance' && rawValue > 0 ? '+' : ''}${formatQuantity(rawValue, 1)}`;
+      const cleanValNum = `${state.direction === 'balance' && rawValue > 0 ? '+' : ''}${isTkm ? formatTkmQuantity(rawValue, 1, true) : formatQuantity(rawValue, 1)}`;
       
       const yoyVal = (r.yoy_pct !== null && r.yoy_pct !== undefined) ? r.yoy_pct : (isTkm ? r.yoy_pct_tkm : r.yoy_pct_tonnes);
       const trendVal = (r.trend_10yr_pct !== null && r.trend_10yr_pct !== undefined) ? r.trend_10yr_pct : (isTkm ? r.trend_10yr_pct_tkm : r.trend_10yr_pct_tonnes);
       const formatHistoricSaldo = value => {
         if (value === null || value === undefined) return '<span style="color:#94a3b8;" title="Kein historischer Saldo für dieses Jahr vorhanden.">--</span>';
         const historic = isTkm ? value / 1e6 : value / 1e3;
-        return `<span style="font-weight:700;">${historic > 0 ? '+' : ''}${formatQuantity(historic, 1)}</span>`;
+        return `<span style="font-weight:700;">${historic > 0 ? '+' : ''}${isTkm ? formatTkmQuantity(historic, 1, true) : formatQuantity(historic, 1)}</span>`;
       };
 
       const yoy = state.direction === 'balance'
@@ -4229,9 +4325,9 @@
               callbacks: {
                 title: () => `Bezugsjahr: ${state.year}`,
                 label: c => {
-                  if (!isBalance) return ` ${c.label}: ${formatDeNum(c.raw, 2)} ${unitText}`;
+                  if (!isBalance) return ` ${c.label}: ${formatTrafficValue(c.raw, unitText, 2)} ${unitText}`;
                   const signedValue = signedValues[c.dataIndex] || 0;
-                  return ` ${c.label}: ${signedValue > 0 ? '+' : ''}${formatDeNum(signedValue, 2)} ${unitText} (Betrag: ${formatDeNum(c.raw, 2)} ${unitText})`;
+                  return ` ${c.label}: ${signedValue > 0 ? '+' : ''}${formatTrafficValue(signedValue, unitText, 2)} ${unitText} (Betrag: ${formatTrafficValue(c.raw, unitText, 2)} ${unitText})`;
                 }
               }
             }
@@ -4327,7 +4423,7 @@
                   const yearTot = r + s + w;
                   const pct = yearTot > 0 ? formatDeNum((Math.abs(val) / yearTot) * 100, 1) : '0,0';
                   const modeName = c.dataset.label.replace(` (${unitText})`, '');
-                  return ` ${modeName}: ${formatDeNum(val, 2)} ${unitText} (${pct} %)`;
+                  return ` ${modeName}: ${formatTrafficValue(val, unitText, 2)} ${unitText} (${pct} %)`;
                 }
               } 
             }
@@ -4412,7 +4508,7 @@
                 label: c => {
                   const val = c.raw;
                   const pct = totalVal > 0 ? formatDeNum((Math.abs(val) / totalVal) * 100, 1) : '0,0';
-                  return `Ausgewähltes Jahr ${selectedYear}: ${formatDeNum(val, 2)} ${unitText} (${pct} %)`;
+                  return `Ausgewähltes Jahr ${selectedYear}: ${formatTrafficValue(val, unitText, 2)} ${unitText} (${pct} %)`;
                 }
               }
             }
@@ -4585,14 +4681,14 @@
             const locationBadge = mapLocationBadge(partnerId);
             const gName = (groupFilter && groupFilter !== 'ALL') ? (NST_GROUPS_7[groupFilter] || groupFilter) : ((r.group_7 && r.group_7 !== 'ALL') ? (NST_GROUPS_7[r.group_7] || `Gruppe ${r.group_7}`) : 'Alle Güterarten');
             const rawValue = isTkm ? (r.tkm || 0) / 1e6 : (r.tonnes || 0) / 1e3;
-            const cleanValNum = `${state.direction === 'balance' && rawValue > 0 ? '+' : ''}${formatQuantity(rawValue, 1)}`;
+            const cleanValNum = `${state.direction === 'balance' && rawValue > 0 ? '+' : ''}${isTkm ? formatTkmQuantity(rawValue, 1, true) : formatQuantity(rawValue, 1)}`;
             
             const yoyVal = (r.yoy_pct !== null && r.yoy_pct !== undefined) ? r.yoy_pct : null;
             const trendVal = (r.trend_10yr_pct !== null && r.trend_10yr_pct !== undefined) ? r.trend_10yr_pct : null;
             const formatHistoricSaldo = value => {
               if (value === null || value === undefined) return '<span style="color:#94a3b8;" title="Kein historischer Saldo für dieses Jahr vorhanden.">--</span>';
               const historic = isTkm ? value / 1e6 : value / 1e3;
-              return `<span style="font-weight:700;">${historic > 0 ? '+' : ''}${formatQuantity(historic, 1)}</span>`;
+              return `<span style="font-weight:700;">${historic > 0 ? '+' : ''}${isTkm ? formatTkmQuantity(historic, 1, true) : formatQuantity(historic, 1)}</span>`;
             };
 
             const yoy = state.direction === 'balance'
@@ -4823,7 +4919,7 @@
                 label: c => {
                   const val = c.raw;
                   const pct = totalVal > 0 ? formatDeNum((Math.abs(val) / totalVal) * 100, 1) : '0,0';
-                  return `Bezugsjahr ${state.year}: ${formatDeNum(val, 2)} ${unitText} (${pct} %)`;
+                  return `Bezugsjahr ${state.year}: ${formatTrafficValue(val, unitText, 2)} ${unitText} (${pct} %)`;
                 }
               }
             }

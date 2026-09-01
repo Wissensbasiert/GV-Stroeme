@@ -40,7 +40,7 @@
     const measurementLabel = isTkm ? 'Verkehrsleistung' : 'Beförderungsmenge';
     const divisor = isTkm ? 1e9 : 1e6;
     const value = record => Number(record?.[metric] || 0);
-    const formatMetric = record => `${state.direction === 'balance' && value(record) > 0 ? '+' : ''}${formatDeNum(value(record) / divisor, 1)} ${unit}`;
+    const formatMetric = record => `${state.direction === 'balance' && value(record) > 0 ? '+' : ''}${formatTrafficValue(value(record) / divisor, unit, 1)} ${unit}`;
     const share = (part, whole) => whole > 0 ? part / whole * 100 : 0;
     const setText = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
     const previous = intermodalData.data_by_year?.[String(activeYear - 1)];
@@ -259,6 +259,7 @@
     if (map && geojsonNuts3) {
       if (mapLayers.intermodal.geojson) map.removeLayer(mapLayers.intermodal.geojson);
       mapLayers.intermodal.geojson = L.geoJSON(geojsonNuts3, {
+        renderer: getNutsRegionRenderer(map),
         style: feature => {
           const id = feature.properties?.NUTS_ID;
           const selected = id === state.region;
@@ -285,12 +286,13 @@
             <div class="map-region-tooltip">
               <div class="map-tooltip-eyebrow">Kombinierter Verkehr · ${activeYear}${directionSuffix}</div>
               <div class="map-tooltip-title">${feature.properties?.NUTS_NAME || id} <span>(${id})</span></div>
-              <div class="map-tooltip-value"><span>Summe erfasster KV-Teilmärkte:</span> ${amount > 0 && direction === 'balance' ? '+' : ''}${formatDeNum(amount / divisor, 2)} ${unit}</div>
-              <div class="map-tooltip-context">Schiene: <strong>${railAmount > 0 && direction === 'balance' ? '+' : ''}${formatDeNum(railAmount / divisor, 2)} ${unit}</strong> · Binnenschiff: <strong>${iwwAmount > 0 && direction === 'balance' ? '+' : ''}${formatDeNum(iwwAmount / divisor, 2)} ${unit}</strong></div>
+              <div class="map-tooltip-value"><span>Summe erfasster KV-Teilmärkte:</span> ${amount > 0 && direction === 'balance' ? '+' : ''}${formatTrafficValue(amount / divisor, unit, 2)} ${unit}</div>
+              <div class="map-tooltip-context">Schiene: <strong>${railAmount > 0 && direction === 'balance' ? '+' : ''}${formatTrafficValue(railAmount / divisor, unit, 2)} ${unit}</strong> · Binnenschiff: <strong>${iwwAmount > 0 && direction === 'balance' ? '+' : ''}${formatTrafficValue(iwwAmount / divisor, unit, 2)} ${unit}</strong></div>
               <div class="map-tooltip-context">Intensitätsmaß; keine Zahl eindeutiger Sendungen.</div>
               <div class="map-tooltip-filter-hint">Klicken Sie, um diese Region/diesen Kreis als Filter zu aktivieren.</div>
             </div>`,
           { sticky: true, className: 'intermodal-region-leaflet-tooltip' });
+          delayRegionTooltip(layer);
           layer.on('click', () => setRegion(id));
         }
       }).addTo(map);
@@ -299,6 +301,7 @@
       });
     }
 
+    renderStateBoundaries('intermodal');
     closeRelationTooltip();
     const drawableTopRelations = topRelations.filter(relation =>
       hasUsableMapLocation(fullCentroids[relation.origin_id]) &&
@@ -348,12 +351,12 @@
           ? '<span class="popup-delta-neutral">--</span>'
           : `<span class="popup-delta ${amount >= 0 ? 'is-positive' : 'is-negative'}">${amount >= 0 ? '↗ +' : '↘ '}${formatDeNum(amount, 1)} %</span>`;
         const balanceDetails = direction === 'balance'
-          ? `<div><strong>Versand:</strong> ${formatQuantity((isTkm ? relation.outbound_tkm : relation.outbound_tonnes) / divisor, 1)} ${unit}</div><div><strong>Empfang:</strong> ${formatQuantity((isTkm ? relation.inbound_tkm : relation.inbound_tonnes) / divisor, 1)} ${unit}</div><div><strong>Saldo:</strong> ${relation.current >= 0 ? '+' : ''}${formatQuantity(relation.current / divisor, 1)} ${unit} · ${relation.current >= 0 ? 'Versandüberschuss' : 'Empfangsüberschuss'}</div>`
+          ? `<div><strong>Versand:</strong> ${isTkm ? formatTkmQuantity(relation.outbound_tkm / divisor, 1, true) : formatQuantity(relation.outbound_tonnes / divisor, 1)} ${unit}</div><div><strong>Empfang:</strong> ${isTkm ? formatTkmQuantity(relation.inbound_tkm / divisor, 1, true) : formatQuantity(relation.inbound_tonnes / divisor, 1)} ${unit}</div><div><strong>Saldo:</strong> ${relation.current >= 0 ? '+' : ''}${isTkm ? formatTkmQuantity(relation.current / divisor, 1, true) : formatQuantity(relation.current / divisor, 1)} ${unit} · ${relation.current >= 0 ? 'Versandüberschuss' : 'Empfangsüberschuss'}</div>`
           : '';
         const combinedPopup = isCombinedMarketLine && railRelation && iwwRelation
-          ? `<div class="intermodal-relation-popup"><div class="popup-eyebrow">${activeYear} · Schiene und Binnenschiff</div><strong>${routeLabel}</strong><div class="popup-market-amount rail"><span>Schiene</span><strong>${formatDeNum(railRelation.current / divisor, 3)} ${unit}</strong></div><div class="popup-market-amount iww"><span>Binnenschiff</span><strong>${formatDeNum(iwwRelation.current / divisor, 3)} ${unit}</strong></div><div class="popup-market-total"><span>Summe erfasster Teilmärkte</span><strong>${formatDeNum((railRelation.current + iwwRelation.current) / divisor, 3)} ${unit}</strong></div><div class="popup-deltas">Die Linienstärke zeigt die Menge des jeweiligen Teilmarkts.</div></div>`
+          ? `<div class="intermodal-relation-popup"><div class="popup-eyebrow">${activeYear} · Schiene und Binnenschiff</div><strong>${routeLabel}</strong><div class="popup-market-amount rail"><span>Schiene</span><strong>${formatTrafficValue(railRelation.current / divisor, unit, 3)} ${unit}</strong></div><div class="popup-market-amount iww"><span>Binnenschiff</span><strong>${formatTrafficValue(iwwRelation.current / divisor, unit, 3)} ${unit}</strong></div><div class="popup-market-total"><span>Summe erfasster Teilmärkte</span><strong>${formatTrafficValue((railRelation.current + iwwRelation.current) / divisor, unit, 3)} ${unit}</strong></div><div class="popup-deltas">Die Linienstärke zeigt die Menge des jeweiligen Teilmarkts.</div></div>`
           : '';
-        const popup = combinedPopup || `<div class="intermodal-relation-popup"><div class="popup-eyebrow">${activeYear} · ${market}</div><strong>${routeLabel}</strong><div>${direction === 'balance' ? 'Nettosaldo' : measurementLabel}: <strong>${relation.current >= 0 && direction === 'balance' ? '+' : ''}${formatQuantity(relation.current / divisor, 1)} ${unit}</strong></div>${balanceDetails || unitDetails}${direction === 'balance' ? '<div class="popup-deltas">Für Salden wird kein prozentualer Zeitvergleich ausgewiesen.</div>' : `<div class="popup-deltas">Vorjahr: ${delta(relation.yoy)} · ggü. ${years[0]}: ${delta(relation.trend)}</div>`}</div>`;
+        const popup = combinedPopup || `<div class="intermodal-relation-popup"><div class="popup-eyebrow">${activeYear} · ${market}</div><strong>${routeLabel}</strong><div>${direction === 'balance' ? 'Nettosaldo' : measurementLabel}: <strong>${relation.current >= 0 && direction === 'balance' ? '+' : ''}${isTkm ? formatTkmQuantity(relation.current / divisor, 1, true) : formatQuantity(relation.current / divisor, 1)} ${unit}</strong></div>${balanceDetails || unitDetails}${direction === 'balance' ? '<div class="popup-deltas">Für Salden wird kein prozentualer Zeitvergleich ausgewiesen.</div>' : `<div class="popup-deltas">Vorjahr: ${delta(relation.yoy)} · ggü. ${years[0]}: ${delta(relation.trend)}</div>`}</div>`;
         const tooltipOptions = { sticky: true, opacity: 0.98, className: 'intermodal-leaflet-tooltip' };
         line.bindTooltip(popup, tooltipOptions);
         marker.bindTooltip(popup, tooltipOptions);
@@ -396,7 +399,7 @@
             : '<span class="intermodal-mode-badge iww">Binnenschiff</span>'
           ).join('');
           row.setAttribute('data-partner-id', relation.partner_id);
-          row.innerHTML = `<td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${partnerName}</strong>${locationBadge}</td><td><span class="intermodal-mode-badges">${modeBadges}</span></td><td style="text-align:right;"><strong>${direction === 'balance' && relation.current > 0 ? '+' : ''}${formatQuantity(relation.current / divisor, 1)}</strong></td><td style="text-align:right;">${change(relation.yoy)}</td><td style="text-align:right;">${change(relation.trend)}</td>`;
+          row.innerHTML = `<td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${partnerName}</strong>${locationBadge}</td><td><span class="intermodal-mode-badges">${modeBadges}</span></td><td style="text-align:right;"><strong>${direction === 'balance' && relation.current > 0 ? '+' : ''}${isTkm ? formatTkmQuantity(relation.current / divisor, 1, true) : formatQuantity(relation.current / divisor, 1)}</strong></td><td style="text-align:right;">${change(relation.yoy)}</td><td style="text-align:right;">${change(relation.trend)}</td>`;
           row.addEventListener('mouseenter', () => setIntermodalPartnerHighlight(relation.partner_id));
           row.addEventListener('mouseleave', () => clearAllHighlights('intermodal'));
           tbody.appendChild(row);
@@ -502,8 +505,8 @@
       ? '<span style="background:#38bdf8;"></span><span style="background:#e0f2fe;"></span><span style="background:#f8fafc;"></span><span style="background:#dcfce7;"></span><span style="background:#22c55e;"></span>'
       : '<span style="background:#eff6ff;"></span><span style="background:#bfdbfe;"></span><span style="background:#60a5fa;"></span><span style="background:#2563eb;"></span><span style="background:#1e40af;"></span>';
     const scaleLabels = isBalance
-      ? `<span>≤ −${formatDeNum(maxValue * 0.8 / divisor, 1)} ${unit}</span><span>≥ +${formatDeNum(maxValue * 0.8 / divisor, 1)} ${unit}</span>`
-      : `<span>&lt; ${formatDeNum(maxValue * 0.1 / divisor, 1)} ${unit}</span><span>&gt; ${formatDeNum(maxValue * 0.8 / divisor, 1)} ${unit}</span>`;
+      ? `<span>≤ −${formatTrafficValue(maxValue * 0.8 / divisor, unit, 1)} ${unit}</span><span>≥ +${formatTrafficValue(maxValue * 0.8 / divisor, unit, 1)} ${unit}</span>`
+      : `<span>&lt; ${formatTrafficValue(maxValue * 0.1 / divisor, unit, 1)} ${unit}</span><span>&gt; ${formatTrafficValue(maxValue * 0.8 / divisor, unit, 1)} ${unit}</span>`;
     legend.innerHTML = `<div class="legend-header"><span class="legend-title">${legendTitle}</span><button type="button" class="btn-legend-toggle" title="${collapsed ? 'Legende maximieren' : 'Legende minimieren'}">${collapsed ? '+' : '−'}</button></div><div class="legend-body" ${collapsed ? 'style="display:none;"' : ''}><div class="legend-scale">${scaleHtml}</div><div class="legend-labels">${scaleLabels}</div>${relationInfo}<div class="intermodal-map-scope">${year} · Kartenfläche: ${mapMarketLabel}</div></div>`;
     legend.querySelector('.btn-legend-toggle')?.addEventListener('click', event => {
       event.preventDefault();

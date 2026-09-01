@@ -345,7 +345,7 @@
     // Further filter settings are intentionally kept out of the KPI titles.
     const scopeSuffix = nationalFilteredScope ? ' ohne Transit' : '';
     setTxt('kpiForecastTotalTitle', `Gesamtaufkommen${scopeSuffix}${directionSuffix}`);
-    const formatKpiValue = value => `${dir === 'balance' && value > 0 ? '+' : ''}${formatDeNum(value / divisor, 2)} ${unitLabel}`;
+    const formatKpiValue = value => `${dir === 'balance' && value > 0 ? '+' : ''}${formatTrafficValue(value / divisor, unitLabel, 2)} ${unitLabel}`;
     setTxt('kpiForecastTotalTonnes', formatKpiValue(totVal));
     
     let totGrowthVal, roadGrowthVal, railGrowthVal, iwwGrowthVal;
@@ -487,6 +487,7 @@
     };
 
     mapLayers.forecast.geojson = L.geoJSON(geojsonNuts3, {
+      renderer: getNutsRegionRenderer(map),
       style: (feature) => {
         const nutsId = feature.properties.NUTS_ID || feature.properties.id;
         const val = choroDict[nutsId] || 0;
@@ -524,9 +525,9 @@
         const balSign = details.balanceValue >= 0 ? '+' : '';
         const metricLabel = isTkm ? 'Verkehrsleistung' : 'Beförderungsmenge';
         const goodsScope = details.hasGroupFilter ? NST_GROUPS_7[state.selectedGroup] : 'alle Güter';
-        const directionHtml = `<div><strong>${metricLabel} (${goodsScope}):</strong> Versand ${formatDeNum(details.outboundValue / divisor, 2)} ${unitLabel} | Empfang ${formatDeNum(details.inboundValue / divisor, 2)} ${unitLabel} | Binnenverkehr ${formatDeNum(details.binnenValue / divisor, 2)} ${unitLabel}</div>
+        const directionHtml = `<div><strong>${metricLabel} (${goodsScope}):</strong> Versand ${formatTrafficValue(details.outboundValue / divisor, unitLabel, 2)} ${unitLabel} | Empfang ${formatTrafficValue(details.inboundValue / divisor, unitLabel, 2)} ${unitLabel} | Binnenverkehr ${formatTrafficValue(details.binnenValue / divisor, unitLabel, 2)} ${unitLabel}</div>
           <div class="forecast-total-definition"><strong>Gesamtaufkommen:</strong> Versand + Empfang + Binnenverkehr</div>
-          <div><strong>Netto-Saldo:</strong> ${balSign}${formatDeNum(details.balanceValue / divisor, 2)} ${unitLabel} (${balStatus}; Binnenverkehr nicht saldowirksam)</div>`;
+          <div><strong>Netto-Saldo:</strong> ${balSign}${formatTrafficValue(details.balanceValue / divisor, unitLabel, 2)} ${unitLabel} (${balStatus}; Binnenverkehr nicht saldowirksam)</div>`;
         const modalHtml = details.modalSplit
           ? `<div><strong>${state.direction === 'balance' ? 'Modalstruktur des Saldos (Beträge)' : 'Modal Split'}:</strong> Straße ${formatDeNum(details.modalSplit[0], 1)} % | Schiene ${formatDeNum(details.modalSplit[1], 1)} % | Binnenschiff ${formatDeNum(details.modalSplit[2], 1)} %</div>`
           : '';
@@ -548,7 +549,7 @@
           <div class="map-region-tooltip">
             <div class="map-tooltip-eyebrow">${getForecastScenarioLabel()} · ${dirText}</div>
             <div class="map-tooltip-title">${cName} <span>(${nutsId})</span></div>
-            <div class="map-tooltip-value">${isTkm ? 'Verkehrsleistung' : 'Beförderungsmenge'}: ${formatDeNum(val / divisor, 2)} ${unitLabel}</div>
+            <div class="map-tooltip-value">${isTkm ? 'Verkehrsleistung' : 'Beförderungsmenge'}: ${formatTrafficValue(val / divisor, unitLabel, 2)} ${unitLabel}</div>
             ${grpBadge}
             <div class="map-tooltip-context">
               ${directionHtml}
@@ -564,6 +565,7 @@
           offset: [0, -10],
           className: 'forecast-region-leaflet-tooltip'
         });
+        delayRegionTooltip(layer);
         layer.on('tooltipopen', () => {
           requestAnimationFrame(() => fitForecastRegionTooltip(map, layer));
         });
@@ -578,6 +580,8 @@
         });
       }
     }).addTo(map);
+
+    renderStateBoundaries('forecast');
 
     if (activeRegionId && mapLayers.forecast.geojson) {
       mapLayers.forecast.geojson.eachLayer(l => {
@@ -716,7 +720,7 @@
       mapLayers.forecast.spiderLookup[lookupKey] = { line, marker, originalColor: lineColor, originalWeight: weight };
 
       const displayVol = isTkm ? vol / 1e6 : vol / 1e3;
-      const formattedVol = `${state.direction === 'balance' && displayVol > 0 ? '+' : ''}${formatQuantity(displayVol, 1)}`;
+      const formattedVol = `${state.direction === 'balance' && displayVol > 0 ? '+' : ''}${isTkm ? formatTkmQuantity(displayVol, 1, true) : formatQuantity(displayVol, 1)}`;
       const pName = getForecastRelationCellName(lookupKey, rel);
       const oName = String(origId) === String(lookupKey) ? pName : getForecastRelationCellName(origId);
       const dName = String(destId) === String(lookupKey) ? pName : getForecastRelationCellName(destId);
@@ -739,8 +743,8 @@
       const outboundValue = isTkm ? (rel.outbound_tkm || 0) / 1e6 : (rel.outbound_tonnes || 0) / 1e3;
       const inboundValue = isTkm ? (rel.inbound_tkm || 0) / 1e6 : (rel.inbound_tonnes || 0) / 1e3;
       const balanceHtml = state.direction === 'balance' ? `
-        <div class="flow-tooltip-context"><strong>Versand:</strong> ${formatQuantity(outboundValue, 1)} ${unitLabel}<br>
-          <strong>Empfang:</strong> ${formatQuantity(inboundValue, 1)} ${unitLabel}<br>
+        <div class="flow-tooltip-context"><strong>Versand:</strong> ${isTkm ? formatTkmQuantity(outboundValue, 1, true) : formatQuantity(outboundValue, 1)} ${unitLabel}<br>
+          <strong>Empfang:</strong> ${isTkm ? formatTkmQuantity(inboundValue, 1, true) : formatQuantity(inboundValue, 1)} ${unitLabel}<br>
           <strong>Saldo:</strong> ${formattedVol} ${unitLabel} · ${displayVol >= 0 ? 'Versandüberschuss' : 'Empfangsüberschuss'}</div>` : '';
 
       const routeArrow = (state.direction === 'all' || state.direction === 'balance') ? '↔' : '→';
@@ -856,7 +860,7 @@
         : 'Alle Güter';
       
       const val = isTkm ? (r.tkm || 0) / 1e6 : (r.tonnes || 0) / 1e3;
-      const cleanValNum = `${state.direction === 'balance' && val > 0 ? '+' : ''}${formatQuantity(val, 1)}`;
+      const cleanValNum = `${state.direction === 'balance' && val > 0 ? '+' : ''}${isTkm ? formatTkmQuantity(val, 1, true) : formatQuantity(val, 1)}`;
 
       const binnenBadge = r.is_binnen ? '<span style="font-size:0.7rem; background:#e2e8f0; color:#475569; padding:1px 5px; border-radius:4px; margin-left:4px;">Binnen</span>' : '';
 
@@ -980,9 +984,9 @@
             callbacks: {
               title: () => timeDescriptor,
               label: c => {
-                if (!isBalance) return ` ${c.label}: ${formatDeNum(c.raw, 2)} ${unitText}`;
+                if (!isBalance) return ` ${c.label}: ${formatTrafficValue(c.raw, unitText, 2)} ${unitText}`;
                 const signedValue = signedModeValues[c.dataIndex] || 0;
-                return ` ${c.label}: ${signedValue > 0 ? '+' : ''}${formatDeNum(signedValue / divisor, 2)} ${unitText} (Betrag: ${formatDeNum(c.raw, 2)} ${unitText})`;
+                return ` ${c.label}: ${signedValue > 0 ? '+' : ''}${formatTrafficValue(signedValue / divisor, unitText, 2)} ${unitText} (Betrag: ${formatTrafficValue(c.raw, unitText, 2)} ${unitText})`;
               }
             }
           }
@@ -1066,7 +1070,7 @@
                 label: c => {
                   const val = c.raw;
                   const pct = totComm > 0 ? formatDeNum((val / totComm) * 100, 1) : '0,0';
-                  return ` ${c.label}: ${formatDeNum(val, 2)} ${unitText} (${pct} %)`;
+                  return ` ${c.label}: ${formatTrafficValue(val, unitText, 2)} ${unitText} (${pct} %)`;
                 }
               }
             }

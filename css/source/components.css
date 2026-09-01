@@ -370,12 +370,11 @@
 .leaflet-popup-pane {
   z-index: 1100 !important;
 }
-/* Leaflet controls live in their own high stacking context. While a hover card
-   is open, lower the control rails so neither legends nor zoom controls can
-   cover labels at the edge of the map. */
+/* Keep map controls above transient hover cards. They remain usable after
+   zooming even when the pointer happens to cross a NUTS region. */
 .leaflet-container.wbp-tooltip-open .leaflet-top,
 .leaflet-container.wbp-tooltip-open .leaflet-bottom {
-  z-index: 350;
+  z-index: 1200;
 }
 .choropleth-legend.collapsed {
   width: auto;
