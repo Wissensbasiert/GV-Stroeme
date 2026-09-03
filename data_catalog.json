@@ -1,6 +1,6 @@
 {
   "title": "Datenkatalog Güterverkehrsströme Deutschland",
-  "last_updated": "2026-08-21",
+  "last_updated": "2026-09-02",
   "sources": {
     "Destatis_IWW": {
       "name": "Binnenschifffahrtsstatistik (EVAS 46321)",
@@ -171,7 +171,7 @@
     "Toll_Collect_Maut": {
       "name": "Lkw-Maut-Portal: Start-Ziel-Relationen zwischen Gemeinden",
       "provider": "BALM / Toll Collect",
-      "time_range": "Monatlich; in Testabfragen Daten ab Juni 2025 nachgewiesen, genaue Verfügbarkeit produktiv prüfen",
+      "time_range": "Monatlich; verfügbare Monate werden beim Seitenaufruf als distinct API-Werte gelesen (am 2026-09-02: 2025-06 bis 2026-07)",
       "spatial_levels": [
         "Verwaltungsgebiete Gemeinden (LAU-Ebene 2)",
         "Start-Ziel-Relationen über Amtliche Gemeindeschlüssel (AGS)"
@@ -179,17 +179,18 @@
       "formats": [
         "Monatlicher CSV-Download (zuletzt verfügbarer Monat)",
         "GeoJSON (mautdaten_bund_monat_s/z)",
-        "ArcGIS FeatureServer API (gezielte Gemeindeabfragen)"
+        "ArcGIS FeatureServer API (gezielte Gemeindeabfragen)",
+        "Lokale BKG-VG250-GeoJSON-Dateien (einmalig aus amtlichen Gemeinde- und Staatsgrenzen erzeugt; ab Zoomstufe 7 bundeslandweise nach Kartenausschnitt geladen)"
       ],
       "metrics": [
-        "Anzahl der Befahrungen",
+        "Anzahl der Mautfahrten (API-Feld anzahl_befahrungen)",
         "Fahrleistung in km",
         "Distanzkennwerte",
         "Fahrzeitkennwerte"
       ],
-      "access_constraint": "Die API erfordert explizit entweder ags_start plus richtung oder ags_ziel plus richtung; bundesweite Komplettabfragen sind nicht zulässig.",
-      "status": "Noch nicht in das Dashboard integriert; als separates, gemeindebezogenes Live-Modul vorgemerkt.",
-      "description": "Mautfahrten auf dem mautpflichtigen Streckennetz, aggregiert zu Gemeinde-Start-Ziel-Relationen. Die Kennzahlen sind kein vollständiger Straßengüterverkehr und enthalten keine Gütermengen. Quelle: BALM, Toll Collect GmbH; für Gemeindegeodaten zusätzlich BKG gemäß Lizenzhinweis."
+      "access_constraint": "Relationsabfragen erfordern explizit entweder ags_start plus richtung oder ags_ziel plus richtung; eine Metadatenabfrage der distinct Monatswerte mit where=1=1 ist zulässig. Bundesweite Komplettabfragen der Relationsdaten sind nicht zulässig.",
+      "status": "Als separates, gemeindebezogenes Live-Modul lokal integriert; aktueller Portal-Endpunkt, CORS, Monatsliste und Beispielabfrage am 2026-09-02 geprüft; produktive Freigabe steht aus.",
+      "description": "Mautfahrten auf dem mautpflichtigen Streckennetz, aggregiert zu Gemeinde-Start-Ziel-Relationen. Die Kennzahlen sind kein vollständiger Straßengüterverkehr und enthalten keine Gütermengen. Quelle: BALM, Toll Collect GmbH; die lokalen Gemeinde- und Staatsgrenzen stammen aus BKG VG250 gemäß Lizenzhinweis."
     },
     "Geodaten_NUTS": {
       "name": "GISCO Eurostat NUTS Geometrien",

@@ -2,22 +2,34 @@
 
 Interaktives Fach-Dashboard von Wissensbasierte Planung zur Analyse räumlicher Güterverkehrsströme in Deutschland.
 
-## Repository-Inhalt
+## Orientierung
 
-Das Repository enthält die Browseranwendung, die Datenaufbereitung, Dokumentation sowie die für die lokale Darstellung benötigten verarbeiteten Webdaten. Umfangreiche Rohdaten, lokale Sicherungen und Arbeitsergebnisse sind bewusst nicht Bestandteil der Git-Historie.
-
-Die große Prognosedatei `data/processed/web_forecast_2040.json` wird über Git Large File Storage (Git LFS) verwaltet.
+- [`docs/README.md`](docs/README.md) ist das zentrale Inhaltsverzeichnis und ordnet Fachkonzept, Betrieb, Qualitätssicherung und Roadmaps ein.
+- [`scripts/README.md`](scripts/README.md) erklärt die aktiven Skripte und trennt sie von historischen Ständen.
+- [`AGENTS.md`](AGENTS.md) enthält die projektbezogene Lese- und Arbeitsreihenfolge für KI-Assistenten.
 
 ## Lokal ansehen
 
-Die Anwendung ist statisch. Sie muss wegen der geladenen Datendateien über einen lokalen Webserver geöffnet werden. Nach dem Start ist die Anwendung im Browser unter der vom Server genannten lokalen Adresse erreichbar.
+Die Anwendung ist statisch und muss wegen der geladenen Datendateien über einen lokalen Webserver geöffnet werden. Danach ist sie unter der vom Server genannten lokalen Adresse erreichbar.
 
-Die erzeugten Browserdateien werden aus den modularen Quellen aufgebaut:
+Die ausgelieferten Browserdateien werden aus den modularen Quellen erzeugt:
 
 ```powershell
-python scripts/build_frontend.py all
+python scripts/frontend/build_frontend.py all
 ```
 
-Weitere Hinweise stehen in `HANDBUCH_SYSTEMDOKUMENTATION.md`, `README_MAINTENANCE.md` und `ANLEITUNG_DATENAKTUALISIERUNG.md`.
+Direkte Änderungen an `index.html`, `css/style.css` oder `js/app.js` sind zu vermeiden; maßgeblich sind die Quellen unter `html/`, `css/source/` und `js/source/` beziehungsweise `js/modules/`.
 
-Das technische Grobkonzept für die geplante Portalintegration, den Analyseassistenten und die Basis-/Premiumlogik steht in [`ROADMAP_ANALYSEASSISTENT_PORTAL.md`](ROADMAP_ANALYSEASSISTENT_PORTAL.md).
+## Projektstruktur
+
+| Bereich | Inhalt |
+|---|---|
+| `docs/` | Fachliche und technische Dokumentation, Qualitätssicherung und Roadmaps |
+| `scripts/` | Datenaufbereitung, Frontend-Build, Prüfungen und Hilfsskripte |
+| `data/raw/` | amtliche und weitere Ausgangsdaten |
+| `data/processed/` | aufbereitete Daten für das Dashboard |
+| `html/`, `css/source/`, `js/source/`, `js/modules/` | bearbeitbare Frontend-Quellen |
+| `index.html`, `css/style.css`, `js/app.js` | generierte Browserdateien |
+| `data_catalog.json` | maschinenlesbarer Datenkatalog |
+
+Umfangreiche Rohdaten, lokale Sicherungen und Arbeitsergebnisse sind bewusst nicht Bestandteil der Git-Historie. Die große Prognosedatei `data/processed/web_forecast_2040.json` wird über Git Large File Storage (Git LFS) verwaltet.

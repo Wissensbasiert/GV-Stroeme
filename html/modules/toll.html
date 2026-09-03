@@ -1,0 +1,105 @@
+      <section id="tab-toll" class="tab-pane">
+        <div id="tollStatusBanner" class="toll-status-banner" role="status" hidden>
+          <span id="tollStatusText"></span>
+          <button type="button" id="btnOpenRoadModule" class="toll-status-link" hidden>Straßengüterverkehr öffnen</button>
+        </div>
+        <div class="module-layout-grid">
+          <div class="card map-card-tall">
+            <div class="card-header">
+              <div class="card-title">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M16.5 7.7a4.7 4.7 0 0 0-3.1-1.2c-2.8 0-4.8 2.2-4.8 5.5s2 5.5 4.8 5.5c1.2 0 2.3-.4 3.1-1.2M6.5 10.3h7M6.5 13.7h7"></path></svg>
+                <span id="tollMapTitle">Mautrelationen: Gemeinde auswählen</span>
+              </div>
+              <div class="card-actions">
+                <label class="map-connection-toggle">
+                  <input type="checkbox" id="toggleTollConnections" checked> Verbindungen anzeigen
+                </label>
+              </div>
+            </div>
+            <div class="map-container-leaflet map-container-tall">
+              <div id="tollLeafletMap" class="leaflet-map-frame"></div>
+              <div class="toll-map-empty" id="tollMapEmpty">
+                Gemeinde, Monat und Richtung auswählen
+              </div>
+              <div class="choropleth-legend" id="tollChoroplethLegend">
+                <div class="legend-header">
+                  <span class="legend-title" id="tollLegendTitle">Mautfahrten</span>
+                  <button type="button" class="btn-legend-toggle" id="btnToggleLegend_toll" title="Legende minimieren/maximieren">−</button>
+                </div>
+                <div class="legend-body" id="legendBody_toll">
+                  <div class="legend-scale toll-legend-scale">
+                    <span></span><span></span><span></span><span></span><span></span>
+                  </div>
+                  <div class="legend-labels" id="tollLegendLabels">
+                    <span>–</span><span>–</span>
+                  </div>
+                  <div class="legend-spider-section" id="tollLegendConnectionSection" style="display:none;">
+                    <div class="legend-subtitle" id="tollConnectionLegendTitle">Verbindungen</div>
+                    <div class="legend-spider-rows">
+                      <div class="legend-spider-item"><span class="legend-line legend-line-thin toll-line-sample"></span><span class="legend-spider-val" id="tollConnectionLegendThin">–</span></div>
+                      <div class="legend-spider-item"><span class="legend-line legend-line-med toll-line-sample"></span><span class="legend-spider-val" id="tollConnectionLegendMedium">–</span></div>
+                      <div class="legend-spider-item"><span class="legend-line legend-line-thick toll-line-sample"></span><span class="legend-spider-val" id="tollConnectionLegendThick">–</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="right-analytics-column">
+            <div class="card table-card-compact">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.7V17c0 .6-.4 1-1 1H7v2h10v-2h-2c-.6 0-1-.4-1-1v-2.3c2.8-.5 5-3 5-6V4H6v4.7c0 3 2.2 5.5 5 6Z"></path></svg>
+                  <span id="tollRelationsTitle">Top 10 Relationen: Gemeinde auswählen</span>
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Mautdaten: Relationen
+                      </div>
+                      Dargestellt sind monatliche Start-Ziel-Relationen von Mautfahrten auf dem mautpflichtigen Streckennetz. Eine Mautfahrt beginnt beim Eintritt in das mautpflichtige Netz und endet beim Austritt; sie ist nicht zwingend mit der gesamten Lkw-Fahrt identisch. Die Daten enthalten keine Gütermengen und bilden nicht den vollständigen Straßengüterverkehr ab. Im Grenzraum können die zugrunde liegenden Fahrten über Deutschland hinausführen; dargestellt werden jedoch nur die in der Datenquelle verfügbaren deutschen Gemeinde-Bezugspunkte. Bei „Beide Richtungen“ berechnet das Tool aus den getrennt vorliegenden Start- und Ziel-Relationen eine kombinierte Ansicht. Diese Auswahl ist hier verfügbar, wird aber nicht als fertige Kennzahl aus den Rohdaten übernommen. Mautfahrten und Fahrleistung werden addiert, mittlere Distanz und Fahrzeit mit der Zahl der Mautfahrten gewichtet.
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div class="data-table-wrapper table-wrapper-compact">
+                <table class="data-table toll-relations-table" id="tableTollRelations">
+                  <thead>
+                    <tr>
+                      <th>Partnergemeinde</th>
+                      <th class="numeric">Mautfahrten</th>
+                      <th class="numeric">Fahrleistung</th>
+                      <th class="numeric">Ø Distanz</th>
+                      <th class="numeric">Ø Fahrzeit</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableTollRelationsBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card chart-card-single">
+              <div class="card-header">
+                <div class="card-title">
+                  Anteil der Mautfahrten nach Distanzklasse
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Berechnung">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">Distanzklassen</div>
+                      Die Zuordnung erfolgt nach der mittleren Distanz der jeweiligen Gemeinde-Relation. Die Balken zeigen den Anteil der Mautfahrten im ausgewählten Monat und in der ausgewählten Richtung.
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div class="chart-canvas-wrap">
+                <canvas id="chartTollDistanceClasses"></canvas>
+                <div class="toll-chart-empty" id="tollChartEmpty" role="status">
+                  Daten werden nach Auswahl einer Gemeinde angezeigt.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>

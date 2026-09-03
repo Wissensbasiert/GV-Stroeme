@@ -926,6 +926,28 @@ body {
   background: #ffffff;
   transition: opacity 0.18s ease, padding 0.22s ease;
 }
+
+/* Flex declarations on the filter controls otherwise override the browser's
+   native [hidden] rule. Keep module-specific controls truly out of layout. */
+.analysis-panel-body .control-group[hidden] {
+  display: none;
+}
+
+/* The Toll module has fewer filters but a longer direction label. Give each
+   section a deliberate width so the control never touches the next divider. */
+.analysis-panel-body.is-toll-mode {
+  gap: 14px 20px;
+  max-width: 1260px;
+}
+.analysis-panel-body.is-toll-mode .analysis-filter-group-space { flex-basis: 350px; }
+.analysis-panel-body.is-toll-mode .analysis-filter-group-view { flex-basis: 350px; }
+.analysis-panel-body.is-toll-mode .analysis-filter-group-display { flex-basis: 280px; }
+.analysis-panel-body.is-toll-mode .analysis-filter-group-view .analysis-filter-group-controls {
+  gap: 8px;
+}
+.analysis-panel-body.is-toll-mode #controlGroupTollDirection .select-input {
+  width: 166px;
+}
 .analysis-panel.is-collapsed .analysis-panel-body {
   display: none;
 }

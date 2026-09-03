@@ -14,7 +14,7 @@
   <!-- Leaflet CSS for Real Geographic Vector Maps -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <!-- Custom App Styles -->
-  <link rel="stylesheet" href="css/style.css?v=20260831-ki-minimal-v27">
+  <link rel="stylesheet" href="css/style.css?v=20260903d">
   
   <!-- Leaflet JS & Chart.js -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -88,6 +88,15 @@
         </div>
       </div>
 
+      <div class="control-group" id="controlGroupTollMunicipality" hidden>
+        <label for="tollMunicipalitySearchInput" class="control-label">Gemeinde:</label>
+        <div class="search-combobox">
+          <input type="text" id="tollMunicipalitySearchInput" class="search-input" placeholder="Gemeinde suchen" autocomplete="off">
+          <button type="button" id="btnClearTollMunicipality" class="btn-clear-input" title="Gemeindeauswahl löschen">&times;</button>
+          <div class="autocomplete-dropdown" id="tollMunicipalityAutocompleteList"></div>
+        </div>
+      </div>
+
       <div class="control-group" id="controlGroupYear">
         <label for="selectYear" class="control-label">Jahr:</label>
         <select id="selectYear" class="select-input select-input-compact">
@@ -102,6 +111,11 @@
           <option value="2017">2017</option>
           <option value="2016">2016</option>
         </select>
+      </div>
+
+      <div class="control-group" id="controlGroupTollMonth" hidden>
+        <label for="selectTollMonth" class="control-label">Monat / Jahr:</label>
+        <select id="selectTollMonth" class="select-input select-input-compact" aria-label="Berichtsmonat auswählen"></select>
       </div>
 
       <!-- Forecast Scenario Control (Visible only when tab-forecast is active) -->
@@ -126,6 +140,16 @@
         </select>
       </div>
 
+      <div class="control-group" id="controlGroupTollMetric" hidden>
+        <label for="selectTollMetric" class="control-label">Kennzahl:</label>
+        <select id="selectTollMetric" class="select-input select-input-compact">
+          <option value="trips" selected>Mautfahrten</option>
+          <option value="mileage">Fahrleistung (km)</option>
+          <option value="distance">Mittlere Distanz (km)</option>
+          <option value="time">Mittlere Fahrzeit (Min.)</option>
+        </select>
+      </div>
+
       <div class="control-group" id="controlGroupDirection">
         <label for="selectDirection" class="control-label">Richtung:</label>
         <select id="selectDirection" class="select-input select-input-compact">
@@ -133,6 +157,15 @@
           <option value="outbound">Versand (Outbound)</option>
           <option value="inbound">Empfang (Inbound)</option>
           <option value="balance">Saldo (Versand − Empfang)</option>
+        </select>
+      </div>
+
+      <div class="control-group" id="controlGroupTollDirection" hidden>
+        <label for="selectTollDirection" class="control-label">Richtung:</label>
+        <select id="selectTollDirection" class="select-input select-input-compact">
+          <option value="outbound" selected>Von Gemeinde</option>
+          <option value="inbound">Zu Gemeinde</option>
+          <option value="both">Beide Richtungen</option>
         </select>
       </div>
 
@@ -194,6 +227,10 @@
           <!-- Semi-Truck / LKW SVG -->
           <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z"></path><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
           <span class="nav-label">Straßengüterverkehr</span>
+        </li>
+        <li class="nav-item" data-tab="tab-toll" title="Mautdaten">
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M16.5 7.7a4.7 4.7 0 0 0-3.1-1.2c-2.8 0-4.8 2.2-4.8 5.5s2 5.5 4.8 5.5c1.2 0 2.3-.4 3.1-1.2M6.5 10.3h7M6.5 13.7h7"></path></svg>
+          <span class="nav-label">Mautdaten</span>
         </li>
         <li class="nav-item" data-tab="tab-rail" title="Schienengüterverkehr">
           <!-- Freight Train SVG -->
@@ -545,6 +582,111 @@
       <!-- ============================================================
            TAB 3: SCHIENENGÜTERVERKEHR
            ============================================================ -->
+      <section id="tab-toll" class="tab-pane">
+        <div id="tollStatusBanner" class="toll-status-banner" role="status" hidden>
+          <span id="tollStatusText"></span>
+          <button type="button" id="btnOpenRoadModule" class="toll-status-link" hidden>Straßengüterverkehr öffnen</button>
+        </div>
+        <div class="module-layout-grid">
+          <div class="card map-card-tall">
+            <div class="card-header">
+              <div class="card-title">
+                <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M16.5 7.7a4.7 4.7 0 0 0-3.1-1.2c-2.8 0-4.8 2.2-4.8 5.5s2 5.5 4.8 5.5c1.2 0 2.3-.4 3.1-1.2M6.5 10.3h7M6.5 13.7h7"></path></svg>
+                <span id="tollMapTitle">Mautrelationen: Gemeinde auswählen</span>
+              </div>
+              <div class="card-actions">
+                <label class="map-connection-toggle">
+                  <input type="checkbox" id="toggleTollConnections" checked> Verbindungen anzeigen
+                </label>
+              </div>
+            </div>
+            <div class="map-container-leaflet map-container-tall">
+              <div id="tollLeafletMap" class="leaflet-map-frame"></div>
+              <div class="toll-map-empty" id="tollMapEmpty">
+                Gemeinde, Monat und Richtung auswählen
+              </div>
+              <div class="choropleth-legend" id="tollChoroplethLegend">
+                <div class="legend-header">
+                  <span class="legend-title" id="tollLegendTitle">Mautfahrten</span>
+                  <button type="button" class="btn-legend-toggle" id="btnToggleLegend_toll" title="Legende minimieren/maximieren">−</button>
+                </div>
+                <div class="legend-body" id="legendBody_toll">
+                  <div class="legend-scale toll-legend-scale">
+                    <span></span><span></span><span></span><span></span><span></span>
+                  </div>
+                  <div class="legend-labels" id="tollLegendLabels">
+                    <span>–</span><span>–</span>
+                  </div>
+                  <div class="legend-spider-section" id="tollLegendConnectionSection" style="display:none;">
+                    <div class="legend-subtitle" id="tollConnectionLegendTitle">Verbindungen</div>
+                    <div class="legend-spider-rows">
+                      <div class="legend-spider-item"><span class="legend-line legend-line-thin toll-line-sample"></span><span class="legend-spider-val" id="tollConnectionLegendThin">–</span></div>
+                      <div class="legend-spider-item"><span class="legend-line legend-line-med toll-line-sample"></span><span class="legend-spider-val" id="tollConnectionLegendMedium">–</span></div>
+                      <div class="legend-spider-item"><span class="legend-line legend-line-thick toll-line-sample"></span><span class="legend-spider-val" id="tollConnectionLegendThick">–</span></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="right-analytics-column">
+            <div class="card table-card-compact">
+              <div class="card-header">
+                <div class="card-title">
+                  <svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.7V17c0 .6-.4 1-1 1H7v2h10v-2h-2c-.6 0-1-.4-1-1v-2.3c2.8-.5 5-3 5-6V4H6v4.7c0 3 2.2 5.5 5 6Z"></path></svg>
+                  <span id="tollRelationsTitle">Top 10 Relationen: Gemeinde auswählen</span>
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Datenbasis">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">
+                        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#4f46e5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        Mautdaten: Relationen
+                      </div>
+                      Dargestellt sind monatliche Start-Ziel-Relationen von Mautfahrten auf dem mautpflichtigen Streckennetz. Eine Mautfahrt beginnt beim Eintritt in das mautpflichtige Netz und endet beim Austritt; sie ist nicht zwingend mit der gesamten Lkw-Fahrt identisch. Die Daten enthalten keine Gütermengen und bilden nicht den vollständigen Straßengüterverkehr ab. Im Grenzraum können die zugrunde liegenden Fahrten über Deutschland hinausführen; dargestellt werden jedoch nur die in der Datenquelle verfügbaren deutschen Gemeinde-Bezugspunkte. Bei „Beide Richtungen“ berechnet das Tool aus den getrennt vorliegenden Start- und Ziel-Relationen eine kombinierte Ansicht. Diese Auswahl ist hier verfügbar, wird aber nicht als fertige Kennzahl aus den Rohdaten übernommen. Mautfahrten und Fahrleistung werden addiert, mittlere Distanz und Fahrzeit mit der Zahl der Mautfahrten gewichtet.
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div class="data-table-wrapper table-wrapper-compact">
+                <table class="data-table toll-relations-table" id="tableTollRelations">
+                  <thead>
+                    <tr>
+                      <th>Partnergemeinde</th>
+                      <th class="numeric">Mautfahrten</th>
+                      <th class="numeric">Fahrleistung</th>
+                      <th class="numeric">Ø Distanz</th>
+                      <th class="numeric">Ø Fahrzeit</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tableTollRelationsBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card chart-card-single">
+              <div class="card-header">
+                <div class="card-title">
+                  Anteil der Mautfahrten nach Distanzklasse
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Berechnung">i</span>
+                    <span class="info-tooltip-box">
+                      <div class="info-tooltip-title">Distanzklassen</div>
+                      Die Zuordnung erfolgt nach der mittleren Distanz der jeweiligen Gemeinde-Relation. Die Balken zeigen den Anteil der Mautfahrten im ausgewählten Monat und in der ausgewählten Richtung.
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div class="chart-canvas-wrap">
+                <canvas id="chartTollDistanceClasses"></canvas>
+                <div class="toll-chart-empty" id="tollChartEmpty" role="status">
+                  Daten werden nach Auswahl einer Gemeinde angezeigt.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
       <section id="tab-rail" class="tab-pane">
         <div class="module-layout-grid">
           <!-- Left: Tall Map -->
@@ -1348,6 +1490,7 @@
         <ul>
           <li><strong>Übersicht:</strong> Vergleichen Sie den Status quo, die Entwicklung und die Verkehrsprognose für die drei landseitigen Verkehrsträger. Karten, Kennzahlen, Güterstrukturen, Modal Split und die wichtigsten Verbindungen bieten den ersten Überblick.</li>
           <li><strong>Verkehrsträger:</strong> Vertiefen Sie Straßengüterverkehr, Schiene und Binnenschifffahrt jeweils mit Karten, Kennzahlen, Güterstrukturen und Relationen.</li>
+          <li><strong>Mautdaten:</strong> Rufen Sie monatliche, gemeindebezogene Mautrelationen live aus dem Lkw-Maut-Portal ab und untersuchen Sie Befahrungen, Fahrleistung sowie Distanz- und Fahrzeitkennwerte.</li>
           <li><strong>Seeverkehr &amp; Häfen:</strong> Analysieren Sie den Seeverkehr und die wichtigsten deutschen Häfen mit Karten, Kennzahlen, Güterstrukturen und internationalen Partnerrelationen.</li>
           <li><strong>Intermodale Verkehre &amp; KV:</strong> Betrachten Sie die abgrenzbaren Teilmärkte auf Schiene und Binnenschiff getrennt nach ihren verfügbaren Merkmalen und Zeitreihen.</li>
           <li><strong>Verkehrsprognose 2040:</strong> Stellen Sie das Basisjahr 2019 der Basisprognose 2040 (P1) gegenüber und prüfen Sie prognostizierte Güterverkehrsverbindungen.</li>
@@ -1384,6 +1527,7 @@
         <p class="source-tool-intro">Die Anwendung führt amtliche und öffentlich bereitgestellte Ausgangsdaten für Analysezwecke zusammen. Für Definitionen, Aktualität und Nachnutzung gelten jeweils die Originalquellen und die dort genannten Nutzungsbedingungen.</p>
         <div class="source-list">
           <section class="source-item"><h4>Straßengüterverkehr</h4><p><strong>Kraftfahrt-Bundesamt (KBA):</strong> Güterverkehrsstatistik; regionale Verflechtungen und Güterstrukturen. <a href="https://www.govdata.de/dl-de/by-2-0" target="_blank" rel="noopener noreferrer">Datenlizenz Deutschland – Namensnennung – Version 2.0</a>; eigene Berechnung und Darstellung.</p></section>
+          <section class="source-item"><h4>Mautdaten</h4><p><strong>Bundesamt für Logistik und Mobilität / Toll Collect GmbH:</strong> monatliche Start-Ziel-Relationen aus dem Lkw-Maut-Portal, live und gemeindebezogen abgerufen. <a href="https://www.govdata.de/dl-de/by-2-0" target="_blank" rel="noopener noreferrer">Datenlizenz Deutschland – Namensnennung – Version 2.0</a>. Gemeindegeometrien: <a href="https://gdz.bkg.bund.de/index.php/default/open-data/wfs-verwaltungsgebiete-1-250-000-stand-01-01-wfs-vg250.html" target="_blank" rel="noopener noreferrer">WFS VG250</a>; Quellenvermerk <a href="https://www.bkg.bund.de" target="_blank" rel="noopener noreferrer">© BKG 2025</a> <a href="https://www.govdata.de/dl-de/by-2-0" target="_blank" rel="noopener noreferrer">dl-de/by-2-0</a>, <a href="https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_vg_nuts.pdf" target="_blank" rel="noopener noreferrer">Datenquellen</a>; eigene Auswertung und Darstellung.</p></section>
           <section class="source-item"><h4>Schiene, Binnenschifffahrt, Seeverkehr und intermodale Verkehre</h4><p><strong>Statistisches Bundesamt (Destatis):</strong> Güterverkehrsstatistiken für Schiene, Binnenschifffahrt und Seeverkehr; die abgrenzbaren intermodalen Teilmärkte werden aus den Daten der Schiene und Binnenschifffahrt getrennt ausgewertet und nicht zu einer Gesamtsumme addiert. <a href="https://www.destatis.de/DE/Service/Impressum/copyright-genesis-online.html" target="_blank" rel="noopener noreferrer">Datenlizenz Deutschland – Namensnennung – Version 2.0</a>; eigene Berechnung und Darstellung.</p></section>
           <section class="source-item"><h4>Verkehrsprognose 2040</h4><p><strong>Bundesministerium für Verkehr (BMV) (Hrsg.):</strong> Datensatz der „Verkehrsprognose 2040“, Teil 2: Wirtschafts- und Verkehrsentwicklungsprognose 2040, Forschungskennzeichen VB970423; Basisjahr 2019 und Prognosefall 1 „Basisprognose 2040“. Datenbereitstellung: Bundesanstalt für Straßen- und Verkehrswesen (BASt) über die Mobilithek. Die dargestellten Werte sind aus den überlassenen Datensätzen abgeleitete Auswertungsergebnisse. Quellenangabe gemäß den Nutzungsbedingungen des Datensatzes (Stand 12. Mai 2025); eigene Berechnung und Darstellung. <a href="https://bmdv.bund.de/SharedDocs/DE/Artikel/G/verkehrsprognose-2040.html" target="_blank" rel="noopener noreferrer">Dokumentation</a>.</p></section>
           <section class="source-item"><h4>Raumbezug</h4><p><strong>Eurostat:</strong> NUTS-Geodaten der Stände 2016, 2021 und 2024. <a href="https://commission.europa.eu/legal-notice_en#copyright-notice" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>; eigene Aufbereitung und Darstellung.</p></section>
@@ -1392,6 +1536,6 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=20260901-nst-taxonomy-v29"></script>
+  <script src="js/app.js?v=20260903d"></script>
 </body>
 </html>

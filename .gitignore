@@ -3,7 +3,14 @@ backups/
 outputs/
 
 # Umfangreiche, reproduzierbare Ausgangsdaten
-data/raw/
+# Quellenbeschreibungen dürfen versioniert werden; große Originaldateien bleiben ausgeschlossen.
+!data/raw/
+data/raw/*
+!data/raw/Luftverkehr/
+data/raw/Luftverkehr/*
+!data/raw/Luftverkehr/Flughafenstandorte/
+data/raw/Luftverkehr/Flughafenstandorte/*
+!data/raw/Luftverkehr/Flughafenstandorte/README_FLUGHAFENSTANDORTE.md
 
 # Python-Artefakte und lokale Entwicklungsumgebungen
 __pycache__/

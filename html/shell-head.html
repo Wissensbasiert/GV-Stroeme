@@ -14,7 +14,7 @@
   <!-- Leaflet CSS for Real Geographic Vector Maps -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <!-- Custom App Styles -->
-  <link rel="stylesheet" href="css/style.css?v=20260831-ki-minimal-v27">
+  <link rel="stylesheet" href="css/style.css?v=20260903d">
   
   <!-- Leaflet JS & Chart.js -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -88,6 +88,15 @@
         </div>
       </div>
 
+      <div class="control-group" id="controlGroupTollMunicipality" hidden>
+        <label for="tollMunicipalitySearchInput" class="control-label">Gemeinde:</label>
+        <div class="search-combobox">
+          <input type="text" id="tollMunicipalitySearchInput" class="search-input" placeholder="Gemeinde suchen" autocomplete="off">
+          <button type="button" id="btnClearTollMunicipality" class="btn-clear-input" title="Gemeindeauswahl löschen">&times;</button>
+          <div class="autocomplete-dropdown" id="tollMunicipalityAutocompleteList"></div>
+        </div>
+      </div>
+
       <div class="control-group" id="controlGroupYear">
         <label for="selectYear" class="control-label">Jahr:</label>
         <select id="selectYear" class="select-input select-input-compact">
@@ -102,6 +111,11 @@
           <option value="2017">2017</option>
           <option value="2016">2016</option>
         </select>
+      </div>
+
+      <div class="control-group" id="controlGroupTollMonth" hidden>
+        <label for="selectTollMonth" class="control-label">Monat / Jahr:</label>
+        <select id="selectTollMonth" class="select-input select-input-compact" aria-label="Berichtsmonat auswählen"></select>
       </div>
 
       <!-- Forecast Scenario Control (Visible only when tab-forecast is active) -->
@@ -126,6 +140,16 @@
         </select>
       </div>
 
+      <div class="control-group" id="controlGroupTollMetric" hidden>
+        <label for="selectTollMetric" class="control-label">Kennzahl:</label>
+        <select id="selectTollMetric" class="select-input select-input-compact">
+          <option value="trips" selected>Mautfahrten</option>
+          <option value="mileage">Fahrleistung (km)</option>
+          <option value="distance">Mittlere Distanz (km)</option>
+          <option value="time">Mittlere Fahrzeit (Min.)</option>
+        </select>
+      </div>
+
       <div class="control-group" id="controlGroupDirection">
         <label for="selectDirection" class="control-label">Richtung:</label>
         <select id="selectDirection" class="select-input select-input-compact">
@@ -133,6 +157,15 @@
           <option value="outbound">Versand (Outbound)</option>
           <option value="inbound">Empfang (Inbound)</option>
           <option value="balance">Saldo (Versand − Empfang)</option>
+        </select>
+      </div>
+
+      <div class="control-group" id="controlGroupTollDirection" hidden>
+        <label for="selectTollDirection" class="control-label">Richtung:</label>
+        <select id="selectTollDirection" class="select-input select-input-compact">
+          <option value="outbound" selected>Von Gemeinde</option>
+          <option value="inbound">Zu Gemeinde</option>
+          <option value="both">Beide Richtungen</option>
         </select>
       </div>
 
@@ -194,6 +227,10 @@
           <!-- Semi-Truck / LKW SVG -->
           <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z"></path><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
           <span class="nav-label">Straßengüterverkehr</span>
+        </li>
+        <li class="nav-item" data-tab="tab-toll" title="Mautdaten">
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M16.5 7.7a4.7 4.7 0 0 0-3.1-1.2c-2.8 0-4.8 2.2-4.8 5.5s2 5.5 4.8 5.5c1.2 0 2.3-.4 3.1-1.2M6.5 10.3h7M6.5 13.7h7"></path></svg>
+          <span class="nav-label">Mautdaten</span>
         </li>
         <li class="nav-item" data-tab="tab-rail" title="Schienengüterverkehr">
           <!-- Freight Train SVG -->

@@ -231,7 +231,12 @@
     forecastModalSplitMetric: 'tonnes',
     forecastChart2View: 'commodity',
     forecastCommodityLevel: '7',
-    showForecastSpider: true
+    showForecastSpider: true,
+    tollMunicipality: null,
+    tollMonth: null,
+    tollMetric: 'trips',
+    tollDirection: 'outbound',
+    showTollConnections: true
   };
 
   // Set Chart.js global typography, font sizes, and formatting
@@ -301,6 +306,8 @@
   let geojsonNuts3 = null;
   let geojsonStateBoundaries = null;
   let forecastData = null;
+  let tollMunicipalityData = null;
+  let tollViewportBounds = null;
   let geojsonVp2040 = null;
   let centroidsVp2040 = {};
   let crosswalkSpatialVp = [];
@@ -310,10 +317,11 @@
   const vpCellToNuts = {};
 
   // Leaflet Map Instances & Layers
-  const maps = { overview: null, road: null, rail: null, iww: null, intermodal: null, maritime: null, forecast: null };
+  const maps = { overview: null, road: null, toll: null, rail: null, iww: null, intermodal: null, maritime: null, forecast: null };
   const mapLayers = {
     overview: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
     road: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
+    toll: { geojson: null, stateBoundaries: null, countryOutline: null, selection: null, spiderGroup: null, spiderLookup: {} },
     rail: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
     iww: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
     intermodal: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
@@ -351,7 +359,13 @@
           mapViewportTimers[mapKey] = window.setTimeout(() => setWhenStable(attempt + 1), 50);
           return;
         }
-        if (mapKey === 'maritime') {
+        if (mapKey === 'toll' && tollViewportBounds?.isValid?.()) {
+          map.fitBounds(tollViewportBounds, {
+            padding: [18, 18],
+            animate: false,
+            maxZoom: 10
+          });
+        } else if (mapKey === 'maritime') {
           map.fitBounds(MARITIME_COAST_BOUNDS, {
             padding: [4, 4],
             animate: false
@@ -378,6 +392,7 @@
   let chartRailCommodity = null;
   let chartIwwCommodity = null;
   let chartMaritimeCommodity = null;
+  let chartTollDistanceClasses = null;
   let chartKvTimeseries = null;
   let chartKvRailUnits = null;
   let chartKvIwwUnits = null;
@@ -590,23 +605,32 @@
       if (element) element.textContent = value;
     };
     const isMaritime = state.activeTab === 'tab-maritime';
+    const isToll = state.activeTab === 'tab-toll';
     const isIntermodal = state.activeTab === 'tab-intermodal';
-    const region = isMaritime
+    const region = isToll
+      ? getTollMunicipalityLabel()
+      : isMaritime
       ? 'Hafenauswahl im Modul'
       : state.region
       ? (regionsData[state.region]?.name || document.getElementById('regionSearchInput')?.value || 'Ausgewählte Region')
       : 'Deutschland';
     const isForecast = state.activeTab === 'tab-forecast';
-    const period = isForecast ? selectedText('selectScenario') : selectedText('selectYear');
+    const period = isToll
+      ? selectedText('selectTollMonth')
+      : isForecast ? selectedText('selectScenario') : selectedText('selectYear');
     const selectedDirection = document.getElementById('selectDirection')?.value;
-    const direction = {
+    const direction = isToll
+      ? selectedText('selectTollDirection')
+      : ({
       all: 'Versand + Empfang',
       outbound: 'Versand',
       inbound: 'Empfang',
       balance: 'Saldo'
-    }[selectedDirection] || selectedText('selectDirection');
+    }[selectedDirection] || selectedText('selectDirection'));
     const selectedGoods = document.getElementById('selectGlobalGroup')?.value;
-    const goods = isIntermodal
+    const goods = isToll
+      ? 'Keine Güterarten'
+      : isIntermodal
       ? 'Güterfilter nicht anwendbar'
       : selectedGoods === 'ALL'
       ? 'Alle Güterarten'
@@ -618,12 +642,14 @@
 
     setText('summaryRegion', region);
     setText('summaryPeriod', period);
-    setText('summaryMetric', isMaritime
+    setText('summaryMetric', isToll
+      ? selectedText('selectTollMetric')
+      : isMaritime
       ? 'Tonnen'
       : document.getElementById('selectMetric')?.value === 'tkm' ? 'Tonnen-km' : 'Tonnen');
     setText('summaryDirection', direction);
     setText('summaryGoods', goods);
-    setText('summaryScope', `Top ${topX} · ${isMaritime ? 'Binnenverkehr nicht anwendbar' : binnen}`);
+    setText('summaryScope', `Top ${topX} · ${isToll ? (state.includeBinnen ? 'Binnenverkehr ein' : 'Binnenverkehr aus') : (isMaritime ? 'Binnenverkehr nicht anwendbar' : binnen)}`);
   }
 
   function setLegendCollapsedState(legend, collapsed) {
@@ -670,6 +696,7 @@
   // support their meaning. Values are retained in state for the other modules,
   // but cannot be changed while they would have no effect.
   function updateGlobalControlAvailability(tabId = state.activeTab) {
+    setTollFilterMode(tabId === 'tab-toll');
     const unavailableByTab = {
       'tab-maritime': new Set(['region', 'metric', 'binnen']),
       // Regionalauswahl, Richtung und Binnenverkehr steuern im KV-Modul Karte
@@ -827,7 +854,8 @@
     const available = {
       maritime: () => Boolean(maritimeData),
       intermodal: () => Boolean(intermodalData),
-      forecast: () => Boolean(forecastData)
+      forecast: () => Boolean(forecastData),
+      toll: () => Boolean(tollMunicipalityData)
     };
     if (available[moduleName]?.()) return true;
     if (deferredModuleLoads[moduleName]) return deferredModuleLoads[moduleName];
@@ -863,6 +891,10 @@
             vpCellToNuts[cid] = item.nuts3_2024 || item.nuts3_2016 || cid;
           });
         }
+      },
+      toll: async () => {
+        tollMunicipalityData = await fetchJson('data/processed/toll_municipalities.json?v=20260902a', null);
+        initializeTollModule();
       }
     };
 
@@ -895,6 +927,9 @@
       ['Binnenschifffahrt', formatDataYearRange(modeYears('iww'))],
       ['Seeverkehr und Seehäfen', formatDataYearRange(Object.keys(maritimeData?.national || maritimeData?.seaports || {}))],
       ['Intermodale Verkehre & KV', formatDataYearRange(intermodalData?.years || [])],
+      ['Mautdaten', tollMunicipalityData?.metadata?.source_month
+        ? `monatlicher Live-Abruf; Gemeindeauswahl Stand ${formatTollMonth(tollMunicipalityData.metadata.source_month)}`
+        : 'monatlicher Live-Abruf'],
       ['Verkehrsprognose VP 2040', 'Basisjahr 2019, Prognosehorizont 2040, Prognosefall 1 „Basisprognose 2040“']
     ];
     const list = document.getElementById('helpDataCoverageList');
@@ -902,7 +937,7 @@
   }
 
   async function refreshDataCoverage() {
-    await Promise.all([ensureModuleData('maritime'), ensureModuleData('intermodal')]);
+    await Promise.all([ensureModuleData('maritime'), ensureModuleData('intermodal'), ensureModuleData('toll')]);
     refreshDataCoverageText();
   }
 
@@ -1190,6 +1225,7 @@
   // Setup Global Event Listeners
   function setupEventListeners() {
     setupAnalysisPanel();
+    setupTollEventListeners();
     // Window Resize Handler for Leaflet & Dynamic Views
     let resizeTimer = null;
     window.addEventListener('resize', () => {
@@ -1246,7 +1282,8 @@
         const deferredModule = ({
           'tab-maritime': 'maritime',
           'tab-intermodal': 'intermodal',
-          'tab-forecast': 'forecast'
+          'tab-forecast': 'forecast',
+          'tab-toll': 'toll'
         })[tabId];
         if (deferredModule) {
           setModuleLoadingState(tabId, true);
@@ -1284,6 +1321,10 @@
           document.getElementById('controlGroupYear')?.style.setProperty('display', 'none');
           document.getElementById('controlGroupScenario')?.style.setProperty('display', 'flex');
           renderForecastTab();
+        } else if (tabId === 'tab-toll') {
+          document.getElementById('controlGroupScenario')?.style.setProperty('display', 'none');
+          document.getElementById('controlGroupYear')?.style.setProperty('display', 'none');
+          renderTollTab();
         } else {
           document.getElementById('controlGroupScenario')?.style.setProperty('display', 'none');
           document.getElementById('controlGroupYear')?.style.setProperty('display', 'flex');
@@ -1397,7 +1438,7 @@
     });
 
     // Map Legend Minimizing / Maximizing
-    ['overview', 'road', 'rail', 'iww', 'intermodal', 'maritime', 'forecast'].forEach(k => {
+    ['overview', 'road', 'toll', 'rail', 'iww', 'intermodal', 'maritime', 'forecast'].forEach(k => {
       const btn = document.getElementById(`btnToggleLegend_${k}`);
       const leg = document.getElementById(`${k}MapLegend`) || document.getElementById(`${k}ChoroplethLegend`);
       if (btn && leg) {
@@ -1810,6 +1851,7 @@
     const mapConfigs = [
       { key: 'overview', containerId: 'overviewLeafletMap' },
       { key: 'road', containerId: 'roadLeafletMap' },
+      { key: 'toll', containerId: 'tollLeafletMap' },
       { key: 'rail', containerId: 'railLeafletMap' },
       { key: 'iww', containerId: 'iwwLeafletMap' },
       { key: 'intermodal', containerId: 'intermodalLeafletMap' },
@@ -2684,13 +2726,13 @@
         item.line.setStyle({
           color: item.originalColor,
           weight: item.originalWeight,
-          opacity: 0.85
+          opacity: item.originalOpacity ?? 0.85
         });
       }
       if (item.marker) {
         item.marker.setStyle({
           fillColor: item.originalColor,
-          radius: Math.max(4, item.originalWeight + 1.5),
+          radius: item.originalRadius ?? Math.max(4, item.originalWeight + 1.5),
           weight: 2,
           color: '#ffffff'
         });
@@ -3408,6 +3450,7 @@
     updateTableHistoricalHeaders();
     const tabId = state.activeTab;
     if (tabId === 'tab-forecast') renderForecastTab();
+    else if (tabId === 'tab-toll') renderTollTab();
     else if (tabId === 'tab-intermodal') renderIntermodalTab();
     else if (tabId === 'tab-maritime') renderMaritimeTab();
     else if (tabId === 'tab-overview') renderOverviewTab();
