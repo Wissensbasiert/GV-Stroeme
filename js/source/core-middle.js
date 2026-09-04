@@ -287,8 +287,10 @@
           const previousAmount = hasPrevious ? comparisonAmount(activeYear - 1) : null;
           const baselineAmount = hasBaseline ? comparisonAmount(2016) : null;
           const formatHistoricValue = value => `${value > 0 && direction === 'balance' ? '+' : ''}${formatTrafficValue(value / divisor, unit, 2)} ${unit}`;
-          const comparisonDisplay = formatRegionHoverComparison(amount, previousAmount, previousYear, formatHistoricValue)
-            + formatRegionHoverComparison(amount, baselineAmount, '2016', formatHistoricValue);
+          const comparisonDisplay = activeYear === 2016
+            ? ''
+            : formatRegionHoverComparison(amount, previousAmount, previousYear, formatHistoricValue)
+              + formatRegionHoverComparison(amount, baselineAmount, '2016', formatHistoricValue);
           const directionSuffix = direction === 'balance' ? ' · Saldo'
             : direction === 'outbound' ? ' · Versand'
             : direction === 'inbound' ? ' · Empfang'

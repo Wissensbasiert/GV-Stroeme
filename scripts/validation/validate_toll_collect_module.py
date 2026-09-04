@@ -96,7 +96,7 @@ def main() -> None:
     )
     require(
         "toll-relation-leaflet-tooltip" in app
-        and "Monat und Jahr:" in app
+        and "Bezugsmonat:" in app
         and "Richtung:" in app
         and "toll-map-tooltip-route-arrow" in app
         and ".toll-map-tooltip-route-arrow" in styles

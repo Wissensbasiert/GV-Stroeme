@@ -521,8 +521,12 @@
           grpBadge = `<div class="map-tooltip-context">Güterart: ${NST_GROUPS_7[state.selectedGroup]}</div>`;
         }
 
-        const balStatus = details.balanceValue >= 0 ? 'Versandüberschuss' : 'Empfangsüberschuss';
-        const balSign = details.balanceValue >= 0 ? '+' : '';
+        const balStatus = details.balanceValue > 0
+          ? 'Versandüberschuss'
+          : details.balanceValue < 0
+            ? 'Empfangsüberschuss'
+            : 'Ausgeglichen';
+        const balSign = details.balanceValue > 0 ? '+' : '';
         const metricLabel = isTkm ? 'Verkehrsleistung' : 'Beförderungsmenge';
         const goodsScope = details.hasGroupFilter ? NST_GROUPS_7[state.selectedGroup] : 'alle Güter';
         const directionHtml = `<div><strong>${metricLabel} (${goodsScope}):</strong> Versand ${formatTrafficValue(details.outboundValue / divisor, unitLabel, 2)} ${unitLabel} | Empfang ${formatTrafficValue(details.inboundValue / divisor, unitLabel, 2)} ${unitLabel} | Binnenverkehr ${formatTrafficValue(details.binnenValue / divisor, unitLabel, 2)} ${unitLabel}</div>

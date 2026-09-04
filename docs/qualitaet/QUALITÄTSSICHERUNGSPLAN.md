@@ -1,7 +1,9 @@
 # Qualitätssicherungsplan für das Güterströme-Dashboard
 
-**Stand:** 01.09.2026  
-**Status:** Automatisierte, browserseitige und manuelle Korrekturregression bestanden; die unabhängige externe Zweitprüfung ist aus Datenschutzgründen noch nicht erfolgt  
+**Stand:** 04.09.2026
+
+**Status:** Automatisierte, browserseitige und manuelle Korrekturregression sowie unabhängige externe Zweitprüfung mit anschließender Nachprüfung bestanden
+
 **Zweck:** Dieser Plan dient zugleich als Arbeitsplan der aktuellen Gesamtprüfung und als verbindliche Vorlage für spätere Datenaktualisierungen.
 
 ## 1. Prüfziel und Freigabegrenze
@@ -453,3 +455,14 @@ Die Flächen-Hover der Module Straßengüterverkehr, Schienengüterverkehr, Binn
 Die zugrunde liegenden Webdaten enthalten für beide Kartenlogiken Jahreswerte von 2016 bis 2025. Ein fehlender Regionscode oder ein Vergleichswert von null wird nicht als Prozentänderung interpretiert, sondern mit `--` gekennzeichnet. Für Salden werden wegen der vorzeichenbehafteten Bezugsgröße keine Prozentänderungen ausgewiesen; analog zu See- und Luftfracht erscheinen stattdessen die historischen Salden des Vorjahres und von 2016.
 
 Der Frontend-Build, `node --check js/app.js` und `git diff --check` bestanden. Der lokale Browserlauf bei 1.600 × 950 Pixeln bestätigte die Vergleichszeilen für Straße, Schiene, Binnenschiff und Intermodal sowie die historischen Salden im Intermodalmodul. Für Cuxhaven 2024 stimmten die sichtbaren Veränderungen mit dem Webdatenpaket überein: Straße −5,0 Prozent zum Vorjahr und −23,6 Prozent gegenüber 2016, Schiene −15,4 beziehungsweise +79,9 Prozent und Binnenschiff +15,8 beziehungsweise −51,9 Prozent. Die Prüfung bei 390 × 844 Pixeln bestätigte eine vollständig innerhalb des Viewports liegende Hover-Karte ohne horizontalen Seitenüberlauf. Es traten keine JavaScript-Laufzeit- oder Datenladefehler auf.
+
+### 10.16 Nachprüfung der unabhängigen Zweitprüfung vom 04.09.2026
+
+Die ausschließlich lesende Antigravity-/Gemini-Zweitprüfung ergab einen veralteten Prüfstring und zwei geringfügige UI-Inkonsistenzen. Alle konkreten Hinweise wurden unabhängig am aktuellen Quellstand nachgeprüft:
+
+- Der Maut-Validator erwartet jetzt die bereits im Frontend verwendete Beschriftung „Bezugsmonat:“ statt „Monat und Jahr:“.
+- Bei Auswahl des Basisjahrs 2016 entfallen in den NUTS-3-Karten-Hovern der Straßen-, Schienen-, Binnenschiffs- und Intermodalansicht sowohl die nicht verfügbare Vorjahreszeile 2015 als auch der leere Vergleich zum Basisjahr selbst. Ab 2017 bleiben Vorjahres- und Basisjahrvergleich unverändert erhalten.
+- Der Prognose-Hover unterscheidet beim Netto-Saldo jetzt dreistufig zwischen Versandüberschuss, Empfangsüberschuss und „Ausgeglichen“. Ein exakter Nullsaldo erhält kein Pluszeichen.
+- Der Hinweis zum DuckDB-Makro `nst_c1c7` wurde als vorsorgliche Robustheitsidee bewertet und nicht umgesetzt. Die aktive Verarbeitung ist verbindlich auf dreistellige NST-Feincodes ausgelegt; dieses Eingabeformat wird durch `validate_nst_fine_codes.py` abgesichert.
+
+Der vollständige Frontend-Build, `node --check js/app.js`, gezielte Bundle-Prüfungen der drei Korrekturen sowie sämtliche aktiven Validatoren für Luftfracht, Seeverkehr, Hafenprofile, NST-Feincodes, Relationsabdeckung, Mautdaten und VP2040 bestanden. Der reale Browserlauf bei 1.600 × 950 Pixeln bestätigte für Straße und Intermodal im Jahr 2016 die Hovers ohne 2015- und Selbstvergleich sowie einen korrekt bezeichneten negativen Prognosesaldo. Es traten keine JavaScript-Laufzeitfehler und kein horizontaler Seitenüberlauf auf. Der bekannte optionale Abruf von `favicon.ico` blieb als nicht funktionsrelevanter 404-Hinweis bestehen. Der exakte Nullsaldo-Zweig wurde zusätzlich als Grenzwertprüfung der erzeugten dreistufigen Logik geprüft. Die JavaScript-Cache-Version wurde auf `20260904-antigravity-regression1` erhöht.

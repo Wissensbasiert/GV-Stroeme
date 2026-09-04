@@ -2411,8 +2411,10 @@
         const previousValue = previousRecord ? resolveChoroplethValue(nutsId, previousRecord, modeFilter, previousYear) : null;
         const baselineValue = baselineRecord ? resolveChoroplethValue(nutsId, baselineRecord, modeFilter, '2016') : null;
         const formatHistoricValue = value => `${value > 0 && isBalance ? '+' : ''}${formatTrafficValue(value / divisor, unit, 2)} ${unit}`;
-        const comparisonDisplay = formatRegionHoverComparison(val, previousValue, previousYear, formatHistoricValue)
-          + formatRegionHoverComparison(val, baselineValue, '2016', formatHistoricValue);
+        const comparisonDisplay = state.year === '2016'
+          ? ''
+          : formatRegionHoverComparison(val, previousValue, previousYear, formatHistoricValue)
+            + formatRegionHoverComparison(val, baselineValue, '2016', formatHistoricValue);
 
         let dirLabel = 'Aufkommen';
         if (state.direction === 'inbound') dirLabel = 'Empfang';
@@ -8224,8 +8226,10 @@
           const previousAmount = hasPrevious ? comparisonAmount(activeYear - 1) : null;
           const baselineAmount = hasBaseline ? comparisonAmount(2016) : null;
           const formatHistoricValue = value => `${value > 0 && direction === 'balance' ? '+' : ''}${formatTrafficValue(value / divisor, unit, 2)} ${unit}`;
-          const comparisonDisplay = formatRegionHoverComparison(amount, previousAmount, previousYear, formatHistoricValue)
-            + formatRegionHoverComparison(amount, baselineAmount, '2016', formatHistoricValue);
+          const comparisonDisplay = activeYear === 2016
+            ? ''
+            : formatRegionHoverComparison(amount, previousAmount, previousYear, formatHistoricValue)
+              + formatRegionHoverComparison(amount, baselineAmount, '2016', formatHistoricValue);
           const directionSuffix = direction === 'balance' ? ' · Saldo'
             : direction === 'outbound' ? ' · Versand'
             : direction === 'inbound' ? ' · Empfang'
@@ -8987,8 +8991,12 @@
           grpBadge = `<div class="map-tooltip-context">Güterart: ${NST_GROUPS_7[state.selectedGroup]}</div>`;
         }
 
-        const balStatus = details.balanceValue >= 0 ? 'Versandüberschuss' : 'Empfangsüberschuss';
-        const balSign = details.balanceValue >= 0 ? '+' : '';
+        const balStatus = details.balanceValue > 0
+          ? 'Versandüberschuss'
+          : details.balanceValue < 0
+            ? 'Empfangsüberschuss'
+            : 'Ausgeglichen';
+        const balSign = details.balanceValue > 0 ? '+' : '';
         const metricLabel = isTkm ? 'Verkehrsleistung' : 'Beförderungsmenge';
         const goodsScope = details.hasGroupFilter ? NST_GROUPS_7[state.selectedGroup] : 'alle Güter';
         const directionHtml = `<div><strong>${metricLabel} (${goodsScope}):</strong> Versand ${formatTrafficValue(details.outboundValue / divisor, unitLabel, 2)} ${unitLabel} | Empfang ${formatTrafficValue(details.inboundValue / divisor, unitLabel, 2)} ${unitLabel} | Binnenverkehr ${formatTrafficValue(details.binnenValue / divisor, unitLabel, 2)} ${unitLabel}</div>

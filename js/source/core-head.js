@@ -2411,8 +2411,10 @@
         const previousValue = previousRecord ? resolveChoroplethValue(nutsId, previousRecord, modeFilter, previousYear) : null;
         const baselineValue = baselineRecord ? resolveChoroplethValue(nutsId, baselineRecord, modeFilter, '2016') : null;
         const formatHistoricValue = value => `${value > 0 && isBalance ? '+' : ''}${formatTrafficValue(value / divisor, unit, 2)} ${unit}`;
-        const comparisonDisplay = formatRegionHoverComparison(val, previousValue, previousYear, formatHistoricValue)
-          + formatRegionHoverComparison(val, baselineValue, '2016', formatHistoricValue);
+        const comparisonDisplay = state.year === '2016'
+          ? ''
+          : formatRegionHoverComparison(val, previousValue, previousYear, formatHistoricValue)
+            + formatRegionHoverComparison(val, baselineValue, '2016', formatHistoricValue);
 
         let dirLabel = 'Aufkommen';
         if (state.direction === 'inbound') dirLabel = 'Empfang';
