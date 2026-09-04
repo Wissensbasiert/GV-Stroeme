@@ -60,6 +60,9 @@ Die vorhandenen Rohdaten decken alle vier Hauptverkehrsträger des Güterverkehr
 
 ---
 
+### 2.5 Luftfracht und Flughäfen
+
+Die Luftfracht wird als eigenes Knotenmodul geführt und nicht in den Modal Split der drei landseitigen Verkehrsträger einbezogen. AVIA_GOOC ist die Quelle der nationalen Randsumme, AVIA_GOOA die Quelle der Flughafenwerte und AVIA_GOR_DE die Quelle der veröffentlichten Top-Relationen. Die Relationssumme ist wegen Veröffentlichungsschwellen nicht vollständig. Für die sichtbaren Top-Relationen werden der aktuelle Wert, die direkt aus derselben Relationsquelle gelesenen Vergleichswerte des Vorjahres und des Basisjahres 2016 sowie der Anteil an der Summe aller für den gewählten Flughafen veröffentlichten positiven Verbindungen gespeichert; fehlende Vergleichswerte bleiben leer. Der Saldo wird im Frontend fachlich transparent als Versand minus Empfang berechnet, sowohl für nationale Werte und Flughäfen als auch für Relationseinträge. Salden werden nach ihrem Absolutbetrag geordnet und kartografisch skaliert; historische Salden werden als Werte ausgewiesen, weil prozentuale Veränderungen eines vorzeichenbehafteten Saldos nicht aussagekräftig sind. Neben Tonnen wird die Zahl reiner Fracht- und Postflüge dargestellt (`CAF_FRM`, `CAF_FRM_DEP`, `CAF_FRM_ARR`); Passagierflüge mit Beiladefracht sind darin nicht enthalten. Die Datenverfügbarkeit wird für nationale Werte, Flughafenwerte, belastbare Flughafen-Flugwerte und Relationen getrennt ausgewiesen. Die flughafenbezogenen Flugzahlen 2025 werden nicht ausgeliefert: Ihre Summe für deutsche Flughäfen beträgt 1.573.111 und widerspricht damit der nationalen Reihe von 116.671; die Tonnagewerte und die nationale Flugreihe 2025 bleiben erhalten.
 ## 3. Vergleich & Weiterentwicklung: Altes Tableau vs. Neues Dashboard
 
 ```mermaid

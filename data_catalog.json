@@ -1,6 +1,6 @@
 {
   "title": "Datenkatalog Güterverkehrsströme Deutschland",
-  "last_updated": "2026-09-02",
+  "last_updated": "2026-09-03",
   "sources": {
     "Destatis_IWW": {
       "name": "Binnenschifffahrtsstatistik (EVAS 46321)",
@@ -192,7 +192,33 @@
       "status": "Als separates, gemeindebezogenes Live-Modul lokal integriert; aktueller Portal-Endpunkt, CORS, Monatsliste und Beispielabfrage am 2026-09-02 geprüft; produktive Freigabe steht aus.",
       "description": "Mautfahrten auf dem mautpflichtigen Streckennetz, aggregiert zu Gemeinde-Start-Ziel-Relationen. Die Kennzahlen sind kein vollständiger Straßengüterverkehr und enthalten keine Gütermengen. Quelle: BALM, Toll Collect GmbH; die lokalen Gemeinde- und Staatsgrenzen stammen aus BKG VG250 gemäß Lizenzhinweis."
     },
-    "Geodaten_NUTS": {
+    "Eurostat_Luftfracht": {
+      "name": "Luftfracht und Flughäfen",
+      "provider": "Eurostat",
+      "time_range": "2016 - 2025; belastbare Flughafen-Flugzahlen und Relationen bis 2024",
+      "granularity_temporal": "Jährlich",
+      "tables": {
+        "AVIA_GOOC": "Nationale Werte",
+        "AVIA_GOOA": "Flughafenwerte",
+        "AVIA_GOR_DE": "Veröffentlichte Flughafenbeziehungen"
+      },
+      "spatial_levels": [
+        "Deutschland",
+        "Deutsche Flughäfen (ICAO)",
+        "Flughafenbeziehungen (ICAO)"
+      ],
+      "metrics": [
+        "Fracht und Post in Tonnen",
+        "Reine Fracht- und Postflüge"
+      ],
+      "coordinate_sources": [
+        "Eurostat/GISCO Airports 2024 (primär)",
+        "OurAirports 2026-09-03 (Ergänzung fehlender ICAO-Codes)"
+      ],
+      "encoding": "UTF-8 with BOM",
+      "delimiter": "Tabulator",
+      "description": "Nationale, flughafenbezogene und veröffentlichte relationale Luftfrachtdaten. Die Flugzahl schließt Passagierflüge mit Beiladefracht aus. Flughafenbezogene Flugzahlen 2025 werden wegen des Widerspruchs zwischen der Summe deutscher Flughäfen (1.573.111) und dem nationalen Wert (116.671) nicht ausgeliefert; Tonnage und nationale Flugreihe bleiben erhalten. Relationsdaten sind wegen Veröffentlichungsschwellen unvollständig und werden nicht als Randsumme verwendet."
+    },    "Geodaten_NUTS": {
       "name": "GISCO Eurostat NUTS Geometrien",
       "provider": "Eurostat / GISCO",
       "versions": [

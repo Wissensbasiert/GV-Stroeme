@@ -207,6 +207,9 @@
     direction: 'all', // 'all', 'outbound', 'inbound', 'balance'
     selectedGroup: 'ALL', // 'ALL' or '1'..'7' (NST-2007 main groups)
     selectedPort: null, // Selected Seaport UNLOCODE (e.g. 'DEHAM') or null for all
+    selectedAirport: null, // Selected airport ICAO code or null for all
+    airfreightMetric: 'tonnes', // 'tonnes' or 'flights'
+    airfreightChartView: 'snapshot', // 'snapshot' or 'trend'
     topX: 10,
     includeBinnen: true, // Toggle for intra-regional self traffic
     modalSplitView: 'snapshot', // 'snapshot' or 'trend'
@@ -303,6 +306,8 @@
   let benchmarkData = {};
   let nstData = {};
   let maritimeData = null;
+  let airfreightData = null;
+  let airfreightViewportBounds = null;
   let geojsonNuts3 = null;
   let geojsonStateBoundaries = null;
   let forecastData = null;
@@ -317,7 +322,7 @@
   const vpCellToNuts = {};
 
   // Leaflet Map Instances & Layers
-  const maps = { overview: null, road: null, toll: null, rail: null, iww: null, intermodal: null, maritime: null, forecast: null };
+  const maps = { overview: null, road: null, toll: null, rail: null, iww: null, intermodal: null, maritime: null, airfreight: null, forecast: null };
   const mapLayers = {
     overview: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
     road: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
@@ -326,6 +331,7 @@
     iww: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
     intermodal: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
     maritime: { geojson: null, portsGroup: null, portsLookup: {} },
+    airfreight: { airportsGroup: null, airportsLookup: {} },
     forecast: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} }
   };
 
@@ -364,6 +370,12 @@
             padding: [18, 18],
             animate: false,
             maxZoom: 10
+          });
+        } else if (mapKey === 'airfreight' && airfreightViewportBounds?.isValid?.()) {
+          map.fitBounds(airfreightViewportBounds, {
+            padding: [18, 18],
+            animate: false,
+            maxZoom: 7
           });
         } else if (mapKey === 'maritime') {
           map.fitBounds(MARITIME_COAST_BOUNDS, {
@@ -605,12 +617,15 @@
       if (element) element.textContent = value;
     };
     const isMaritime = state.activeTab === 'tab-maritime';
+    const isAirfreight = state.activeTab === 'tab-airfreight';
     const isToll = state.activeTab === 'tab-toll';
     const isIntermodal = state.activeTab === 'tab-intermodal';
     const region = isToll
       ? getTollMunicipalityLabel()
       : isMaritime
-      ? 'Hafenauswahl im Modul'
+      ? (state.selectedPort ? (maritimeData?.seaports?.[state.year]?.[state.selectedPort]?.name || state.selectedPort) : 'Alle Häfen')
+      : isAirfreight
+      ? (state.selectedAirport ? (airfreightData?.airports?.[state.selectedAirport]?.name || state.selectedAirport) : 'Alle Flughäfen')
       : state.region
       ? (regionsData[state.region]?.name || document.getElementById('regionSearchInput')?.value || 'Ausgewählte Region')
       : 'Deutschland';
@@ -630,7 +645,7 @@
     const selectedGoods = document.getElementById('selectGlobalGroup')?.value;
     const goods = isToll
       ? 'Keine Güterarten'
-      : isIntermodal
+      : (isIntermodal || isAirfreight)
       ? 'Güterfilter nicht anwendbar'
       : selectedGoods === 'ALL'
       ? 'Alle Güterarten'
@@ -646,10 +661,15 @@
       ? selectedText('selectTollMetric')
       : isMaritime
       ? 'Tonnen'
+      : isAirfreight
+      ? (state.airfreightMetric === 'flights' ? 'Reine Fracht- und Postflüge' : 'Tonnen')
       : document.getElementById('selectMetric')?.value === 'tkm' ? 'Tonnen-km' : 'Tonnen');
     setText('summaryDirection', direction);
     setText('summaryGoods', goods);
-    setText('summaryScope', `Top ${topX} · ${isToll ? (state.includeBinnen ? 'Binnenverkehr ein' : 'Binnenverkehr aus') : (isMaritime ? 'Binnenverkehr nicht anwendbar' : binnen)}`);
+    const scope = (isMaritime || isAirfreight)
+      ? `Top ${topX}`
+      : `Top ${topX} · ${isToll ? (state.includeBinnen ? 'Binnenverkehr ein' : 'Binnenverkehr aus') : binnen}`;
+    setText('summaryScope', scope);
   }
 
   function setLegendCollapsedState(legend, collapsed) {
@@ -687,7 +707,7 @@
     });
     panel.classList.add('is-collapsed');
     document.getElementById('analysisPanelBody')?.setAttribute('hidden', '');
-    ['selectYear', 'selectScenario', 'selectMetric', 'selectDirection', 'selectGlobalGroup', 'selectTopX', 'selectBinnenverkehr']
+    ['selectYear', 'selectScenario', 'selectMetric', 'selectDirection', 'selectGlobalGroup', 'selectTopX', 'selectBinnenverkehr', 'selectMaritimePort', 'selectAirfreightAirport', 'selectAirfreightMetric']
       .forEach(id => document.getElementById(id)?.addEventListener('change', updateAnalysisSummary));
     updateAnalysisSummary();
   }
@@ -696,9 +716,15 @@
   // support their meaning. Values are retained in state for the other modules,
   // but cannot be changed while they would have no effect.
   function updateGlobalControlAvailability(tabId = state.activeTab) {
-    setTollFilterMode(tabId === 'tab-toll');
+    const isToll = tabId === 'tab-toll';
+    const isAirfreight = tabId === 'tab-airfreight';
+    const isMaritime = tabId === 'tab-maritime';
+    setTollFilterMode(isToll);
+    setAirfreightFilterMode(isAirfreight, isToll, isMaritime);
+    setMaritimePortFilterMode(isMaritime);
     const unavailableByTab = {
       'tab-maritime': new Set(['region', 'metric', 'binnen']),
+      'tab-airfreight': new Set(['region', 'metric', 'goods', 'binnen']),
       // Regionalauswahl, Richtung und Binnenverkehr steuern im KV-Modul Karte
       // und Relationentabelle. NST-Güterarten sind in dieser Datenquelle nicht
       // ausgewiesen und bleiben deshalb bewusst deaktiviert.
@@ -735,11 +761,18 @@
       document.getElementById('regionAutocompleteList')?.classList.remove('active');
     }
 
+    const directionSelect = document.getElementById('selectDirection');
+    const balanceOption = directionSelect?.querySelector('option[value="balance"]');
+    if (balanceOption) {
+      balanceOption.disabled = false;
+      balanceOption.title = '';
+    }
+
     // Straßendaten liegen derzeit nur bis 2024 vor. Ein auswählbares Jahr
     // 2025 würde eine leere Karte wie einen echten Nullwert erscheinen lassen.
     const yearSelect = document.getElementById('selectYear');
     const road2025Option = yearSelect?.querySelector('option[value="2025"]');
-    const road2025Unavailable = tabId === 'tab-road';
+    const road2025Unavailable = tabId === 'tab-road' && (getLatestAvailableModeYear('road') || 0) < 2025;
     if (road2025Option) {
       road2025Option.disabled = road2025Unavailable;
       road2025Option.title = road2025Unavailable
@@ -853,6 +886,7 @@
   async function ensureModuleData(moduleName) {
     const available = {
       maritime: () => Boolean(maritimeData),
+      airfreight: () => Boolean(airfreightData),
       intermodal: () => Boolean(intermodalData),
       forecast: () => Boolean(forecastData),
       toll: () => Boolean(tollMunicipalityData)
@@ -862,6 +896,7 @@
 
     const loaders = {
       maritime: async () => { maritimeData = await fetchJson('data/processed/web_maritime.json?v=20260821n', {}); },
+      airfreight: async () => { airfreightData = await fetchJson('data/processed/web_airfreight.json?v=20260904-airfreight-dataquality1', {}); },
       // This file is regenerated by the data pipeline.  The explicit revision
       // clears copies from older application sessions; no-store also protects
       // later data refreshes when the frontend bundle itself is unchanged.
@@ -926,6 +961,7 @@
       ['Schienengüterverkehr', formatDataYearRange(modeYears('rail'))],
       ['Binnenschifffahrt', formatDataYearRange(modeYears('iww'))],
       ['Seeverkehr und Seehäfen', formatDataYearRange(Object.keys(maritimeData?.national || maritimeData?.seaports || {}))],
+      ['Luftfracht und Flughäfen', 'Deutschland ' + formatDataYearRange(airfreightData?.metadata?.availableNationalYears || []) + '; Flughäfen ' + formatDataYearRange(airfreightData?.metadata?.availableAirportYears || []) + '; Relationen ' + formatDataYearRange(airfreightData?.metadata?.availableRelationYears || [])],
       ['Intermodale Verkehre & KV', formatDataYearRange(intermodalData?.years || [])],
       ['Mautdaten', tollMunicipalityData?.metadata?.source_month
         ? `monatlicher Live-Abruf; Gemeindeauswahl Stand ${formatTollMonth(tollMunicipalityData.metadata.source_month)}`
@@ -937,7 +973,7 @@
   }
 
   async function refreshDataCoverage() {
-    await Promise.all([ensureModuleData('maritime'), ensureModuleData('intermodal'), ensureModuleData('toll')]);
+    await Promise.all([ensureModuleData('maritime'), ensureModuleData('airfreight'), ensureModuleData('intermodal'), ensureModuleData('toll')]);
     refreshDataCoverageText();
   }
 
@@ -1222,10 +1258,85 @@
     });
   }
 
+  function setupMobileModuleSwitcher() {
+    const button = document.getElementById('btnMobileModule');
+    const menu = document.getElementById('mobileModuleMenu');
+    const desktopItems = [...document.querySelectorAll('#mainNav > li')];
+    if (!button || !menu || !desktopItems.length) return;
+
+    desktopItems.forEach(item => {
+      if (item.classList.contains('nav-group-label')) {
+        const label = document.createElement('div');
+        label.className = 'mobile-module-group';
+        label.textContent = item.textContent.trim();
+        menu.appendChild(label);
+        return;
+      }
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.className = 'mobile-module-option';
+      option.dataset.tab = item.dataset.tab;
+      option.style.setProperty('--module-accent', item.style.getPropertyValue('--module-accent'));
+      option.innerHTML = `${item.querySelector('.nav-svg')?.outerHTML || ''}<span>${item.querySelector('.nav-label')?.textContent || item.title}</span><span class="mobile-module-check" aria-hidden="true">✓</span>`;
+      option.addEventListener('click', () => {
+        item.click();
+        menu.hidden = true;
+        button.setAttribute('aria-expanded', 'false');
+        button.focus();
+      });
+      menu.appendChild(option);
+    });
+
+    const sync = () => {
+      const active = document.querySelector('#mainNav .nav-item.active');
+      if (!active) return;
+      button.style.setProperty('--module-accent', active.style.getPropertyValue('--module-accent'));
+      const icon = button.querySelector('.mobile-module-icon');
+      if (icon) icon.innerHTML = active.querySelector('.nav-svg')?.outerHTML || '';
+      const label = button.querySelector('.mobile-module-label');
+      if (label) label.textContent = active.querySelector('.nav-label')?.textContent || active.title;
+      menu.querySelectorAll('.mobile-module-option').forEach(option => {
+        const current = option.dataset.tab === active.dataset.tab;
+        option.classList.toggle('active', current);
+        option.setAttribute('aria-current', current ? 'page' : 'false');
+      });
+    };
+    window.syncMobileModuleSwitcher = sync;
+
+    button.addEventListener('click', event => {
+      event.stopPropagation();
+      menu.hidden = !menu.hidden;
+      button.setAttribute('aria-expanded', String(!menu.hidden));
+      if (!menu.hidden) menu.querySelector('.mobile-module-option.active')?.focus();
+    });
+    menu.addEventListener('keydown', event => {
+      const options = [...menu.querySelectorAll('.mobile-module-option')];
+      const index = options.indexOf(document.activeElement);
+      if (event.key === 'Escape') {
+        menu.hidden = true;
+        button.setAttribute('aria-expanded', 'false');
+        button.focus();
+      } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const step = event.key === 'ArrowDown' ? 1 : -1;
+        options[(index + step + options.length) % options.length]?.focus();
+      }
+    });
+    document.addEventListener('click', event => {
+      if (!event.target.closest('#mobileModuleSwitcher')) {
+        menu.hidden = true;
+        button.setAttribute('aria-expanded', 'false');
+      }
+    });
+    sync();
+  }
   // Setup Global Event Listeners
   function setupEventListeners() {
     setupAnalysisPanel();
     setupTollEventListeners();
+    setupMaritimeEventListeners();
+    setupAirfreightEventListeners();
+    setupMobileModuleSwitcher();
     // Window Resize Handler for Leaflet & Dynamic Views
     let resizeTimer = null;
     window.addEventListener('resize', () => {
@@ -1270,6 +1381,7 @@
         
         item.classList.add('active');
         item.setAttribute('aria-selected', 'true');
+        window.syncMobileModuleSwitcher?.();
         const tabId = item.getAttribute('data-tab');
         state.activeTab = tabId;
         document.getElementById('analysisPanelBody')?.classList.toggle('has-forecast-scenario', tabId === 'tab-forecast');
@@ -1281,6 +1393,7 @@
 
         const deferredModule = ({
           'tab-maritime': 'maritime',
+          'tab-airfreight': 'airfreight',
           'tab-intermodal': 'intermodal',
           'tab-forecast': 'forecast',
           'tab-toll': 'toll'
@@ -1332,6 +1445,8 @@
             renderIntermodalTab();
           } else if (tabId === 'tab-maritime') {
             renderMaritimeTab();
+          } else if (tabId === 'tab-airfreight') {
+            renderAirfreightTab();
           } else if (tabId === 'tab-overview') {
             renderOverviewTab();
           } else if (tabId.startsWith('tab-')) {
@@ -1463,6 +1578,7 @@
         e.preventDefault();
         state.selectedPort = null;
         renderMaritimeTab();
+        updateAnalysisSummary();
       });
     }
 
@@ -1856,6 +1972,7 @@
       { key: 'iww', containerId: 'iwwLeafletMap' },
       { key: 'intermodal', containerId: 'intermodalLeafletMap' },
       { key: 'maritime', containerId: 'maritimeLeafletMap' },
+      { key: 'airfreight', containerId: 'airfreightLeafletMap' },
       { key: 'forecast', containerId: 'forecastLeafletMap' }
     ];
 
@@ -2003,9 +2120,9 @@
   }
 
   // Resolve Choropleth Value based on Active Filters & Mode Filters & Direction
-  function resolveChoroplethValue(nutsId, cData, modeFilter) {
+  function resolveChoroplethValue(nutsId, cData, modeFilter, year = state.year) {
     const isTkm = state.metric === 'tkm';
-    const yrSum = summaryData[nutsId]?.[state.year] || {};
+    const yrSum = summaryData[nutsId]?.[String(year)] || {};
     const dir = state.direction; // 'all', 'inbound', 'outbound', 'balance'
     
     // 1. If a specific commodity group is selected (1-7)
@@ -2057,6 +2174,19 @@
     if (dir === 'balance') return isTkm ? (cData.balance_tkm || 0) : (cData.balance_tonnes || 0);
 
     return isTkm ? (cData.total_tkm || 0) : (cData.total_tonnes || 0);
+  }
+
+  function formatRegionHoverComparison(current, reference, label, formatHistoricValue) {
+    if (state.direction === 'balance') {
+      return `<div>Saldo ${label}: <strong>${reference === null || reference === undefined ? '--' : formatHistoricValue(reference)}</strong></div>`;
+    }
+    if (!Number.isFinite(Number(reference)) || Number(reference) <= 0) {
+      return `<div>Δ ggü. ${label}: <strong>--</strong></div>`;
+    }
+    const delta = (Number(current) - Number(reference)) / Number(reference) * 100;
+    const color = delta >= 0 ? '#16a34a' : '#dc2626';
+    const arrow = delta >= 0 ? '↗ +' : '↘ ';
+    return `<div>Δ ggü. ${label}: <strong style="color:${color};">${arrow}${formatDeNum(delta, 1)} %</strong></div>`;
   }
 
   function getOverviewTooltipFilteredValue(record) {
@@ -2275,6 +2405,14 @@
         const isTkm = state.metric === 'tkm';
         const unit = isTkm ? 'Mrd. tkm' : 'Mio. t';
         const divisor = isTkm ? 1e9 : 1e6;
+        const previousYear = String(Number(state.year) - 1);
+        const previousRecord = choroplethData?.[previousYear]?.[nutsId];
+        const baselineRecord = state.year === '2016' ? null : choroplethData?.['2016']?.[nutsId];
+        const previousValue = previousRecord ? resolveChoroplethValue(nutsId, previousRecord, modeFilter, previousYear) : null;
+        const baselineValue = baselineRecord ? resolveChoroplethValue(nutsId, baselineRecord, modeFilter, '2016') : null;
+        const formatHistoricValue = value => `${value > 0 && isBalance ? '+' : ''}${formatTrafficValue(value / divisor, unit, 2)} ${unit}`;
+        const comparisonDisplay = formatRegionHoverComparison(val, previousValue, previousYear, formatHistoricValue)
+          + formatRegionHoverComparison(val, baselineValue, '2016', formatHistoricValue);
 
         let dirLabel = 'Aufkommen';
         if (state.direction === 'inbound') dirLabel = 'Empfang';
@@ -2312,12 +2450,10 @@
 
         layer.bindTooltip(`
           <div class="map-region-tooltip" style="font-size:0.825rem; line-height:1.45; width:min(360px, calc(100vw - 42px)); min-width:0; max-width:calc(100vw - 42px); box-sizing:border-box; white-space:normal;">
-            <div style="font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:2px;">Landkreis / kreisfreie Stadt</div>
-            <strong>${nutsName}</strong> <span style="font-size:0.75rem; color:#64748b; font-weight:600;">(${nutsId})</span>
-            <div style="margin-top:7px; padding-top:6px; border-top:1px solid #e2e8f0;">
-              <div style="font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:2px;">Bezugsjahr · ${state.year}</div>
-              • ${displayVal}
-            </div>
+            <div class="map-tooltip-title">${nutsName} <span>(${nutsId})</span></div>
+            <div class="map-tooltip-meta">Landkreis / kreisfreie Stadt · Bezugsjahr: ${state.year}</div>
+            <div class="map-tooltip-value">${displayVal}</div>
+            <div class="map-tooltip-context">${comparisonDisplay}</div>
             ${forecastBlock}
             <div class="map-tooltip-filter-hint" style="display:block; max-width:none; margin-top:7px; white-space:normal; overflow-wrap:anywhere; line-height:1.3;">Klicken Sie, um diese Region/diesen Kreis als Filter zu aktivieren.</div>
           </div>
@@ -2731,16 +2867,17 @@
       }
       if (item.marker) {
         item.marker.setStyle({
-          fillColor: item.originalColor,
+          fillColor: item.originalMarkerColor || item.originalColor,
+          fillOpacity: item.originalMarkerOpacity ?? 0.9,
           radius: item.originalRadius ?? Math.max(4, item.originalWeight + 1.5),
-          weight: 2,
-          color: '#ffffff'
+          weight: item.originalMarkerWeight ?? 2,
+          color: item.originalMarkerBorderColor || '#ffffff'
         });
       }
     });
   }
 
-  function setHighlight(mapKey, partnerId) {
+  function setHighlight(mapKey, partnerId, scrollTable = true) {
     if (!partnerId) return;
     if (activeHighlightedPartnerId === partnerId && activeHighlightedMapKey === mapKey) return;
 
@@ -2753,7 +2890,7 @@
     const rows = document.querySelectorAll(`.data-table tbody tr[data-partner-id="${partnerId}"]`);
     rows.forEach(r => {
       r.classList.add('row-highlight');
-      r.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (scrollTable) r.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
 
     // Highlight map relation
@@ -2771,7 +2908,7 @@
       if (item.marker) {
         item.marker.setStyle({
         fillColor: '#2563eb',
-          radius: Math.max(6.5, item.originalWeight + 3.5),
+          radius: Math.max(6.5, item.originalRadius || 0, item.originalWeight + 3.5),
           weight: 3,
           color: '#ffffff'
         });
@@ -3453,6 +3590,7 @@
     else if (tabId === 'tab-toll') renderTollTab();
     else if (tabId === 'tab-intermodal') renderIntermodalTab();
     else if (tabId === 'tab-maritime') renderMaritimeTab();
+    else if (tabId === 'tab-airfreight') renderAirfreightTab();
     else if (tabId === 'tab-overview') renderOverviewTab();
     else if (tabId?.startsWith('tab-')) renderModeDetailTab(tabId.replace('tab-', ''));
     annotateMissingComparisons();
@@ -4227,7 +4365,7 @@
       const row = document.createElement('tr');
       row.setAttribute('data-partner-id', partnerId);
       row.innerHTML = `
-        <td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${partnerName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${partnerId})</span>${locationBadge}${binnenBadge}${modeBadge}</td>
+        <td class="relation-partner-cell"><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><span class="relation-partner-details"><strong>${partnerName}</strong><span class="table-sub-label">(${partnerId})</span>${locationBadge}${binnenBadge}${modeBadge}</span></td>
         <td style="text-align: right;"><strong>${cleanValNum}</strong></td>
         <td style="text-align: right;">${yoy}</td>
         <td style="text-align: right;">${trend10}</td>
@@ -4751,7 +4889,7 @@
             const row = document.createElement('tr');
             row.setAttribute('data-partner-id', partnerId);
             row.innerHTML = `
-              <td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${partnerName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${partnerId})</span>${locationBadge}${binnenBadge}</td>
+              <td class="relation-partner-cell"><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><span class="relation-partner-details"><strong>${partnerName}</strong><span class="table-sub-label">(${partnerId})</span>${locationBadge}${binnenBadge}</span></td>
               <td>${gName}</td>
               <td style="text-align: right;"><strong>${cleanValNum}</strong></td>
               <td style="text-align: right;">${yoy}</td>
@@ -5173,6 +5311,33 @@
     return unit ? `${sign}${formatted} ${unit}` : `${sign}${formatted}`;
   }
 
+  function updateMaritimePortSelect(yearPorts) {
+    const select = document.getElementById('selectMaritimePort');
+    if (!select) return;
+    const ports = Object.values(yearPorts || {}).sort((a, b) =>
+      String(a.name || a.unlocode).localeCompare(String(b.name || b.unlocode), 'de')
+    );
+    if (state.selectedPort && !yearPorts?.[state.selectedPort]) state.selectedPort = null;
+    select.replaceChildren(
+      new Option('Alle Häfen', ''),
+      ...ports.map(port => new Option((port.name || port.unlocode) + ' (' + port.unlocode + ')', port.unlocode))
+    );
+    select.value = state.selectedPort || '';
+  }
+
+  function setMaritimePortFilterMode(isMaritime) {
+    const control = document.getElementById('controlGroupMaritimePort');
+    if (control) control.hidden = !isMaritime;
+    document.getElementById('analysisPanelBody')?.classList.toggle('is-maritime-mode', isMaritime);
+  }
+
+  function setupMaritimeEventListeners() {
+    document.getElementById('selectMaritimePort')?.addEventListener('change', event => {
+      state.selectedPort = event.target.value || null;
+      renderMaritimeTab();
+      updateAnalysisSummary();
+    });
+  }
   // ============================================================
   // TAB 5: SEEVERKEHR & HÄFEN (INTERACTIVE PORTS, KPIS & CHARTS)
   // ============================================================
@@ -5182,6 +5347,7 @@
     const prevYr = String(parseInt(yr) - 1);
     const yearPorts = maritimeData.seaports?.[yr] || maritimeData.seaports?.['2024'] || {};
     const prevPorts = maritimeData.seaports?.[prevYr] || {};
+    updateMaritimePortSelect(yearPorts);
 
     // Helper: Dynamically build nationwide maritime aggregation across all ports and commodities
     const buildNationalMaritime = (targetYr) => {
@@ -5388,9 +5554,28 @@
         return 16.5;
       };
 
+      const basePorts = maritimeData.seaports?.['2016'] || {};
+      const formatPortHoverComparison = (current, reference, label) => {
+        if (dirFilter === 'balance') {
+          return '<div>Saldo ' + label + ': <strong>' + (reference === null ? '--' : formatSmartMioTonnes(reference, 'Mio. t')) + '</strong></div>';
+        }
+        if (reference === null || reference === undefined || reference <= 0) {
+          return '<div>Δ ggü. ' + label + ': <strong>--</strong></div>';
+        }
+        const delta = ((current - reference) / reference) * 100;
+        const color = delta >= 0 ? '#16a34a' : '#dc2626';
+        const arrow = delta >= 0 ? '↗ +' : '↘ ';
+        return '<div>Δ ggü. ' + label + ': <strong style="color:' + color + ';">' + arrow + formatDeNum(delta, 1) + ' %</strong></div>';
+      };
       Object.values(yearPorts).forEach(p => {
         const portFlow = getFilteredTonnage(p, groupFilter, dirFilter);
         const portTeu = getFilteredTeu(p, groupFilter, dirFilter);
+        const previousPortFlow = prevPorts[p.unlocode] ? getFilteredTonnage(prevPorts[p.unlocode], groupFilter, dirFilter) : null;
+        const baselinePortFlow = yr === '2016' || !basePorts[p.unlocode]
+          ? null
+          : getFilteredTonnage(basePorts[p.unlocode], groupFilter, dirFilter);
+        const comparisonInfo = formatPortHoverComparison(portFlow, previousPortFlow, prevYr)
+          + formatPortHoverComparison(portFlow, baselinePortFlow, '2016');
         const radius = getMrtmRadius(portFlow);
         const isThisSelected = isSpecific && (state.selectedPort === p.unlocode);
         const isAnotherSelected = isSpecific && !isThisSelected;
@@ -5411,17 +5596,18 @@
 
         // Lightweight Hover Tooltip with smart dynamic decimal formatting
         const teuTooltip = (portTeu !== 0)
-          ? `<br>• Containerumschlag (${teuDirectionLabel}): <strong>${Math.abs(portTeu) >= 10000 ? formatSmartMioTonnes(portTeu, 'Mio. TEU') : formatDeNum(portTeu, 0) + ' TEU'}</strong>`
+          ? `<div class="map-tooltip-context">Containerumschlag (${teuDirectionLabel}): <strong>${Math.abs(portTeu) >= 10000 ? formatSmartMioTonnes(portTeu, 'Mio. TEU') : formatDeNum(portTeu, 0) + ' TEU'}</strong></div>`
           : '';
         marker.bindTooltip(`
-          <div style="font-size:0.825rem; line-height:1.45;">
-            <div style="font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:2px;">Bezugsjahr: ${state.year} · ${teuDirectionLabel}</div>
-            <strong>Seehafen ${p.name}</strong> (${p.unlocode})<br>
-            • Umschlag: <strong>${formatSmartMioTonnes(portFlow, 'Mio. t')}</strong>
+          <div class="map-region-tooltip">
+            <div class="map-tooltip-title">Seehafen ${p.name} <span>(${p.unlocode})</span></div>
+            <div class="map-tooltip-meta">Bezugsjahr: ${state.year} · ${teuDirectionLabel}</div>
+            <div class="map-tooltip-value">Umschlag: <strong>${formatSmartMioTonnes(portFlow, 'Mio. t')}</strong></div>
+            <div class="map-tooltip-context">${comparisonInfo}</div>
             ${teuTooltip}
             <div class="map-tooltip-filter-hint">Klicken Sie, um diesen Hafen auszuwählen und die Analysen darauf zu begrenzen.</div>
           </div>
-        `, { sticky: true });
+        `, { sticky: true, className: 'maritime-leaflet-tooltip' });
 
         // Rich Click Detail Popup
         const teuInfo = portTeu !== 0 ? `• Containerumschlag (${teuDirectionLabel}): <strong>${Math.abs(portTeu) >= 10000 ? formatSmartMioTonnes(portTeu, 'Mio. TEU') : formatDeNum(portTeu, 0) + ' TEU'}</strong><br>` : '';
@@ -5445,6 +5631,7 @@
         marker.on('click', () => {
           state.selectedPort = (state.selectedPort === p.unlocode) ? null : p.unlocode;
           renderMaritimeTab();
+          updateAnalysisSummary();
         });
       });
     }
@@ -5540,7 +5727,7 @@
           const row = document.createElement('tr');
           row.setAttribute('data-partner-id', p.iso);
           row.innerHTML = `
-            <td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${p.name}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${p.iso})</span></td>
+            <td class="relation-partner-cell"><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><span class="relation-partner-details"><strong>${p.name}</strong><span class="table-sub-label">(${p.iso})</span></span></td>
             <td>${gName}</td>
             <td style="text-align: right;"><strong>${cleanValNum}</strong></td>
             <td style="text-align: right;">${yoy}</td>
@@ -5721,6 +5908,668 @@
   }
 
   // ============================================================
+  // ============================================================
+  // LUFTFRACHT & FLUGHÄFEN
+  // ============================================================
+  let chartAirfreightAirports = null;
+  const AIRFREIGHT_COLOR = '#0ea5e9';
+  const AIRFREIGHT_TREND_COLORS = ['#0ea5e9', '#2563eb', '#0f766e', '#7c3aed', '#d97706', '#4c7f83'];
+
+  function setAirfreightHtml(id, html) {
+    const element = document.getElementById(id);
+    if (element) element.innerHTML = html;
+  }
+
+  function getAirfreightDirection() {
+    return ['outbound', 'inbound', 'balance'].includes(state.direction) ? state.direction : 'all';
+  }
+
+  function getAirfreightMetric() {
+    return state.airfreightMetric === 'flights' ? 'flights' : 'tonnes';
+  }
+
+  function getAirfreightMetricLabel(metric = getAirfreightMetric()) {
+    return metric === 'flights' ? 'Reine Fracht- und Postflüge' : 'Fracht und Post';
+  }
+
+  function getAirfreightDirectionLabel(direction = getAirfreightDirection(), compact = false) {
+    if (direction === 'outbound') return compact ? 'Versand (geladen)' : 'Versand · am ausgewählten Flughafen geladen';
+    if (direction === 'inbound') return compact ? 'Empfang (entladen)' : 'Empfang · am ausgewählten Flughafen entladen';
+    if (direction === 'balance') return compact ? 'Saldo (geladen − entladen)' : 'Saldo · am ausgewählten Flughafen geladen minus entladen';
+    return compact ? 'Gesamt (geladen und entladen)' : 'Gesamt · geladen und entladen';
+  }
+
+  function getAirfreightValue(record, metric = getAirfreightMetric(), direction = getAirfreightDirection()) {
+    const values = record?.[metric];
+    if (!values) return null;
+    if (direction === 'balance') {
+      const hasOutbound = values.outbound !== null && values.outbound !== undefined;
+      const hasInbound = values.inbound !== null && values.inbound !== undefined;
+      if (!hasOutbound && !hasInbound) return null;
+      return Number(values.outbound || 0) - Number(values.inbound || 0);
+    }
+    const value = values[direction];
+    return value === null || value === undefined ? null : Number(value);
+  }
+
+  function formatAirfreightValue(value, metric = getAirfreightMetric(), withUnit = true, direction = getAirfreightDirection()) {
+    if (value === null || value === undefined || !Number.isFinite(Number(value))) return '--';
+    const numeric = Number(value);
+    const sign = direction === 'balance' && numeric > 0 ? '+' : '';
+    if (metric === 'flights') {
+      const formatted = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 }).format(numeric);
+      return withUnit ? `${sign}${formatted} Flüge` : `${sign}${formatted}`;
+    }
+    const absolute = Math.abs(numeric);
+    if (absolute >= 1e6) return `${sign}${formatDeNum(numeric / 1e6, 2)}${withUnit ? ' Mio. t' : ''}`;
+    if (absolute >= 1e3) return `${sign}${formatDeNum(numeric / 1e3, 1)}${withUnit ? ' Tsd. t' : ''}`;
+    return `${sign}${formatDeNum(numeric, absolute < 10 ? 1 : 0)}${withUnit ? ' t' : ''}`;
+  }
+
+  function formatAirfreightDelta(value) {
+    if (value === null || value === undefined || !Number.isFinite(Number(value))) {
+      return '<span style="color:#94a3b8;">--</span>';
+    }
+    const numeric = Number(value);
+    return `<span style="color:${numeric >= 0 ? '#16a34a' : '#dc2626'}; font-weight:700;">${numeric >= 0 ? '↗ +' : '↘ '}${formatDeNum(numeric, 1)} %</span>`;
+  }
+
+  function getAirfreightPercentChange(current, reference) {
+    const currentValue = Number(current);
+    const referenceValue = Number(reference);
+    return Number.isFinite(currentValue) && Number.isFinite(referenceValue) && referenceValue > 0
+      ? ((currentValue - referenceValue) / referenceValue) * 100
+      : null;
+  }
+
+  function getAirfreightCountryName(code) {
+    if (!code) return '--';
+    try {
+      return new Intl.DisplayNames(['de'], { type: 'region' }).of(code) || code;
+    } catch (_error) {
+      return code;
+    }
+  }
+
+  function bindAirfreightTableTooltip(target, text) {
+    if (!target || !text) return;
+    let tooltip = document.getElementById('airfreightTableHoverTooltip');
+    if (!tooltip) {
+      tooltip = document.createElement('div');
+      tooltip.id = 'airfreightTableHoverTooltip';
+      tooltip.className = 'table-hover-tooltip';
+      tooltip.hidden = true;
+      tooltip.setAttribute('role', 'tooltip');
+      document.body.appendChild(tooltip);
+    }
+    const show = () => {
+      tooltip.textContent = text;
+      tooltip.hidden = false;
+      tooltip.style.visibility = 'hidden';
+      const rect = target.getBoundingClientRect();
+      const tipRect = tooltip.getBoundingClientRect();
+      const gap = 8;
+      const left = Math.min(window.innerWidth - tipRect.width - 12, Math.max(12, rect.left));
+      let top = rect.top - tipRect.height - gap;
+      if (top < 12) top = rect.bottom + gap;
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
+      tooltip.style.visibility = 'visible';
+    };
+    const hide = () => { tooltip.hidden = true; };
+    target.addEventListener('mouseenter', show);
+    target.addEventListener('mouseleave', hide);
+    target.addEventListener('focus', show);
+    target.addEventListener('blur', hide);
+  }
+
+  function scheduleAirfreightHighlightClear() {
+    window.setTimeout(() => {
+      const mapHovered = document.querySelector('#airfreightLeafletMap .flow-relation-target:hover');
+      const rowHovered = document.querySelector('#tableAirfreightRelationsBody tr[data-partner-id]:hover');
+      if (mapHovered || rowHovered) return;
+      closeActiveRelationTooltip('airfreight');
+      clearAllHighlights('airfreight');
+    }, 60);
+  }
+
+  function getAirfreightAirportEntries(year = state.year, metric = getAirfreightMetric(), direction = getAirfreightDirection()) {
+    return Object.values(airfreightData?.airportValues?.[year] || {})
+      .map(record => ({
+        ...record,
+        meta: airfreightData?.airports?.[record.code] || {},
+        value: getAirfreightValue(record, metric, direction)
+      }))
+      .filter(record => record.value !== null)
+      .sort((a, b) => {
+        const difference = getAirfreightDirection() === 'balance'
+          ? Math.abs(b.value) - Math.abs(a.value)
+          : b.value - a.value;
+        return difference || String(a.meta.name || a.code).localeCompare(String(b.meta.name || b.code), 'de');
+      });
+  }
+
+  function isAirfreightAirportMetricYearAvailable(year = state.year, metric = getAirfreightMetric()) {
+    const years = metric === 'flights'
+      ? airfreightData?.metadata?.availableAirportFlightYears
+      : airfreightData?.metadata?.availableAirportYears;
+    return Array.isArray(years) && years.map(String).includes(String(year));
+  }
+
+  function ensureAirfreightAirportSelection(entries) {
+    if (state.selectedAirport && !entries.some(record => record.code === state.selectedAirport)) {
+      state.selectedAirport = null;
+    }
+  }
+
+  function updateAirfreightAirportSelect(entries) {
+    const select = document.getElementById('selectAirfreightAirport');
+    if (!select) return;
+    const options = entries.map(record => {
+      const name = record.meta.name || record.code;
+      return `<option value="${record.code}">${name} (${record.code})</option>`;
+    }).join('');
+    select.innerHTML = `<option value="">Alle Flughäfen</option>${options}`;
+    select.value = state.selectedAirport || '';
+  }
+
+  function getAirfreightRelations() {
+    if (!state.selectedAirport) return [];
+    const metric = getAirfreightMetric();
+    const direction = getAirfreightDirection();
+    const relationSet = airfreightData?.relations?.[state.year]?.[state.selectedAirport]?.[metric] || {};
+    if (direction !== 'balance') return relationSet[direction] || [];
+
+    const byPartner = new Map();
+    const merge = (records, factor) => (records || []).forEach(record => {
+      const current = byPartner.get(record.partner) || { partner: record.partner, value: 0, previous_value: 0, baseline_value: 0, hasPrevious: false, hasBaseline: false };
+      current.value += factor * Number(record.value || 0);
+      if (record.previous_value !== null && record.previous_value !== undefined) {
+        current.previous_value += factor * Number(record.previous_value || 0);
+        current.hasPrevious = true;
+      }
+      if (record.baseline_value !== null && record.baseline_value !== undefined) {
+        current.baseline_value += factor * Number(record.baseline_value || 0);
+        current.hasBaseline = true;
+      }
+      byPartner.set(record.partner, current);
+    });
+    merge(relationSet.outbound, 1);
+    merge(relationSet.inbound, -1);
+    return [...byPartner.values()]
+      .map(record => ({ ...record, previous_value: record.hasPrevious ? record.previous_value : null, baseline_value: record.hasBaseline ? record.baseline_value : null }))
+      .filter(record => record.value !== 0)
+      .sort((a, b) => Math.abs(b.value) - Math.abs(a.value) || String(a.partner).localeCompare(String(b.partner), 'de'));
+  }
+
+  function niceAirfreightBoundary(value) {
+    if (!Number.isFinite(value) || value <= 0) return 1;
+    const magnitude = 10 ** Math.floor(Math.log10(value));
+    const normalized = value / magnitude;
+    const nice = normalized < 1.5 ? 1 : normalized < 3.5 ? 2 : normalized < 7.5 ? 5 : 10;
+    return nice * magnitude;
+  }
+
+  function formatAirfreightBoundary(value, metric) {
+    if (metric === 'flights') return `${formatDeNum(value, 0)} Flüge`;
+    if (value >= 1e6) return `${formatDeNum(value / 1e6, value % 1e6 === 0 ? 0 : 1)} Mio. t`;
+    if (value >= 1e3) return `${formatDeNum(value / 1e3, value % 1e3 === 0 ? 0 : 1)} Tsd. t`;
+    return `${formatDeNum(value, 0)} t`;
+  }
+
+  function getAirfreightClassification(values, metric = getAirfreightMetric()) {
+    const positive = values.map(value => Math.abs(Number(value))).filter(value => Number.isFinite(value) && value > 0);
+    const maximum = positive.length ? Math.max(...positive) : 1;
+    let first = niceAirfreightBoundary(maximum * 0.25);
+    let second = niceAirfreightBoundary(maximum * 0.60);
+    if (second <= first) second = niceAirfreightBoundary(first * 2.1);
+    if (second >= maximum && maximum > first) second = niceAirfreightBoundary(maximum * 0.55);
+    if (second <= first) second = first * 2;
+    const labels = [
+      `< ${formatAirfreightBoundary(first, metric)}`,
+      `${formatAirfreightBoundary(first, metric)} – ${formatAirfreightBoundary(second, metric)}`,
+      `> ${formatAirfreightBoundary(second, metric)}`
+    ];
+    const getClass = value => {
+      const numeric = Math.abs(Number(value) || 0);
+      if (numeric < first) return 0;
+      if (numeric <= second) return 1;
+      return 2;
+    };
+    return {
+      first,
+      second,
+      labels,
+      getRadius: value => [6.5, 11, 16.5][getClass(value)],
+      getWeight: value => [2.2, 4.8, 8][getClass(value)]
+    };
+  }
+
+  function updateAirfreightLegend(entries, relations) {
+    const metric = getAirfreightMetric();
+    const airportClasses = getAirfreightClassification(entries.map(record => record.value), metric);
+    const isBalance = getAirfreightDirection() === 'balance';
+    setText('airfreightLegendTitle', isBalance ? `${getAirfreightMetricLabel(metric)} · Saldo` : getAirfreightMetricLabel(metric));
+    setText('airfreightAirportLegendSubtitle', isBalance
+      ? 'Absoluter Saldo an Flughäfen'
+      : (metric === 'flights' ? 'Flugaufkommen der Flughäfen' : 'Frachtaufkommen der Flughäfen'));
+    setText('airfreightAirportLegendLow', airportClasses.labels[0]);
+    setText('airfreightAirportLegendMedium', airportClasses.labels[1]);
+    setText('airfreightAirportLegendHigh', airportClasses.labels[2]);
+
+    const visibleRelations = state.selectedAirport ? relations.slice(0, state.topX) : [];
+    const relationSection = document.getElementById('airfreightRelationLegendSection');
+    if (relationSection) relationSection.hidden = visibleRelations.length === 0;
+    setText('airfreightRelationLegendSubtitle', isBalance ? 'Absoluter Saldo der Top-Relationen' : 'Top-Relationen');
+    if (visibleRelations.length) {
+      const relationClasses = getAirfreightClassification(visibleRelations.map(record => record.value), metric);
+      setText('airfreightRelationLegendLow', relationClasses.labels[0]);
+      setText('airfreightRelationLegendMedium', relationClasses.labels[1]);
+      setText('airfreightRelationLegendHigh', relationClasses.labels[2]);
+    }
+    return { airportClasses, relationClasses: getAirfreightClassification(visibleRelations.map(record => record.value), metric) };
+  }
+
+  function setAirfreightRelationStatus(message = '', showYearAction = false) {
+    const status = document.getElementById('airfreightRelationStatus');
+    if (!status) return;
+    status.hidden = !message;
+    status.innerHTML = message;
+    if (showYearAction) {
+      status.querySelector('button')?.addEventListener('click', () => {
+        const year = String(airfreightData.metadata.latestRelationYear);
+        state.year = year;
+        const yearSelect = document.getElementById('selectYear');
+        if (yearSelect) yearSelect.value = year;
+        renderAll();
+        updateAnalysisSummary();
+      }, { once: true });
+    }
+  }
+
+  function renderAirfreightKpis(entries) {
+    const metric = getAirfreightMetric();
+    const direction = getAirfreightDirection();
+    const current = getAirfreightValue(airfreightData?.national?.[state.year], metric, direction);
+    const previousYear = String(Number(state.year) - 1);
+    const previous = getAirfreightValue(airfreightData?.national?.[previousYear], metric, direction);
+    const directionLabel = getAirfreightDirectionLabel(direction, true);
+    const metricLabel = metric === 'flights' ? 'Reine Luftfracht- und Luftpostflüge in Deutschland' : 'Luftfracht- und Luftpostaufkommen in Deutschland';
+    setText('airfreightNationalTitle', metricLabel);
+    setText('airfreightNationalValue', formatAirfreightValue(current, metric));
+    setText('airfreightNationalSub', directionLabel);
+
+    const isBalance = direction === 'balance';
+    setText('airfreightYoYTitle', isBalance ? `Saldo ${previousYear}` : 'Veränderung zum Vorjahr');
+    if (isBalance) {
+      setText('airfreightYoYValue', formatAirfreightValue(previous, metric, true, 'balance'));
+      setText('airfreightYoYSub', previous === null ? `Kein Vergleichswert für ${previousYear}` : 'Historischer Saldo; keine Prozentveränderung');
+    } else {
+      const change = current !== null && previous > 0 ? ((current - previous) / previous) * 100 : null;
+      setAirfreightHtml('airfreightYoYValue', change === null
+        ? '--'
+        : `<span style="color:${change >= 0 ? '#16a34a' : '#dc2626'};">${change >= 0 ? '+' : ''}${formatDeNum(change, 1)} %</span>`);
+      setText('airfreightYoYSub', previous === null ? `Kein Vergleichswert für ${previousYear}` : `gegenüber ${previousYear}`);
+    }
+
+    setText('airfreightAirportCountTitle', metric === 'flights'
+      ? 'Deutsche Flughäfen mit ausgewiesener Zahl reiner Fracht- und Postflüge'
+      : 'Deutsche Flughäfen mit ausgewiesenem Frachtaufkommen');
+    const airportMetricAvailable = isAirfreightAirportMetricYearAvailable();
+    setText('airfreightAirportCount', airportMetricAvailable ? String(entries.length) : '--');
+    setText('airfreightAirportCountSub', airportMetricAvailable ? 'Einschließlich veröffentlichter Nullwerte' : 'Flughafenwerte derzeit nicht belastbar');
+
+    const total = entries.reduce((sum, record) => sum + (direction === 'balance' ? Math.abs(record.value || 0) : Math.max(0, record.value || 0)), 0);
+    const topThree = entries.slice(0, 3).reduce((sum, record) => sum + (direction === 'balance' ? Math.abs(record.value || 0) : Math.max(0, record.value || 0)), 0);
+    setText('airfreightTop3Share', total > 0 ? `${formatDeNum((topThree / total) * 100, 1)} %` : '--');
+    setText('airfreightTop3Sub', airportMetricAvailable
+      ? (direction === 'balance' ? 'Anteil an der Summe absoluter Salden' : 'Anteil an der Summe der Flughafenwerte')
+      : 'Flughafenwerte derzeit nicht belastbar');
+  }
+
+  function renderAirfreightMap(entries, relations) {
+    const map = maps.airfreight;
+    if (!map) return;
+    if (mapLayers.airfreight.airportsGroup) map.removeLayer(mapLayers.airfreight.airportsGroup);
+    mapLayers.airfreight.airportsGroup = L.layerGroup().addTo(map);
+    mapLayers.airfreight.airportsLookup = {};
+    mapLayers.airfreight.spiderLookup = {};
+
+    const metric = getAirfreightMetric();
+    const directionLabel = getAirfreightDirectionLabel();
+    const direction = getAirfreightDirection();
+    const { airportClasses, relationClasses } = updateAirfreightLegend(entries, relations);
+    entries.forEach(record => {
+      const { lat, lng, name } = record.meta;
+      if (!Number.isFinite(Number(lat)) || !Number.isFinite(Number(lng))) return;
+      const selected = record.code === state.selectedAirport;
+      const radius = airportClasses.getRadius(record.value);
+      const marker = L.circleMarker([lat, lng], {
+        pane: 'selectionPane',
+        className: 'airfreight-airport-marker',
+        radius: selected ? radius + 2.5 : radius,
+        fillColor: AIRFREIGHT_COLOR,
+        fillOpacity: selected ? 1 : (state.selectedAirport ? 0.62 : 0.86),
+        color: selected ? '#0f172a' : '#ffffff',
+        weight: selected ? 3.5 : 1.7
+      }).addTo(mapLayers.airfreight.airportsGroup);
+      const previousRecord = airfreightData?.airportValues?.[String(Number(state.year) - 1)]?.[record.code];
+      const baselineRecord = airfreightData?.airportValues?.['2016']?.[record.code];
+      const previousValue = getAirfreightValue(previousRecord, metric, getAirfreightDirection());
+      const baselineValue = getAirfreightValue(baselineRecord, metric, getAirfreightDirection());
+      const previousYear = String(Number(state.year) - 1);
+      const airportComparisonInfo = direction === 'balance'
+        ? 'Saldo ' + previousYear + ': <strong>' + formatAirfreightValue(previousValue, metric, true, 'balance') + '</strong><br>Saldo 2016: <strong>' + formatAirfreightValue(baselineValue, metric, true, 'balance') + '</strong>'
+        : 'Δ Vorjahr: ' + formatAirfreightDelta(getAirfreightPercentChange(record.value, previousValue)) + '<br>Δ ggü. 2016: ' + formatAirfreightDelta(getAirfreightPercentChange(record.value, baselineValue));
+      marker.bindTooltip(`
+        <div class="map-region-tooltip">
+          <div class="map-tooltip-title">${name || record.code} <span>(${record.code})</span></div>
+          <div class="map-tooltip-meta">Bezugsjahr: ${state.year}</div>
+          <div class="map-tooltip-value">${getAirfreightMetricLabel(metric)}: ${formatAirfreightValue(record.value, metric)}</div>
+          <div class="map-tooltip-context">${getAirfreightDirectionLabel()}<br>${airportComparisonInfo}</div>
+          <div class="map-tooltip-filter-hint">Klicken Sie, um diesen Flughafen auszuwählen und seine Top-Relationen anzuzeigen.</div>
+        </div>`, { sticky: true, className: 'airfreight-leaflet-tooltip' });
+      marker.on('click', () => {
+        state.selectedAirport = selected ? null : record.code;
+        renderAirfreightTab();
+        updateAnalysisSummary();
+      });
+      mapLayers.airfreight.airportsLookup[record.code] = marker;
+    });
+
+    const selected = airfreightData.airports?.[state.selectedAirport];
+    const visibleRelations = selected ? relations.slice(0, state.topX) : [];
+    const relationSum = visibleRelations.reduce((sum, relation) => sum + Math.abs(Number(relation.value) || 0), 0);
+    visibleRelations.forEach(relation => {
+      const partner = airfreightData.airports?.[relation.partner];
+      if (!partner || !Number.isFinite(Number(partner.lat)) || !Number.isFinite(Number(partner.lng))) return;
+      const weight = relationClasses.getWeight(relation.value);
+      const share = relationSum > 0 ? (Math.abs(relation.value) / relationSum) * 100 : null;
+      const allPublishedSum = direction === 'balance'
+        ? null
+        : getAirfreightValue(airfreightData?.relationTotals?.[state.year]?.[state.selectedAirport], metric, direction);
+      const shareAll = Number.isFinite(allPublishedSum) && Math.abs(allPublishedSum) > 0
+        ? (Math.abs(relation.value) / Math.abs(allPublishedSum)) * 100
+        : null;
+      const route = getAirfreightDirection() === 'outbound'
+        ? `${selected.name} <span>(${state.selectedAirport})</span> → ${partner.name} <span>(${relation.partner})</span>`
+        : getAirfreightDirection() === 'inbound'
+        ? `${partner.name} <span>(${relation.partner})</span> → ${selected.name} <span>(${state.selectedAirport})</span>`
+        : `${selected.name} <span>(${state.selectedAirport})</span> ↔ ${partner.name} <span>(${relation.partner})</span>`;
+      const relationComparisonInfo = direction === 'balance'
+        ? 'Saldo ' + String(Number(state.year) - 1) + ': <strong>' + formatAirfreightValue(relation.previous_value, metric, true, 'balance') + '</strong><br>Saldo 2016: <strong>' + formatAirfreightValue(relation.baseline_value, metric, true, 'balance') + '</strong>'
+        : 'Vorjahr: ' + formatAirfreightDelta(relation.yoy_pct) + '<br>Gegenüber 2016: ' + formatAirfreightDelta(relation.trend_pct);
+      const shareAllInfo = direction === 'balance'
+        ? 'Anteil an allen veröffentlichten Top-Relationen: <strong>--</strong><br><span style="color:#64748b;">Für Salden wird kein Gesamtanteil ausgewiesen.</span>'
+        : 'Anteil an allen veröffentlichten Top-Relationen: <strong>' + (shareAll === null ? '--' : formatDeNum(shareAll, 1) + ' %') + '</strong>';
+      const tooltip = `
+        <div class="flow-relation-tooltip">
+          <div class="flow-tooltip-eyebrow">Veröffentlichte Top-Relation im Luftfrachtverkehr · ${state.year}</div>
+          <div class="flow-tooltip-route">${route}</div>
+          <div class="flow-tooltip-value">${getAirfreightMetricLabel(metric)}: ${formatAirfreightValue(relation.value, metric)}</div>
+          <div class="flow-tooltip-modes">${directionLabel}</div>
+          <div class="flow-tooltip-context">${relationComparisonInfo}<br>Anteil an der angezeigten Top-Auswahl: <strong>${share === null ? '--' : `${formatDeNum(share, 1)} %`}</strong><br>${shareAllInfo}</div>
+        </div>`;
+      const tooltipOptions = { sticky: true, opacity: 0.98, className: 'airfreight-leaflet-tooltip' };
+      const line = L.polyline([[selected.lat, selected.lng], [partner.lat, partner.lng]], {
+        pane: 'connectionPane',
+        className: 'airfreight-relation-line flow-relation-target',
+        color: AIRFREIGHT_COLOR,
+        opacity: 0.72,
+        weight
+      }).bindTooltip(tooltip, tooltipOptions).addTo(mapLayers.airfreight.airportsGroup);
+      const partnerRadius = relationClasses.getRadius(relation.value);
+      const partnerMarker = L.circleMarker([partner.lat, partner.lng], {
+        pane: 'connectionPane',
+        className: 'airfreight-relation-marker flow-relation-target',
+        radius: partnerRadius,
+        fillColor: AIRFREIGHT_COLOR,
+        fillOpacity: 0.9,
+        color: '#ffffff',
+        weight: 1.2
+      }).bindTooltip(tooltip, tooltipOptions).addTo(mapLayers.airfreight.airportsGroup);
+      mapLayers.airfreight.spiderLookup[relation.partner] = {
+        line,
+        marker: partnerMarker,
+        originalColor: AIRFREIGHT_COLOR,
+        originalWeight: weight,
+        originalOpacity: 0.72,
+        originalRadius: partnerRadius,
+        originalMarkerColor: AIRFREIGHT_COLOR,
+        originalMarkerOpacity: 0.9,
+        originalMarkerWeight: 1.2,
+        originalMarkerBorderColor: '#ffffff'
+      };
+      [line, partnerMarker].forEach(layer => {
+        layer.on('mouseover', event => {
+          openActiveRelationTooltip('airfreight', layer, event);
+          setHighlight('airfreight', relation.partner);
+        });
+        layer.on('mouseout', scheduleAirfreightHighlightClear);
+      });
+    });
+    bindMapHighlightReset('airfreight');
+
+    // The analytical focus remains Germany even when worldwide relations are
+    // shown. Selecting an airport therefore never expands the viewport.
+    airfreightViewportBounds = null;
+    setMapDefaultViewport('airfreight');
+  }
+
+  function renderAirfreightRelations(relations) {
+    const body = document.getElementById('tableAirfreightRelationsBody');
+    if (!body) return;
+    const metric = getAirfreightMetric();
+    const selected = airfreightData.airports?.[state.selectedAirport];
+    setText('airfreightRelationsTitle', selected
+      ? `Top ${state.topX} Relationen: ${selected.name}`
+      : 'Top Relationen: Flughafen auswählen');
+    setText('thAirfreightMeasure', metric === 'flights' ? 'Flüge (Anzahl)' : 'Menge (t)');
+    const isBalance = getAirfreightDirection() === 'balance';
+    const historicalSaldo = value => value === null || value === undefined
+      ? '<span style="color:#94a3b8;">--</span>'
+      : '<span style="font-weight:700;">' + formatAirfreightValue(value, metric, false, 'balance') + '</span>';
+    const yoyHeader = document.getElementById('thAirfreightYoY');
+    const trendHeader = document.getElementById('thTrend_airfreight');
+    if (yoyHeader) {
+      yoyHeader.innerHTML = isBalance ? 'Saldo<br><span>' + (Number(state.year) - 1) + '</span>' : 'Δ<br><span>Vorjahr</span>';
+      yoyHeader.title = isBalance ? 'Historischer Saldo im Vorjahr' : 'Veränderung gegenüber dem Vorjahr';
+    }
+    if (trendHeader) {
+      trendHeader.innerHTML = isBalance ? 'Saldo<br><span>2016</span>' : 'Δ<br><span>ggü. 2016</span>';
+      trendHeader.title = isBalance ? 'Historischer Saldo im Basisjahr 2016' : 'Veränderung gegenüber dem Basisjahr 2016';
+    }
+
+    if (!state.selectedAirport) {
+      setAirfreightRelationStatus('');
+      const airportMetricAvailable = isAirfreightAirportMetricYearAvailable();
+      setText('airfreightMapScope', airportMetricAvailable ? `${state.year} · Flughafen auswählen` : `${state.year} · Flughafenwerte nicht belastbar`);
+      body.innerHTML = `
+        <tr><td colspan="5" style="text-align:center; color:#475569; padding:28px 16px; font-size:0.86rem; line-height:1.6;">
+          <div class="empty-state-icon"><img src="assets/icons/map.svg" alt="" aria-hidden="true"></div>
+          <strong style="color:#0f172a; font-size:0.95rem;">${airportMetricAvailable ? 'Alle deutschen Flughäfen sichtbar' : `Flughafen-Flugzahlen ${state.year} derzeit nicht belastbar`}</strong><br>
+          <span style="color:#64748b; font-size:0.81rem;">${airportMetricAvailable ? 'Bitte wählen Sie auf der Karte einen <strong>Flughafen</strong> aus oder öffnen Sie <strong>Aktuelle Einstellungen → Raum &amp; Zeit</strong>, um dessen stärkste veröffentlichte Top-Relationen im Luftfrachtverkehr anzuzeigen.' : 'Die veröffentlichten Flughafenwerte widersprechen der nationalen Reihe und werden deshalb nicht dargestellt. Die nationale Flugzahl bleibt verfügbar.'}</span>
+        </td></tr>`;
+      return;
+    }
+
+    const availableYears = airfreightData.metadata.availableRelationYears.map(String);
+    if (!availableYears.includes(state.year)) {
+      const latest = airfreightData.metadata.latestRelationYear;
+      body.innerHTML = '';
+      setAirfreightRelationStatus(
+        `Für das ausgewählte Jahr <strong>${state.year}</strong> liegen keine Relationsdaten vor. Das letzte verfügbare Relationsjahr ist <strong>${latest}</strong>. <button type="button" class="select-input-sm">${latest} auswählen</button>`,
+        true
+      );
+      setText('airfreightMapScope', `Relationen ${state.year} nicht verfügbar`);
+      return;
+    }
+
+    setAirfreightRelationStatus('');
+    setText('airfreightMapScope', `${getAirfreightDirectionLabel(getAirfreightDirection(), true)} · ${state.year}`);
+    const visible = relations.slice(0, state.topX);
+    if (!visible.length) {
+      body.innerHTML = '<tr><td colspan="5" style="text-align:center; color:#64748b; padding:28px 16px;">Für diese Auswahl sind keine veröffentlichten Top-Relationen vorhanden.</td></tr>';
+      return;
+    }
+    body.innerHTML = visible.map((relation, rank) => {
+      const partner = airfreightData.airports?.[relation.partner] || { code: relation.partner, name: relation.partner, country: '' };
+      const noPoint = !Number.isFinite(Number(partner.lat)) || !Number.isFinite(Number(partner.lng));
+      const countryName = getAirfreightCountryName(partner.country);
+      return `<tr data-partner-id="${relation.partner}">
+        <td class="relation-partner-cell"><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><span class="relation-partner-details"><strong>${partner.name || relation.partner}</strong><span class="table-sub-label">(${relation.partner})</span>${noPoint ? '<span class="table-status-label">ohne Kartenpunkt</span>' : ''}</span></td>
+        <td><span class="table-truncated-label" tabindex="0" data-full-label="${countryName}">${countryName}</span></td>
+        <td style="text-align:right; font-weight:700;">${formatAirfreightValue(relation.value, metric, false)}</td>
+        <td style="text-align:right;">${isBalance ? historicalSaldo(relation.previous_value) : formatAirfreightDelta(relation.yoy_pct)}</td>
+        <td style="text-align:right;">${isBalance ? historicalSaldo(relation.baseline_value) : formatAirfreightDelta(relation.trend_pct)}</td>
+      </tr>`;
+    }).join('');
+    body.querySelectorAll('tr[data-partner-id]').forEach(row => {
+      const partnerId = row.dataset.partnerId;
+      row.addEventListener('mouseenter', () => setHighlight('airfreight', partnerId, false));
+      row.addEventListener('mouseleave', scheduleAirfreightHighlightClear);
+    });
+    body.querySelectorAll('[data-full-label]').forEach(label => bindAirfreightTableTooltip(label, label.dataset.fullLabel));
+    const tableWrapper = body.closest('.data-table-wrapper');
+    if (tableWrapper) tableWrapper.onmouseleave = () => clearAllHighlights('airfreight');
+  }
+
+  function renderAirfreightChart(entries) {
+    const canvas = document.getElementById('chartAirfreightAirports');
+    if (!canvas) return;
+    if (chartAirfreightAirports) {
+      chartAirfreightAirports.destroy();
+      chartAirfreightAirports = null;
+    }
+    const metric = getAirfreightMetric();
+    const direction = getAirfreightDirection();
+    const isBalance = direction === 'balance';
+    const unit = metric === 'flights' ? 'Flüge' : 'Mio. t';
+    const selectedName = airfreightData.airports?.[state.selectedAirport]?.name || state.selectedAirport;
+    const measurementTitle = metric === 'flights' ? 'Anzahl reiner Fracht- und Postflüge' : 'Fracht- und Postaufkommen';
+
+    if (state.airfreightChartView === 'trend') {
+      const codes = [...new Set([...entries.slice(0, 5).map(record => record.code), state.selectedAirport].filter(Boolean))];
+      const years = (metric === 'flights'
+        ? airfreightData.metadata.availableAirportFlightYears
+        : airfreightData.metadata.availableAirportYears).map(String);
+      const datasets = codes.map((code, index) => ({
+        label: airfreightData.airports?.[code]?.name || code,
+        data: years.map(year => {
+          const value = getAirfreightValue(airfreightData.airportValues?.[year]?.[code], metric, direction);
+          return value === null ? null : metric === 'tonnes' ? value / 1e6 : value;
+        }),
+        borderColor: AIRFREIGHT_TREND_COLORS[index % AIRFREIGHT_TREND_COLORS.length],
+        backgroundColor: AIRFREIGHT_TREND_COLORS[index % AIRFREIGHT_TREND_COLORS.length],
+        borderWidth: code === state.selectedAirport ? 3.5 : 2,
+        pointRadius: code === state.selectedAirport ? 3 : 2,
+        tension: 0.2,
+        spanGaps: false
+      }));
+      setText('airfreightChartTitle', `Entwicklung führender deutscher Flughäfen: ${isBalance ? 'Saldo Fracht und Post' : measurementTitle}${selectedName ? ` · Auswahl: ${selectedName}` : ''}`);
+      chartAirfreightAirports = new Chart(canvas, {
+        type: 'line',
+        data: { labels: years, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: true, position: 'bottom', labels: { boxWidth: 10, padding: 8 } },
+            tooltip: {
+              callbacks: {
+                label: item => ` ${item.dataset.label}: ${formatDeNum(item.parsed.y, metric === 'tonnes' ? 2 : 0)} ${unit}`
+              }
+            }
+          },
+          scales: {
+            x: { ticks: { font: { size: 11, weight: '600' } } },
+            y: { beginAtZero: !isBalance, title: { display: true, text: isBalance ? `Saldo (${unit})` : unit, font: { size: 11, weight: '600' } } }
+          }
+        }
+      });
+      return;
+    }
+
+    const visible = entries.slice(0, state.topX);
+    const labels = visible.map(record => record.meta.name || record.code);
+    const values = visible.map(record => metric === 'tonnes' ? record.value / 1e6 : record.value);
+    setText('airfreightChartTitle', `Top ${state.topX} deutsche Flughäfen nach ${isBalance ? 'absolutem Saldo von Fracht und Post' : measurementTitle} · ${state.year}`);
+    chartAirfreightAirports = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: isBalance ? `Saldo (${unit})` : unit,
+          data: values,
+          backgroundColor: AIRFREIGHT_COLOR,
+          borderRadius: 4,
+          maxBarThickness: 24
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { beginAtZero: !isBalance, title: { display: true, text: isBalance ? `Saldo (${unit})` : unit, font: { size: 11, weight: '600' } } },
+          y: { ticks: { callback: (_value, index) => abbreviateAxisLabel(labels[index], 22), font: { size: 11, weight: '600' } } }
+        }
+      }
+    });
+    enableYAxisLabelHover(chartAirfreightAirports, labels);
+  }
+
+  function renderAirfreightTab() {
+    if (!airfreightData) return;
+    const metric = getAirfreightMetric();
+    const direction = getAirfreightDirection();
+    const entries = getAirfreightAirportEntries(state.year, metric, direction);
+    ensureAirfreightAirportSelection(entries);
+    updateAirfreightAirportSelect(entries);
+    const relations = getAirfreightRelations();
+    setText('airfreightMapTitle', `Deutsche Flughäfen · ${getAirfreightDirectionLabel(direction, true)} · ${state.year}`);
+    renderAirfreightKpis(entries);
+    renderAirfreightMap(entries, relations);
+    renderAirfreightRelations(relations);
+    renderAirfreightChart(entries);
+  }
+
+  function setAirfreightFilterMode(isAirfreight, isToll = false, isMaritime = false) {
+    const normalGroups = ['controlGroupRegion', 'controlGroupMetric', 'controlGroupGoods'];
+    const airfreightGroups = ['controlGroupAirfreightAirport', 'controlGroupAirfreightMetric'];
+    if (!isToll) {
+      normalGroups.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.hidden = isAirfreight || (isMaritime && id === 'controlGroupRegion');
+      });
+    }
+    airfreightGroups.forEach(id => {
+      const element = document.getElementById(id);
+      if (element) element.hidden = !isAirfreight;
+    });
+    document.getElementById('analysisPanelBody')?.classList.toggle('is-airfreight-mode', isAirfreight);
+  }
+
+  function setupAirfreightEventListeners() {
+    document.getElementById('selectAirfreightAirport')?.addEventListener('change', event => {
+      state.selectedAirport = event.target.value || null;
+      renderAirfreightTab();
+      updateAnalysisSummary();
+    });
+    document.getElementById('selectAirfreightMetric')?.addEventListener('change', event => {
+      state.airfreightMetric = event.target.value === 'flights' ? 'flights' : 'tonnes';
+      renderAirfreightTab();
+      updateAnalysisSummary();
+    });
+    document.querySelectorAll('#toggleAirfreightChartView .toggle-btn').forEach(button => {
+      button.addEventListener('click', () => {
+        state.airfreightChartView = button.dataset.view === 'trend' ? 'trend' : 'snapshot';
+        document.querySelectorAll('#toggleAirfreightChartView .toggle-btn').forEach(item => item.classList.toggle('active', item === button));
+        renderAirfreightChart(getAirfreightAirportEntries());
+      });
+    });
+  }
   // ============================================================
   // LIVE-MODUL: GEMEINDEBEZOGENE MAUTDATEN
   // ============================================================
@@ -6719,12 +7568,12 @@
     const arrow = isOutbound ? '→' : isInbound ? '→' : '↔';
     return `
       <div class="map-tooltip toll-map-tooltip">
-        <div class="toll-map-tooltip-eyebrow">
-          <span>Monat und Jahr: ${escapeTollHtml(formatTollMonth(state.tollMonth))}</span>
-          <span>Richtung: ${getTollDirectionLabel()}</span>
-        </div>
         <div class="toll-map-tooltip-title">
           ${escapeTollHtml(origin)} <span class="toll-map-tooltip-route-arrow">${arrow}</span> ${escapeTollHtml(destination)}
+        </div>
+        <div class="toll-map-tooltip-meta">
+          <span>Bezugsmonat: ${escapeTollHtml(formatTollMonth(state.tollMonth))}</span>
+          <span>Richtung: ${getTollDirectionLabel()}</span>
         </div>
         <div class="toll-map-tooltip-details">
           <div><strong>Mautfahrten:</strong> ${formatDeNum(row.trips, 0)}</div>
@@ -7366,15 +8215,27 @@
           const amount = choro[id] || 0;
           const railAmount = getScopedIntermodalMetricForRegion(activeYear, id, 'rail', 'intermodal_load_units', metric) || 0;
           const iwwAmount = getScopedIntermodalMetricForRegion(activeYear, id, 'iww', 'containerised_transport', metric) || 0;
+          const previousYear = String(activeYear - 1);
+          const hasPrevious = Boolean(intermodalData?.scoped_metrics_by_year?.[previousYear]?.[id]);
+          const hasBaseline = activeYear !== 2016 && Boolean(intermodalData?.scoped_metrics_by_year?.['2016']?.[id]);
+          const comparisonAmount = year =>
+            (getScopedIntermodalMetricForRegion(year, id, 'rail', 'intermodal_load_units', metric) || 0)
+            + (getScopedIntermodalMetricForRegion(year, id, 'iww', 'containerised_transport', metric) || 0);
+          const previousAmount = hasPrevious ? comparisonAmount(activeYear - 1) : null;
+          const baselineAmount = hasBaseline ? comparisonAmount(2016) : null;
+          const formatHistoricValue = value => `${value > 0 && direction === 'balance' ? '+' : ''}${formatTrafficValue(value / divisor, unit, 2)} ${unit}`;
+          const comparisonDisplay = formatRegionHoverComparison(amount, previousAmount, previousYear, formatHistoricValue)
+            + formatRegionHoverComparison(amount, baselineAmount, '2016', formatHistoricValue);
           const directionSuffix = direction === 'balance' ? ' · Saldo'
             : direction === 'outbound' ? ' · Versand'
             : direction === 'inbound' ? ' · Empfang'
             : '';
           layer.bindTooltip(`
             <div class="map-region-tooltip">
-              <div class="map-tooltip-eyebrow">Kombinierter Verkehr · ${activeYear}${directionSuffix}</div>
               <div class="map-tooltip-title">${feature.properties?.NUTS_NAME || id} <span>(${id})</span></div>
+              <div class="map-tooltip-meta">Kombinierter Verkehr · ${activeYear}${directionSuffix}</div>
               <div class="map-tooltip-value"><span>Summe erfasster KV-Teilmärkte:</span> ${amount > 0 && direction === 'balance' ? '+' : ''}${formatTrafficValue(amount / divisor, unit, 2)} ${unit}</div>
+              <div class="map-tooltip-context">${comparisonDisplay}</div>
               <div class="map-tooltip-context">Schiene: <strong>${railAmount > 0 && direction === 'balance' ? '+' : ''}${formatTrafficValue(railAmount / divisor, unit, 2)} ${unit}</strong> · Binnenschiff: <strong>${iwwAmount > 0 && direction === 'balance' ? '+' : ''}${formatTrafficValue(iwwAmount / divisor, unit, 2)} ${unit}</strong></div>
               <div class="map-tooltip-context">Intensitätsmaß; keine Zahl eindeutiger Sendungen.</div>
               <div class="map-tooltip-filter-hint">Klicken Sie, um diese Region/diesen Kreis als Filter zu aktivieren.</div>
@@ -7487,7 +8348,7 @@
             : '<span class="intermodal-mode-badge iww">Binnenschiff</span>'
           ).join('');
           row.setAttribute('data-partner-id', relation.partner_id);
-          row.innerHTML = `<td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${partnerName}</strong>${locationBadge}</td><td><span class="intermodal-mode-badges">${modeBadges}</span></td><td style="text-align:right;"><strong>${direction === 'balance' && relation.current > 0 ? '+' : ''}${isTkm ? formatTkmQuantity(relation.current / divisor, 1, true) : formatQuantity(relation.current / divisor, 1)}</strong></td><td style="text-align:right;">${change(relation.yoy)}</td><td style="text-align:right;">${change(relation.trend)}</td>`;
+          row.innerHTML = `<td class="relation-partner-cell"><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><span class="relation-partner-details"><strong>${partnerName}</strong>${locationBadge}</span></td><td><span class="intermodal-mode-badges">${modeBadges}</span></td><td style="text-align:right;"><strong>${direction === 'balance' && relation.current > 0 ? '+' : ''}${isTkm ? formatTkmQuantity(relation.current / divisor, 1, true) : formatQuantity(relation.current / divisor, 1)}</strong></td><td style="text-align:right;">${change(relation.yoy)}</td><td style="text-align:right;">${change(relation.trend)}</td>`;
           row.addEventListener('mouseenter', () => setIntermodalPartnerHighlight(relation.partner_id));
           row.addEventListener('mouseleave', () => clearAllHighlights('intermodal'));
           tbody.appendChild(row);
@@ -8152,8 +9013,8 @@
 
         const tipHtml = `
           <div class="map-region-tooltip">
-            <div class="map-tooltip-eyebrow">${getForecastScenarioLabel()} · ${dirText}</div>
             <div class="map-tooltip-title">${cName} <span>(${nutsId})</span></div>
+            <div class="map-tooltip-meta">${getForecastScenarioLabel()} · ${dirText}</div>
             <div class="map-tooltip-value">${isTkm ? 'Verkehrsleistung' : 'Beförderungsmenge'}: ${formatTrafficValue(val / divisor, unitLabel, 2)} ${unitLabel}</div>
             ${grpBadge}
             <div class="map-tooltip-context">
@@ -8493,7 +9354,7 @@
       const row = document.createElement('tr');
       row.setAttribute('data-partner-id', pId);
       row.innerHTML = `
-        <td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${pName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${pId})</span>${binnenBadge}${modeBadge ? `<span class="relation-mode-badges">${modeBadge}</span>` : ''}</td>
+        <td class="relation-partner-cell"><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><span class="relation-partner-details"><strong>${pName}</strong><span class="table-sub-label">(${pId})</span>${binnenBadge}${modeBadge ? `<span class="relation-mode-badges">${modeBadge}</span>` : ''}</span></td>
         <td>${groupName}</td>
         <td style="text-align: right;"><strong>${cleanValNum}</strong></td>
         <td style="text-align: right;">${growthHtml}</td>

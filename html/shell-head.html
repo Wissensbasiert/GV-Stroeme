@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Güterverkehrsströme Deutschland – Interaktives Fach-Dashboard | Wissensbasierte Planung</title>
-  <meta name="description" content="Interaktives Fach-Dashboard für Güterverkehrsströme in Deutschland: NUTS-3 Verflechtungen, Choroplethenkarten, Modal Split, Güterstrukturen, Seeverkehr und intermodale Verkehre.">
+  <meta name="description" content="Interaktives Fach-Dashboard für Güterverkehrsströme in Deutschland: NUTS-3 Verflechtungen, Choroplethenkarten, Modal Split, Güterstrukturen, See- und Luftfrachtverkehr sowie intermodale Verkehre.">
   
   <!-- Google Fonts: Inter for premium typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +14,7 @@
   <!-- Leaflet CSS for Real Geographic Vector Maps -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <!-- Custom App Styles -->
-  <link rel="stylesheet" href="css/style.css?v=20260903d">
+  <link rel="stylesheet" href="css/style.css?v=20260904-airfreight-feedback3">
   
   <!-- Leaflet JS & Chart.js -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -88,6 +88,20 @@
         </div>
       </div>
 
+      <div class="control-group" id="controlGroupAirfreightAirport" hidden>
+        <label for="selectAirfreightAirport" class="control-label">Flughafen:</label>
+        <select id="selectAirfreightAirport" class="select-input select-input-compact" title="Flughafen auswählen">
+          <option value="" selected>Alle Flughäfen</option>
+        </select>
+      </div>
+
+      <div class="control-group" id="controlGroupMaritimePort" hidden>
+        <label for="selectMaritimePort" class="control-label">Hafen:</label>
+        <select id="selectMaritimePort" class="select-input select-input-compact" title="Hafen auswählen">
+          <option value="" selected>Alle Häfen</option>
+        </select>
+      </div>
+
       <div class="control-group" id="controlGroupTollMunicipality" hidden>
         <label for="tollMunicipalitySearchInput" class="control-label">Gemeinde:</label>
         <div class="search-combobox">
@@ -137,6 +151,14 @@
         <select id="selectMetric" class="select-input select-input-compact">
           <option value="tonnes" selected>Tonnen (t)</option>
           <option value="tkm">Tonnen-km (tkm)</option>
+        </select>
+      </div>
+
+      <div class="control-group" id="controlGroupAirfreightMetric" hidden>
+        <label for="selectAirfreightMetric" class="control-label">Kennzahl:</label>
+        <select id="selectAirfreightMetric" class="select-input select-input-compact" title="Kennzahl auswählen">
+          <option value="tonnes" selected>Fracht und Post (t)</option>
+          <option value="flights">Reine Fracht- und Postflüge (Anzahl)</option>
         </select>
       </div>
 
@@ -209,6 +231,14 @@
       </div>
     </section>
 
+    <div class="mobile-module-switcher" id="mobileModuleSwitcher">
+      <button class="mobile-module-button" id="btnMobileModule" type="button" aria-expanded="false" aria-controls="mobileModuleMenu">
+        <span class="mobile-module-icon" aria-hidden="true"></span>
+        <span class="mobile-module-label">Übersicht</span>
+        <svg class="mobile-module-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </button>
+      <div class="mobile-module-menu" id="mobileModuleMenu" hidden></div>
+    </div>
     <!-- Sidebar Navigation with Authentic Transport SVGs and Integrated Collapse Arrow -->
     <aside class="app-sidebar" id="appSidebar">
       <div class="sidebar-header">
@@ -219,41 +249,43 @@
       </div>
 
       <ul class="nav-list" id="mainNav">
-        <li class="nav-item active" data-tab="tab-overview" title="Übersicht">
+        <li class="nav-group-label">Einstieg</li>
+        <li class="nav-item active" data-tab="tab-overview" style="--module-accent: var(--accent-overview)" title="Übersicht">
           <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
           <span class="nav-label">Übersicht</span>
         </li>
-        <li class="nav-item" data-tab="tab-road" title="Straßengüterverkehr">
-          <!-- Semi-Truck / LKW SVG -->
+        <li class="nav-group-label">Verkehrsträger und Knoten</li>
+        <li class="nav-item" data-tab="tab-road" style="--module-accent: var(--accent-road)" title="Straßengüterverkehr">
           <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7V8z"></path><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
           <span class="nav-label">Straßengüterverkehr</span>
         </li>
-        <li class="nav-item" data-tab="tab-toll" title="Mautdaten">
-          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M16.5 7.7a4.7 4.7 0 0 0-3.1-1.2c-2.8 0-4.8 2.2-4.8 5.5s2 5.5 4.8 5.5c1.2 0 2.3-.4 3.1-1.2M6.5 10.3h7M6.5 13.7h7"></path></svg>
-          <span class="nav-label">Mautdaten</span>
-        </li>
-        <li class="nav-item" data-tab="tab-rail" title="Schienengüterverkehr">
-          <!-- Freight Train SVG -->
+        <li class="nav-item" data-tab="tab-rail" style="--module-accent: var(--accent-rail)" title="Schienengüterverkehr">
           <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="3" width="16" height="16" rx="2"></rect><path d="M4 11h16M12 3v8m-4 8 2 2m6-2-2 2M8 15h.01M16 15h.01"></path></svg>
           <span class="nav-label">Schienengüterverkehr</span>
         </li>
-        <li class="nav-item" data-tab="tab-iww" title="Binnenschifffahrt">
-          <!-- Inland Waterway Barge SVG -->
+        <li class="nav-item" data-tab="tab-iww" style="--module-accent: var(--accent-iww)" title="Binnenschifffahrt">
           <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20a6 6 0 0 0 10 0 6 6 0 0 0 10 0M4 16l2-8 6 3 6-3 2 8M12 4v7"></path></svg>
           <span class="nav-label">Binnenschifffahrt</span>
         </li>
-        <li class="nav-item" data-tab="tab-maritime" title="Seeverkehr & Häfen">
-          <!-- Maritime harbour symbol -->
+        <li class="nav-item" data-tab="tab-maritime" style="--module-accent: var(--accent-maritime)" title="Seeverkehr &amp; Häfen">
           <svg class="nav-svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M178-80h-58v-60h58q40 0 79-11t76-34q35 22 72 32.5t75 10.5q38 0 75-10.5t72-32.5q38 23 77.5 34t78.5 11h57v60h-57q-39 0-78-9t-77-28q-38 19-75 28t-73 9q-36 0-73-9.5T333-117q-38 18-77.5 27.5T178-80Zm226.5-169.5Q365-270 330-307q-33 33-71 52.5T182-230l-71-245q-4-12 2-22.5t18-14.5l55-16v-190q0-25 17.5-42.5T246-778h132v-103h204v103h132q25 0 42.5 17.5T774-718v190l55 16q12 4 18 14.5t2 22.5l-71 245q-39-5-77-24.5T630-307q-35 37-74.5 57.5T480-229q-36 0-75.5-20.5ZM481-289q32 0 58.5-18t47.5-43l41-48 36 38q16 17 34 31t38 25l48-159-304-92-304 92 48 159q20-11 38-25t34-31l36-38 41 48q22 25 49 43t59 18ZM246-547l234-71 234 72v-172H246v171Zm234 125Z"/></svg>
-          <span class="nav-label">Seeverkehr & Häfen</span>
+          <span class="nav-label">Seeverkehr &amp; Häfen</span>
         </li>
-        <li class="nav-item" data-tab="tab-intermodal" title="Intermodaler Verkehr & KV">
-          <!-- Intermodal ISO Container SVG -->
+        <li class="nav-item" data-tab="tab-airfreight" style="--module-accent: var(--accent-airfreight)" title="Luftfracht &amp; Flughäfen">
+          <svg class="nav-svg" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M285-80v-83l124-86v-172L80-288v-102l329-231v-188q0-29 21-50t50-21q29 0 50 21t21 50v188l329 231v102L551-421v172l123 86v83l-194-59-195 59Z"/></svg>
+          <span class="nav-label">Luftfracht &amp; Flughäfen</span>
+        </li>
+        <li class="nav-group-label">Vertiefungen</li>
+        <li class="nav-item" data-tab="tab-toll" style="--module-accent: var(--primary-color)" title="Mautdaten">
+          <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M16.5 7.7a4.7 4.7 0 0 0-3.1-1.2c-2.8 0-4.8 2.2-4.8 5.5s2 5.5 4.8 5.5c1.2 0 2.3-.4 3.1-1.2M6.5 10.3h7M6.5 13.7h7"></path></svg>
+          <span class="nav-label">Mautdaten</span>
+        </li>
+        <li class="nav-item" data-tab="tab-intermodal" style="--module-accent: var(--accent-intermodal)" title="Intermodaler Verkehr &amp; KV">
           <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="1.5"></rect><line x1="7" y1="5" x2="7" y2="19"></line><line x1="12" y1="5" x2="12" y2="19"></line><line x1="17" y1="5" x2="17" y2="19"></line><circle cx="4.5" cy="7.5" r="0.75" fill="currentColor"></circle><circle cx="19.5" cy="7.5" r="0.75" fill="currentColor"></circle><circle cx="4.5" cy="16.5" r="0.75" fill="currentColor"></circle><circle cx="19.5" cy="16.5" r="0.75" fill="currentColor"></circle></svg>
-          <span class="nav-label">Intermodaler Verkehr & KV</span>
+          <span class="nav-label">Intermodaler Verkehr &amp; KV</span>
         </li>
-        <li class="nav-item" data-tab="tab-forecast" title="Verkehrsprognose 2040">
-          <!-- Forecast Growth Curve SVG -->
+        <li class="nav-group-label">Zukunft</li>
+        <li class="nav-item" data-tab="tab-forecast" style="--module-accent: var(--accent-forecast)" title="Verkehrsprognose 2040">
           <svg class="nav-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
           <span class="nav-label">Verkehrsprognose 2040</span>
         </li>

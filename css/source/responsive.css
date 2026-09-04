@@ -504,3 +504,95 @@
   #modalSteckbrief .steckbrief-relation-table thead { display: table-header-group; }
   #modalSteckbrief .steckbrief-relation-table tr { break-inside: avoid; }
 }
+
+@media (max-width: 900px) {
+  .app-sidebar {
+    display: none;
+  }
+  .mobile-module-switcher {
+    display: block;
+    position: relative;
+    padding: 8px 12px;
+    background: var(--sidebar-bg);
+    border-bottom: 1px solid #334155;
+    z-index: 900;
+  }
+  .mobile-module-button {
+    width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border: 1px solid #475569;
+    border-left: 4px solid var(--module-accent, var(--primary-color));
+    border-radius: var(--radius-md);
+    background: #1e293b;
+    color: #f8fafc;
+    font: inherit;
+    font-weight: 700;
+    text-align: left;
+    cursor: pointer;
+  }
+  .mobile-module-icon,
+  .mobile-module-icon .nav-svg {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 20px;
+  }
+  .mobile-module-icon .nav-svg { margin: 0; }
+  .mobile-module-label { flex: 1; }
+  .mobile-module-chevron { width: 18px; height: 18px; }
+  .mobile-module-button[aria-expanded="true"] .mobile-module-chevron { transform: rotate(180deg); }
+  .mobile-module-menu {
+    position: absolute;
+    top: calc(100% - 4px);
+    left: 12px;
+    right: 12px;
+    max-height: min(68vh, 520px);
+    overflow-y: auto;
+    padding: 8px;
+    border: 1px solid #cbd5e1;
+    border-radius: var(--radius-md);
+    background: #ffffff;
+    box-shadow: var(--shadow-hover);
+  }
+  .mobile-module-group {
+    padding: 10px 9px 5px;
+    color: #64748b;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .mobile-module-option {
+    width: 100%;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border: 0;
+    border-left: 4px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: #1e293b;
+    font: inherit;
+    font-size: 0.84rem;
+    text-align: left;
+    cursor: pointer;
+  }
+  .mobile-module-option:hover,
+  .mobile-module-option:focus-visible { background: #f1f5f9; outline: 2px solid #0f172a; outline-offset: -2px; }
+  .mobile-module-option.active {
+    border-left-color: var(--module-accent, var(--primary-color));
+    background: #f1f5f9;
+    font-weight: 750;
+  }
+  .mobile-module-option .nav-svg { width: 18px; height: 18px; margin: 0; flex: 0 0 18px; }
+  .mobile-module-option > span:nth-child(2) { flex: 1; }
+  .mobile-module-check { visibility: hidden; font-weight: 900; }
+  .mobile-module-option.active .mobile-module-check { visibility: visible; }
+  .airfreight-map-actions { width: 100%; }
+  .airfreight-map-actions .select-input-sm { flex: 1 1 150px; min-width: 0; }
+}

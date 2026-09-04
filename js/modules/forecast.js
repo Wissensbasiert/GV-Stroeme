@@ -547,8 +547,8 @@
 
         const tipHtml = `
           <div class="map-region-tooltip">
-            <div class="map-tooltip-eyebrow">${getForecastScenarioLabel()} · ${dirText}</div>
             <div class="map-tooltip-title">${cName} <span>(${nutsId})</span></div>
+            <div class="map-tooltip-meta">${getForecastScenarioLabel()} · ${dirText}</div>
             <div class="map-tooltip-value">${isTkm ? 'Verkehrsleistung' : 'Beförderungsmenge'}: ${formatTrafficValue(val / divisor, unitLabel, 2)} ${unitLabel}</div>
             ${grpBadge}
             <div class="map-tooltip-context">
@@ -888,7 +888,7 @@
       const row = document.createElement('tr');
       row.setAttribute('data-partner-id', pId);
       row.innerHTML = `
-        <td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${pName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${pId})</span>${binnenBadge}${modeBadge ? `<span class="relation-mode-badges">${modeBadge}</span>` : ''}</td>
+        <td class="relation-partner-cell"><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><span class="relation-partner-details"><strong>${pName}</strong><span class="table-sub-label">(${pId})</span>${binnenBadge}${modeBadge ? `<span class="relation-mode-badges">${modeBadge}</span>` : ''}</span></td>
         <td>${groupName}</td>
         <td style="text-align: right;"><strong>${cleanValNum}</strong></td>
         <td style="text-align: right;">${growthHtml}</td>

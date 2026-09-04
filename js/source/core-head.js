@@ -207,6 +207,9 @@
     direction: 'all', // 'all', 'outbound', 'inbound', 'balance'
     selectedGroup: 'ALL', // 'ALL' or '1'..'7' (NST-2007 main groups)
     selectedPort: null, // Selected Seaport UNLOCODE (e.g. 'DEHAM') or null for all
+    selectedAirport: null, // Selected airport ICAO code or null for all
+    airfreightMetric: 'tonnes', // 'tonnes' or 'flights'
+    airfreightChartView: 'snapshot', // 'snapshot' or 'trend'
     topX: 10,
     includeBinnen: true, // Toggle for intra-regional self traffic
     modalSplitView: 'snapshot', // 'snapshot' or 'trend'
@@ -303,6 +306,8 @@
   let benchmarkData = {};
   let nstData = {};
   let maritimeData = null;
+  let airfreightData = null;
+  let airfreightViewportBounds = null;
   let geojsonNuts3 = null;
   let geojsonStateBoundaries = null;
   let forecastData = null;
@@ -317,7 +322,7 @@
   const vpCellToNuts = {};
 
   // Leaflet Map Instances & Layers
-  const maps = { overview: null, road: null, toll: null, rail: null, iww: null, intermodal: null, maritime: null, forecast: null };
+  const maps = { overview: null, road: null, toll: null, rail: null, iww: null, intermodal: null, maritime: null, airfreight: null, forecast: null };
   const mapLayers = {
     overview: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
     road: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
@@ -326,6 +331,7 @@
     iww: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
     intermodal: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} },
     maritime: { geojson: null, portsGroup: null, portsLookup: {} },
+    airfreight: { airportsGroup: null, airportsLookup: {} },
     forecast: { geojson: null, stateBoundaries: null, selection: null, spiderGroup: null, spiderLookup: {} }
   };
 
@@ -364,6 +370,12 @@
             padding: [18, 18],
             animate: false,
             maxZoom: 10
+          });
+        } else if (mapKey === 'airfreight' && airfreightViewportBounds?.isValid?.()) {
+          map.fitBounds(airfreightViewportBounds, {
+            padding: [18, 18],
+            animate: false,
+            maxZoom: 7
           });
         } else if (mapKey === 'maritime') {
           map.fitBounds(MARITIME_COAST_BOUNDS, {
@@ -605,12 +617,15 @@
       if (element) element.textContent = value;
     };
     const isMaritime = state.activeTab === 'tab-maritime';
+    const isAirfreight = state.activeTab === 'tab-airfreight';
     const isToll = state.activeTab === 'tab-toll';
     const isIntermodal = state.activeTab === 'tab-intermodal';
     const region = isToll
       ? getTollMunicipalityLabel()
       : isMaritime
-      ? 'Hafenauswahl im Modul'
+      ? (state.selectedPort ? (maritimeData?.seaports?.[state.year]?.[state.selectedPort]?.name || state.selectedPort) : 'Alle Häfen')
+      : isAirfreight
+      ? (state.selectedAirport ? (airfreightData?.airports?.[state.selectedAirport]?.name || state.selectedAirport) : 'Alle Flughäfen')
       : state.region
       ? (regionsData[state.region]?.name || document.getElementById('regionSearchInput')?.value || 'Ausgewählte Region')
       : 'Deutschland';
@@ -630,7 +645,7 @@
     const selectedGoods = document.getElementById('selectGlobalGroup')?.value;
     const goods = isToll
       ? 'Keine Güterarten'
-      : isIntermodal
+      : (isIntermodal || isAirfreight)
       ? 'Güterfilter nicht anwendbar'
       : selectedGoods === 'ALL'
       ? 'Alle Güterarten'
@@ -646,10 +661,15 @@
       ? selectedText('selectTollMetric')
       : isMaritime
       ? 'Tonnen'
+      : isAirfreight
+      ? (state.airfreightMetric === 'flights' ? 'Reine Fracht- und Postflüge' : 'Tonnen')
       : document.getElementById('selectMetric')?.value === 'tkm' ? 'Tonnen-km' : 'Tonnen');
     setText('summaryDirection', direction);
     setText('summaryGoods', goods);
-    setText('summaryScope', `Top ${topX} · ${isToll ? (state.includeBinnen ? 'Binnenverkehr ein' : 'Binnenverkehr aus') : (isMaritime ? 'Binnenverkehr nicht anwendbar' : binnen)}`);
+    const scope = (isMaritime || isAirfreight)
+      ? `Top ${topX}`
+      : `Top ${topX} · ${isToll ? (state.includeBinnen ? 'Binnenverkehr ein' : 'Binnenverkehr aus') : binnen}`;
+    setText('summaryScope', scope);
   }
 
   function setLegendCollapsedState(legend, collapsed) {
@@ -687,7 +707,7 @@
     });
     panel.classList.add('is-collapsed');
     document.getElementById('analysisPanelBody')?.setAttribute('hidden', '');
-    ['selectYear', 'selectScenario', 'selectMetric', 'selectDirection', 'selectGlobalGroup', 'selectTopX', 'selectBinnenverkehr']
+    ['selectYear', 'selectScenario', 'selectMetric', 'selectDirection', 'selectGlobalGroup', 'selectTopX', 'selectBinnenverkehr', 'selectMaritimePort', 'selectAirfreightAirport', 'selectAirfreightMetric']
       .forEach(id => document.getElementById(id)?.addEventListener('change', updateAnalysisSummary));
     updateAnalysisSummary();
   }
@@ -696,9 +716,15 @@
   // support their meaning. Values are retained in state for the other modules,
   // but cannot be changed while they would have no effect.
   function updateGlobalControlAvailability(tabId = state.activeTab) {
-    setTollFilterMode(tabId === 'tab-toll');
+    const isToll = tabId === 'tab-toll';
+    const isAirfreight = tabId === 'tab-airfreight';
+    const isMaritime = tabId === 'tab-maritime';
+    setTollFilterMode(isToll);
+    setAirfreightFilterMode(isAirfreight, isToll, isMaritime);
+    setMaritimePortFilterMode(isMaritime);
     const unavailableByTab = {
       'tab-maritime': new Set(['region', 'metric', 'binnen']),
+      'tab-airfreight': new Set(['region', 'metric', 'goods', 'binnen']),
       // Regionalauswahl, Richtung und Binnenverkehr steuern im KV-Modul Karte
       // und Relationentabelle. NST-Güterarten sind in dieser Datenquelle nicht
       // ausgewiesen und bleiben deshalb bewusst deaktiviert.
@@ -735,11 +761,18 @@
       document.getElementById('regionAutocompleteList')?.classList.remove('active');
     }
 
+    const directionSelect = document.getElementById('selectDirection');
+    const balanceOption = directionSelect?.querySelector('option[value="balance"]');
+    if (balanceOption) {
+      balanceOption.disabled = false;
+      balanceOption.title = '';
+    }
+
     // Straßendaten liegen derzeit nur bis 2024 vor. Ein auswählbares Jahr
     // 2025 würde eine leere Karte wie einen echten Nullwert erscheinen lassen.
     const yearSelect = document.getElementById('selectYear');
     const road2025Option = yearSelect?.querySelector('option[value="2025"]');
-    const road2025Unavailable = tabId === 'tab-road';
+    const road2025Unavailable = tabId === 'tab-road' && (getLatestAvailableModeYear('road') || 0) < 2025;
     if (road2025Option) {
       road2025Option.disabled = road2025Unavailable;
       road2025Option.title = road2025Unavailable
@@ -853,6 +886,7 @@
   async function ensureModuleData(moduleName) {
     const available = {
       maritime: () => Boolean(maritimeData),
+      airfreight: () => Boolean(airfreightData),
       intermodal: () => Boolean(intermodalData),
       forecast: () => Boolean(forecastData),
       toll: () => Boolean(tollMunicipalityData)
@@ -862,6 +896,7 @@
 
     const loaders = {
       maritime: async () => { maritimeData = await fetchJson('data/processed/web_maritime.json?v=20260821n', {}); },
+      airfreight: async () => { airfreightData = await fetchJson('data/processed/web_airfreight.json?v=20260904-airfreight-dataquality1', {}); },
       // This file is regenerated by the data pipeline.  The explicit revision
       // clears copies from older application sessions; no-store also protects
       // later data refreshes when the frontend bundle itself is unchanged.
@@ -926,6 +961,7 @@
       ['Schienengüterverkehr', formatDataYearRange(modeYears('rail'))],
       ['Binnenschifffahrt', formatDataYearRange(modeYears('iww'))],
       ['Seeverkehr und Seehäfen', formatDataYearRange(Object.keys(maritimeData?.national || maritimeData?.seaports || {}))],
+      ['Luftfracht und Flughäfen', 'Deutschland ' + formatDataYearRange(airfreightData?.metadata?.availableNationalYears || []) + '; Flughäfen ' + formatDataYearRange(airfreightData?.metadata?.availableAirportYears || []) + '; Relationen ' + formatDataYearRange(airfreightData?.metadata?.availableRelationYears || [])],
       ['Intermodale Verkehre & KV', formatDataYearRange(intermodalData?.years || [])],
       ['Mautdaten', tollMunicipalityData?.metadata?.source_month
         ? `monatlicher Live-Abruf; Gemeindeauswahl Stand ${formatTollMonth(tollMunicipalityData.metadata.source_month)}`
@@ -937,7 +973,7 @@
   }
 
   async function refreshDataCoverage() {
-    await Promise.all([ensureModuleData('maritime'), ensureModuleData('intermodal'), ensureModuleData('toll')]);
+    await Promise.all([ensureModuleData('maritime'), ensureModuleData('airfreight'), ensureModuleData('intermodal'), ensureModuleData('toll')]);
     refreshDataCoverageText();
   }
 
@@ -1222,10 +1258,85 @@
     });
   }
 
+  function setupMobileModuleSwitcher() {
+    const button = document.getElementById('btnMobileModule');
+    const menu = document.getElementById('mobileModuleMenu');
+    const desktopItems = [...document.querySelectorAll('#mainNav > li')];
+    if (!button || !menu || !desktopItems.length) return;
+
+    desktopItems.forEach(item => {
+      if (item.classList.contains('nav-group-label')) {
+        const label = document.createElement('div');
+        label.className = 'mobile-module-group';
+        label.textContent = item.textContent.trim();
+        menu.appendChild(label);
+        return;
+      }
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.className = 'mobile-module-option';
+      option.dataset.tab = item.dataset.tab;
+      option.style.setProperty('--module-accent', item.style.getPropertyValue('--module-accent'));
+      option.innerHTML = `${item.querySelector('.nav-svg')?.outerHTML || ''}<span>${item.querySelector('.nav-label')?.textContent || item.title}</span><span class="mobile-module-check" aria-hidden="true">✓</span>`;
+      option.addEventListener('click', () => {
+        item.click();
+        menu.hidden = true;
+        button.setAttribute('aria-expanded', 'false');
+        button.focus();
+      });
+      menu.appendChild(option);
+    });
+
+    const sync = () => {
+      const active = document.querySelector('#mainNav .nav-item.active');
+      if (!active) return;
+      button.style.setProperty('--module-accent', active.style.getPropertyValue('--module-accent'));
+      const icon = button.querySelector('.mobile-module-icon');
+      if (icon) icon.innerHTML = active.querySelector('.nav-svg')?.outerHTML || '';
+      const label = button.querySelector('.mobile-module-label');
+      if (label) label.textContent = active.querySelector('.nav-label')?.textContent || active.title;
+      menu.querySelectorAll('.mobile-module-option').forEach(option => {
+        const current = option.dataset.tab === active.dataset.tab;
+        option.classList.toggle('active', current);
+        option.setAttribute('aria-current', current ? 'page' : 'false');
+      });
+    };
+    window.syncMobileModuleSwitcher = sync;
+
+    button.addEventListener('click', event => {
+      event.stopPropagation();
+      menu.hidden = !menu.hidden;
+      button.setAttribute('aria-expanded', String(!menu.hidden));
+      if (!menu.hidden) menu.querySelector('.mobile-module-option.active')?.focus();
+    });
+    menu.addEventListener('keydown', event => {
+      const options = [...menu.querySelectorAll('.mobile-module-option')];
+      const index = options.indexOf(document.activeElement);
+      if (event.key === 'Escape') {
+        menu.hidden = true;
+        button.setAttribute('aria-expanded', 'false');
+        button.focus();
+      } else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
+        const step = event.key === 'ArrowDown' ? 1 : -1;
+        options[(index + step + options.length) % options.length]?.focus();
+      }
+    });
+    document.addEventListener('click', event => {
+      if (!event.target.closest('#mobileModuleSwitcher')) {
+        menu.hidden = true;
+        button.setAttribute('aria-expanded', 'false');
+      }
+    });
+    sync();
+  }
   // Setup Global Event Listeners
   function setupEventListeners() {
     setupAnalysisPanel();
     setupTollEventListeners();
+    setupMaritimeEventListeners();
+    setupAirfreightEventListeners();
+    setupMobileModuleSwitcher();
     // Window Resize Handler for Leaflet & Dynamic Views
     let resizeTimer = null;
     window.addEventListener('resize', () => {
@@ -1270,6 +1381,7 @@
         
         item.classList.add('active');
         item.setAttribute('aria-selected', 'true');
+        window.syncMobileModuleSwitcher?.();
         const tabId = item.getAttribute('data-tab');
         state.activeTab = tabId;
         document.getElementById('analysisPanelBody')?.classList.toggle('has-forecast-scenario', tabId === 'tab-forecast');
@@ -1281,6 +1393,7 @@
 
         const deferredModule = ({
           'tab-maritime': 'maritime',
+          'tab-airfreight': 'airfreight',
           'tab-intermodal': 'intermodal',
           'tab-forecast': 'forecast',
           'tab-toll': 'toll'
@@ -1332,6 +1445,8 @@
             renderIntermodalTab();
           } else if (tabId === 'tab-maritime') {
             renderMaritimeTab();
+          } else if (tabId === 'tab-airfreight') {
+            renderAirfreightTab();
           } else if (tabId === 'tab-overview') {
             renderOverviewTab();
           } else if (tabId.startsWith('tab-')) {
@@ -1463,6 +1578,7 @@
         e.preventDefault();
         state.selectedPort = null;
         renderMaritimeTab();
+        updateAnalysisSummary();
       });
     }
 
@@ -1856,6 +1972,7 @@
       { key: 'iww', containerId: 'iwwLeafletMap' },
       { key: 'intermodal', containerId: 'intermodalLeafletMap' },
       { key: 'maritime', containerId: 'maritimeLeafletMap' },
+      { key: 'airfreight', containerId: 'airfreightLeafletMap' },
       { key: 'forecast', containerId: 'forecastLeafletMap' }
     ];
 
@@ -2003,9 +2120,9 @@
   }
 
   // Resolve Choropleth Value based on Active Filters & Mode Filters & Direction
-  function resolveChoroplethValue(nutsId, cData, modeFilter) {
+  function resolveChoroplethValue(nutsId, cData, modeFilter, year = state.year) {
     const isTkm = state.metric === 'tkm';
-    const yrSum = summaryData[nutsId]?.[state.year] || {};
+    const yrSum = summaryData[nutsId]?.[String(year)] || {};
     const dir = state.direction; // 'all', 'inbound', 'outbound', 'balance'
     
     // 1. If a specific commodity group is selected (1-7)
@@ -2057,6 +2174,19 @@
     if (dir === 'balance') return isTkm ? (cData.balance_tkm || 0) : (cData.balance_tonnes || 0);
 
     return isTkm ? (cData.total_tkm || 0) : (cData.total_tonnes || 0);
+  }
+
+  function formatRegionHoverComparison(current, reference, label, formatHistoricValue) {
+    if (state.direction === 'balance') {
+      return `<div>Saldo ${label}: <strong>${reference === null || reference === undefined ? '--' : formatHistoricValue(reference)}</strong></div>`;
+    }
+    if (!Number.isFinite(Number(reference)) || Number(reference) <= 0) {
+      return `<div>Δ ggü. ${label}: <strong>--</strong></div>`;
+    }
+    const delta = (Number(current) - Number(reference)) / Number(reference) * 100;
+    const color = delta >= 0 ? '#16a34a' : '#dc2626';
+    const arrow = delta >= 0 ? '↗ +' : '↘ ';
+    return `<div>Δ ggü. ${label}: <strong style="color:${color};">${arrow}${formatDeNum(delta, 1)} %</strong></div>`;
   }
 
   function getOverviewTooltipFilteredValue(record) {
@@ -2275,6 +2405,14 @@
         const isTkm = state.metric === 'tkm';
         const unit = isTkm ? 'Mrd. tkm' : 'Mio. t';
         const divisor = isTkm ? 1e9 : 1e6;
+        const previousYear = String(Number(state.year) - 1);
+        const previousRecord = choroplethData?.[previousYear]?.[nutsId];
+        const baselineRecord = state.year === '2016' ? null : choroplethData?.['2016']?.[nutsId];
+        const previousValue = previousRecord ? resolveChoroplethValue(nutsId, previousRecord, modeFilter, previousYear) : null;
+        const baselineValue = baselineRecord ? resolveChoroplethValue(nutsId, baselineRecord, modeFilter, '2016') : null;
+        const formatHistoricValue = value => `${value > 0 && isBalance ? '+' : ''}${formatTrafficValue(value / divisor, unit, 2)} ${unit}`;
+        const comparisonDisplay = formatRegionHoverComparison(val, previousValue, previousYear, formatHistoricValue)
+          + formatRegionHoverComparison(val, baselineValue, '2016', formatHistoricValue);
 
         let dirLabel = 'Aufkommen';
         if (state.direction === 'inbound') dirLabel = 'Empfang';
@@ -2312,12 +2450,10 @@
 
         layer.bindTooltip(`
           <div class="map-region-tooltip" style="font-size:0.825rem; line-height:1.45; width:min(360px, calc(100vw - 42px)); min-width:0; max-width:calc(100vw - 42px); box-sizing:border-box; white-space:normal;">
-            <div style="font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:2px;">Landkreis / kreisfreie Stadt</div>
-            <strong>${nutsName}</strong> <span style="font-size:0.75rem; color:#64748b; font-weight:600;">(${nutsId})</span>
-            <div style="margin-top:7px; padding-top:6px; border-top:1px solid #e2e8f0;">
-              <div style="font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:2px;">Bezugsjahr · ${state.year}</div>
-              • ${displayVal}
-            </div>
+            <div class="map-tooltip-title">${nutsName} <span>(${nutsId})</span></div>
+            <div class="map-tooltip-meta">Landkreis / kreisfreie Stadt · Bezugsjahr: ${state.year}</div>
+            <div class="map-tooltip-value">${displayVal}</div>
+            <div class="map-tooltip-context">${comparisonDisplay}</div>
             ${forecastBlock}
             <div class="map-tooltip-filter-hint" style="display:block; max-width:none; margin-top:7px; white-space:normal; overflow-wrap:anywhere; line-height:1.3;">Klicken Sie, um diese Region/diesen Kreis als Filter zu aktivieren.</div>
           </div>
@@ -2731,16 +2867,17 @@
       }
       if (item.marker) {
         item.marker.setStyle({
-          fillColor: item.originalColor,
+          fillColor: item.originalMarkerColor || item.originalColor,
+          fillOpacity: item.originalMarkerOpacity ?? 0.9,
           radius: item.originalRadius ?? Math.max(4, item.originalWeight + 1.5),
-          weight: 2,
-          color: '#ffffff'
+          weight: item.originalMarkerWeight ?? 2,
+          color: item.originalMarkerBorderColor || '#ffffff'
         });
       }
     });
   }
 
-  function setHighlight(mapKey, partnerId) {
+  function setHighlight(mapKey, partnerId, scrollTable = true) {
     if (!partnerId) return;
     if (activeHighlightedPartnerId === partnerId && activeHighlightedMapKey === mapKey) return;
 
@@ -2753,7 +2890,7 @@
     const rows = document.querySelectorAll(`.data-table tbody tr[data-partner-id="${partnerId}"]`);
     rows.forEach(r => {
       r.classList.add('row-highlight');
-      r.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (scrollTable) r.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     });
 
     // Highlight map relation
@@ -2771,7 +2908,7 @@
       if (item.marker) {
         item.marker.setStyle({
         fillColor: '#2563eb',
-          radius: Math.max(6.5, item.originalWeight + 3.5),
+          radius: Math.max(6.5, item.originalRadius || 0, item.originalWeight + 3.5),
           weight: 3,
           color: '#ffffff'
         });
@@ -3453,6 +3590,7 @@
     else if (tabId === 'tab-toll') renderTollTab();
     else if (tabId === 'tab-intermodal') renderIntermodalTab();
     else if (tabId === 'tab-maritime') renderMaritimeTab();
+    else if (tabId === 'tab-airfreight') renderAirfreightTab();
     else if (tabId === 'tab-overview') renderOverviewTab();
     else if (tabId?.startsWith('tab-')) renderModeDetailTab(tabId.replace('tab-', ''));
     annotateMissingComparisons();
@@ -4227,7 +4365,7 @@
       const row = document.createElement('tr');
       row.setAttribute('data-partner-id', partnerId);
       row.innerHTML = `
-        <td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${partnerName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${partnerId})</span>${locationBadge}${binnenBadge}${modeBadge}</td>
+        <td class="relation-partner-cell"><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><span class="relation-partner-details"><strong>${partnerName}</strong><span class="table-sub-label">(${partnerId})</span>${locationBadge}${binnenBadge}${modeBadge}</span></td>
         <td style="text-align: right;"><strong>${cleanValNum}</strong></td>
         <td style="text-align: right;">${yoy}</td>
         <td style="text-align: right;">${trend10}</td>
@@ -4751,7 +4889,7 @@
             const row = document.createElement('tr');
             row.setAttribute('data-partner-id', partnerId);
             row.innerHTML = `
-              <td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${partnerName}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${partnerId})</span>${locationBadge}${binnenBadge}</td>
+              <td class="relation-partner-cell"><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><span class="relation-partner-details"><strong>${partnerName}</strong><span class="table-sub-label">(${partnerId})</span>${locationBadge}${binnenBadge}</span></td>
               <td>${gName}</td>
               <td style="text-align: right;"><strong>${cleanValNum}</strong></td>
               <td style="text-align: right;">${yoy}</td>

@@ -1204,18 +1204,8 @@
   font-size: 0.83rem;
   line-height: 1.5;
 }
-.toll-map-tooltip-eyebrow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 2px 10px;
-  margin-bottom: 4px;
-  color: #64748b;
-  font-size: 0.7rem;
-  font-weight: 500;
-  line-height: 1.35;
-  letter-spacing: 0.01em;
-}
 .toll-map-tooltip-title {
+  margin-bottom: 4px;
   padding-bottom: 5px;
   border-bottom: 1px solid #e2e8f0;
   color: #0f172a;
@@ -1223,6 +1213,19 @@
   font-weight: 800;
   line-height: 1.35;
   overflow-wrap: anywhere;
+}
+.toll-map-tooltip-meta,
+.toll-map-tooltip-eyebrow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  margin-bottom: 4px;
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 .toll-map-tooltip-route-arrow {
   color: #64748b;
@@ -1267,3 +1270,35 @@
     flex-direction: column;
   }
 }
+
+
+
+.airfreight-relation-status {
+  margin: 8px 14px 0;
+  padding: 9px 11px;
+  border: 1px solid #bae6fd;
+  border-left: 3px solid var(--accent-airfreight);
+  border-radius: var(--radius-md);
+  background: #f0f9ff;
+  color: #0c4a6e;
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.airfreight-relation-status button {
+  margin-left: 6px;
+  cursor: pointer;
+}
+
+.airfreight-circle-small,
+.airfreight-circle-medium,
+.airfreight-circle-large {
+  display: inline-block;
+  border-radius: 50%;
+  border: 2px solid #0369a1;
+  background: rgba(14, 165, 233, 0.55);
+}
+.airfreight-circle-small { width: 10px; height: 10px; }
+.airfreight-circle-medium { width: 15px; height: 15px; }
+.airfreight-circle-large { width: 20px; height: 20px; }
+.airfreight-line-sample { background: var(--accent-airfreight); border-top-color: var(--accent-airfreight); }

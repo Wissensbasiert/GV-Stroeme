@@ -1,7 +1,7 @@
 # Roadmap: Fachliche Weiterentwicklung des Güterströme-Dashboards
 
-**Stand:** 03.09.2026  
-**Status:** Fachliches Konzept; Umsetzung nach Prüfung und Ergänzung der Datenquellen  
+**Stand:** 04.09.2026
+**Status:** Umgesetzt und lokal qualitätsgesichert; maßgeblicher Prüfstand im Qualitätssicherungsplan
 **Bezug:** Güterverkehrsströme Deutschland
 
 ## 1. Zweck des Dokuments
@@ -88,9 +88,9 @@ Die Relationsdaten bilden daher nur einen veröffentlichten Ausschnitt des tats�
 
 Diese Einschränkungen werden im Modul an der Relationstabelle und in den allgemeinen Quelleninformationen erläutert.
 
-### 4.1 Vorgesehener Informationstext für die Top-10-Relationen
+### 4.1 Informationstext für die Top-10-Relationen
 
-> Die Tabelle zeigt die zehn stärksten veröffentlichten Fracht- und Postrelationen des ausgewählten Flughafens. Eurostat veröffentlicht in AVIA_GOR_DE nur Routen oberhalb festgelegter Schwellen. Mit `:` gekennzeichnete Angaben können entweder unterhalb der Veröffentlichungsschwelle liegen oder keinen Verkehr aufweisen. Die Relationsdaten sind daher nicht vollständig; ihre Summe entspricht nicht dem gesamten Fracht- und Postaufkommen des Flughafens. Die vollständigen Flughafenwerte stammen aus AVIA_GOOA, der nationale Gesamtwert aus AVIA_GOOC. Die dargestellten Flughafenbeziehungen entsprechen außerdem nicht zwingend dem ursprünglichen Versand- und endgültigen Empfangsort einer Sendung.
+> Die Auswertung verbindet drei fachlich getrennte Datenebenen: nationale Luftfrachtwerte für Deutschland, veröffentlichte Werte je Flughafen und veröffentlichte Beziehungen zwischen Flughäfen. Die Ebenen folgen unterschiedlichen Zähl- und Veröffentlichungsregeln und dürfen deshalb nicht gegeneinander hochgerechnet werden. Die Tabelle zeigt nur die stärksten veröffentlichten Beziehungen des ausgewählten Flughafens. Beziehungen unterhalb der Veröffentlichungsschwelle können fehlen; die Summe der Tabelle entspricht daher weder dem gesamten Aufkommen des Flughafens noch dem nationalen Gesamtwert. Eine Flughafenverbindung bezeichnet zudem nicht zwingend den ursprünglichen Versand- oder endgültigen Empfangsort einer Sendung.
 
 ## 5. Inhalt und Aufbau des Moduls
 
@@ -100,7 +100,7 @@ Das Modul orientiert sich gestalterisch an den bestehenden Analysemodulen, über
 
 Vorgesehen sind kompakte Kennzahlen zu:
 
-- Fracht- und Postaufkommen in Deutschland,
+- Luftfracht- und Luftpostaufkommen in Deutschland,
 - Veränderung gegenüber dem Vorjahr,
 - Zahl der Flughäfen mit ausgewiesenem Aufkommen,
 - Konzentration auf die größten Frachtflughäfen.
@@ -109,7 +109,7 @@ Die nationale Gesamtmenge stammt aus AVIA_GOOC. Flughafenbezogene Kennzahlen wer
 
 ### 5.2 Karte und Relationsdarstellung
 
-Die Karte zeigt die deutschen Flughäfen als Punktsymbole. Größe beziehungsweise visuelles Gewicht der Symbole richten sich nach dem Fracht- und Postaufkommen des ausgewählten Jahres. Nach Auswahl eines Flughafens werden dessen stärkste veröffentlichte Beziehungen aus AVIA_GOR_DE dargestellt.
+Die Karte zeigt beim Einstieg ohne vorausgewählten Flughafen alle deutschen Flughäfen als Punktsymbole in einem auf Deutschland begrenzten Kartenausschnitt. Größe beziehungsweise visuelles Gewicht der Symbole richten sich nach der gewählten Kennzahl und dem ausgewählten Jahr. Erst nach Auswahl eines Flughafens werden dessen stärkste veröffentlichte Beziehungen dargestellt. Der Deutschlandausschnitt bleibt dabei erhalten und wird für Fernverbindungen nicht automatisch auf die Weltansicht erweitert.
 
 Die Karte wird nicht als NUTS-3-Flächenkarte umgesetzt. Ein Flughafen ist ein Verkehrsknoten; sein Umschlag darf nicht ohne weitere Annahmen als Güterverkehrsmenge des umgebenden Kreises interpretiert werden.
 
@@ -121,11 +121,11 @@ Für die Standortkoordinaten gilt folgende Quellenhierarchie:
 
 Die am 3. September 2026 durchgeführte Bestandsprüfung ergab 281 unterschiedliche ICAO-Codes in den relevanten Flughafen- und Relationsdaten ab 2016. GISCO deckt davon 279 ab; `CYYC` und `EKCH` werden durch OurAirports ergänzt. Die kombinierte Abdeckung beträgt für den derzeitigen Bestand 281 von 281 Codes. Dieser Befund wird bei jeder Datenaktualisierung neu geprüft. Originaldateien, Abrufstände, Prüfsummen und Aktualisierungsablauf sind in [`README_FLUGHAFENSTANDORTE.md`](../../data/raw/Luftverkehr/Flughafenstandorte/README_FLUGHAFENSTANDORTE.md) dokumentiert.
 
-Die später erzeugte Flughafenstammtabelle speichert je Standort ICAO-Code, Anzeigename, Staat, Längen- und Breitengrad, Koordinatenquelle und Stand der Quelle. Historische oder geschlossene Flughäfen werden nicht allein aufgrund eines aktuellen Geodatensatzes entfernt, wenn sie für frühere Berichtsjahre in den Eurostat-Daten benötigt werden.
+Die später erzeugte Flughafenstammtabelle speichert je Standort ICAO-Code, Anzeigename, Staat, Längen- und Breitengrad, Koordinatenquelle und Stand der Quelle. Für deutsche Flughäfen werden die deutschsprachigen Eurostat-Flughafenlabels als Anzeigeautorität verwendet und nur orthografisch (Umlaute und Großschreibung) aufbereitet; ausländische Partner behalten ihre Standortbezeichnung aus GISCO beziehungsweise OurAirports. Historische oder geschlossene Flughäfen werden nicht allein aufgrund eines aktuellen Geodatensatzes entfernt, wenn sie für frühere Berichtsjahre in den Eurostat-Daten benötigt werden.
 
 ### 5.3 Top-10-Relationen
 
-Die Relationstabelle zeigt die zehn stärksten veröffentlichten Partnerflughäfen der aktuellen Auswahl. Sie reagiert auf Jahr und Richtung. Gesamt, Versand und Empfang werden aus den jeweils passenden Messgrößen der Relationsquelle abgeleitet.
+Die Relationstabelle zeigt die zehn stärksten veröffentlichten Partnerflughäfen der aktuellen Auswahl. Sie reagiert auf Jahr, Richtung und Kennzahl. Vor dem Flughafennamen stehen Rang und Punkt; der ICAO-Code folgt zurückhaltend in Klammern. Neben dem aktuellen Wert zeigt die Tabelle die Veränderung gegenüber dem Vorjahr und gegenüber dem Basisjahr 2016. Der Anteil an der sichtbaren Top-Auswahl wird im Hover der Verbindung erläutert.
 
 Die Eurostat-Begriffe werden nicht inhaltlich umgedeutet, sondern für die konsistente Bedienlogik des Dashboards transparent übersetzt:
 
@@ -152,21 +152,21 @@ Folgende Steuerungen sind fachlich vorgesehen:
 
 - **Jahr:** zentrale Jahresauswahl, begrenzt auf die für das Modul verfügbaren Jahre,
 - **Richtung:** Gesamt, Versand (geladen) und Empfang (entladen),
-- **Flughafen:** eigene Auswahl innerhalb des Moduls oder Auswahl direkt über die Karte,
-- **Kennzahl:** Fracht und Post in Tonnen sowie Fracht- und Postflüge in Anzahl.
+- **Flughafen:** Auswahl unter **Aktuelle Einstellungen → Raum & Zeit** oder direkt über die Karte,
+- **Kennzahl:** Auswahl unter **Aktuelle Einstellungen → Betrachtung** zwischen Fracht und Post in Tonnen sowie reinen Fracht- und Postflügen in Anzahl.
 
 Der Kennzahlenschalter wird ähnlich wie im Mautdatenmodul angeordnet, aber fachlich eindeutig beschriftet:
 
 - **Fracht und Post (t):** primäre Kennzahl für Aufkommen, Rangfolge, Dynamik und Relationen;
 - **Fracht- und Postflüge (Anzahl):** ergänzende Betriebskennzahl auf Basis von `CAF_FRM`.
 
-Die Flugzahl darf nicht als Menge von Gütern bezeichnet werden. Außerdem ist sie kein Maß für die durchschnittliche Auslastung: Die [Eurostat-Metadaten](https://ec.europa.eu/eurostat/cache/metadata/en/avia_pa_esms.htm) führen `CAF_FRM` als „Freight and mail commercial air flights“, während die Tonnage nach dem Konzept der geladenen und entladenen Fracht und Post abgegrenzt wird. Vor der Umsetzung wird anhand der Eurostat-Metadaten und ausgewählter Flughäfen abschließend dokumentiert, welche Passagierflüge mit Beiladefracht in der Flugzahl enthalten sind. Bis zu dieser Prüfung bleibt die Tonnage die voreingestellte und fachlich führende Kennzahl; eine Division Tonnen je Flug wird nicht angeboten.
+Die Flugzahl darf nicht als Menge von Gütern bezeichnet werden. Außerdem ist sie kein Maß für die durchschnittliche Auslastung: Die [Eurostat-Metadaten](https://ec.europa.eu/eurostat/cache/metadata/en/avia_pa_esms.htm) führen `CAF_FRM` als „Freight and mail commercial air flights“, während die Tonnage nach dem Konzept der geladenen und entladenen Fracht und Post abgegrenzt wird. Die geprüfte Kennzahl umfasst reine Fracht- und Postflüge; Passagierflüge mit Beiladefracht sind nicht enthalten. Die Tonnage bleibt die voreingestellte und fachlich führende Kennzahl; eine Division Tonnen je Flug wird nicht angeboten.
 
 Die regionale NUTS-Auswahl, NST-2007-Gütergruppen und Tonnenkilometer sind für das Luftfrachtmodul nicht anwendbar. Nicht passende globale Filter werden im Modul klar als nicht verfügbar gekennzeichnet oder ausgeblendet, ohne ihre Werte für andere Module zu verändern.
 
 ## 7. Neustrukturierung der Desktop-Navigation
 
-Mit dem Luftfrachtmodul umfasst die Navigation neun fachlich unterschiedliche Bereiche. Zur besseren Orientierung werden sichtbare Gruppenüberschriften und zusätzliche Abstände eingeführt. Auf- und zuklappbare Untermenüs sind bei diesem Umfang zunächst nicht erforderlich.
+Mit dem Luftfrachtmodul umfasst die Navigation neun fachlich unterschiedliche Bereiche. Zur besseren Orientierung werden sichtbare Gruppenüberschriften in heller, fetter Versalschrift und zusätzliche Abstände eingeführt. Auf seitliche beziehungsweise nachlaufende Trennlinien wird bewusst verzichtet. Symbole und Texte bleiben innerhalb der Gruppen linksbündig. Auf- und zuklappbare Untermenüs sind bei diesem Umfang zunächst nicht erforderlich.
 
 Vorgesehene Gliederung:
 
@@ -288,14 +288,14 @@ Die sichtbaren Quellenangaben werden **erst mit der tatsächlichen Freischaltung
 - Desktop- und Mobilnavigation mit Maus, Tastatur und Berührung testen,
 - Ladezeit und Größe der erzeugten Webdatei dokumentieren.
 
-## 12. Noch zu treffende Detailentscheidungen
+## 12. Getroffene Detailentscheidungen
 
-1. Welche Akzentfarbe wird für Luftfracht festgelegt?
-2. Welche Zahl von Flughäfen wird in der Statusansicht standardmäßig gezeigt?
-3. Welche Flughäfen erscheinen gleichzeitig in der Dynamikansicht?
-4. Soll die Flughafenwahl dauerhaft im Modul sichtbar sein oder erst nach Auswahl auf der Karte erscheinen?
-5. Soll die ergänzende Flugzahl bereits in der ersten Ausbaustufe angeboten werden oder erst nach der vertieften Prüfung ihrer Abgrenzung?
+1. Luftfracht verwendet den bereits im Dashboard vorhandenen hellblauen Akzent `#0ea5e9`; aktive Einträge sind zusätzlich durch Rand und Schriftgewicht erkennbar.
+2. Die Statusansicht zeigt standardmäßig Top 10 und folgt dem vorhandenen Top-X-Filter.
+3. Die Dynamikansicht zeigt die fünf im gewählten Jahr führenden Flughäfen sowie zusätzlich den ausgewählten Flughafen.
+4. Die Flughafenwahl steht unter **Aktuelle Einstellungen → Raum & Zeit** und ist zusätzlich über Kartenpunkte steuerbar. Beim Einstieg ist kein Flughafen vorausgewählt.
+5. Die Flugzahl ist in der ersten Ausbaustufe enthalten. Sie wird ausdrücklich als **reine Fracht- und Postflüge** bezeichnet (`CAF_FRM`, `CAF_FRM_DEP`, `CAF_FRM_ARR`); Passagierflüge mit Beiladefracht sind nicht enthalten.
 
-## 13. Unmittelbar nächster Arbeitsschritt
+## 13. Nächster Pflegezyklus
 
-Als nächster Schritt wird die fachliche Vorverarbeitung für den Zeitraum ab 2016 spezifiziert und anschließend umgesetzt. Dabei entstehen getrennte Jahresverfügbarkeiten für nationale Werte, Flughafensummen und Relationen sowie eine ICAO-basierte Flughafenstammtabelle mit dokumentierter Koordinatenquelle. Vor der Freischaltung des Moduls werden der dynamische Relations-Leerzustand und die synchrone Aktualisierung von „Quellen“ und „Hinweise“ in die Qualitätssicherung aufgenommen.
+Bei einem neuen Eurostat-Release werden die drei Tabellen getrennt aktualisiert, `scripts/pipelines/build_airfreight_data.py` und `scripts/validation/validate_airfreight_bundle.py` ausgeführt sowie Datenstände, Quellenhinweise und Browseransicht gemeinsam geprüft. Abweichende letzte Berichtsjahre bleiben ausdrücklich sichtbar und werden nicht durch Rückfallwerte kaschiert.

@@ -65,6 +65,33 @@
     return unit ? `${sign}${formatted} ${unit}` : `${sign}${formatted}`;
   }
 
+  function updateMaritimePortSelect(yearPorts) {
+    const select = document.getElementById('selectMaritimePort');
+    if (!select) return;
+    const ports = Object.values(yearPorts || {}).sort((a, b) =>
+      String(a.name || a.unlocode).localeCompare(String(b.name || b.unlocode), 'de')
+    );
+    if (state.selectedPort && !yearPorts?.[state.selectedPort]) state.selectedPort = null;
+    select.replaceChildren(
+      new Option('Alle Häfen', ''),
+      ...ports.map(port => new Option((port.name || port.unlocode) + ' (' + port.unlocode + ')', port.unlocode))
+    );
+    select.value = state.selectedPort || '';
+  }
+
+  function setMaritimePortFilterMode(isMaritime) {
+    const control = document.getElementById('controlGroupMaritimePort');
+    if (control) control.hidden = !isMaritime;
+    document.getElementById('analysisPanelBody')?.classList.toggle('is-maritime-mode', isMaritime);
+  }
+
+  function setupMaritimeEventListeners() {
+    document.getElementById('selectMaritimePort')?.addEventListener('change', event => {
+      state.selectedPort = event.target.value || null;
+      renderMaritimeTab();
+      updateAnalysisSummary();
+    });
+  }
   // ============================================================
   // TAB 5: SEEVERKEHR & HÄFEN (INTERACTIVE PORTS, KPIS & CHARTS)
   // ============================================================
@@ -74,6 +101,7 @@
     const prevYr = String(parseInt(yr) - 1);
     const yearPorts = maritimeData.seaports?.[yr] || maritimeData.seaports?.['2024'] || {};
     const prevPorts = maritimeData.seaports?.[prevYr] || {};
+    updateMaritimePortSelect(yearPorts);
 
     // Helper: Dynamically build nationwide maritime aggregation across all ports and commodities
     const buildNationalMaritime = (targetYr) => {
@@ -280,9 +308,28 @@
         return 16.5;
       };
 
+      const basePorts = maritimeData.seaports?.['2016'] || {};
+      const formatPortHoverComparison = (current, reference, label) => {
+        if (dirFilter === 'balance') {
+          return '<div>Saldo ' + label + ': <strong>' + (reference === null ? '--' : formatSmartMioTonnes(reference, 'Mio. t')) + '</strong></div>';
+        }
+        if (reference === null || reference === undefined || reference <= 0) {
+          return '<div>Δ ggü. ' + label + ': <strong>--</strong></div>';
+        }
+        const delta = ((current - reference) / reference) * 100;
+        const color = delta >= 0 ? '#16a34a' : '#dc2626';
+        const arrow = delta >= 0 ? '↗ +' : '↘ ';
+        return '<div>Δ ggü. ' + label + ': <strong style="color:' + color + ';">' + arrow + formatDeNum(delta, 1) + ' %</strong></div>';
+      };
       Object.values(yearPorts).forEach(p => {
         const portFlow = getFilteredTonnage(p, groupFilter, dirFilter);
         const portTeu = getFilteredTeu(p, groupFilter, dirFilter);
+        const previousPortFlow = prevPorts[p.unlocode] ? getFilteredTonnage(prevPorts[p.unlocode], groupFilter, dirFilter) : null;
+        const baselinePortFlow = yr === '2016' || !basePorts[p.unlocode]
+          ? null
+          : getFilteredTonnage(basePorts[p.unlocode], groupFilter, dirFilter);
+        const comparisonInfo = formatPortHoverComparison(portFlow, previousPortFlow, prevYr)
+          + formatPortHoverComparison(portFlow, baselinePortFlow, '2016');
         const radius = getMrtmRadius(portFlow);
         const isThisSelected = isSpecific && (state.selectedPort === p.unlocode);
         const isAnotherSelected = isSpecific && !isThisSelected;
@@ -303,17 +350,18 @@
 
         // Lightweight Hover Tooltip with smart dynamic decimal formatting
         const teuTooltip = (portTeu !== 0)
-          ? `<br>• Containerumschlag (${teuDirectionLabel}): <strong>${Math.abs(portTeu) >= 10000 ? formatSmartMioTonnes(portTeu, 'Mio. TEU') : formatDeNum(portTeu, 0) + ' TEU'}</strong>`
+          ? `<div class="map-tooltip-context">Containerumschlag (${teuDirectionLabel}): <strong>${Math.abs(portTeu) >= 10000 ? formatSmartMioTonnes(portTeu, 'Mio. TEU') : formatDeNum(portTeu, 0) + ' TEU'}</strong></div>`
           : '';
         marker.bindTooltip(`
-          <div style="font-size:0.825rem; line-height:1.45;">
-            <div style="font-size:0.68rem; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.04em; margin-bottom:2px;">Bezugsjahr: ${state.year} · ${teuDirectionLabel}</div>
-            <strong>Seehafen ${p.name}</strong> (${p.unlocode})<br>
-            • Umschlag: <strong>${formatSmartMioTonnes(portFlow, 'Mio. t')}</strong>
+          <div class="map-region-tooltip">
+            <div class="map-tooltip-title">Seehafen ${p.name} <span>(${p.unlocode})</span></div>
+            <div class="map-tooltip-meta">Bezugsjahr: ${state.year} · ${teuDirectionLabel}</div>
+            <div class="map-tooltip-value">Umschlag: <strong>${formatSmartMioTonnes(portFlow, 'Mio. t')}</strong></div>
+            <div class="map-tooltip-context">${comparisonInfo}</div>
             ${teuTooltip}
             <div class="map-tooltip-filter-hint">Klicken Sie, um diesen Hafen auszuwählen und die Analysen darauf zu begrenzen.</div>
           </div>
-        `, { sticky: true });
+        `, { sticky: true, className: 'maritime-leaflet-tooltip' });
 
         // Rich Click Detail Popup
         const teuInfo = portTeu !== 0 ? `• Containerumschlag (${teuDirectionLabel}): <strong>${Math.abs(portTeu) >= 10000 ? formatSmartMioTonnes(portTeu, 'Mio. TEU') : formatDeNum(portTeu, 0) + ' TEU'}</strong><br>` : '';
@@ -337,6 +385,7 @@
         marker.on('click', () => {
           state.selectedPort = (state.selectedPort === p.unlocode) ? null : p.unlocode;
           renderMaritimeTab();
+          updateAnalysisSummary();
         });
       });
     }
@@ -432,7 +481,7 @@
           const row = document.createElement('tr');
           row.setAttribute('data-partner-id', p.iso);
           row.innerHTML = `
-            <td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${p.name}</strong> <span style="font-size:0.75rem; color:#94a3b8;">(${p.iso})</span></td>
+            <td class="relation-partner-cell"><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><span class="relation-partner-details"><strong>${p.name}</strong><span class="table-sub-label">(${p.iso})</span></span></td>
             <td>${gName}</td>
             <td style="text-align: right;"><strong>${cleanValNum}</strong></td>
             <td style="text-align: right;">${yoy}</td>

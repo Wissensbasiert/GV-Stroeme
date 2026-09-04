@@ -22,7 +22,8 @@ Alle Web-JSON-Dateien werden UTF-8-kodiert geschrieben. Umlaute und Sonderzeiche
 | Mautdaten | neuester bundesweiter Monatsdownload unter `data/raw/Straße/Lkw-Portal/mautdaten_bund_monat_sz_YYYY-MM.zip` ausschließlich für das Suchregister; Relationswerte live aus der API; lokale amtliche BKG-VG250-Gemeindegrenzen | `scripts/toll/build_toll_collect_module_data.py` für `toll_municipalities.json`; `scripts/toll/build_toll_municipality_boundaries.py` für die bedarfsgesteuerten Geometrie-Dateien; Live-Abruf durch das Frontend | klickbare Gemeindeauswahl, gemeindebezogene Monatsrelationen, Top-X, Karten-Hover und Fahrtenanteile nach mittlerer Distanzklasse |
 | Schienengüterverkehr | `data/raw/SGV OpenData/eb_opendata_YYYY.csv` | `scripts/pipelines/build_web_data_bundle_v5.py` und `scripts/pipelines/build_intermodal_data.py` | regionale Ist-Werte sowie getrennte KV-Teilmarktanalyse Schiene |
 | Binnenschifffahrt | `data/raw/IWW OpenData/IWW_OpenData_YYYY.csv` | `scripts/pipelines/build_web_data_bundle_v5.py` und `scripts/pipelines/build_intermodal_data.py` | regionale Ist-Werte sowie getrennte KV-Teilmarktanalyse Binnenschiff |
-| Seeverkehr | `data/raw/MRTM OpenData/MRTM_OpenData_YYYY.csv` | `scripts/pipelines/build_web_data_bundle_v5.py`, danach `scripts/pipelines/build_maritime_port_profiles.py` | Seeverkehr, deutsche Seehäfen, Empfang/Versand, Güter und Partner |
+| Seeverkehr | data/raw/MRTM OpenData/MRTM_OpenData_YYYY.csv | scripts/pipelines/build_web_data_bundle_v5.py, danach scripts/pipelines/build_maritime_port_profiles.py | Seeverkehr, deutsche Seehäfen, Empfang/Versand, Güter und Partner |
+| Luftfracht | data/raw/Luftverkehr/estat_avia_gooc.tsv, stat_avia_gooa.tsv, stat_avia_gor_de.tsv; Standorte unter Flughafenstandorte/ | scripts/pipelines/build_airfreight_data.py | nationale Luftfracht, Flughafenwerte, reine Fracht- und Postflüge sowie veröffentlichte Flughafenbeziehungen |
 | Verkehrsprognose 2040 | `data/raw/VP2040/VP2040_2019_GV_NUTS3/` und `data/raw/VP2040/VP2040_2040P1BP_GV_NUTS3/` | `scripts/pipelines/pipeline_vp2040.py` | Szenarien 2019 und 2040 P1, Karten, Regionalwerte, Relationen und Veränderung |
 | Räumliche und fachliche Umstiegsschlüssel | `data/crosswalks/crosswalk_spatial_vp2040.json`, `data/crosswalks/vp2040_special_cells_nuts3.json` und `data/crosswalks/crosswalk_nst_vp2040.json` | von `scripts/pipelines/pipeline_vp2040.py` und der VP2040-Prüfung gelesen | NUTS-3-Zuordnung einschließlich Sonderzellen sowie Gütergruppen-Umstieg |
 
@@ -137,6 +138,11 @@ Die intermodalen Relationstabellen folgen derselben räumlichen Regel: qualifizi
 
 Die Auswahl **„Binnenverkehr ausblenden“** ist eine reine Darstellungsoption für Relationslinien und Relationstabellen. Sie darf keine KPI, Flächenfärbung, Güterstruktur, nationale Randsumme oder fachliche Ausgangsdatei verändern. Diese Regel gilt in allen Analysemodulen einschließlich Verkehrsprognose und kombiniertem Verkehr.
 
+### 4.5 Luftfracht und Flughäfen (Eurostat)
+
+`scripts/pipelines/build_airfreight_data.py` verarbeitet ab 2016 drei getrennte Eurostat-Tabellen: AVIA_GOOC liefert ausschließlich die nationale Randsumme, AVIA_GOOA die Flughafenwerte und AVIA_GOR_DE die veröffentlichten Flughafenbeziehungen. Nationale Werte werden weder aus Flughäfen noch aus Relationen rekonstruiert. Für 2025 bleiben die Relationen bewusst leer, weil die Relationstabelle derzeit nur bis 2024 reicht.
+
+Die Kennzahl **Reine Fracht- und Postflüge** verwendet `CAF_FRM`, `CAF_FRM_DEP` und `CAF_FRM_ARR`. Sie umfasst keine Passagierflüge mit Beiladefracht. Die flughafenbezogenen Flugzahlen 2025 werden wegen eines Widerspruchs zwischen AVIA_GOOA (Summe deutscher Flughäfen: 1.573.111) und AVIA_GOOC (national: 116.671) nicht in das Web-Bündel übernommen; die Rohdaten bleiben unverändert. Diese Ausschlussregel ist nach jeder Aktualisierung erneut fachlich zu prüfen. Die Relationsdaten sind wegen Eurostat-Veröffentlichungsschwellen unvollständig; ihre Summe ist keine Randsumme. Für jede gespeicherte Top-Relation wird ihr Anteil an allen veröffentlichten positiven Relationen des gewählten Flughafens aus der vollständigen Relationsquelle vor dem Top-25-Schnitt berechnet. Flughafenpunkte werden vorrangig aus GISCO Airports 2024 bezogen und nur bei fehlendem ICAO-Code aus OurAirports ergänzt. Nach jedem Neuaufbau ist zwingend `python scripts/validation/validate_airfreight_bundle.py` auszuführen.
 ## 5. Berechnungslogik der VP2040 im Detail
 
 ### 5.1 Eingangsprüfung und Harmonisierung
@@ -196,7 +202,9 @@ Der Karten-Hover kann für dieselbe Region, Richtung, Kennzahl und NST-7-Hauptgr
 | `scripts/pipelines/pipeline_phase2_aggregations.py` | `fact_od_flows.parquet`, `fact_regional_summary.parquet`, `national_benchmarks.json` | KBA VE7, SGV und IWW; Grundlage für die Ist-Daten-Relationen |
 | `scripts/pipelines/build_web_data_bundle_v5.py` | `web_regions.json`, `web_summary_by_region.json`, `web_choropleth.json`, `web_maritime.json` und regionale Relationsdateien | NUTS-Zentroide, KBA, SGV, IWW, MRTM sowie für die Relationen `fact_od_flows.parquet` |
 | `scripts/pipelines/build_intermodal_data.py` | `web_intermodal.json` | SGV und IWW; die Teilmärkte bleiben getrennt und werden nicht zu einem nationalen KV-Gesamtwert addiert |
-| `scripts/pipelines/build_maritime_port_profiles.py` | ergänzt `web_maritime.json` | zuvor erzeugtes `web_maritime.json` und MRTM |
+| scripts/pipelines/build_maritime_port_profiles.py | ergänzt web_maritime.json | zuvor erzeugtes web_maritime.json und MRTM |
+| scripts/pipelines/build_airfreight_data.py | web_airfreight.json | Eurostat AVIA_GOOC, AVIA_GOOA und AVIA_GOR_DE sowie GISCO/OurAirports-Flughafenstandorte |
+| scripts/validation/validate_airfreight_bundle.py | keine Produktivdatei | prüft Jahre, ausgewählte Rohwerte, Flugdefinition, Dateigröße und die Koordinatenabdeckung 281/281 |
 | `scripts/pipelines/pipeline_vp2040.py` | `web_forecast_2040.json` | VP2040-Matrizen 2019 und 2040 P1, räumlicher und fachlicher Umstiegsschlüssel, `web_regions.json` |
 | `scripts/validation/validate_maritime_bundle.py` | keine Produktivdatei | prüft `web_maritime.json` unabhängig gegen alle aktiven MRTM-Jahresdateien |
 | `scripts/validation/validate_nst_fine_codes.py` | keine Produktivdatei | prüft die NST-2007-Feinpositionen von Schiene und Binnenschiff, ihre C1–C7-Summen und die sichtbaren NST-20-/C1–C7-Bezeichnungen |

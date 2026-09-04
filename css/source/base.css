@@ -9,6 +9,7 @@
   --accent-rail: #2563eb;
   --accent-iww: #0f766e;
   --accent-maritime: #4f46e5;
+  --accent-airfreight: #0ea5e9;
   --accent-intermodal: #047857;
   --accent-forecast: #7c3aed;
   --bg-color: #f8fafc; /* slate-50 */
@@ -315,23 +316,26 @@
   line-height: 1.5;
   color: #334155;
 }
-.map-tooltip-eyebrow {
-  margin-bottom: 3px;
-  padding-bottom: 3px;
+/* Every point and regional hover follows the same reading order:
+   name, divider, scope/year, values and supporting context. */
+.map-tooltip-title {
+  margin-bottom: 5px;
+  padding-bottom: 5px;
   border-bottom: 1px solid #e2e8f0;
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+.map-tooltip-title span { color: #64748b; font-size: 0.75rem; font-weight: 600; }
+.map-tooltip-meta,
+.map-tooltip-eyebrow {
+  margin-bottom: 4px;
   color: #64748b;
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
-.map-tooltip-title {
-  margin-bottom: 3px;
-  color: #0f172a;
-  font-size: 0.9rem;
-  font-weight: 800;
-}
-.map-tooltip-title span { color: #64748b; font-size: 0.75rem; font-weight: 600; }
 .map-tooltip-value { margin: 4px 0; color: #0f172a; font-size: 0.9rem; font-weight: 800; }
 .map-tooltip-context { margin-top: 4px; color: #475569; font-size: 0.78rem; line-height: 1.45; }
 
@@ -375,6 +379,40 @@
   width: 100%;
   min-width: 0;
   max-width: 100%;
+}
+
+.leaflet-tooltip.airfreight-leaflet-tooltip {
+  width: min(360px, var(--map-tooltip-max-width, calc(100vw - 24px)));
+  min-width: min(300px, var(--map-tooltip-max-width, calc(100vw - 24px)));
+  max-width: var(--map-tooltip-max-width, calc(100vw - 24px));
+  box-sizing: border-box;
+  white-space: normal;
+}
+.leaflet-tooltip.airfreight-leaflet-tooltip .flow-relation-tooltip,
+.leaflet-tooltip.airfreight-leaflet-tooltip .map-region-tooltip {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.leaflet-tooltip.airfreight-leaflet-tooltip .flow-tooltip-value {
+  white-space: nowrap;
+}
+
+/* Port hovers retain a stable reading width despite the compact map column. */
+.leaflet-tooltip.maritime-leaflet-tooltip {
+  width: min(320px, var(--map-tooltip-max-width, calc(100vw - 24px)));
+  min-width: min(300px, var(--map-tooltip-max-width, calc(100vw - 24px)));
+  max-width: var(--map-tooltip-max-width, calc(100vw - 24px));
+  box-sizing: border-box;
+  white-space: normal;
+}
+.leaflet-tooltip.maritime-leaflet-tooltip .map-region-tooltip {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.leaflet-tooltip.maritime-leaflet-tooltip .map-tooltip-value {
+  white-space: nowrap;
 }
 
 /* Forecast relation lines use the same stable reading width as the other
@@ -435,9 +473,9 @@
     font-size: 0.7rem;
     line-height: 1.18;
   }
+  .leaflet-tooltip.forecast-region-leaflet-tooltip .map-tooltip-meta,
   .leaflet-tooltip.forecast-region-leaflet-tooltip .map-tooltip-eyebrow {
     margin-bottom: 2px;
-    padding-bottom: 2px;
     font-size: 0.61rem;
   }
   .leaflet-tooltip.forecast-region-leaflet-tooltip .map-tooltip-title,
@@ -948,6 +986,27 @@ body {
 .analysis-panel-body.is-toll-mode #controlGroupTollDirection .select-input {
   width: 166px;
 }
+.analysis-panel-body.is-airfreight-mode {
+  gap: 14px 20px;
+  max-width: 1260px;
+}
+.analysis-panel-body.is-airfreight-mode .analysis-filter-group-space { flex-basis: 450px; }
+.analysis-panel-body.is-airfreight-mode .analysis-filter-group-view { flex-basis: 490px; }
+#controlGroupAirfreightAirport .select-input { width: 285px; }
+#controlGroupAirfreightMetric .select-input { width: 255px; }
+/* The maritime module has a compact port-and-year selection. Its own
+   allocation prevents the display filters from wrapping unnecessarily on
+   ordinary desktop widths. */
+.analysis-panel-body.is-maritime-mode {
+  gap: 14px 20px;
+  max-width: none;
+}
+.analysis-panel-body.is-maritime-mode .analysis-filter-group-space,
+.analysis-panel-body.is-maritime-mode .analysis-filter-group-view,
+.analysis-panel-body.is-maritime-mode .analysis-filter-group-display {
+  flex: 0 0 auto;
+}
+#controlGroupMaritimePort .select-input { width: 285px; }
 .analysis-panel.is-collapsed .analysis-panel-body {
   display: none;
 }
@@ -1299,7 +1358,8 @@ body {
   width: var(--sidebar-collapsed-width);
 }
 .app-sidebar.collapsed .nav-section-title,
-.app-sidebar.collapsed .nav-label {
+.app-sidebar.collapsed .nav-label,
+.app-sidebar.collapsed .nav-group-label {
   display: none;
 }
 .app-sidebar.collapsed .sidebar-header {
@@ -1309,6 +1369,8 @@ body {
 .app-sidebar.collapsed .sidebar-chevron {
   transform: rotate(180deg);
 }
+
+
 .app-sidebar.collapsed .nav-item {
   justify-content: center;
   padding: 12px 0;
@@ -1331,6 +1393,27 @@ body {
   margin-bottom: 14px;
 }
 
+.nav-group-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 12px 7px;
+  color: #cbd5e1;
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.055em;
+  text-transform: uppercase;
+}
+
+
+.nav-item + .nav-group-label {
+  margin-top: 10px;
+  padding-top: 12px;
+}
+
+.mobile-module-switcher {
+  display: none;
+}
 .nav-item {
   display: flex;
   align-items: center;
@@ -1352,7 +1435,7 @@ body {
 .nav-item.active {
   background-color: var(--sidebar-hover);
   color: var(--sidebar-text-active);
-  border-left-color: var(--primary-color);
+  border-left-color: var(--module-accent, var(--primary-color));
   font-weight: 700;
 }
 .nav-svg {
@@ -1558,6 +1641,7 @@ body {
 #tab-rail { --module-accent: var(--accent-rail); }
 #tab-iww { --module-accent: var(--accent-iww); }
 #tab-maritime { --module-accent: var(--accent-maritime); }
+#tab-airfreight { --module-accent: var(--accent-airfreight); }
 #tab-intermodal { --module-accent: var(--accent-intermodal); }
 #tab-forecast { --module-accent: var(--accent-forecast); }
 .kpi-card:hover {
@@ -1572,6 +1656,13 @@ body {
   color: var(--text-muted);
   margin-bottom: 3px;
 }
+#tab-airfreight .kpi-title {
+  min-height: 2.5em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.25;
+}
 .kpi-value {
   font-size: 1.35rem;
   font-weight: 800;
@@ -1581,6 +1672,7 @@ body {
   line-height: 1.2;
 }
 .kpi-sub {
+  margin-top: auto;
   font-size: 0.75rem;
   font-weight: 600;
   color: var(--primary-hover);

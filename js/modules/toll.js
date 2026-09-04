@@ -996,12 +996,12 @@
     const arrow = isOutbound ? '→' : isInbound ? '→' : '↔';
     return `
       <div class="map-tooltip toll-map-tooltip">
-        <div class="toll-map-tooltip-eyebrow">
-          <span>Monat und Jahr: ${escapeTollHtml(formatTollMonth(state.tollMonth))}</span>
-          <span>Richtung: ${getTollDirectionLabel()}</span>
-        </div>
         <div class="toll-map-tooltip-title">
           ${escapeTollHtml(origin)} <span class="toll-map-tooltip-route-arrow">${arrow}</span> ${escapeTollHtml(destination)}
+        </div>
+        <div class="toll-map-tooltip-meta">
+          <span>Bezugsmonat: ${escapeTollHtml(formatTollMonth(state.tollMonth))}</span>
+          <span>Richtung: ${getTollDirectionLabel()}</span>
         </div>
         <div class="toll-map-tooltip-details">
           <div><strong>Mautfahrten:</strong> ${formatDeNum(row.trips, 0)}</div>

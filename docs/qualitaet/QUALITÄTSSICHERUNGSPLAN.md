@@ -379,3 +379,77 @@ Die Karten- und Tabellenprüfung bestätigte insbesondere die Wiederherstellung 
 Die auf ausdrücklichen Wunsch vorgesehene Gemini-Zweitprüfung wurde vorbereitet und die lokale Anmeldung geprüft. Ihre Ausführung wurde nicht freigegeben, weil dabei Projektinhalte an einen externen Dienst übertragen würden. Dies ist kein Befund zur Datenqualität, sondern ein noch nicht ausgeführter zusätzlicher Prüfschritt. Die hier dokumentierte Freigabeempfehlung stützt sich deshalb auf die lokale automatisierte, manuelle und browserseitige Prüfung.
 
 **Freigabeempfehlung für den geprüften lokalen Datenstand:** Die dokumentierten Tests ergeben keinen offenen Daten- oder Darstellungsfehler für die geprüften Funktionen. Der Stand ist damit für den nächsten kontrollierten Produktionsschritt geeignet. Vor einer endgültigen externen Veröffentlichung bleiben die üblichen produktiven Betriebsprüfungen (Deployment, Berechtigungen und Live-Ansicht) erforderlich; die optionale externe Zweitprüfung kann nach einer gesonderten Freigabe zur Datenübertragung ergänzt werden.
+
+### 10.10 Luftfrachtmodul und Navigationsregression vom 03.09.2026
+
+Das neue Modul **Luftfracht & Flughäfen** wurde lokal mit folgenden bestandenen Prüfungen abgenommen:
+
+- `scripts/validation/validate_airfreight_bundle.py` bestätigt die getrennten Zeitstände 2016–2025 für nationale Werte und Flughafen-Tonnagewerte sowie 2016–2024 für belastbare Flughafen-Flugwerte und Relationen. Für 2025 existiert bewusst kein Relationsblock.
+- Nationale Tonnen- und Flugwerte 2025, der Tonnagewert Frankfurt/Main 2025 sowie die Relation Frankfurt/Main–Shanghai Pudong 2024 stimmen mit den Eurostat-Rohdateien überein. Die flughafenbezogenen Flugzahlen 2025 werden aufgrund des später festgestellten Widerspruchs zur nationalen Reihe nicht mehr ausgeliefert; siehe Abschnitt 10.12.
+- 22 deutsche Flughäfen besitzen 2025 einen veröffentlichten Gesamttonnagewert einschließlich veröffentlichter Nullwerte.
+- Der ICAO-Standortabgleich umfasst 281 fachlich relevante Codes: 279 Punkte stammen aus GISCO Airports 2024; CYYC und EKCH wurden aus OurAirports ergänzt. Es fehlt kein Kartenpunkt.
+- `web_airfreight.json` ist 1,36 MiB groß, enthält für die sichtbaren Top-Relationen zusätzlich Vorjahres- und 2016-Vergleiche und wird erst beim Öffnen des Moduls geladen.
+- Der Frontend-Build wurde aus den modularen Quellen neu erzeugt; `node --check js/app.js` sowie die JSON-Prüfung des Datenkatalogs bestanden.
+- Der Browserfunktionstest bestätigte: Einstieg ohne Vorauswahl mit 22 Flughafenpunkten und ohne Relationslinien, Flughafenwahl im Einstellungsmenü oder über die Karte, Umschaltung von Tonnen auf Fluganzahl, zehn 2024er Relationen, Vorjahres- und 2016-Deltas, dreistufige dynamische Kreis- und Linienlegenden, Status-/Dynamikumschaltung sowie den sichtbaren 2025-Leerzustand mit Verweis auf 2024. Es traten keine JavaScript-Laufzeitfehler auf.
+- Die Sichtprüfung bei 1.440 × 1.000 Pixeln und 390 × 844 Pixeln bestätigte die bestehende Gestaltungssystematik, linksbündige Navigationseinträge mit dezenten Gruppentrennern, den Deutschlandausschnitt ohne automatisches Herauszoomen nach Flughafenauswahl, einheitliche Karten-Hover mit 360 Pixel Desktopbreite beziehungsweise mobil angepasster Breite und keinen horizontalen Überlauf. Auf Mobilgeräten ist die lange Seitenleiste vollständig ersetzt.
+
+Die Flugzahl ist fachlich eng bezeichnet: `CAF_FRM` zählt reine kommerzielle Fracht- und Postflüge. Passagierflüge mit Beiladefracht sind nicht enthalten. Relationsdaten bleiben wegen der Eurostat-Veröffentlichungsschwellen ausdrücklich unvollständig und werden nicht als nationale oder flughafenbezogene Randsumme verwendet.
+
+**Freigabeempfehlung für die lokale Umsetzung:** Die dokumentierten Daten-, Build-, Funktions- und Sichtprüfungen ergeben keinen offenen Befund für das neue Modul oder die Navigation. Vor einer externen Veröffentlichung bleiben Deployment und Live-Ansicht gesondert zu prüfen.
+
+### 10.11 UI-Nachprüfung Luftfracht und Navigation vom 04.09.2026
+
+Die 13 Hinweise aus der visuellen Nutzerprüfung wurden in den bearbeitbaren Quellen umgesetzt und anschließend im neu erzeugten Frontend geprüft:
+
+- Die Navigationsgruppen verwenden helle, fette Versalschrift und zusätzliche Abstände ohne seitliche beziehungsweise nachlaufende Trennlinien.
+- Der erste Luftfracht-KPI heißt abhängig von der Kennzahl „Luftfracht- und Luftpostaufkommen in Deutschland“ beziehungsweise „Reine Luftfracht- und Luftpostflüge in Deutschland“. Die Unterzeilen der KPI 1, 3 und 4 wiederholen das ausgewählte Jahr nicht; alle vier KPI-Unterzeilen schließen in der Desktopansicht bündig ab.
+- Das Startjahr bleibt 2024, solange für die gemeinsame Übersicht insbesondere der Straßengüterverkehr 2025 fehlt. Die Freigabe von 2025 im Straßenmodul wird nun aus dem tatsächlich neuesten vorhandenen Straßenjahr abgeleitet und ist nicht mehr dauerhaft fest codiert.
+- Routen und Relationstabelle reagieren bidirektional: Beim Tabellen-Hover wird genau die zugehörige Route dunkelblau hervorgehoben, beim Karten-Hover die korrespondierende Tabellenzeile. Das Rücksetzen ist verzögert und prüft, ob sich der Zeiger noch über Route oder Zeile befindet.
+- Rang, Flughafen-/Regionsname und zurückhaltender Code verwenden in allen Relationstabellen eine gemeinsame zweispaltige Ausrichtung. Mehrzeilige Namen beginnen damit bündig untereinander.
+- Gekürzte Staatennamen in der Luftfrachttabelle besitzen ein helles, außerhalb der Tabellenzelle gerendertes Hover-Fenster mit der vollständigen Bezeichnung.
+- Der Relationstitel folgt der übrigen Modullogik „Top X Relationen: Flughafen“ und enthält nicht mehr den Zusatz „veröffentlicht“. Der methodische Informationstext erläutert die Veröffentlichungseinschränkung weiterhin.
+- Deutsche Flughäfen verwenden deutschsprachige Anzeigeformen auf Grundlage der Eurostat-Flughafenlabels, darunter „Frankfurt/Main“, „Köln/Bonn“ und „Leipzig/Halle“. Diese Regel ist mit drei festen Namensprüfungen im Luftfracht-Validator abgesichert.
+- Das Statusdiagramm nutzt für alle Balken dieselbe Luftfrachtfarbe. Der dynamische Titel benennt weiterhin die aktive Kennzahl.
+- In der eingeklappten Einstellungszusammenfassung wird „Binnenverkehr“ für See- und Luftfracht nicht mehr aufgeführt, weil dort kein entsprechender Filter auswählbar ist. Der Hinweis zum nicht anwendbaren Güterfilter bleibt erhalten.
+- Flughafen-Hover zeigen zusätzlich die prozentuale Veränderung zum Vorjahr und gegenüber 2016.
+
+`python scripts/validation/validate_airfreight_bundle.py`, der vollständige Frontend-Build und `node --check js/app.js` bestanden. Der Browserlauf mit Chrome bestätigte bei 1.636 × 912 Pixeln und 1.100 × 850 Pixeln: Startjahr 2024, ausgeblendete Navigationslinien, bündige KPI-Unterzeilen, deutsche Flughafennamen, einheitliche Balkenfarbe, vollständigen Staaten-Hover, beide Hervorhebungsrichtungen, keine JavaScript-Laufzeitfehler und keinen horizontalen Seitenüberlauf. Die Cache-Version der ausgelieferten CSS- und JavaScript-Dateien wurde auf `20260904-airfreight-feedback2` erhöht, damit ein normales Neuladen den neuen Stand abruft.
+### 10.12 UI- und Datenqualitäts-Nachprüfung Luftfracht vom 04.09.2026
+
+Die fünf weiteren Hinweise aus der visuellen Nutzerprüfung wurden umgesetzt und fachlich geprüft:
+
+- Alle vier Luftfracht-KPI reservieren denselben zweizeiligen Titelbereich. Der Browserlauf bei 1.873 × 1.272 Pixeln maß für alle Titel 28 Pixel Höhe und für alle Kennzahlwerte dieselbe Oberkante.
+- Die Staatsspalte der Relationstabelle wurde von 13 auf 17 Prozent verbreitert; die Mengenspalte wurde auf 16 Prozent angepasst. Der native schwarze Browser-Hinweis auf Mengen- und Veränderungszellen wurde entfernt, der helle vollständige Staaten-Hover bleibt erhalten.
+- Der Karten-Hover zeigt neben dem Anteil an der sichtbaren Top-Auswahl den Anteil an allen veröffentlichten positiven Verbindungen des gewählten Flughafens. Die Bezugsgröße wird aus der vollständigen Relationsquelle vor dem Top-25-Schnitt berechnet und im Web-Bündel einmal je Jahr, Flughafen, Kennzahl und Richtung gespeichert.
+- Die Diagramm-Hover benennen die Einheit ausdrücklich. Der Browserlauf bestätigte beispielsweise „Frankfurt/Main: 23.743 Flüge“; für Tonnage wird „Mio. t“ verwendet.
+- Die 2025er Flughafen-Flugreihe wurde nicht geglättet oder umgedeutet, sondern aufgrund eines belegten Quellenwiderspruchs ausgeschlossen: AVIA_GOOA summiert für deutsche Flughäfen 1.573.111 reine Fracht- und Postflüge, AVIA_GOOC weist national 116.671 aus. Frankfurt/Main springt zugleich von 23.743 auf 428.299 und München von 3.227 auf 320.764. Die Oberfläche endet für Flughafen-Flugtrends deshalb 2024 und kennzeichnet eine 2025er Auswahl als derzeit nicht belastbar; Tonnage und nationale Flugreihe 2025 bleiben erhalten.
+- Der zuvor beobachtete lokale Ladeabbruch lag an der gestreamten Übertragung der Luftfracht-JSON vom synchronisierten Projektlaufwerk. Die lokale Vorschau auf Port 8000 liefert diese Datei nun aus einer vollständigen Temp-Kopie und sendet große Dateien blockweise. Ein HTTP-Abruf bestätigte alle 1.446.953 Bytes.
+
+`python scripts/validation/validate_airfreight_bundle.py`, der vollständige Frontend-Build, `node --check js/app.js` und `git diff --check` bestanden. Der Browserlauf bestätigte die vier identischen KPI-Wertpositionen, die verbreiterte Staatsspalte, das fehlende native Mengen-Tooltip, beide Relationsanteile, die Einheit im Diagramm-Hover sowie den 2025er Qualitäts-Leerzustand. Es trat kein JavaScript-Laufzeitfehler auf; lediglich die bereits fehlende optionale `favicon.ico` erzeugte einen 404-Hinweis. Die CSS-/JavaScript-Cache-Version lautet `20260904-airfreight-feedback3`, die Daten-Cachekennung `20260904-airfreight-dataquality1`.
+
+### 10.13 UI-Harmonisierung Karten-Hover und Hafenfilter vom 04.09.2026
+
+Die nachfolgenden Darstellungsanpassungen wurden in den bearbeitbaren Frontend-Quellen umgesetzt:
+
+- Die Überschrift der Luftfracht-Relationstabelle folgt wieder der gemeinsamen Kurzform „Top X Relationen: Flughafen“. Die präzise Bezeichnung „Top-Relationen im Luftfrachtverkehr“ bleibt beim entsprechenden Kartenhinweis erhalten.
+- Die Hafenauswahl verwendet eine eigene, kompaktere Flex-Aufteilung. Hafen, Jahr, Betrachtung und Darstellung passen bei der üblichen Desktopbreite in eine gemeinsame Zeile; für kleinere Ansichten bleiben die vorhandenen responsiven Umbrüche maßgeblich.
+- Die Hover für Häfen, Flughäfen, regionale Verkehrsträgerkarten, kombinierten Verkehr und Verkehrsprognose verwenden dieselbe Reihenfolge: Name mit Code, Trennlinie, Bezugsjahr beziehungsweise Szenario, Kennwert, danach Vergleichs- und Kontextangaben. Die vorhandenen fachlichen Inhalte bleiben erhalten.
+
+Der vollständige Frontend-Build, `node --check js/app.js` und `git diff --check` bestanden. Eine erneute Sichtprüfung der Karte bei Desktop- und Mobilbreite bleibt vor einer externen Freigabe erforderlich.
+
+### 10.14 UI-Korrektur Hafenfilter, Kartenhinweise und Maut-Hover vom 04.09.2026
+
+Die Sichtprüfung ergab drei Korrekturen zur vorangegangenen UI-Harmonisierung:
+
+- Die Breite der Gruppe „Betrachtung“ im Seeverkehr wurde auf den tatsächlichen Bedarf von Kennzahl, Richtung und Güterart abgestimmt. Sie kann nicht mehr in den Bereich „Darstellung“ hineinragen.
+- Der Informations-Hover an der Luftfracht-Kartenüberschrift benennt nun ausdrücklich die „stärksten veröffentlichten Relationen im Luftfrachtverkehr“ und nicht allgemein Beziehungen.
+- Hafen-Hover erhalten eine feste Lesebreite von 300 bis 320 Pixeln. Die Maut-Hover folgen ebenfalls der gemeinsamen Reihenfolge: Relation, Trennlinie, Bezugsmonat und Richtung, anschließend Kennwerte und Kontext.
+
+`node --check` für die beiden angepassten Module, der vollständige Frontend-Build, `node --check js/app.js` und `git diff --check` bestanden. Der zusätzliche lokale Browserlauf bei 1.767 × 1.272 Pixeln bestätigte die einzeilige Darstellung ohne Überlagerung: Zwischen den drei Filtergruppen liegen jeweils 20 Pixel, zwischen den sichtbaren Steuerelementen jeweils 10 Pixel. Die Gruppe „Betrachtung“ endet 20 Pixel vor dem Beginn der Gruppe „Darstellung“.
+### 10.15 NUTS-3-Zeitvergleiche in Karten-Hovern vom 04.09.2026
+
+Die Flächen-Hover der Module Straßengüterverkehr, Schienengüterverkehr, Binnenschifffahrt und intermodaler Verkehr wurden um Vergleiche zum Vorjahr und zum Basisjahr 2016 ergänzt. Die Berechnung verwendet jeweils dieselbe NUTS-3-Region, Kennzahl, Richtung und Güterauswahl wie der aktuelle Kartenwert. Im intermodalen Modul bleibt die Flächenkennzahl die dokumentierte Summe der erfassten Teilmärkte Schiene und Binnenschiff; sie wird nicht als Zahl eindeutiger Sendungen interpretiert.
+
+Die zugrunde liegenden Webdaten enthalten für beide Kartenlogiken Jahreswerte von 2016 bis 2025. Ein fehlender Regionscode oder ein Vergleichswert von null wird nicht als Prozentänderung interpretiert, sondern mit `--` gekennzeichnet. Für Salden werden wegen der vorzeichenbehafteten Bezugsgröße keine Prozentänderungen ausgewiesen; analog zu See- und Luftfracht erscheinen stattdessen die historischen Salden des Vorjahres und von 2016.
+
+Der Frontend-Build, `node --check js/app.js` und `git diff --check` bestanden. Der lokale Browserlauf bei 1.600 × 950 Pixeln bestätigte die Vergleichszeilen für Straße, Schiene, Binnenschiff und Intermodal sowie die historischen Salden im Intermodalmodul. Für Cuxhaven 2024 stimmten die sichtbaren Veränderungen mit dem Webdatenpaket überein: Straße −5,0 Prozent zum Vorjahr und −23,6 Prozent gegenüber 2016, Schiene −15,4 beziehungsweise +79,9 Prozent und Binnenschiff +15,8 beziehungsweise −51,9 Prozent. Die Prüfung bei 390 × 844 Pixeln bestätigte eine vollständig innerhalb des Viewports liegende Hover-Karte ohne horizontalen Seitenüberlauf. Es traten keine JavaScript-Laufzeit- oder Datenladefehler auf.

@@ -278,15 +278,27 @@
           const amount = choro[id] || 0;
           const railAmount = getScopedIntermodalMetricForRegion(activeYear, id, 'rail', 'intermodal_load_units', metric) || 0;
           const iwwAmount = getScopedIntermodalMetricForRegion(activeYear, id, 'iww', 'containerised_transport', metric) || 0;
+          const previousYear = String(activeYear - 1);
+          const hasPrevious = Boolean(intermodalData?.scoped_metrics_by_year?.[previousYear]?.[id]);
+          const hasBaseline = activeYear !== 2016 && Boolean(intermodalData?.scoped_metrics_by_year?.['2016']?.[id]);
+          const comparisonAmount = year =>
+            (getScopedIntermodalMetricForRegion(year, id, 'rail', 'intermodal_load_units', metric) || 0)
+            + (getScopedIntermodalMetricForRegion(year, id, 'iww', 'containerised_transport', metric) || 0);
+          const previousAmount = hasPrevious ? comparisonAmount(activeYear - 1) : null;
+          const baselineAmount = hasBaseline ? comparisonAmount(2016) : null;
+          const formatHistoricValue = value => `${value > 0 && direction === 'balance' ? '+' : ''}${formatTrafficValue(value / divisor, unit, 2)} ${unit}`;
+          const comparisonDisplay = formatRegionHoverComparison(amount, previousAmount, previousYear, formatHistoricValue)
+            + formatRegionHoverComparison(amount, baselineAmount, '2016', formatHistoricValue);
           const directionSuffix = direction === 'balance' ? ' · Saldo'
             : direction === 'outbound' ? ' · Versand'
             : direction === 'inbound' ? ' · Empfang'
             : '';
           layer.bindTooltip(`
             <div class="map-region-tooltip">
-              <div class="map-tooltip-eyebrow">Kombinierter Verkehr · ${activeYear}${directionSuffix}</div>
               <div class="map-tooltip-title">${feature.properties?.NUTS_NAME || id} <span>(${id})</span></div>
+              <div class="map-tooltip-meta">Kombinierter Verkehr · ${activeYear}${directionSuffix}</div>
               <div class="map-tooltip-value"><span>Summe erfasster KV-Teilmärkte:</span> ${amount > 0 && direction === 'balance' ? '+' : ''}${formatTrafficValue(amount / divisor, unit, 2)} ${unit}</div>
+              <div class="map-tooltip-context">${comparisonDisplay}</div>
               <div class="map-tooltip-context">Schiene: <strong>${railAmount > 0 && direction === 'balance' ? '+' : ''}${formatTrafficValue(railAmount / divisor, unit, 2)} ${unit}</strong> · Binnenschiff: <strong>${iwwAmount > 0 && direction === 'balance' ? '+' : ''}${formatTrafficValue(iwwAmount / divisor, unit, 2)} ${unit}</strong></div>
               <div class="map-tooltip-context">Intensitätsmaß; keine Zahl eindeutiger Sendungen.</div>
               <div class="map-tooltip-filter-hint">Klicken Sie, um diese Region/diesen Kreis als Filter zu aktivieren.</div>
@@ -399,7 +411,7 @@
             : '<span class="intermodal-mode-badge iww">Binnenschiff</span>'
           ).join('');
           row.setAttribute('data-partner-id', relation.partner_id);
-          row.innerHTML = `<td><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><strong>${partnerName}</strong>${locationBadge}</td><td><span class="intermodal-mode-badges">${modeBadges}</span></td><td style="text-align:right;"><strong>${direction === 'balance' && relation.current > 0 ? '+' : ''}${isTkm ? formatTkmQuantity(relation.current / divisor, 1, true) : formatQuantity(relation.current / divisor, 1)}</strong></td><td style="text-align:right;">${change(relation.yoy)}</td><td style="text-align:right;">${change(relation.trend)}</td>`;
+          row.innerHTML = `<td class="relation-partner-cell"><span class="relation-rank" aria-label="Rang ${rank + 1}">${rank + 1}<span class="relation-rank-separator" aria-hidden="true">·</span></span><span class="relation-partner-details"><strong>${partnerName}</strong>${locationBadge}</span></td><td><span class="intermodal-mode-badges">${modeBadges}</span></td><td style="text-align:right;"><strong>${direction === 'balance' && relation.current > 0 ? '+' : ''}${isTkm ? formatTkmQuantity(relation.current / divisor, 1, true) : formatQuantity(relation.current / divisor, 1)}</strong></td><td style="text-align:right;">${change(relation.yoy)}</td><td style="text-align:right;">${change(relation.trend)}</td>`;
           row.addEventListener('mouseenter', () => setIntermodalPartnerHighlight(relation.partner_id));
           row.addEventListener('mouseleave', () => clearAllHighlights('intermodal'));
           tbody.appendChild(row);

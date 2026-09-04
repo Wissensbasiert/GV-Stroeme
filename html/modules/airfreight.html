@@ -1,0 +1,110 @@
+      <section id="tab-airfreight" class="tab-pane airfreight-module">
+        <div class="kpi-row">
+          <div class="kpi-card" style="border-top: 3px solid var(--accent-airfreight);">
+            <div class="kpi-title" id="airfreightNationalTitle">Luftfracht und Post in Deutschland</div>
+            <div class="kpi-value" id="airfreightNationalValue">--</div>
+            <div class="kpi-sub" id="airfreightNationalSub">--</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" id="airfreightYoYTitle">Veränderung zum Vorjahr</div>
+            <div class="kpi-value" id="airfreightYoYValue">--</div>
+            <div class="kpi-sub" id="airfreightYoYSub">--</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title" id="airfreightAirportCountTitle">Flughäfen mit ausgewiesenem Aufkommen</div>
+            <div class="kpi-value" id="airfreightAirportCount">--</div>
+            <div class="kpi-sub" id="airfreightAirportCountSub">--</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-title">Konzentration auf die Top 3</div>
+            <div class="kpi-value" id="airfreightTop3Share">--</div>
+            <div class="kpi-sub" id="airfreightTop3Sub">--</div>
+          </div>
+        </div>
+
+        <div class="module-layout-grid airfreight-module-layout">
+          <div class="card map-card-tall">
+            <div class="card-header">
+              <div class="card-title">
+                <svg class="section-icon" viewBox="0 -960 960 960" fill="currentColor" aria-hidden="true"><path d="M285-80v-83l124-86v-172L80-288v-102l329-231v-188q0-29 21-50t50-21q29 0 50 21t21 50v188l329 231v102L551-421v172l123 86v83l-194-59-195 59Z"/></svg>
+                <span id="airfreightMapTitle">Deutsche Frachtflughäfen</span>
+                <span class="info-tooltip-wrap" tabindex="0">
+                  <span class="info-icon-btn" title="Informationen zur Kartenbasis">i</span>
+                  <span class="info-tooltip-box">Die Punkte zeigen deutsche Flughäfen mit einem veröffentlichten Wert im ausgewählten Jahr. Ihre Größe folgt der aktiven Kennzahl. Nach Auswahl eines Flughafens zeigen die Verbindungslinien dessen stärkste veröffentlichte Relationen im Luftfrachtverkehr. Die nationalen Gesamtwerte und die Flughafenwerte werden aus ihren jeweils zuständigen Eurostat-Auswertungen übernommen und wegen unterschiedlicher Zähllogiken nicht miteinander verrechnet.</span>
+                </span>
+              </div>
+
+            </div>
+            <div class="map-container-leaflet map-container-tall">
+              <div id="airfreightLeafletMap" class="leaflet-map-frame"></div>
+              <div class="choropleth-legend" id="airfreightMapLegend">
+                <div class="legend-header">
+                  <span class="legend-title" id="airfreightLegendTitle">Fracht und Post</span>
+                  <button type="button" class="btn-legend-toggle" id="btnToggleLegend_airfreight" title="Legende minimieren">−</button>
+                </div>
+                <div class="legend-body">
+                  <div class="legend-subtitle" id="airfreightAirportLegendSubtitle">Flughafenaufkommen</div>
+                  <div class="legend-spider-rows">
+                    <div class="legend-spider-item"><span class="legend-symbol-slot"><span class="legend-circle-sample airfreight-circle-small"></span></span><span class="legend-spider-val" id="airfreightAirportLegendLow">–</span></div>
+                    <div class="legend-spider-item"><span class="legend-symbol-slot"><span class="legend-circle-sample airfreight-circle-medium"></span></span><span class="legend-spider-val" id="airfreightAirportLegendMedium">–</span></div>
+                    <div class="legend-spider-item"><span class="legend-symbol-slot"><span class="legend-circle-sample airfreight-circle-large"></span></span><span class="legend-spider-val" id="airfreightAirportLegendHigh">–</span></div>
+                  </div>
+                  <div class="legend-spider-section" id="airfreightRelationLegendSection" hidden>
+                    <div class="legend-subtitle" id="airfreightRelationLegendSubtitle">Top-Relationen</div>
+                    <div class="legend-spider-rows">
+                      <div class="legend-spider-item"><span class="legend-line legend-line-thin airfreight-line-sample"></span><span class="legend-spider-val" id="airfreightRelationLegendLow">–</span></div>
+                      <div class="legend-spider-item"><span class="legend-line legend-line-med airfreight-line-sample"></span><span class="legend-spider-val" id="airfreightRelationLegendMedium">–</span></div>
+                      <div class="legend-spider-item"><span class="legend-line legend-line-thick airfreight-line-sample"></span><span class="legend-spider-val" id="airfreightRelationLegendHigh">–</span></div>
+                    </div>
+                  </div>
+                  <div class="intermodal-map-scope" id="airfreightMapScope">Flughafen auswählen</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="right-analytics-column">
+            <div class="card table-card-compact">
+              <div class="card-header">
+                <div class="card-title">
+                  <span id="airfreightRelationsTitle">Top Relationen: Flughafen auswählen</span>
+                  <span class="info-tooltip-wrap" tabindex="0">
+                    <span class="info-icon-btn" title="Informationen zur Relationstabelle">i</span>
+                    <span class="info-tooltip-box">Das Analysemodul führt drei unterschiedlich abgegrenzte Eurostat-Ebenen zusammen: nationale Gesamtwerte, veröffentlichte Werte einzelner Flughäfen und veröffentlichte Flughafenrelationen. Diese Ebenen folgen unterschiedlichen Zähl- und Veröffentlichungsvorgaben und werden deshalb nicht zu einer gemeinsamen Summe verrechnet. Die angezeigten Top-Relationen erscheinen nur oberhalb der Veröffentlichungsschwellen; sie bilden daher keine vollständige Rangfolge ab. Sie bezeichnen den gemeldeten nächsten Ziel- beziehungsweise vorherigen Herkunftsflughafen, nicht zwingend den ursprünglichen Versand- oder endgültigen Empfangsort.</span>
+                  </span>
+                </div>
+              </div>
+              <div class="airfreight-relation-status" id="airfreightRelationStatus" role="status" hidden></div>
+              <div class="data-table-wrapper table-wrapper-compact">
+                <table class="data-table" id="tableAirfreightRelations">
+                  <thead><tr>
+                    <th style="width:33%;">Partnerflughafen</th>
+                    <th style="width:17%;">Staat</th>
+                    <th id="thAirfreightMeasure" style="width:16%; text-align:right;">Menge (t)</th>
+                    <th class="table-change-header" id="thAirfreightYoY" style="width:17%; text-align:right;" title="Veränderung gegenüber dem Vorjahr">Δ<br><span>Vorjahr</span></th>
+                    <th class="table-change-header" id="thTrend_airfreight" style="width:17%; text-align:right;" title="Veränderung gegenüber dem Basisjahr 2016">Δ<br><span>ggü. 2016</span></th>
+                  </tr></thead>
+                  <tbody id="tableAirfreightRelationsBody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="card chart-card-single">
+              <div class="card-header">
+                <div class="card-title">
+                  <span id="airfreightChartTitle">Rangfolge der deutschen Flughäfen</span>
+                  <span class="info-tooltip-wrap" tabindex="0"><span class="info-icon-btn" title="Informationen zum Diagramm">i</span><span class="info-tooltip-box">„Status“ zeigt die führenden deutschen Flughäfen im ausgewählten Jahr. „Dynamik“ zeigt die fünf im Auswahljahr führenden Flughäfen sowie den aktuell ausgewählten Standort. Fehlende Zwischenjahre werden nicht interpoliert. Die Flugzahl umfasst ausschließlich reine kommerzielle Fracht- und Postflüge; Passagierflüge mit Beiladefracht sind nicht enthalten. Die flughafenbezogenen Flugzahlen für 2025 werden wegen eines Widerspruchs zur nationalen Reihe derzeit nicht dargestellt.</span></span>
+                </div>
+                <div class="card-actions">
+                  <div class="toggle-group" id="toggleAirfreightChartView">
+                    <button class="toggle-btn active" data-view="snapshot">Status</button>
+                    <button class="toggle-btn" data-view="trend">Dynamik</button>
+                  </div>
+                </div>
+              </div>
+              <div class="chart-canvas-wrap"><canvas id="chartAirfreightAirports"></canvas></div>
+            </div>
+          </div>
+        </div>
+      </section>
+

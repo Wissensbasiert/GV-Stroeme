@@ -155,7 +155,7 @@ Durchführung eines neuen Datenupdates maßgeblich.
 
 ### 4.3 Hafenprofile im Seeverkehr (`scripts/pipelines/build_maritime_port_profiles.py`)
 1. **Quelle und Zeitraum:** Liest die bereits im Projekt abgelegten jährlichen Destatis-Dateien EVAS 46331 für 2016 bis 2025.
-2. **Abgrenzung:** Ergänzt die kartierten deutschen Seehäfen um Empfang, Versand, NST-2007-Güterstruktur und internationale Partnerländer. Die Partnerbeziehungen werden nur nach Auswahl eines Hafens gezeigt.
+2. **Abgrenzung:** Ergänzt die kartierten deutschen Seehäfen um Empfang, Versand, NST-2007-Güterstruktur und internationale Partnerländer. Die Partnerbeziehungen werden nur nach Auswahl eines Hafens gezeigt. Die Auswahl steht sowohl über den Kartenpunkt als auch als nach dem Berichtsjahr aufgebaute Hafenliste unter „Aktuelle Einstellungen“ zur Verfügung; der allgemeine NUTS-3-Regionsfilter wird im Seeverkehr nicht angezeigt. Der Karten-Hover zeigt zusätzlich zur aktuellen Menge den Vergleich zum Vorjahr und zum Basisjahr 2016; bei Saldo werden die historischen Salden statt Prozentänderungen gezeigt.
 3. **Ausführung:** Nach einem vollständigen Neuaufbau von `web_maritime.json` dieses Skript ebenfalls ausführen, damit die hafenbezogenen Profile erhalten bleiben.
 
 ### 4.4 ETL für Verkehrsprognose 2040 (`scripts/pipelines/pipeline_vp2040.py`)
@@ -171,6 +171,9 @@ Durchführung eines neuen Datenupdates maßgeblich.
 
 ---
 
+### 4.5 ETL für Luftfracht und Flughäfen (`scripts/pipelines/build_airfreight_data.py`)
+
+Das eigenständige Modul lädt `data/processed/web_airfreight.json` erst beim Öffnen. Das Bündel hält nationale Werte (AVIA_GOOC), Flughafenwerte (AVIA_GOOA) und veröffentlichte Top-Relationen (AVIA_GOR_DE) getrennt. Tonnen und reine Fracht- und Postflüge sind unter **Aktuelle Einstellungen** auswählbar; Passagierflüge mit Beiladefracht gehören nicht zur Flugzahl. Neben Gesamt, Versand und Empfang ist der Saldo als Versand minus Empfang verfügbar. Bei Saldo werden alle Werte direkt aus diesen beiden Richtungen berechnet, nach absolutem Saldo rangiert und skaliert; historische Salden des Vorjahres und von 2016 ersetzen nicht aussagekräftige Prozentveränderungen. Beim Einstieg sind alle deutschen Flughafenpunkte ohne Vorauswahl sichtbar. Die Relationstabelle erscheint erst nach Auswahl und enthält den aktuellen Wert sowie Vergleiche zum Vorjahr und zu 2016. Der Standortstamm verwendet ICAO-Codes und GISCO-Koordinaten, ergänzt durch OurAirports. Die mobile Navigation ersetzt unter 900 Pixeln die Seitenleiste durch eine gruppierte, tastaturbedienbare Modulauswahl.
 ## 5. Visualisierungs- & Interaktionskonzept
 
 ### 5.1 Farbkonzept & Barrierefreiheit

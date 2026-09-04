@@ -22,6 +22,7 @@ BUNDLES = {
         "parts": [
             ROOT / "js" / "source" / "core-head.js",
             ROOT / "js" / "modules" / "maritime.js",
+            ROOT / "js" / "modules" / "airfreight.js",
             ROOT / "js" / "modules" / "toll.js",
             ROOT / "js" / "source" / "core-middle.js",
             ROOT / "js" / "modules" / "forecast.js",
@@ -38,6 +39,7 @@ BUNDLES = {
             ROOT / "html" / "modules" / "rail.html",
             ROOT / "html" / "modules" / "iww.html",
             ROOT / "html" / "modules" / "maritime.html",
+            ROOT / "html" / "modules" / "airfreight.html",
             ROOT / "html" / "modules" / "intermodal.html",
             ROOT / "html" / "modules" / "forecast.html",
             ROOT / "html" / "shell-tail.html",

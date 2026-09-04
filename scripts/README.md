@@ -20,6 +20,8 @@ python scripts/pipelines/pipeline_phase2_aggregations.py
 python scripts/pipelines/build_web_data_bundle_v5.py
 python scripts/pipelines/build_intermodal_data.py
 python scripts/pipelines/build_maritime_port_profiles.py
+python scripts/pipelines/build_airfreight_data.py
+python scripts/validation/validate_airfreight_bundle.py
 python scripts/pipelines/pipeline_vp2040.py
 python scripts/frontend/build_frontend.py all
 ```
