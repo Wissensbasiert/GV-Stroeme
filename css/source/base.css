@@ -1224,7 +1224,8 @@ body {
 #btnHelpModal { order: 1; }
 #btnSteckbriefModal { order: 2; }
 #btnLicensesModal { order: 3; }
-#btnAiModal { order: 4; }
+#btnExportModal { order: 4; }
+#btnAiModal { order: 5; }
 
 .btn-header {
   display: flex;

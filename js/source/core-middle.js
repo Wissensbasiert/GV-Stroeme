@@ -276,6 +276,7 @@
         onEachFeature: (feature, layer) => {
           const id = feature.properties?.NUTS_ID;
           const amount = choro[id] || 0;
+          layer.wbpExport = { code: id, name: feature.properties?.NUTS_NAME || id, value: amount, unit: metric === 'tkm' ? 'tkm' : 't' };
           const railAmount = getScopedIntermodalMetricForRegion(activeYear, id, 'rail', 'intermodal_load_units', metric) || 0;
           const iwwAmount = getScopedIntermodalMetricForRegion(activeYear, id, 'iww', 'containerised_transport', metric) || 0;
           const previousYear = String(activeYear - 1);
@@ -522,6 +523,7 @@
       ? `<span>≤ −${formatTrafficValue(maxValue * 0.8 / divisor, unit, 1)} ${unit}</span><span>≥ +${formatTrafficValue(maxValue * 0.8 / divisor, unit, 1)} ${unit}</span>`
       : `<span>&lt; ${formatTrafficValue(maxValue * 0.1 / divisor, unit, 1)} ${unit}</span><span>&gt; ${formatTrafficValue(maxValue * 0.8 / divisor, unit, 1)} ${unit}</span>`;
     legend.innerHTML = `<div class="legend-header"><span class="legend-title">${legendTitle}</span><button type="button" class="btn-legend-toggle" title="${collapsed ? 'Legende maximieren' : 'Legende minimieren'}">${collapsed ? '+' : '−'}</button></div><div class="legend-body" ${collapsed ? 'style="display:none;"' : ''}><div class="legend-scale">${scaleHtml}</div><div class="legend-labels">${scaleLabels}</div>${relationInfo}<div class="intermodal-map-scope">${year} · Kartenfläche: ${mapMarketLabel}</div></div>`;
+    setLegendCollapsedState(legend, collapsed);
     legend.querySelector('.btn-legend-toggle')?.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();

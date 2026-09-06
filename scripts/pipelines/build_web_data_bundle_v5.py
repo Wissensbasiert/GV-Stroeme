@@ -10,6 +10,7 @@ import os
 import glob
 import json
 import duckdb
+import subprocess
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 PROCESSED_DIR = os.path.join(BASE_DIR, "data", "processed")
@@ -910,5 +911,7 @@ if os.path.exists(old_monolith):
     with open(old_monolith, "w", encoding="utf-8") as f:
         json.dump({}, f)
     print("    Cleared old 512MB web_top_relations.json")
+
+subprocess.run(["node", os.path.join(BASE_DIR, "scripts", "frontend", "build_delivery_data.cjs"), "--kind", "summary"], check=True)
 
 print("\n>>> Pipeline v5 completed successfully!")

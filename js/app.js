@@ -292,11 +292,9 @@
   let fullCentroids = {};
   let summaryData = {};
   let nationalSummaryData = {};
-  let summaryDataLoad = null;
   // Compact 2019/2040 values for the regional overview tooltip. This keeps
   // the large forecast relation cube deferred until the forecast tab opens.
   let overviewForecastTooltipData = null;
-  let overviewForecastTooltipDataLoad = null;
   const loadedRegionRelations = {};
   let choroplethData = {};
   // Large datasets are requested only when their respective module is opened.
@@ -317,7 +315,6 @@
   let centroidsVp2040 = {};
   let crosswalkSpatialVp = [];
   let crosswalkNstVp = [];
-  const deferredModuleLoads = {};
   const nutsToVpCell = {};
   const vpCellToNuts = {};
 
@@ -391,6 +388,7 @@
           });
         }
         mapViewportInitialized[mapKey] = true;
+        map.getContainer().dataset.viewportReady = 'true';
       });
     };
 
@@ -445,68 +443,6 @@
     "20": "20 Sonstige Güter a.n.g."
   };
 
-  // German Number Formatter Helper
-  function formatDeNum(val, maxDecimals = 1, minDecimals = 0) {
-    if (val === null || val === undefined || isNaN(val)) return '--';
-    return Number(val).toLocaleString('de-DE', {
-      minimumFractionDigits: minDecimals,
-      maximumFractionDigits: maxDecimals
-    });
-  }
-
-  function setText(id, value) {
-    const element = document.getElementById(id);
-    if (element) element.textContent = value;
-  }
-
-  // Quantities use one decimal place by default. Very small non-zero values
-  // retain further precision so an existing relation never appears as zero.
-  function formatQuantity(val, standardDecimals = 1) {
-    if (val === null || val === undefined || isNaN(val)) return '--';
-    const absolute = Math.abs(Number(val));
-    const decimals = absolute > 0 && absolute < 0.01 ? 3 : (absolute > 0 && absolute < 0.1 ? 2 : standardDecimals);
-    return formatDeNum(val, decimals, decimals);
-  }
-
-  // Verkehrsleistungen behalten in einer Ansicht die etablierte Einheit. Bei
-  // sehr kleinen positiven tkm-Werten wird nur so weit präzisiert, wie es
-  // lesbar bleibt; darunter steht ein begrenzter, aber nicht irreführend
-  // gerundeter Wert.
-  function formatTkmQuantity(val, standardDecimals = 1, fixedDecimals = false) {
-    if (val === null || val === undefined || isNaN(val)) return '--';
-    const numeric = Number(val);
-    const absolute = Math.abs(numeric);
-    if (absolute === 0) return formatDeNum(0, standardDecimals, fixedDecimals ? standardDecimals : 0);
-    if (absolute < 0.000001) {
-      return `${numeric < 0 ? '−' : ''}<${formatDeNum(0.000001, 6, 6)}`;
-    }
-    const decimals = absolute < 0.00001 ? 6
-      : absolute < 0.0001 ? 5
-      : absolute < 0.001 ? 4
-      : absolute < 0.01 ? 3
-      : absolute < 0.1 ? 2
-      : standardDecimals;
-    const finalDecimals = Math.max(standardDecimals, decimals);
-    return formatDeNum(numeric, finalDecimals, fixedDecimals ? finalDecimals : 0);
-  }
-
-  function formatTrafficValue(val, unit, standardDecimals = 1) {
-    return String(unit).includes('tkm')
-      ? formatTkmQuantity(val, standardDecimals)
-      : formatDeNum(val, standardDecimals);
-  }
-  // Composition charts must calculate their share from the visible values of
-  // the hovered year. This keeps the percentage consistent with all filters.
-  function formatDynamicChartShare(context, unitText, suffix = '') {
-    const value = Number(context.raw);
-    const valuesAtYear = context.chart.data.datasets
-      .map(dataset => Number(dataset.data?.[context.dataIndex]))
-      .filter(Number.isFinite);
-    const total = valuesAtYear.reduce((sum, item) => sum + Math.abs(item), 0);
-    const share = total > 0 ? formatDeNum(Math.abs(value) / total * 100, 1) : '0,0';
-    return ` ${context.dataset.label}: ${formatTrafficValue(value, unitText, 2)} ${unitText} (${share} %${suffix})`;
-  }
-
   function getLatestConsolidatedOverviewYear(regYears, isTkm) {
     const metricKey = isTkm ? 'modes_tkm' : 'modes_tonnes';
     return Object.keys(regYears || {})
@@ -552,26 +488,12 @@
   // ----------------------------------------------------
   async function loadRegionRelations(regionId) {
     if (!regionId) return {};
-    if (loadedRegionRelations[regionId]) {
-      return loadedRegionRelations[regionId];
-    }
-    try {
-      // Regional relation files are rebuilt independently of the application
-      // bundle.  Do not reuse a browser copy after a data rebuild: otherwise
-      // the table and map can silently show a previous pipeline state.
-      const res = await fetch(
-        `data/processed/relations/${regionId}.json?v=20260901-international-relations`,
-        { cache: 'no-store' }
-      );
-      if (res.ok) {
-        const data = await res.json();
-        loadedRegionRelations[regionId] = data;
-        return data;
-      }
-    } catch (e) {
-      console.warn(`Could not load relations for ${regionId}`, e);
-    }
-    return {};
+    if (loadedRegionRelations[regionId]) return loadedRegionRelations[regionId];
+    return requestDataOnce(`relations:${regionId}`, async () => {
+      const data = await fetchJson(`data/processed/relations/${encodeURIComponent(regionId)}.json`);
+      loadedRegionRelations[regionId] = data;
+      return data;
+    });
   }
 
   function getRegionRelations(regionId) {
@@ -586,25 +508,31 @@
     return nationalSummaryData;
   }
 
-  // Master Region Switcher
+  // Publish only the latest selection after its required detail data arrives.
+  let regionSelectionSequence = 0;
+  let geometrySelectionSequence = 0;
   async function setRegion(regionId) {
-    if (!regionId || regionId === 'DE' || regionId === 'ALL') {
-      state.region = null;
-      const input = document.getElementById('regionSearchInput');
-      if (input) input.value = 'Deutschland';
-      updateAnalysisSummary();
-      renderAll();
-      return;
-    }
-    state.region = regionId;
+    const sequence = ++regionSelectionSequence;
+    state.region = !regionId || regionId === 'DE' || regionId === 'ALL' ? null : regionId;
+    const selectedRegion = state.region;
     const input = document.getElementById('regionSearchInput');
-    const curr = regionsData[regionId];
-    if (input && curr) {
-      input.value = `${curr.name} (${curr.id})`;
-    }
+    const curr = regionsData[selectedRegion];
+    if (input) input.value = selectedRegion ? (curr ? `${curr.name} (${curr.id})` : selectedRegion) : 'Deutschland';
     updateAnalysisSummary();
-    await Promise.all([ensureSummaryData(), loadRegionRelations(regionId)]);
-    renderAll();
+    const tabId = state.activeTab;
+    setModuleLoadingState(tabId, true);
+    try {
+      const [summaryLoaded] = await Promise.all([ensureSummaryData(selectedRegion), loadRegionRelations(selectedRegion)]);
+      if (!summaryLoaded) throw new Error('Regional summary unavailable');
+      if (state.activeTab === 'tab-forecast' && !await ensureModuleData('forecast')) throw new Error('Forecast region unavailable');
+      if (sequence !== regionSelectionSequence) return;
+      setModuleLoadingState(tabId, false);
+      renderAll();
+    } catch (error) {
+      if (sequence !== regionSelectionSequence) return;
+      console.error('Could not load selected region:', error);
+      showDataLoadError(document.getElementById(state.activeTab), 'Die Daten der ausgewählten Region konnten nicht geladen werden.', () => setRegion(selectedRegion));
+    }
   }
 
   function updateAnalysisSummary() {
@@ -681,6 +609,8 @@
     if (button) {
       button.textContent = collapsed ? '+' : '−';
       button.title = collapsed ? 'Legende maximieren' : 'Legende minimieren';
+      button.setAttribute('aria-label', collapsed ? 'Legende öffnen' : 'Legende schließen');
+      button.setAttribute('aria-expanded', String(!collapsed));
     }
   }
 
@@ -792,17 +722,32 @@
   // ----------------------------------------------------
   async function init() {
     setupEventListeners();
+    setupExportActions();
     observeMissingComparisons();
     updateGlobalControlAvailability();
     initLeafletMaps();
     setModuleLoadingState('tab-overview', true);
     const overviewNotice = document.querySelector('#tab-overview .module-loading-status');
     if (overviewNotice) overviewNotice.textContent = 'Startansicht wird geladen …';
-    await loadData();
-    setupRegionAutocomplete();
+    await loadInitialView();
+  }
+
+  let initialDataReady = false;
+  let regionAutocompleteReady = false;
+  async function loadInitialView() {
+    setModuleLoadingState('tab-overview', true);
+    try {
+      await requestDataOnce('initial-data', loadData);
+      if (!await ensureSummaryData()) throw new Error('Summary unavailable');
+    } catch (error) {
+      console.error('Could not initialize dashboard:', error);
+      showDataLoadError(document.getElementById('tab-overview'), 'Die Startdaten konnten nicht geladen werden.', loadInitialView);
+      return;
+    }
+    initialDataReady = true;
+    if (!regionAutocompleteReady) { setupRegionAutocomplete(); regionAutocompleteReady = true; }
     // The overview charts need the regional summary cube.  Drawing them once
     // before and once after its background load caused the visible double draw.
-    await ensureSummaryData();
     setInitialYearToLatestCompleteData();
     renderAll();
     // Load the compact preview after first render and refresh only the visible
@@ -819,127 +764,6 @@
     };
     requestAnimationFrame(refreshInitialOverview);
     setModuleLoadingState('tab-overview', false);
-  }
-
-  function setModuleLoadingState(tabId, isLoading) {
-    const pane = document.getElementById(tabId);
-    if (!pane) return;
-    pane.setAttribute('aria-busy', String(isLoading));
-    let notice = pane.querySelector('.module-loading-status');
-    if (!notice) {
-      notice = document.createElement('div');
-      notice.className = 'module-loading-status';
-      notice.setAttribute('role', 'status');
-      notice.textContent = 'Fachdaten werden geladen …';
-      pane.insertAdjacentElement('afterbegin', notice);
-    }
-    notice.hidden = !isLoading;
-  }
-
-  // Processed dashboard data can be rebuilt while the local server keeps
-  // running.  Prefer correctness over reusing a stale browser response.
-  async function fetchJson(url, fallback) {
-    const response = await fetch(url, { cache: 'no-store' });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json();
-  }
-
-  function hasRegionalSummaryData() {
-    return Object.keys(summaryData || {}).length > 0;
-  }
-
-  async function ensureSummaryData() {
-    if (hasRegionalSummaryData()) return true;
-    if (!summaryDataLoad) {
-      summaryDataLoad = fetchJson('data/processed/web_summary_by_region.json', {})
-        .then(data => {
-          summaryData = data;
-          nationalSummaryData = computeNationalSummaries();
-          return true;
-        })
-        .catch(error => {
-          console.error('Could not load regional summary data:', error);
-          return false;
-        });
-    }
-    return summaryDataLoad;
-  }
-
-  async function ensureOverviewForecastTooltipData() {
-    if (overviewForecastTooltipData) return true;
-    if (!overviewForecastTooltipDataLoad) {
-      overviewForecastTooltipDataLoad = fetchJson('data/processed/web_forecast_overview_tooltip.json?v=20260824a', null)
-        .then(data => {
-          overviewForecastTooltipData = data?.scenarios ? data : null;
-          return Boolean(overviewForecastTooltipData);
-        })
-        .catch(error => {
-          // The overview stays fully usable when the optional preview is not
-          // available; only its forecast block is omitted from tooltips.
-          console.warn('Could not load overview forecast tooltip data:', error);
-          return false;
-        });
-    }
-    return overviewForecastTooltipDataLoad;
-  }
-
-  async function ensureModuleData(moduleName) {
-    const available = {
-      maritime: () => Boolean(maritimeData),
-      airfreight: () => Boolean(airfreightData),
-      intermodal: () => Boolean(intermodalData),
-      forecast: () => Boolean(forecastData),
-      toll: () => Boolean(tollMunicipalityData)
-    };
-    if (available[moduleName]?.()) return true;
-    if (deferredModuleLoads[moduleName]) return deferredModuleLoads[moduleName];
-
-    const loaders = {
-      maritime: async () => { maritimeData = await fetchJson('data/processed/web_maritime.json?v=20260821n', {}); },
-      airfreight: async () => { airfreightData = await fetchJson('data/processed/web_airfreight.json?v=20260904-airfreight-dataquality1', {}); },
-      // This file is regenerated by the data pipeline.  The explicit revision
-      // clears copies from older application sessions; no-store also protects
-      // later data refreshes when the frontend bundle itself is unchanged.
-      intermodal: async () => {
-        intermodalData = await fetchJson(
-          'data/processed/web_intermodal.json?v=20260901-international-relations',
-          {}
-        );
-      },
-      forecast: async () => {
-        const [forecastRes, centroidsRes, spatialCrosswalkRes, nstCrosswalkRes] = await Promise.all([
-          fetchJson('data/processed/web_forecast_2040.json?v=20260821modalbygroup', null),
-          fetchJson('data/processed/nuts_centroids_vp2040.json', {}),
-          fetchJson('data/crosswalks/crosswalk_spatial_vp2040.json', []),
-          fetchJson('data/crosswalks/crosswalk_nst_vp2040.json', [])
-        ]);
-        forecastData = forecastRes;
-        centroidsVp2040 = centroidsRes;
-        crosswalkSpatialVp = spatialCrosswalkRes;
-        crosswalkNstVp = nstCrosswalkRes;
-        if (Array.isArray(crosswalkSpatialVp)) {
-          crosswalkSpatialVp.forEach(item => {
-            const cid = String(item.cell_id);
-            if (item.nuts3_2024) nutsToVpCell[item.nuts3_2024] = cid;
-            if (item.nuts3_2016) nutsToVpCell[item.nuts3_2016] = cid;
-            if (item.ags_5stellig) nutsToVpCell[item.ags_5stellig] = cid;
-            vpCellToNuts[cid] = item.nuts3_2024 || item.nuts3_2016 || cid;
-          });
-        }
-      },
-      toll: async () => {
-        tollMunicipalityData = await fetchJson('data/processed/toll_municipalities.json?v=20260902a', null);
-        initializeTollModule();
-      }
-    };
-
-    deferredModuleLoads[moduleName] = loaders[moduleName]()
-      .then(() => true)
-      .catch(error => {
-        console.error(`Could not load ${moduleName} module data:`, error);
-        return false;
-      });
-    return deferredModuleLoads[moduleName];
   }
 
   function formatDataYearRange(years) {
@@ -977,134 +801,17 @@
     refreshDataCoverageText();
   }
 
-  // Precompute National Aggregates from summaryData & benchmarkData
-  function computeNationalSummaries() {
-    const national = {};
-    const years = ['2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'];
-    
-    years.forEach(yr => {
-      const b = benchmarkData[yr] || {};
-      const bModes = b.modes || {};
-      
-      const obj = {
-        total_tonnes: b.total_tonnes || 0,
-        total_tkm: b.total_tkm || 0,
-        modes_tonnes: {
-          road: bModes.road?.tonnes || 0,
-          rail: bModes.rail?.tonnes || 0,
-          iww: bModes.iww?.tonnes || 0
-        },
-        modes_tkm: {
-          road: bModes.road?.tkm || 0,
-          rail: bModes.rail?.tkm || 0,
-          iww: bModes.iww?.tkm || 0
-        },
-        modes_direction_tonnes: { road: { inbound: 0, outbound: 0 }, rail: { inbound: 0, outbound: 0 }, iww: { inbound: 0, outbound: 0 } },
-        modes_direction_tkm: { road: { inbound: 0, outbound: 0 }, rail: { inbound: 0, outbound: 0 }, iww: { inbound: 0, outbound: 0 } },
-        directions_tonnes: { inbound: 0, outbound: 0 },
-        directions_tkm: { inbound: 0, outbound: 0 },
-        groups_7_tonnes: { all: {}, inbound: {}, outbound: {}, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0 },
-        groups_7_tkm: { all: {}, inbound: {}, outbound: {}, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0 },
-        by_mode_groups: { road: { all: {}, inbound: {}, outbound: {} }, rail: { all: {}, inbound: {}, outbound: {} }, iww: { all: {}, inbound: {}, outbound: {} } },
-        by_mode_groups_tkm: { road: { all: {}, inbound: {}, outbound: {} }, rail: { all: {}, inbound: {}, outbound: {} }, iww: { all: {}, inbound: {}, outbound: {} } },
-        by_mode_divisions: { road: {}, rail: {}, iww: {} },
-        by_mode_divisions_tkm: { road: {}, rail: {}, iww: {} }
-      };
-
-      Object.keys(summaryData).forEach(nutsId => {
-        if (nutsId.length === 5) {
-          const rData = summaryData[nutsId]?.[yr];
-          if (!rData) return;
-          ['road', 'rail', 'iww'].forEach(m => {
-            obj.modes_direction_tonnes[m].inbound += (rData.modes_direction_tonnes?.[m]?.inbound || 0) / 2;
-            obj.modes_direction_tonnes[m].outbound += (rData.modes_direction_tonnes?.[m]?.outbound || 0) / 2;
-            obj.modes_direction_tkm[m].inbound += (rData.modes_direction_tkm?.[m]?.inbound || 0) / 2;
-            obj.modes_direction_tkm[m].outbound += (rData.modes_direction_tkm?.[m]?.outbound || 0) / 2;
-          });
-
-          // Inbound & Outbound
-          obj.directions_tonnes.inbound += (rData.directions_tonnes?.inbound || 0) / 2;
-          obj.directions_tonnes.outbound += (rData.directions_tonnes?.outbound || 0) / 2;
-          obj.directions_tkm.inbound += (rData.directions_tkm?.inbound || 0) / 2;
-          obj.directions_tkm.outbound += (rData.directions_tkm?.outbound || 0) / 2;
-
-          // NST 7
-          const g7 = rData.groups_7_tonnes || {};
-          const g7Map = g7.all || g7;
-          Object.keys(g7Map).forEach(k => {
-            obj.groups_7_tonnes[k] = (obj.groups_7_tonnes[k] || 0) + (g7Map[k] || 0) / 2;
-            obj.groups_7_tonnes.all[k] = (obj.groups_7_tonnes.all[k] || 0) + (g7Map[k] || 0) / 2;
-          });
-          ['inbound', 'outbound'].forEach(direction => Object.entries(g7[direction] || {}).forEach(([k, amount]) => {
-            obj.groups_7_tonnes[direction][k] = (obj.groups_7_tonnes[direction][k] || 0) + (amount || 0) / 2;
-          }));
-          const g7tkm = rData.groups_7_tkm || {};
-          const g7tkmMap = g7tkm.all || g7tkm;
-          Object.keys(g7tkmMap).forEach(k => {
-            obj.groups_7_tkm[k] = (obj.groups_7_tkm[k] || 0) + (g7tkmMap[k] || 0) / 2;
-            obj.groups_7_tkm.all[k] = (obj.groups_7_tkm.all[k] || 0) + (g7tkmMap[k] || 0) / 2;
-          });
-          ['inbound', 'outbound'].forEach(direction => Object.entries(g7tkm[direction] || {}).forEach(([k, amount]) => {
-            obj.groups_7_tkm[direction][k] = (obj.groups_7_tkm[direction][k] || 0) + (amount || 0) / 2;
-          }));
-
-          // Mode divisions 20 & Mode groups 7
-          ['road', 'rail', 'iww'].forEach(m => {
-            const divMap = rData.by_mode_divisions?.[m]?.all || rData.by_mode_divisions?.[m] || {};
-            Object.keys(divMap).forEach(k => {
-              const padK = k.padStart(2, '0');
-              obj.by_mode_divisions[m][padK] = (obj.by_mode_divisions[m][padK] || 0) + (divMap[k] || 0) / 2;
-            });
-            const divTkmMap = rData.by_mode_divisions_tkm?.[m]?.all || rData.by_mode_divisions_tkm?.[m] || {};
-            Object.keys(divTkmMap).forEach(k => {
-              const padK = k.padStart(2, '0');
-              obj.by_mode_divisions_tkm[m][padK] = (obj.by_mode_divisions_tkm[m][padK] || 0) + (divTkmMap[k] || 0) / 2;
-            });
-            const grpMap = rData.by_mode_groups?.[m]?.all || rData.by_mode_groups?.[m] || {};
-            Object.keys(grpMap).forEach(k => {
-              obj.by_mode_groups[m][k] = (obj.by_mode_groups[m][k] || 0) + (grpMap[k] || 0) / 2;
-              obj.by_mode_groups[m].all[k] = (obj.by_mode_groups[m].all[k] || 0) + (grpMap[k] || 0) / 2;
-            });
-            ['inbound', 'outbound'].forEach(direction => Object.entries(rData.by_mode_groups?.[m]?.[direction] || {}).forEach(([k, amount]) => {
-              obj.by_mode_groups[m][direction][k] = (obj.by_mode_groups[m][direction][k] || 0) + (amount || 0) / 2;
-            }));
-            const grpTkmMap = rData.by_mode_groups_tkm?.[m]?.all || rData.by_mode_groups_tkm?.[m] || {};
-            Object.keys(grpTkmMap).forEach(k => {
-              obj.by_mode_groups_tkm[m][k] = (obj.by_mode_groups_tkm[m][k] || 0) + (grpTkmMap[k] || 0) / 2;
-              obj.by_mode_groups_tkm[m].all[k] = (obj.by_mode_groups_tkm[m].all[k] || 0) + (grpTkmMap[k] || 0) / 2;
-            });
-            ['inbound', 'outbound'].forEach(direction => Object.entries(rData.by_mode_groups_tkm?.[m]?.[direction] || {}).forEach(([k, amount]) => {
-              obj.by_mode_groups_tkm[m][direction][k] = (obj.by_mode_groups_tkm[m][direction][k] || 0) + (amount || 0) / 2;
-            }));
-          });
-        }
-      });
-
-      if (!obj.total_tonnes) {
-        obj.total_tonnes = obj.modes_tonnes.road + obj.modes_tonnes.rail + obj.modes_tonnes.iww;
-      }
-      national[yr] = obj;
-    });
-    return national;
-  }
-
   // Load All Precomputed JSON Data with Error Resilience
   async function loadData() {
-    const fetchSafe = (url, fallback = {}) =>
-      fetchJson(url, fallback).catch(err => {
-        console.warn(`Could not load ${url}:`, err);
-        return fallback;
-      });
-
     try {
       const [regRes, centRes, choroRes, benRes, nstRes, geoRes, stateBoundaryRes] = await Promise.all([
-        fetchSafe('data/processed/web_regions.json', {}),
-        fetchSafe('data/processed/nuts_centroids_full.json', {}),
-        fetchSafe('data/processed/web_choropleth.json', {}),
-        fetchSafe('data/processed/national_benchmarks.json', {}),
-        fetchSafe('data/processed/dim_nst2007.json', {}),
-        fetchSafe('data/processed/nuts3_de_2024_display.geojson', null),
-        fetchSafe('data/processed/nuts1_de_boundaries.geojson', null)
+        fetchJson('data/processed/web_regions.json', {}),
+        fetchJson('data/processed/nuts_centroids_full.json', {}),
+        fetchJson('data/processed/web_choropleth.json', {}),
+        fetchJson('data/processed/national_benchmarks.json', {}),
+        fetchJson('data/processed/dim_nst2007.json', {}),
+        fetchJson('data/processed/nuts3_de_2024_display.geojson', null),
+        fetchJson('data/processed/nuts1_de_boundaries.geojson', null)
       ]);
 
       regionsData = regRes;
@@ -1134,7 +841,7 @@
         await Promise.all([ensureSummaryData(), loadRegionRelations(state.region)]);
       }
     } catch (err) {
-      console.error("Error loading data bundle:", err);
+      throw err;
     }
   }
 
@@ -1373,6 +1080,7 @@
       item.setAttribute('aria-selected', item.classList.contains('active') ? 'true' : 'false');
       item.addEventListener('click', async (e) => {
         e.preventDefault();
+        if (!initialDataReady) { await loadInitialView(); if (!initialDataReady) return; }
         document.querySelectorAll('#mainNav .nav-item').forEach(i => {
           i.classList.remove('active');
           i.setAttribute('aria-selected', 'false');
@@ -1392,43 +1100,21 @@
         const activeMapKey = tabId.replace('tab-', '');
 
         const deferredModule = ({
-          'tab-maritime': 'maritime',
-          'tab-airfreight': 'airfreight',
-          'tab-intermodal': 'intermodal',
-          'tab-forecast': 'forecast',
-          'tab-toll': 'toll'
+          'tab-maritime': 'maritime', 'tab-airfreight': 'airfreight',
+          'tab-intermodal': 'intermodal', 'tab-forecast': 'forecast', 'tab-toll': 'toll'
         })[tabId];
-        if (deferredModule) {
-          setModuleLoadingState(tabId, true);
-          const loaded = await ensureModuleData(deferredModule);
-          if (!loaded) {
-            const pane = document.getElementById(tabId);
-            const notice = pane?.querySelector('.module-loading-status');
-            if (pane) pane.setAttribute('aria-busy', 'false');
-            if (notice) {
-              notice.textContent = 'Die Fachdaten konnten nicht geladen werden. Bitte laden Sie die Seite erneut.';
-              notice.hidden = false;
-            }
-            return;
-          }
-          setModuleLoadingState(tabId, false);
-          if (state.activeTab !== tabId) return;
+        setModuleLoadingState(tabId, true);
+        const summaryLoaded = await ensureSummaryData();
+        let loaded = summaryLoaded && (!deferredModule || await ensureModuleData(deferredModule));
+        if (loaded && state.region && ['tab-overview', 'tab-road', 'tab-rail', 'tab-iww'].includes(tabId)) {
+          try { await loadRegionRelations(state.region); } catch (error) { loaded = false; }
         }
-
-        if (['tab-road', 'tab-rail', 'tab-iww'].includes(tabId)) {
-          setModuleLoadingState(tabId, true);
-          const loaded = await ensureSummaryData();
-          if (!loaded) {
-            const notice = document.querySelector(`#${tabId} .module-loading-status`);
-            if (notice) {
-              notice.textContent = 'Die Fachdaten konnten nicht geladen werden. Bitte laden Sie die Seite erneut.';
-              notice.hidden = false;
-            }
-            return;
-          }
-          setModuleLoadingState(tabId, false);
-          if (state.activeTab !== tabId) return;
+        if (!loaded) {
+          showDataLoadError(target, 'Die Fachdaten konnten nicht geladen werden.', () => item.click());
+          return;
         }
+        setModuleLoadingState(tabId, false);
+        if (state.activeTab !== tabId) return;
 
         if (tabId === 'tab-forecast') {
           document.getElementById('controlGroupYear')?.style.setProperty('display', 'none');
@@ -1467,21 +1153,29 @@
       });
     });
 
-    // Year Selector
+    // Year-specific boundaries and their data year are committed together.
     document.getElementById('selectYear')?.addEventListener('change', async e => {
-      state.year = e.target.value;
-      
-      let geojsonFile = 'data/processed/nuts3_de_2024_display.geojson';
-      if (parseInt(state.year) <= 2020) geojsonFile = 'data/processed/nuts3_de_2016_display.geojson';
-      else if (parseInt(state.year) <= 2023) geojsonFile = 'data/processed/nuts3_de_2021_display.geojson';
-
+      const selectedYear = e.target.value;
+      const sequence = ++geometrySelectionSequence;
+      const vintage = Number(selectedYear) <= 2020 ? '2016' : Number(selectedYear) <= 2023 ? '2021' : '2024';
+      const tabId = state.activeTab;
+      setModuleLoadingState(tabId, true);
       try {
-        geojsonNuts3 = await fetch(geojsonFile).then(r => r.json());
-      } catch (err) {
-        console.warn("Using fallback geometry:", err);
+        const geometry = await requestDataOnce(`geometry:${vintage}`, () => fetchJson(`data/processed/nuts3_de_${vintage}_display.geojson`));
+        if (sequence !== geometrySelectionSequence) return;
+        state.year = selectedYear;
+        geojsonNuts3 = geometry;
+        setModuleLoadingState(tabId, false);
+        renderAll();
+      } catch (error) {
+        if (sequence !== geometrySelectionSequence) return;
+        document.getElementById('selectYear').value = state.year;
+        showDataLoadError(document.getElementById(tabId), 'Die Grenzen für das ausgewählte Datenjahr konnten nicht geladen werden.', () => {
+          const select = document.getElementById('selectYear');
+          select.value = selectedYear;
+          select.dispatchEvent(new Event('change'));
+        });
       }
-
-      renderAll();
     });
 
     // Forecast Scenario Selector
@@ -1553,7 +1247,7 @@
     });
 
     // Map Legend Minimizing / Maximizing
-    ['overview', 'road', 'toll', 'rail', 'iww', 'intermodal', 'maritime', 'forecast'].forEach(k => {
+    ['overview', 'road', 'toll', 'rail', 'iww', 'intermodal', 'maritime', 'airfreight', 'forecast'].forEach(k => {
       const btn = document.getElementById(`btnToggleLegend_${k}`);
       const leg = document.getElementById(`${k}MapLegend`) || document.getElementById(`${k}ChoroplethLegend`);
       if (btn && leg) {
@@ -1752,46 +1446,16 @@
       input.focus();
     };
 
-    // Modals Handling
-    const setupModal = (btnId, modalId) => {
-      const btn = document.getElementById(btnId);
-      const modal = document.getElementById(modalId);
-      if (btn && modal) {
-        btn.addEventListener('click', async () => {
-          modal.classList.add('active');
-          modal.querySelector('.modal-close')?.focus();
-          if (modalId === 'modalSteckbrief') await prepareSteckbriefModal();
-          if (modalId === 'modalHelp' || modalId === 'modalLicenses') await refreshDataCoverage();
-          if (modalId === 'modalAi') {
-            requestAnimationFrame(() => document.getElementById('aiQuestionInput')?.focus());
-          }
-        });
-        modal.querySelectorAll('.modal-close, [data-close]')?.forEach(c => {
-          c.addEventListener('click', () => {
-            modal.classList.remove('active');
-            btn.focus();
-          });
-        });
-        modal.addEventListener('click', e => {
-          if (e.target === modal) {
-            modal.classList.remove('active');
-            btn.focus();
-          }
-        });
-        document.addEventListener('keydown', e => {
-          if (e.key === 'Escape' && modal.classList.contains('active')) {
-            modal.classList.remove('active');
-            btn.focus();
-          }
-        });
-      }
+    const onDialogOpen = async modalId => {
+      if (modalId === 'modalSteckbrief') await prepareSteckbriefModal();
+      if (modalId === 'modalHelp' || modalId === 'modalLicenses') await refreshDataCoverage();
+      if (modalId === 'modalAi') requestAnimationFrame(() => document.getElementById('aiQuestionInput')?.focus());
     };
-
-    setupModal('btnAiModal', 'modalAi');
-    setupModal('btnSteckbriefModal', 'modalSteckbrief');
-    setupModal('btnHelpModal', 'modalHelp');
-    setupModal('btnLicensesModal', 'modalLicenses');
-    setupModal('brandLogoBtn', 'modalLicenses');
+    bindDialog('btnAiModal', 'modalAi', onDialogOpen);
+    bindDialog('btnSteckbriefModal', 'modalSteckbrief', onDialogOpen);
+    bindDialog('btnHelpModal', 'modalHelp', onDialogOpen);
+    bindDialog('btnLicensesModal', 'modalLicenses', onDialogOpen);
+    bindDialog('brandLogoBtn', 'modalLicenses', onDialogOpen);
 
     document.getElementById('aiQuestionForm')?.addEventListener('submit', event => {
       event.preventDefault();
@@ -1986,12 +1650,13 @@
         // Give also initially hidden module maps a valid, neutral view. Without
         // this Leaflet can cache a 0 x 0 size and clamp the first fitBounds call
         // to maxZoom 18. The precise Germany/coast fit follows on activation.
-        center: [51.175, 10.425],
-        zoom: 5,
+        ...(cfg.key === 'overview' ? {} : { center: [51.175, 10.425], zoom: 5 }),
         // Fractional zoom lets fitBounds use the card height accurately instead
         // of rounding to a different whole zoom step in another browser.
         zoomSnap: 0.1
       });
+      // Fit before adding tiles: the first overview frame already shows Germany.
+      if (cfg.key === 'overview') map.fitBounds(GERMANY_BOUNDS, { padding: [8, 8], animate: false });
       map.createPane('connectionPane');
       map.getPane('connectionPane').style.zIndex = 450;
       map.createPane('stateBoundaryPane');
@@ -2032,6 +1697,15 @@
         position: 'bottomleft',
         prefix: false
       }).addTo(map);
+      // Credits can wrap to several lines on phones, especially in the toll map.
+      // Keep the mobile legend above their actual height, including later updates.
+      const attribution = map.attributionControl.getContainer();
+      const mapFrame = el.closest('.map-container-leaflet');
+      const attributionObserver = new ResizeObserver(() => {
+        mapFrame?.style.setProperty('--map-attribution-height', `${attribution.getBoundingClientRect().height}px`);
+      });
+      attributionObserver.observe(attribution);
+      map.on('unload', () => attributionObserver.disconnect());
 
       // German localized OpenStreetMap Basemap (DE designations & labels)
       L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png', {
@@ -2405,6 +2079,7 @@
         const isTkm = state.metric === 'tkm';
         const unit = isTkm ? 'Mrd. tkm' : 'Mio. t';
         const divisor = isTkm ? 1e9 : 1e6;
+        layer.wbpExport = { code: nutsId, name: nutsName, value: val, unit: isTkm ? 'tkm' : 't' };
         const previousYear = String(Number(state.year) - 1);
         const previousRecord = choroplethData?.[previousYear]?.[nutsId];
         const baselineRecord = state.year === '2016' ? null : choroplethData?.['2016']?.[nutsId];
@@ -2832,6 +2507,8 @@
         ${spiderHtml}
       </div>
     `;
+
+    setLegendCollapsedState(legendEl, isCollapsed);
 
     // Rebind the toggle button on dynamically updated legend
     const btn = legendEl.querySelector('.btn-legend-toggle');
@@ -3769,12 +3446,19 @@
     if (bodyEl) {
       bodyEl.innerHTML = '<div class="steckbrief-loading" role="status">Steckbrief wird aus den Regionaldaten erstellt …</div>';
     }
-    await Promise.all([
-      ensureSummaryData(),
-      ensureModuleData('intermodal'),
-      ensureModuleData('forecast'),
-      state.region ? loadRegionRelations(state.region) : Promise.resolve()
-    ]);
+    if (bodyEl) delete bodyEl.dataset.loadError;
+    const region = state.region;
+    try {
+      const results = await Promise.all([
+        ensureSummaryData(region), ensureModuleData('intermodal'), ensureModuleData('forecast'), loadRegionRelations(region)
+      ]);
+      if (results.some(result => result === false)) throw new Error('Profile data incomplete');
+      if (region !== state.region) return prepareSteckbriefModal();
+    } catch (error) {
+      console.error('Could not prepare profile:', error);
+      showDataLoadError(bodyEl, 'Der Steckbrief konnte nicht vollständig geladen werden.', prepareSteckbriefModal);
+      return;
+    }
     renderSteckbriefModal();
   }
 
@@ -4633,6 +4317,7 @@
     const ctx = document.getElementById('chartCommodity');
     if (!ctx) return;
     if (chartCommodity) chartCommodity.destroy();
+    renderScrollableChartLegend('chartCommodity', null, false);
 
     const regYears = getActiveRegionSummary();
     const isTkm = state.metric === 'tkm';
@@ -4759,7 +4444,8 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { 
+            legend: {
+              display: false,
               position: 'bottom',
               align: 'start',
               labels: { 
@@ -4787,6 +4473,7 @@
           }
         }
       });
+      renderScrollableChartLegend('chartCommodity', chartCommodity, true);
     }
   }
 
@@ -4922,6 +4609,9 @@
   const subChartInstances = {};
 
   function setScrollableChartCanvas(canvasId, enabled, contentHeight = 0) {
+    // Normalize the previous legend container before creating the next Chart.
+    // Otherwise its resize observer remains attached to a removed wrapper.
+    renderScrollableChartLegend(canvasId, null, false);
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const chartWrap = canvas.closest('.chart-canvas-wrap');
@@ -5014,7 +4704,21 @@
     const legend = existing || document.createElement('div');
     legend.id = `${canvasId}-legend`;
     legend.className = 'chart-scroll-legend';
-    legend.innerHTML = chart.data.datasets.map(dataset => `<span><i style="background:${dataset.borderColor};"></i>${dataset.label}</span>`).join('');
+    legend.replaceChildren(...chart.data.datasets.map((dataset, index) => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.setAttribute('aria-pressed', String(chart.isDatasetVisible(index)));
+      const swatch = document.createElement('i');
+      swatch.style.background = dataset.borderColor;
+      swatch.setAttribute('aria-hidden', 'true');
+      item.append(swatch, document.createTextNode(dataset.label));
+      item.addEventListener('click', () => {
+        chart.setDatasetVisibility(index, !chart.isDatasetVisible(index));
+        item.setAttribute('aria-pressed', String(chart.isDatasetVisible(index)));
+        chart.update();
+      });
+      return item;
+    }));
     if (!existing) plot.insertAdjacentElement('afterend', legend);
     chartWrap?.classList.add('chart-with-scroll-legend');
     requestAnimationFrame(() => chart.resize());
@@ -5172,32 +4876,32 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { 
+            legend: {
               display: !is20,
               position: 'bottom',
               align: 'start',
-              labels: { 
-                boxWidth: 10, 
+              labels: {
+                boxWidth: 10,
                 padding: 8,
-                font: { size: 11, weight: '600' } 
-              } 
+                font: { size: 11, weight: '600' }
+              }
             },
-            tooltip: { 
-              callbacks: { 
+            tooltip: {
+              callbacks: {
                 title: items => `Jahr: ${items[0]?.label}`,
                 label: c => formatDynamicChartShare(c, unitText)
-              } 
+              }
             }
           },
-          scales: { 
+          scales: {
             x: {
               ticks: { font: { size: 11, weight: '600' } }
             },
-            y: { 
-              beginAtZero: state.direction !== 'balance', 
+            y: {
+              beginAtZero: state.direction !== 'balance',
               title: { display: true, text: unitText, font: { size: 11, weight: '600' } },
               ticks: { font: { size: 11 } }
-            } 
+            }
           }
         }
       });
@@ -5246,6 +4950,536 @@
       }
     });
   }
+  // German Number Formatter Helper
+  function formatDeNum(val, maxDecimals = 1, minDecimals = 0) {
+    if (val === null || val === undefined || !Number.isFinite(Number(val))) return '--';
+    return Number(val).toLocaleString('de-DE', {
+      minimumFractionDigits: minDecimals,
+      maximumFractionDigits: maxDecimals
+    });
+  }
+
+  function setText(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value;
+  }
+
+  // Quantities use one decimal place by default. Very small non-zero values
+  // retain further precision so an existing relation never appears as zero.
+  function formatQuantity(val, standardDecimals = 1) {
+    if (val === null || val === undefined || isNaN(val)) return '--';
+    const absolute = Math.abs(Number(val));
+    const decimals = absolute > 0 && absolute < 0.01 ? 3 : (absolute > 0 && absolute < 0.1 ? 2 : standardDecimals);
+    return formatDeNum(val, decimals, decimals);
+  }
+
+  // Verkehrsleistungen behalten in einer Ansicht die etablierte Einheit. Bei
+  // sehr kleinen positiven tkm-Werten wird nur so weit präzisiert, wie es
+  // lesbar bleibt; darunter steht ein begrenzter, aber nicht irreführend
+  // gerundeter Wert.
+  function formatTkmQuantity(val, standardDecimals = 1, fixedDecimals = false) {
+    if (val === null || val === undefined || isNaN(val)) return '--';
+    const numeric = Number(val);
+    const absolute = Math.abs(numeric);
+    if (absolute === 0) return formatDeNum(0, standardDecimals, fixedDecimals ? standardDecimals : 0);
+    if (absolute < 0.000001) {
+      return `${numeric < 0 ? '−' : ''}<${formatDeNum(0.000001, 6, 6)}`;
+    }
+    const decimals = absolute < 0.00001 ? 6
+      : absolute < 0.0001 ? 5
+      : absolute < 0.001 ? 4
+      : absolute < 0.01 ? 3
+      : absolute < 0.1 ? 2
+      : standardDecimals;
+    const finalDecimals = Math.max(standardDecimals, decimals);
+    return formatDeNum(numeric, finalDecimals, fixedDecimals ? finalDecimals : 0);
+  }
+
+  function formatTrafficValue(val, unit, standardDecimals = 1) {
+    return String(unit).includes('tkm')
+      ? formatTkmQuantity(val, standardDecimals)
+      : formatDeNum(val, standardDecimals);
+  }
+  // Composition charts must calculate their share from the visible values of
+  // the hovered year. This keeps the percentage consistent with all filters.
+  function formatDynamicChartShare(context, unitText, suffix = '') {
+    const value = Number(context.raw);
+    const valuesAtYear = context.chart.data.datasets
+      .map(dataset => Number(dataset.data?.[context.dataIndex]))
+      .filter(Number.isFinite);
+    const total = valuesAtYear.reduce((sum, item) => sum + Math.abs(item), 0);
+    const share = total > 0 ? formatDeNum(Math.abs(value) / total * 100, 1) : '0,0';
+    return ` ${context.dataset.label}: ${formatTrafficValue(value, unitText, 2)} ${unitText} (${share} %${suffix})`;
+  }
+
+  // Tables specify one scale for every row; compact values must carry a unit.
+  function formatFixedUnitValue(value, { divisor = 1, decimals = 1, signed = false } = {}) {
+    if (value === null || value === undefined || !Number.isFinite(Number(value))) return '--';
+    const number = Number(value) / divisor;
+    return `${signed && number > 0 ? '+' : ''}${formatDeNum(number, decimals)}`;
+  }
+
+  // Precompute National Aggregates from summaryData & benchmarkData
+  function computeNationalSummaries(summaryData, benchmarkData) {
+    const national = {};
+    const years = ['2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'];
+
+    years.forEach(yr => {
+      const b = benchmarkData[yr] || {};
+      const bModes = b.modes || {};
+
+      const obj = {
+        total_tonnes: b.total_tonnes || 0,
+        total_tkm: b.total_tkm || 0,
+        modes_tonnes: {
+          road: bModes.road?.tonnes || 0,
+          rail: bModes.rail?.tonnes || 0,
+          iww: bModes.iww?.tonnes || 0
+        },
+        modes_tkm: {
+          road: bModes.road?.tkm || 0,
+          rail: bModes.rail?.tkm || 0,
+          iww: bModes.iww?.tkm || 0
+        },
+        modes_direction_tonnes: { road: { inbound: 0, outbound: 0 }, rail: { inbound: 0, outbound: 0 }, iww: { inbound: 0, outbound: 0 } },
+        modes_direction_tkm: { road: { inbound: 0, outbound: 0 }, rail: { inbound: 0, outbound: 0 }, iww: { inbound: 0, outbound: 0 } },
+        directions_tonnes: { inbound: 0, outbound: 0 },
+        directions_tkm: { inbound: 0, outbound: 0 },
+        groups_7_tonnes: { all: {}, inbound: {}, outbound: {}, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0 },
+        groups_7_tkm: { all: {}, inbound: {}, outbound: {}, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0 },
+        by_mode_groups: { road: { all: {}, inbound: {}, outbound: {} }, rail: { all: {}, inbound: {}, outbound: {} }, iww: { all: {}, inbound: {}, outbound: {} } },
+        by_mode_groups_tkm: { road: { all: {}, inbound: {}, outbound: {} }, rail: { all: {}, inbound: {}, outbound: {} }, iww: { all: {}, inbound: {}, outbound: {} } },
+        by_mode_divisions: { road: {}, rail: {}, iww: {} },
+        by_mode_divisions_tkm: { road: {}, rail: {}, iww: {} }
+      };
+
+      Object.keys(summaryData).forEach(nutsId => {
+        if (nutsId.length === 5) {
+          const rData = summaryData[nutsId]?.[yr];
+          if (!rData) return;
+          ['road', 'rail', 'iww'].forEach(m => {
+            obj.modes_direction_tonnes[m].inbound += (rData.modes_direction_tonnes?.[m]?.inbound || 0) / 2;
+            obj.modes_direction_tonnes[m].outbound += (rData.modes_direction_tonnes?.[m]?.outbound || 0) / 2;
+            obj.modes_direction_tkm[m].inbound += (rData.modes_direction_tkm?.[m]?.inbound || 0) / 2;
+            obj.modes_direction_tkm[m].outbound += (rData.modes_direction_tkm?.[m]?.outbound || 0) / 2;
+          });
+
+          // Inbound & Outbound
+          obj.directions_tonnes.inbound += (rData.directions_tonnes?.inbound || 0) / 2;
+          obj.directions_tonnes.outbound += (rData.directions_tonnes?.outbound || 0) / 2;
+          obj.directions_tkm.inbound += (rData.directions_tkm?.inbound || 0) / 2;
+          obj.directions_tkm.outbound += (rData.directions_tkm?.outbound || 0) / 2;
+
+          // NST 7
+          const g7 = rData.groups_7_tonnes || {};
+          const g7Map = g7.all || g7;
+          Object.keys(g7Map).forEach(k => {
+            obj.groups_7_tonnes[k] = (obj.groups_7_tonnes[k] || 0) + (g7Map[k] || 0) / 2;
+            obj.groups_7_tonnes.all[k] = (obj.groups_7_tonnes.all[k] || 0) + (g7Map[k] || 0) / 2;
+          });
+          ['inbound', 'outbound'].forEach(direction => Object.entries(g7[direction] || {}).forEach(([k, amount]) => {
+            obj.groups_7_tonnes[direction][k] = (obj.groups_7_tonnes[direction][k] || 0) + (amount || 0) / 2;
+          }));
+          const g7tkm = rData.groups_7_tkm || {};
+          const g7tkmMap = g7tkm.all || g7tkm;
+          Object.keys(g7tkmMap).forEach(k => {
+            obj.groups_7_tkm[k] = (obj.groups_7_tkm[k] || 0) + (g7tkmMap[k] || 0) / 2;
+            obj.groups_7_tkm.all[k] = (obj.groups_7_tkm.all[k] || 0) + (g7tkmMap[k] || 0) / 2;
+          });
+          ['inbound', 'outbound'].forEach(direction => Object.entries(g7tkm[direction] || {}).forEach(([k, amount]) => {
+            obj.groups_7_tkm[direction][k] = (obj.groups_7_tkm[direction][k] || 0) + (amount || 0) / 2;
+          }));
+
+          // Mode divisions 20 & Mode groups 7
+          ['road', 'rail', 'iww'].forEach(m => {
+            const divMap = rData.by_mode_divisions?.[m]?.all || rData.by_mode_divisions?.[m] || {};
+            Object.keys(divMap).forEach(k => {
+              const padK = k.padStart(2, '0');
+              obj.by_mode_divisions[m][padK] = (obj.by_mode_divisions[m][padK] || 0) + (divMap[k] || 0) / 2;
+            });
+            const divTkmMap = rData.by_mode_divisions_tkm?.[m]?.all || rData.by_mode_divisions_tkm?.[m] || {};
+            Object.keys(divTkmMap).forEach(k => {
+              const padK = k.padStart(2, '0');
+              obj.by_mode_divisions_tkm[m][padK] = (obj.by_mode_divisions_tkm[m][padK] || 0) + (divTkmMap[k] || 0) / 2;
+            });
+            const grpMap = rData.by_mode_groups?.[m]?.all || rData.by_mode_groups?.[m] || {};
+            Object.keys(grpMap).forEach(k => {
+              obj.by_mode_groups[m][k] = (obj.by_mode_groups[m][k] || 0) + (grpMap[k] || 0) / 2;
+              obj.by_mode_groups[m].all[k] = (obj.by_mode_groups[m].all[k] || 0) + (grpMap[k] || 0) / 2;
+            });
+            ['inbound', 'outbound'].forEach(direction => Object.entries(rData.by_mode_groups?.[m]?.[direction] || {}).forEach(([k, amount]) => {
+              obj.by_mode_groups[m][direction][k] = (obj.by_mode_groups[m][direction][k] || 0) + (amount || 0) / 2;
+            }));
+            const grpTkmMap = rData.by_mode_groups_tkm?.[m]?.all || rData.by_mode_groups_tkm?.[m] || {};
+            Object.keys(grpTkmMap).forEach(k => {
+              obj.by_mode_groups_tkm[m][k] = (obj.by_mode_groups_tkm[m][k] || 0) + (grpTkmMap[k] || 0) / 2;
+              obj.by_mode_groups_tkm[m].all[k] = (obj.by_mode_groups_tkm[m].all[k] || 0) + (grpTkmMap[k] || 0) / 2;
+            });
+            ['inbound', 'outbound'].forEach(direction => Object.entries(rData.by_mode_groups_tkm?.[m]?.[direction] || {}).forEach(([k, amount]) => {
+              obj.by_mode_groups_tkm[m][direction][k] = (obj.by_mode_groups_tkm[m][direction][k] || 0) + (amount || 0) / 2;
+            }));
+          });
+        }
+      });
+
+      if (!obj.total_tonnes) {
+        obj.total_tonnes = obj.modes_tonnes.road + obj.modes_tonnes.rail + obj.modes_tonnes.iww;
+      }
+      national[yr] = obj;
+    });
+    return national;
+  }
+
+  // Shared loading, failure recovery and delivery-partition access.
+  const pendingDataLoads = new Map();
+  const loadedSummaryDetails = new Set();
+  const loadedForecastDetails = new Set();
+
+  function requestDataOnce(key, loader) {
+    if (!pendingDataLoads.has(key)) {
+      const request = Promise.resolve().then(loader).catch(error => {
+        pendingDataLoads.delete(key);
+        throw error;
+      });
+      pendingDataLoads.set(key, request);
+    }
+    return pendingDataLoads.get(key);
+  }
+
+  function showDataLoadError(container, message, retry) {
+    if (!container) return;
+    container.setAttribute('aria-busy', 'false');
+    container.dataset.loadError = 'true';
+    let notice = container.querySelector('.module-loading-status');
+    if (!notice) {
+      notice = document.createElement('div');
+      notice.className = 'module-loading-status';
+      container.prepend(notice);
+    }
+    notice.setAttribute('role', 'alert');
+    const label = document.createElement('span');
+    label.textContent = message;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn-header data-retry-button';
+    button.textContent = 'Erneut versuchen';
+    button.addEventListener('click', () => { button.disabled = true; retry(); });
+    notice.replaceChildren(label, button);
+    notice.hidden = false;
+  }
+
+  function setModuleLoadingState(tabId, isLoading) {
+    const pane = document.getElementById(tabId);
+    if (!pane) return;
+    delete pane.dataset.loadError;
+    pane.setAttribute('aria-busy', String(isLoading));
+    let notice = pane.querySelector('.module-loading-status');
+    if (!notice) {
+      notice = document.createElement('div');
+      notice.className = 'module-loading-status';
+      pane.insertAdjacentElement('afterbegin', notice);
+    }
+    notice.setAttribute('role', 'status');
+    notice.textContent = 'Fachdaten werden geladen …';
+    notice.hidden = !isLoading;
+  }
+
+  // Keep local rebuilds fresh; bound stalled requests without bypassing TLS/CORS.
+  async function fetchJson(url, _fallback, { timeoutMs = 30000, signal } = {}) {
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    if (signal?.aborted) abort();
+    else signal?.addEventListener('abort', abort, { once: true });
+    const timer = setTimeout(abort, timeoutMs);
+    try {
+      const response = await fetch(url, { cache: 'no-store', signal: controller.signal });
+      if (!response.ok) throw new Error(`HTTP ${response.status}: ${url}`);
+      return await response.json();
+    } finally {
+      clearTimeout(timer);
+      signal?.removeEventListener('abort', abort);
+    }
+  }
+
+  function hasRegionalSummaryData() {
+    return Object.keys(summaryData || {}).length > 0;
+  }
+
+  async function ensureSummaryData(regionId = state.region) {
+    try {
+      await requestDataOnce('summary', async () => {
+        const data = await fetchJson('data/processed/web_summary_core.json');
+        if (data?.format !== 1 || !data.regions || !data.national) throw new Error('Invalid summary delivery data');
+        summaryData = data.regions;
+        nationalSummaryData = data.national;
+      });
+      if (regionId && summaryData[regionId] && !loadedSummaryDetails.has(regionId)) {
+        await requestDataOnce(`summary:${regionId}`, async () => {
+          const detail = await fetchJson(`data/processed/delivery/summary/${encodeURIComponent(regionId)}.json`);
+          for (const year of Object.keys(summaryData[regionId])) {
+            if (!detail[year]) throw new Error(`Missing regional summary year: ${year}`);
+          }
+          for (const [year, record] of Object.entries(detail)) Object.assign(summaryData[regionId][year], record);
+          loadedSummaryDetails.add(regionId);
+        });
+      }
+      return true;
+    } catch (error) {
+      console.error('Could not load regional summary data:', error);
+      return false;
+    }
+  }
+
+  async function ensureForecastRegionData(regionId = state.region) {
+    if (!regionId || loadedForecastDetails.has(regionId)) return true;
+    const scenarioIds = Object.keys(forecastData?.scenarios || {}).filter(id => forecastData.scenarios[id].regions?.[regionId]);
+    if (!scenarioIds.length) return true; // Region outside the forecast source coverage.
+    await requestDataOnce(`forecast:${regionId}`, async () => {
+      const detail = await fetchJson(`data/processed/delivery/forecast/${encodeURIComponent(regionId)}.json`);
+      for (const id of scenarioIds) {
+        if (!detail[id]?.relations_overall || !detail[id]?.by_group_relations) throw new Error(`Incomplete forecast region: ${regionId}`);
+      }
+      for (const id of scenarioIds) Object.assign(forecastData.scenarios[id].regions[regionId], detail[id]);
+      loadedForecastDetails.add(regionId);
+    });
+    return true;
+  }
+
+  async function ensureOverviewForecastTooltipData() {
+    try {
+      await requestDataOnce('overview-forecast', async () => {
+        const data = await fetchJson('data/processed/web_forecast_overview_tooltip.json');
+        if (!data?.scenarios) throw new Error('Invalid forecast preview');
+        overviewForecastTooltipData = data;
+      });
+      return true;
+    } catch (error) {
+      console.warn('Could not load overview forecast tooltip data:', error);
+      return false;
+    }
+  }
+
+  async function ensureModuleData(moduleName) {
+    const available = {
+      maritime: () => Boolean(maritimeData),
+      airfreight: () => Boolean(airfreightData),
+      intermodal: () => Boolean(intermodalData),
+      forecast: () => Boolean(forecastData),
+      toll: () => Boolean(tollMunicipalityData)
+    };
+
+    const loaders = {
+      maritime: async () => { maritimeData = await fetchJson('data/processed/web_maritime.json?v=20260821n', {}); },
+      airfreight: async () => { airfreightData = await fetchJson('data/processed/web_airfreight.json?v=20260904-airfreight-dataquality1', {}); },
+      // This file is regenerated by the data pipeline.  The explicit revision
+      // clears copies from older application sessions; no-store also protects
+      // later data refreshes when the frontend bundle itself is unchanged.
+      intermodal: async () => {
+        intermodalData = await fetchJson(
+          'data/processed/web_intermodal.json?v=20260901-international-relations',
+          {}
+        );
+      },
+      forecast: async () => {
+        const [forecastRes, centroidsRes, spatialCrosswalkRes, nstCrosswalkRes] = await Promise.all([
+          fetchJson('data/processed/web_forecast_core.json', null),
+          fetchJson('data/processed/nuts_centroids_vp2040.json', {}),
+          fetchJson('data/crosswalks/crosswalk_spatial_vp2040.json', []),
+          fetchJson('data/crosswalks/crosswalk_nst_vp2040.json', [])
+        ]);
+        forecastData = forecastRes;
+        centroidsVp2040 = centroidsRes;
+        crosswalkSpatialVp = spatialCrosswalkRes;
+        crosswalkNstVp = nstCrosswalkRes;
+        if (Array.isArray(crosswalkSpatialVp)) {
+          crosswalkSpatialVp.forEach(item => {
+            const cid = String(item.cell_id);
+            if (item.nuts3_2024) nutsToVpCell[item.nuts3_2024] = cid;
+            if (item.nuts3_2016) nutsToVpCell[item.nuts3_2016] = cid;
+            if (item.ags_5stellig) nutsToVpCell[item.ags_5stellig] = cid;
+            vpCellToNuts[cid] = item.nuts3_2024 || item.nuts3_2016 || cid;
+          });
+        }
+      },
+      toll: async () => {
+        tollMunicipalityData = await fetchJson('data/processed/toll_municipalities.json?v=20260902a', null);
+        initializeTollModule();
+      }
+    };
+
+    try {
+      if (!available[moduleName]?.()) await requestDataOnce(`module:${moduleName}`, loaders[moduleName]);
+      if (moduleName === 'forecast') await ensureForecastRegionData();
+      return true;
+    } catch (error) {
+      console.error(`Could not load ${moduleName} module data:`, error);
+      return false;
+    }
+  }
+
+  // One controller per dialog, even when several buttons open it.
+  const dialogControllers = new WeakMap();
+  function bindDialog(buttonId, dialogId, onOpen) {
+    const button = document.getElementById(buttonId);
+    const dialog = document.getElementById(dialogId);
+    if (!button || !dialog) return;
+    if (!button.matches('button, a[href], input')) {
+      button.setAttribute('role', 'button');
+      button.tabIndex = 0;
+      button.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); button.click(); }
+      });
+    }
+    let controller = dialogControllers.get(dialog);
+    if (!controller) {
+      let opener = null;
+      const focusable = () => [...dialog.querySelectorAll('a[href], button, input, select, textarea, [tabindex]')]
+        .filter(node => !node.disabled && node.tabIndex >= 0 && node.getClientRects().length && !node.closest('[hidden], [inert]'));
+      dialog.setAttribute('role', 'dialog');
+      dialog.setAttribute('aria-modal', 'true');
+      dialog.tabIndex = -1;
+      dialog.querySelectorAll('.modal-close').forEach(node => {
+        if (!node.getAttribute('aria-label')) node.setAttribute('aria-label', 'Dialog schließen');
+      });
+      const close = () => {
+        dialog.classList.remove('active');
+        if (opener?.isConnected) opener.focus();
+      };
+      dialog.querySelectorAll('.modal-close, [data-close]').forEach(node => node.addEventListener('click', close));
+      dialog.addEventListener('click', event => { if (event.target === dialog) close(); });
+      document.addEventListener('keydown', event => {
+        if (!dialog.classList.contains('active')) return;
+        if (event.key === 'Escape') { event.preventDefault(); close(); return; }
+        if (event.key !== 'Tab') return;
+        const items = focusable();
+        const first = items[0] || dialog, last = items.at(-1) || dialog;
+        if (!items.length || !dialog.contains(document.activeElement) ||
+            (event.shiftKey && document.activeElement === first) ||
+            (!event.shiftKey && document.activeElement === last)) {
+          event.preventDefault();
+          (event.shiftKey ? last : first).focus();
+        }
+      });
+      document.addEventListener('focusin', event => {
+        if (dialog.classList.contains('active') && !dialog.contains(event.target)) (focusable()[0] || dialog).focus();
+      });
+      controller = { open(origin) {
+        opener = origin;
+        dialog.classList.add('active');
+        (dialog.querySelector('.modal-close') || focusable()[0] || dialog).focus();
+      }};
+      dialogControllers.set(dialog, controller);
+    }
+    button.addEventListener('click', async () => {
+      controller.open(button);
+      await onOpen?.(dialogId);
+    });
+  }
+
+  // Complete monthly responses, cached only within this browser session.
+  const tollMonthlyCache = new Map();
+  let tollAvailableMonths = [];
+  let tollComparison = { status: 'idle', month: null, rows: new Map() };
+  const TOLL_CACHE_TTL_MS = 15 * 60 * 1000;
+
+  function previousTollYearMonth(month) {
+    const match = /^(\d{4})-(\d{2})$/.exec(String(month || ''));
+    return match ? `${Number(match[1]) - 1}-${match[2]}` : null;
+  }
+
+  function latestTollComparableMonth(months = tollAvailableMonths) {
+    const available = new Set(months);
+    return [...available].filter(month => available.has(previousTollYearMonth(month))).sort().at(-1) || null;
+  }
+  function tollComparisonAvailabilityHint() {
+    const latest = latestTollComparableMonth();
+    if (!latest) return 'Für die veröffentlichten Monate ist derzeit kein Vorjahresvergleich möglich.';
+    const label = new Intl.DateTimeFormat('de-DE', { month: 'long', year: 'numeric', timeZone: 'UTC' }).format(new Date(`${latest}-01T00:00:00Z`));
+    return `Letzter verfügbarer Berichtsmonat mit Vorjahresvergleich: ${label}.`;
+  }
+
+  function compareTollValues(current, previous) {
+    if (current === null || previous === null || !Number.isFinite(current) || !Number.isFinite(previous)) return null;
+    return { current, previous, absolute: current - previous, percent: previous === 0 ? null : (current - previous) / previous * 100 };
+  }
+
+  async function getTollMonthlySnapshot(scope, signal) {
+    const key = `${scope.municipality}|${scope.month}|${scope.direction}`;
+    const cached = tollMonthlyCache.get(key);
+    if (cached && Date.now() - cached.fetchedAtMs < TOLL_CACHE_TTL_MS) return cached;
+    const features = await fetchTollRelations(scope, signal);
+    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+    const snapshot = { ...scope, fetchedAt: new Date().toISOString(), fetchedAtMs: Date.now(), rows: normalizeTollFeatures(features, scope), complete: true };
+    tollMonthlyCache.set(key, snapshot);
+    while (tollMonthlyCache.size > 24) tollMonthlyCache.delete(tollMonthlyCache.keys().next().value);
+    return snapshot;
+  }
+
+  function updateTollComparisonNotice() {
+    const notice = document.getElementById('tollComparisonNotice');
+    if (!notice) return;
+    notice.hidden = !state.tollMunicipality || !state.tollMonth || tollApiFailed || !['loading', 'error'].includes(tollComparison.status);
+    const month = formatTollMonth(tollComparison.month);
+    const text = {
+      loading: `Vorjahresvergleich ${month} wird geladen …`,
+      available: `Vorjahresvergleich zu ${month}: Werte in den Gemeinde- und Verbindungsinformationen.`,
+      unavailable: `Vorjahresvergleich: ${month} ist in der API nicht verfügbar.`,
+      error: `Vorjahresvergleich ${month} konnte nicht geladen werden. Die aktuellen Werte bleiben verfügbar.`
+    }[tollComparison.status] || '';
+    notice.replaceChildren(document.createTextNode(text));
+    if (tollComparison.status === 'error') {
+      const retry = document.createElement('button');
+      retry.className = 'btn-header'; retry.type = 'button'; retry.textContent = 'Vergleich erneut laden';
+      retry.addEventListener('click', () => loadTollComparison({ municipality: state.tollMunicipality, month: state.tollMonth, direction: state.tollDirection }, tollRequestSequence, tollRelationsController?.signal));
+      notice.append(retry);
+    }
+  }
+
+  async function loadTollComparison(scope, requestId, signal) {
+    const month = previousTollYearMonth(scope.month);
+    tollComparison = { status: tollAvailableMonths.includes(month) ? 'loading' : 'unavailable', month, rows: new Map() };
+    updateTollComparisonNotice();
+    if (tollComparison.status === 'unavailable') return;
+    try {
+      const snapshot = await getTollMonthlySnapshot({ ...scope, month }, signal);
+      if (requestId !== tollRequestSequence) return;
+      tollComparison = { status: 'available', month, rows: new Map(snapshot.rows.map(row => [row.partnerAgs, row])), fetchedAt: snapshot.fetchedAt };
+    } catch (error) {
+      if (requestId !== tollRequestSequence) return;
+      tollComparison = { status: 'error', month, rows: new Map() };
+      console.warn('Previous-year Toll data unavailable:', error);
+    }
+    updateTollComparisonNotice();
+  }
+
+  function getTollComparisonForRow(row, metric = state.tollMetric) {
+    if (tollComparison.status !== 'available') return null;
+    const previous = tollComparison.rows.get(row.partnerAgs);
+    if (!previous) return null;
+    const field = TOLL_METRICS[metric]?.field || 'trips';
+    return compareTollValues(row[field], previous[field]);
+  }
+
+  function buildTollComparisonTooltip(row) {
+    const month = formatTollMonth(tollComparison.month);
+    if (!tollComparison.month) return '';
+    const result = getTollComparisonForRow(row);
+    let body;
+    if (tollComparison.status === 'loading') body = 'Vergleich wird geladen …';
+    else if (tollComparison.status === 'error') body = 'Vergleichsdaten konnten nicht geladen werden.';
+    else if (tollComparison.status === 'unavailable') body = `Dieser Vorjahresmonat ist nicht verfügbar. ${tollComparisonAvailabilityHint()}`;
+    else if (!result) body = 'Kein vergleichbarer Vorjahreswert für diese Relation veröffentlicht.';
+    else {
+      const metric = TOLL_METRICS[state.tollMetric] || TOLL_METRICS.trips;
+      const decimals = ['distance', 'time'].includes(state.tollMetric) ? 1 : 0;
+      const percent = result.percent === null ? 'Prozentänderung nicht berechenbar (Vorjahreswert 0)' : `${formatFixedUnitValue(result.percent, { decimals: 1, signed: true })} %`;
+      const arrow = result.absolute > 0 ? '↗' : result.absolute < 0 ? '↘' : '→';
+      const color = result.absolute > 0 ? '#16a34a' : result.absolute < 0 ? '#dc2626' : '#64748b';
+      body = `${metric.label}: ${formatDeNum(result.previous, decimals)} ${metric.unit}<br>Veränderung: <span style="color:${color};"><strong>${arrow} ${formatFixedUnitValue(result.absolute, { decimals, signed: true })} ${metric.unit}</strong> · ${percent}</span>`;
+    }
+    return `<div class="toll-comparison-tooltip"><strong>Vorjahresmonat ${escapeTollHtml(month)}</strong><br>${body}</div>`;
+  }
+
   // Helper: Compute YoY and Trend vs earliest base year (2016) for Maritime Partner Countries
   function computeMaritimePartnerTrends(partnerList, activePortCode, yr, groupFilter, dirFilter) {
     const currentYear = parseInt(yr);
@@ -5594,6 +5828,7 @@
           fillOpacity: (portFlow === 0) ? 0.25 : (isAnotherSelected ? 0.45 : 0.95)
         }).addTo(mapLayers.maritime.portsGroup);
 
+        marker.wbpExport = { code: p.unlocode, name: p.name, value: portFlow, unit: 't' };
         mapLayers.maritime.portsLookup[p.unlocode] = { marker, originalRadius: radius };
 
         // Lightweight Hover Tooltip with smart dynamic decimal formatting
@@ -5947,7 +6182,7 @@
     if (direction === 'balance') {
       const hasOutbound = values.outbound !== null && values.outbound !== undefined;
       const hasInbound = values.inbound !== null && values.inbound !== undefined;
-      if (!hasOutbound && !hasInbound) return null;
+      if (!hasOutbound || !hasInbound) return null;
       return Number(values.outbound || 0) - Number(values.inbound || 0);
     }
     const value = values[direction];
@@ -5957,6 +6192,7 @@
   function formatAirfreightValue(value, metric = getAirfreightMetric(), withUnit = true, direction = getAirfreightDirection()) {
     if (value === null || value === undefined || !Number.isFinite(Number(value))) return '--';
     const numeric = Number(value);
+    if (!withUnit) return formatFixedUnitValue(numeric, { decimals: metric === 'flights' ? 0 : 1, signed: direction === 'balance' });
     const sign = direction === 'balance' && numeric > 0 ? '+' : '';
     if (metric === 'flights') {
       const formatted = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 }).format(numeric);
@@ -6059,7 +6295,7 @@
   }
 
   function ensureAirfreightAirportSelection(entries) {
-    if (state.selectedAirport && !entries.some(record => record.code === state.selectedAirport)) {
+    if (state.selectedAirport && airfreightData.airports?.[state.selectedAirport]?.country !== 'DE') {
       state.selectedAirport = null;
     }
   }
@@ -6071,7 +6307,8 @@
       const name = record.meta.name || record.code;
       return `<option value="${record.code}">${name} (${record.code})</option>`;
     }).join('');
-    select.innerHTML = `<option value="">Alle Flughäfen</option>${options}`;
+    const missingSelection = state.selectedAirport && !entries.some(record => record.code === state.selectedAirport) ? `<option value="${state.selectedAirport}">${airfreightData.airports[state.selectedAirport].name} (${state.selectedAirport}) – kein belastbarer Wert</option>` : '';
+    select.innerHTML = `<option value="">Alle Flughäfen</option>${options}${missingSelection}`;
     select.value = state.selectedAirport || '';
   }
 
@@ -6192,41 +6429,47 @@
   function renderAirfreightKpis(entries) {
     const metric = getAirfreightMetric();
     const direction = getAirfreightDirection();
-    const current = getAirfreightValue(airfreightData?.national?.[state.year], metric, direction);
-    const previousYear = String(Number(state.year) - 1);
-    const previous = getAirfreightValue(airfreightData?.national?.[previousYear], metric, direction);
-    const directionLabel = getAirfreightDirectionLabel(direction, true);
-    const metricLabel = metric === 'flights' ? 'Reine Luftfracht- und Luftpostflüge in Deutschland' : 'Luftfracht- und Luftpostaufkommen in Deutschland';
-    setText('airfreightNationalTitle', metricLabel);
-    setText('airfreightNationalValue', formatAirfreightValue(current, metric));
-    setText('airfreightNationalSub', directionLabel);
-
     const isBalance = direction === 'balance';
+    const code = state.selectedAirport;
+    const name = airfreightData.airports?.[code]?.name || code;
+    const previousYear = String(Number(state.year) - 1);
+    const airportMetricAvailable = isAirfreightAirportMetricYearAvailable();
+    const read = year => code
+      ? (isAirfreightAirportMetricYearAvailable(year, metric) ? getAirfreightValue(airfreightData.airportValues?.[year]?.[code], metric, direction) : null)
+      : getAirfreightValue(airfreightData.national?.[year], metric, direction);
+    const current = read(state.year), previous = read(previousYear);
+    const metricLabel = metric === 'flights' ? 'Reine Fracht- und Postflüge' : 'Luftfracht- und Luftpostaufkommen';
+    setText('airfreightNationalTitle', `${metricLabel} ${code ? '· ' + name : 'in Deutschland'}`);
+    setText('airfreightNationalValue', formatAirfreightValue(current, metric));
+    setText('airfreightNationalSub', current === null ? (code && !airportMetricAvailable ? 'Flughafenwerte derzeit nicht belastbar' : 'Kein veröffentlichter Wert für diese Auswahl') : getAirfreightDirectionLabel(direction, true));
     setText('airfreightYoYTitle', isBalance ? `Saldo ${previousYear}` : 'Veränderung zum Vorjahr');
     if (isBalance) {
       setText('airfreightYoYValue', formatAirfreightValue(previous, metric, true, 'balance'));
       setText('airfreightYoYSub', previous === null ? `Kein Vergleichswert für ${previousYear}` : 'Historischer Saldo; keine Prozentveränderung');
     } else {
       const change = current !== null && previous > 0 ? ((current - previous) / previous) * 100 : null;
-      setAirfreightHtml('airfreightYoYValue', change === null
-        ? '--'
-        : `<span style="color:${change >= 0 ? '#16a34a' : '#dc2626'};">${change >= 0 ? '+' : ''}${formatDeNum(change, 1)} %</span>`);
-      setText('airfreightYoYSub', previous === null ? `Kein Vergleichswert für ${previousYear}` : `gegenüber ${previousYear}`);
+      setAirfreightHtml('airfreightYoYValue', change === null ? '--' : `<span style="color:${change >= 0 ? '#16a34a' : '#dc2626'};">${change > 0 ? '↗ +' : change < 0 ? '↘ ' : '→ '}${formatDeNum(change, 1)} %</span>`);
+      setText('airfreightYoYSub', current === null ? 'Kein aktueller Vergleichswert' : previous === null ? `Kein Vergleichswert für ${previousYear}` : previous === 0 ? `Prozentänderung nicht berechenbar (${previousYear}: 0)` : `gegenüber ${previousYear}`);
     }
-
-    setText('airfreightAirportCountTitle', metric === 'flights'
-      ? 'Deutsche Flughäfen mit ausgewiesener Zahl reiner Fracht- und Postflüge'
-      : 'Deutsche Flughäfen mit ausgewiesenem Frachtaufkommen');
-    const airportMetricAvailable = isAirfreightAirportMetricYearAvailable();
-    setText('airfreightAirportCount', airportMetricAvailable ? String(entries.length) : '--');
-    setText('airfreightAirportCountSub', airportMetricAvailable ? 'Einschließlich veröffentlichter Nullwerte' : 'Flughafenwerte derzeit nicht belastbar');
-
-    const total = entries.reduce((sum, record) => sum + (direction === 'balance' ? Math.abs(record.value || 0) : Math.max(0, record.value || 0)), 0);
-    const topThree = entries.slice(0, 3).reduce((sum, record) => sum + (direction === 'balance' ? Math.abs(record.value || 0) : Math.max(0, record.value || 0)), 0);
-    setText('airfreightTop3Share', total > 0 ? `${formatDeNum((topThree / total) * 100, 1)} %` : '--');
-    setText('airfreightTop3Sub', airportMetricAvailable
-      ? (direction === 'balance' ? 'Anteil an der Summe absoluter Salden' : 'Anteil an der Summe der Flughafenwerte')
-      : 'Flughafenwerte derzeit nicht belastbar');
+    const magnitude = value => isBalance ? Math.abs(value) : Math.max(0, value);
+    const total = entries.reduce((sum, record) => sum + magnitude(record.value || 0), 0);
+    if (code) {
+      setText('airfreightAirportCountTitle', isBalance ? 'Anteil an den absoluten Flughafensalden' : 'Anteil an den deutschen Flughafenwerten');
+      setText('airfreightAirportCount', current !== null && total > 0 ? `${formatDeNum(magnitude(current) / total * 100, 1)} %` : '--');
+      setText('airfreightAirportCountSub', !airportMetricAvailable ? 'Flughafenwerte derzeit nicht belastbar' : isBalance ? 'Bezugsgröße: Summe der absoluten Salden' : 'Bezugsgröße: Summe veröffentlichter Flughafenwerte');
+      setText('airfreightTop3Title', isBalance ? 'Rang nach absolutem Saldo' : 'Rang unter deutschen Flughäfen');
+      const rank = current === null ? null : 1 + entries.filter(record => magnitude(record.value) > magnitude(current)).length;
+      setText('airfreightTop3Share', rank === null ? '--' : `${rank} von ${entries.length}`);
+      setText('airfreightTop3Sub', !airportMetricAvailable ? 'Flughafenwerte derzeit nicht belastbar' : current === null ? 'Kein veröffentlichter Flughafenwert' : 'Gleiche Werte erhalten denselben Rang');
+    } else {
+      setText('airfreightAirportCountTitle', metric === 'flights' ? 'Deutsche Flughäfen mit ausgewiesener Zahl reiner Fracht- und Postflüge' : 'Deutsche Flughäfen mit ausgewiesenem Frachtaufkommen');
+      setText('airfreightAirportCount', airportMetricAvailable ? String(entries.length) : '--');
+      setText('airfreightAirportCountSub', airportMetricAvailable ? 'Einschließlich veröffentlichter Nullwerte' : 'Flughafenwerte derzeit nicht belastbar');
+      const topThree = entries.slice(0, 3).reduce((sum, record) => sum + magnitude(record.value || 0), 0);
+      setText('airfreightTop3Title', 'Konzentration auf die Top 3');
+      setText('airfreightTop3Share', total > 0 ? `${formatDeNum(topThree / total * 100, 1)} %` : '--');
+      setText('airfreightTop3Sub', airportMetricAvailable ? (isBalance ? 'Anteil an der Summe absoluter Salden' : 'Anteil an der Summe der Flughafenwerte') : 'Flughafenwerte derzeit nicht belastbar');
+    }
   }
 
   function renderAirfreightMap(entries, relations) {
@@ -6276,6 +6519,7 @@
         renderAirfreightTab();
         updateAnalysisSummary();
       });
+      marker.wbpExport = { code: record.code, name: name || record.code, value: record.value, unit: metric === 'tonnes' ? 't' : 'Flüge' };
       mapLayers.airfreight.airportsLookup[record.code] = marker;
     });
 
@@ -6611,6 +6855,7 @@
   let tollRelations = [];
   let tollLoadedSelectionKey = null;
   let tollRequestSequence = 0;
+  let tollRelationsController = null;
   let tollRequestPending = false;
   let tollApiFailed = false;
   let tollMunicipalityMapReady = false;
@@ -6683,18 +6928,14 @@
       orderByFields: 'monat DESC',
       f: 'json'
     });
-    tollMonthAvailabilityPromise = fetch(`${TOLL_API_QUERY_URL}?${params.toString()}`, {
-      cache: 'no-store',
-      headers: { Accept: 'application/json' }
-    }).then(async response => {
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const payload = await response.json();
+    tollMonthAvailabilityPromise = fetchJson(`${TOLL_API_QUERY_URL}?${params.toString()}`).then(payload => {
       if (payload?.error) throw new Error(payload.error.message || 'API-Fehler');
       const months = [...new Set((payload?.features || [])
         .map(feature => parseTollApiMonth(feature?.attributes?.monat))
         .filter(Boolean))]
         .sort((a, b) => b.localeCompare(a));
       if (!months.length) throw new Error('Die API meldet keine verfügbaren Berichtsmonate.');
+      tollAvailableMonths = months;
       return months;
     }).catch(error => {
       tollMonthAvailabilityPromise = null;
@@ -6707,6 +6948,7 @@
     const select = document.getElementById('selectTollMonth');
     if (!select) return;
     select.disabled = true;
+    setTollStatus('loading', 'Verfügbare Berichtsmonate werden geladen …');
     select.innerHTML = '<option value="">Monate werden geladen …</option>';
     try {
       const months = await fetchTollAvailableMonths();
@@ -6890,6 +7132,11 @@
       state.showTollConnections = event.target.checked;
       if (!tollRequestPending) renderTollMap(getVisibleTollRows());
     });
+    document.getElementById('btnRetryToll')?.addEventListener('click', async event => {
+      event.currentTarget.disabled = true;
+      if (!state.tollMonth) await buildTollMonthOptions();
+      else await loadTollRelations();
+    });
     document.getElementById('btnOpenRoadModule')?.addEventListener('click', () => {
       document.querySelector('#mainNav .nav-item[data-tab="tab-road"]')?.click();
     });
@@ -6905,6 +7152,8 @@
     banner.classList.toggle('is-loading', kind === 'loading');
     text.textContent = message || '';
     link.hidden = !showRoadLink;
+    const retry = document.getElementById('btnRetryToll');
+    if (retry) { retry.hidden = kind !== 'error'; retry.disabled = false; }
   }
 
   function setTollMapEmpty(message = '', kind = '') {
@@ -7240,6 +7489,7 @@
   }
 
   function renderTollEmptySelection() {
+    updateTollComparisonNotice();
     clearTollMap();
     setTollStatus('', '');
     renderStateBoundaries('toll');
@@ -7255,7 +7505,7 @@
     scheduleTollMunicipalityBoundaryRefresh();
   }
 
-  async function fetchTollFeaturePage(where, offset) {
+  async function fetchTollFeaturePage(where, offset, signal) {
     const params = new URLSearchParams({
       where,
       outFields: '*',
@@ -7265,12 +7515,7 @@
       resultRecordCount: String(TOLL_PAGE_SIZE),
       f: 'geojson'
     });
-    const response = await fetch(`${TOLL_API_QUERY_URL}?${params.toString()}`, {
-      cache: 'no-store',
-      headers: { Accept: 'application/geo+json, application/json' }
-    });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const payload = await response.json();
+    const payload = await fetchJson(`${TOLL_API_QUERY_URL}?${params.toString()}`, null, { signal });
     if (payload?.error) throw new Error(payload.error.message || 'API-Fehler');
     if (!Array.isArray(payload?.features)) {
       throw new Error('Die API-Antwort enthält keine GeoJSON-Features.');
@@ -7278,18 +7523,19 @@
     return payload;
   }
 
-  async function fetchTollRelationsForDirection(tollDirection) {
+  async function fetchTollRelationsForDirection(tollDirection, scope, signal) {
+    const { municipality, month } = scope;
     const isOutbound = tollDirection === 'outbound';
     const agsField = isOutbound ? 'ags_start' : 'ags_ziel';
     const direction = isOutbound ? 0 : 1;
     const where = (
-      `${agsField} = '${state.tollMunicipality}' AND ` +
-      `monat = DATE '${state.tollMonth}-01' AND richtung = ${direction}`
+      `${agsField} = '${municipality}' AND ` +
+      `monat = DATE '${month}-01' AND richtung = ${direction}`
     );
     const features = [];
     let offset = 0;
     while (true) {
-      const payload = await fetchTollFeaturePage(where, offset);
+      const payload = await fetchTollFeaturePage(where, offset, signal);
       const page = payload.features;
       features.push(...page);
       if (!payload.exceededTransferLimit) break;
@@ -7300,30 +7546,31 @@
       const properties = feature?.properties || {};
       const missing = TOLL_REQUIRED_FIELDS.filter(field => !(field in properties));
       if (missing.length) throw new Error(`Unvollständiger Feldsatz: ${missing.join(', ')}`);
-      if (String(properties[agsField]) !== state.tollMunicipality || Number(properties.richtung) !== direction) {
+      if (String(properties[agsField]) !== municipality || Number(properties.richtung) !== direction) {
         throw new Error('Die API-Antwort weicht von Gemeinde oder Richtung der Abfrage ab.');
       }
     });
     return features;
   }
 
-  async function fetchTollRelations() {
-    if (state.tollDirection === 'both') {
+  async function fetchTollRelations(scope, signal) {
+    if (scope.direction === 'both') {
       const [outbound, inbound] = await Promise.all([
-        fetchTollRelationsForDirection('outbound'),
-        fetchTollRelationsForDirection('inbound')
+        fetchTollRelationsForDirection('outbound', scope, signal),
+        fetchTollRelationsForDirection('inbound', scope, signal)
       ]);
       return [...outbound, ...inbound];
     }
-    return fetchTollRelationsForDirection(state.tollDirection);
+    return fetchTollRelationsForDirection(scope.direction, scope, signal);
   }
 
   function numericTollValue(value) {
+    if (value === null || value === undefined || value === '') return null;
     const number = Number(value);
     return Number.isFinite(number) ? number : null;
   }
 
-  function normalizeTollFeatures(features) {
+  function normalizeTollFeatures(features, scope = { municipality: state.tollMunicipality, direction: state.tollDirection }) {
     const grouped = new Map();
     features.forEach(feature => {
       const properties = feature.properties || {};
@@ -7335,8 +7582,8 @@
       // A municipal internal trip occurs in both directional API views. It is
       // one relation, not one outbound and one inbound trip, so retain the
       // outbound record once in the combined display.
-      if (state.tollDirection === 'both'
-        && partnerAgs === state.tollMunicipality
+      if (scope.direction === 'both'
+        && partnerAgs === scope.municipality
         && !isOutbound) return;
       const trips = numericTollValue(properties.anzahl_befahrungen) || 0;
       let row = grouped.get(partnerAgs);
@@ -7345,6 +7592,7 @@
           partnerAgs,
           partnerName: String(properties[partnerNameField] || properties.name || partnerAgs),
           trips: 0,
+          tripsValid: true, mileageValid: true,
           mileage: 0,
           distanceWeighted: 0,
           timeWeighted: 0,
@@ -7354,6 +7602,8 @@
         };
         grouped.set(partnerAgs, row);
       }
+      row.tripsValid &&= numericTollValue(properties.anzahl_befahrungen) !== null;
+      row.mileageValid &&= numericTollValue(properties.fahrleistung_km) !== null;
       row.trips += trips;
       row.mileage += numericTollValue(properties.fahrleistung_km) || 0;
       const distance = numericTollValue(properties.distanz_km_mittelw);
@@ -7371,8 +7621,8 @@
     return [...grouped.values()].map(row => ({
       partnerAgs: row.partnerAgs,
       partnerName: row.partnerName,
-      trips: row.trips,
-      mileage: row.mileage,
+      trips: row.tripsValid ? row.trips : null,
+      mileage: row.mileageValid ? row.mileage : null,
       distance: row.distanceWeight > 0 ? row.distanceWeighted / row.distanceWeight : null,
       time: row.timeWeight > 0 ? row.timeWeighted / row.timeWeight : null,
       geometry: row.geometry
@@ -7381,14 +7631,20 @@
 
   async function loadTollRelations() {
     if (state.activeTab !== 'tab-toll' || !tollModuleInitialized) return;
+    tollRelationsController?.abort();
+    tollRelationsController = new AbortController();
+    const requestId = ++tollRequestSequence;
     const selectionKey = getTollSelectionKey();
     if (!selectionKey) {
-      if (!selectionKey) renderTollEmptySelection();
+      tollRequestPending = false;
+      setModuleLoadingState('tab-toll', false);
+      renderTollEmptySelection();
       return;
     }
-    const requestId = ++tollRequestSequence;
     tollRequestPending = true;
     tollApiFailed = false;
+    tollComparison = { status: 'loading', month: previousTollYearMonth(state.tollMonth), rows: new Map() };
+    updateTollComparisonNotice();
     setTollStatus('', '');
     setModuleLoadingState('tab-toll', true);
     const loadingNotice = document.querySelector('#tab-toll .module-loading-status');
@@ -7397,13 +7653,15 @@
     const body = document.getElementById('tableTollRelationsBody');
     if (body) body.innerHTML = '<tr><td colspan="5" class="empty-state-cell">Live-Daten werden geladen …</td></tr>';
     try {
-      const features = await fetchTollRelations();
+      const scope = { municipality: state.tollMunicipality, month: state.tollMonth, direction: state.tollDirection };
+      const snapshot = await getTollMonthlySnapshot(scope, tollRelationsController.signal);
       if (requestId !== tollRequestSequence) return;
-      tollRelations = normalizeTollFeatures(features);
+      tollRelations = snapshot.rows;
       tollLoadedSelectionKey = selectionKey;
       tollApiFailed = false;
       setTollStatus('', '');
       renderTollData();
+      loadTollComparison(scope, requestId, tollRelationsController.signal);
     } catch (error) {
       if (requestId !== tollRequestSequence) return;
       console.error('Could not load live Toll Collect relations:', error);
@@ -7420,6 +7678,7 @@
   }
 
   function renderTollApiError() {
+    updateTollComparisonNotice();
     const keepMunicipalityViewport = Boolean(mapLayers.toll.municipalityBoundaries);
     clearTollMap();
     setTollMapEmpty('Die Mautdaten-API ist derzeit nicht erreichbar.');
@@ -7582,6 +7841,7 @@
           <div><strong>Fahrleistung:</strong> ${formatDeNum(row.mileage, 0)} km</div>
           <div><strong>Mittlere Distanz:</strong> ${formatDeNum(row.distance, 1, 1)} km</div>
           <div><strong>Mittlere Fahrzeit:</strong> ${formatDeNum(row.time, 1, 1)} Min.</div>
+          ${buildTollComparisonTooltip(row)}
           <div class="toll-map-tooltip-context">Platz ${row.rank} · Anteil der Mautfahrten: <strong>${formatTollTripShare(row.tripShare)} %</strong></div>
         </div>
       </div>`;
@@ -7709,6 +7969,7 @@
       },
       onEachFeature: (feature, layer) => {
         const row = feature.properties.tollRow;
+        layer.wbpExport = { code: row.partnerAgs, name: row.partnerName || row.partnerAgs, value: row[metric.field], unit: metric.unit };
         mapLayers.toll.partnerLayers[row.partnerAgs] = layer;
         bindTollHoverTooltip(
           layer,
@@ -8215,6 +8476,7 @@
         onEachFeature: (feature, layer) => {
           const id = feature.properties?.NUTS_ID;
           const amount = choro[id] || 0;
+          layer.wbpExport = { code: id, name: feature.properties?.NUTS_NAME || id, value: amount, unit: metric === 'tkm' ? 'tkm' : 't' };
           const railAmount = getScopedIntermodalMetricForRegion(activeYear, id, 'rail', 'intermodal_load_units', metric) || 0;
           const iwwAmount = getScopedIntermodalMetricForRegion(activeYear, id, 'iww', 'containerised_transport', metric) || 0;
           const previousYear = String(activeYear - 1);
@@ -8461,6 +8723,7 @@
       ? `<span>≤ −${formatTrafficValue(maxValue * 0.8 / divisor, unit, 1)} ${unit}</span><span>≥ +${formatTrafficValue(maxValue * 0.8 / divisor, unit, 1)} ${unit}</span>`
       : `<span>&lt; ${formatTrafficValue(maxValue * 0.1 / divisor, unit, 1)} ${unit}</span><span>&gt; ${formatTrafficValue(maxValue * 0.8 / divisor, unit, 1)} ${unit}</span>`;
     legend.innerHTML = `<div class="legend-header"><span class="legend-title">${legendTitle}</span><button type="button" class="btn-legend-toggle" title="${collapsed ? 'Legende maximieren' : 'Legende minimieren'}">${collapsed ? '+' : '−'}</button></div><div class="legend-body" ${collapsed ? 'style="display:none;"' : ''}><div class="legend-scale">${scaleHtml}</div><div class="legend-labels">${scaleLabels}</div>${relationInfo}<div class="intermodal-map-scope">${year} · Kartenfläche: ${mapMarketLabel}</div></div>`;
+    setLegendCollapsedState(legend, collapsed);
     legend.querySelector('.btn-legend-toggle')?.addEventListener('click', event => {
       event.preventDefault();
       event.stopPropagation();
@@ -8979,6 +9242,7 @@
         const regInfo = sc?.regions?.[nutsId];
         const val = choroDict[nutsId] || 0;
 
+        layer.wbpExport = { code: nutsId, name: cName, value: val, unit: isTkm ? 'tkm' : 't' };
         const details = getForecastRegionTooltipDetails(regInfo, isTkm);
 
         let dirText = 'Gesamtaufkommen';
@@ -9661,6 +9925,321 @@
       enableYAxisLabelHover(chartForecastCommodityKv, labels);
     }
   }
+  // Exports are snapshots of the active view. No source dataset is downloaded.
+  const exportLibraries = new Map();
+  let exportSnapshot = null;
+  let enlargedChart = null;
+  let enlargedSnapshot = null;
+  const EXPORT_ROW_LIMIT = 2000;
+  const EXPORT_FEATURE_LIMIT = 100;
+
+  function exportText(node) {
+    if (!node) return '';
+    const copy = node.cloneNode(true);
+    copy.querySelectorAll('svg, button, .info-tooltip-wrap, .map-tooltip-filter-hint').forEach(n => n.remove());
+    return copy.textContent.replace(/\s+/g, ' ').trim();
+  }
+  function exportTableCell(cell) {
+    const text = exportText(cell);
+    // Only right-aligned, unscaled quantities become numbers. Codes stay text.
+    if (cell.tagName === 'TD' && getComputedStyle(cell).textAlign === 'right' && !/^0\d/.test(text) && /^[+\-−]?(?:\d{1,3}(?:\.\d{3})+|\d+)(?:,\d+)?$/.test(text)) return Number(text.replaceAll('.', '').replace(',', '.').replace('−', '-'));
+    return text;
+  }
+  function exportChartTitle(canvas) {
+    return exportText(canvas.closest('.card')?.querySelector('.card-title')) || canvas.id;
+  }
+  function cloneChartSetting(value) {
+    if (Array.isArray(value)) return value.map(cloneChartSetting);
+    if (value && Object.getPrototypeOf(value) === Object.prototype) return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, cloneChartSetting(v)]));
+    return value;
+  }
+  function snapshotChart(chart) {
+    const config = cloneChartSetting(chart.config._config);
+    config.data.datasets.forEach((dataset, i) => { dataset.hidden = !chart.isDatasetVisible(i); });
+    config.options = config.options || {};
+    Object.assign(config.options, { responsive: true, maintainAspectRatio: false, animation: false });
+    config.options.font = { ...(config.options.font || {}), size: 14 };
+    Object.values(config.options.scales || {}).forEach(axis => { axis.ticks = { ...(axis.ticks || {}), font: { ...(axis.ticks?.font || {}), size: 14 } }; });
+    config.options.plugins = config.options.plugins || {};
+    if (config.options.plugins.legend?.labels) config.options.plugins.legend.labels.font = { ...(config.options.plugins.legend.labels.font || {}), size: 14 };
+    config.options.plugins.tooltip = { ...(config.options.plugins.tooltip || {}), enabled: true, external: null };
+    if (chart.canvas.closest('.card')?.querySelector('.chart-scroll-legend')) config.options.plugins.legend = { ...(config.options.plugins.legend || {}), display: true, position: 'bottom' };
+    if (chart.canvas.closest('.card')?.querySelector('.chart-sticky-axis') && config.options.scales?.x) { config.options.scales.x.ticks.display = true; config.options.scales.x.title.display = true; }
+    // Expanded horizontal charts need room for the complete commodity labels.
+    if (config.options.indexAxis === 'y' && config.options.scales?.y) {
+      delete config.options.scales.y.afterFit;
+      config.options.scales.y.ticks = { ...(config.options.scales.y.ticks || {}), autoSkip: false, crossAlign: 'near', callback: function(value) {
+        const words = String(this.getLabelForValue(value)).split(/\s+/); const lines = []; let line = '';
+        for (const word of words) { if (line && (line + ' ' + word).length > 48) { lines.push(line); line = word; } else line = line ? line + ' ' + word : word; }
+        if (line) lines.push(line); return lines;
+      }};
+    }
+    // Custom legend callbacks may close over the small chart. Use this chart's defaults.
+    if (config.options.plugins.legend) delete config.options.plugins.legend.onClick;
+    const unit = chart.canvas.id.includes('Toll') ? '%' : chart.canvas.id.includes('Airfreight') ? (state.airfreightMetric === 'flights' ? 'Flüge' : 'Mio. t') : chart.data.datasets.some(d => d.label === 'Mio. t') ? 'Mio. t' : state.metric === 'tkm' ? 'Mrd. tkm' : 'Mio. t';
+    return { unit, id: chart.canvas.id, title: exportChartTitle(chart.canvas), config, hiddenIndices: (chart.data.labels || []).map((_, i) => chart.getDataVisibility(i) ? -1 : i).filter(i => i >= 0) };
+  }
+  function createSnapshotChart(canvas, snapshot, responsive = true) {
+    const config = cloneChartSetting(snapshot.config);
+    config.options.responsive = responsive;
+    config.options.devicePixelRatio = 1;
+    const chart = new Chart(canvas, config);
+    snapshot.hiddenIndices.forEach(i => chart.toggleDataVisibility(i));
+    chart.update('none');
+    return chart;
+  }
+  function captureExportSnapshot() {
+    const pane = document.getElementById(state.activeTab);
+    const ready = pane && pane.getAttribute('aria-busy') !== 'true' && pane.dataset.loadError !== 'true';
+    const tabName = exportText(document.querySelector(`#mainNav [data-tab="${state.activeTab}"]`));
+    const context = [...document.querySelectorAll('.analysis-summary-item')].filter(n => !n.hidden && n.style.display !== 'none').map(exportText).filter(Boolean).join(' · ');
+    const sources = [...document.querySelectorAll('#modalLicenses .source-item')].map(n => [exportText(n), ...[...n.querySelectorAll('a[href]')].map(a => a.href)].join('\n'));
+    const charts = ready ? [...pane.querySelectorAll('canvas')].filter(c => c.getClientRects().length).map(c => Chart.getChart(c)).filter(Boolean).map(snapshotChart) : [];
+    const kpis = ready ? [...pane.querySelectorAll('.kpi-card')].filter(n => n.getClientRects().length).map(n => [exportText(n.querySelector('.kpi-title')), exportText(n.querySelector('.kpi-value')), exportText(n.querySelector('.kpi-sub'))]) : [];
+    const tables = ready ? [...pane.querySelectorAll('table')].filter(n => n.getClientRects().length).map(table => ({ title: exportText(table.closest('.card')?.querySelector('.card-title')) || 'Tabelle', rows: [...table.querySelectorAll('tr')].filter(n => n.getClientRects().length).map(row => [...row.querySelectorAll('th,td')].map(exportTableCell)) })) : [];
+    const notes = [...pane.querySelectorAll('.info-tooltip-box')].map(exportText);
+    const key = state.activeTab.replace('tab-', '');
+    const map = maps[key];
+    const bounds = map?.getBounds();
+    const bbox = bounds ? [Math.max(-180, bounds.getWest()), Math.max(-90, bounds.getSouth()), Math.min(180, bounds.getEast()), Math.min(90, bounds.getNorth())] : null;
+    const candidates = [];
+    const addLayer = layer => {
+      if (!layer?.wbpExport || !map.hasLayer(layer)) return;
+      if (layer.getBounds ? !bounds.intersects(layer.getBounds()) : !bounds.contains(layer.getLatLng())) return;
+      let tooltip = layer.getTooltip?.()?.getContent();
+      if (typeof tooltip === 'function') tooltip = tooltip(layer);
+      const textNode = document.createElement('div');
+      if (typeof tooltip === 'string') textNode.innerHTML = tooltip;
+      candidates.push({ type: 'Feature', geometry: cloneChartSetting(layer.toGeoJSON().geometry), properties: { ...layer.wbpExport, information: exportText(textNode) } });
+    };
+    if (ready && bounds) {
+      mapLayers[key]?.geojson?.eachLayer(addLayer);
+      Object.values(mapLayers[key]?.portsLookup || {}).forEach(x => addLayer(x.marker));
+      Object.values(mapLayers[key]?.airportsLookup || {}).forEach(addLayer);
+    }
+    if (key === 'toll') {
+      notes.push(exportText(document.getElementById('tollComparisonNotice')));
+      const current = tollMonthlyCache.get(`${state.tollMunicipality}|${state.tollMonth}|${state.tollDirection}`);
+      if (current) notes.push(`Mautdaten abgerufen: ${current.fetchedAt}; Gemeinde ${current.municipality}; Monat ${current.month}; Richtung ${current.direction}.`);
+      if (tollComparison.fetchedAt) notes.push(`Vorjahresdaten abgerufen: ${tollComparison.fetchedAt}; Monat ${tollComparison.month}.`);
+    }
+    const localExtent = bbox && map.distance([bbox[1], bbox[0]], [bbox[1], bbox[2]]) <= 250000 && map.distance([bbox[1], bbox[0]], [bbox[3], bbox[0]]) <= 250000;
+    return { localExtent, ready, tabName, context, createdAt: new Date().toISOString(), sources, notes, charts, kpis, tables, bbox, candidates };
+  }
+  async function loadExportLibrary(url) {
+    if (!exportLibraries.has(url)) exportLibraries.set(url, new Promise((resolve, reject) => {
+      const script = document.createElement('script'); script.src = url;
+      script.onload = resolve;
+      script.onerror = () => { script.remove(); exportLibraries.delete(url); reject(new Error('Die Exportfunktion konnte nicht geladen werden. Bitte erneut versuchen.')); };
+      document.head.append(script);
+    }));
+    return exportLibraries.get(url);
+  }
+  function downloadExport(blob, snapshot, extension, label = '') {
+    const slug = `${snapshot.tabName}-${label}`.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '-').replace(/-+$/, '').slice(0, 90);
+    const url = URL.createObjectURL(blob), anchor = document.createElement('a');
+    anchor.href = url; anchor.download = `Gueterstroeme-${slug}-${snapshot.createdAt.slice(0, 10)}.${extension}`;
+    document.body.append(anchor); anchor.click(); anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  }
+  function canvasTextLines(ctx, text, width) {
+    const lines = []; let line = '';
+    for (const word of text.split(/\s+/)) {
+      if (line && ctx.measureText(`${line} ${word}`).width > width) { lines.push(line); line = word; }
+      else line = line ? `${line} ${word}` : word;
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+  async function exportChartPng(chartSnapshot, snapshot) {
+    if (!chartSnapshot) throw new Error('Für diese Auswahl ist kein Diagramm verfügbar.');
+    const canvas = document.createElement('canvas'); canvas.width = 1680; const chartHeight = chartSnapshot.config.options?.indexAxis === 'y' ? Math.max(920, (chartSnapshot.config.data.labels?.length || 0) * 44 + 100) : 920; canvas.height = chartHeight;
+    const chart = createSnapshotChart(canvas, chartSnapshot, false);
+    try {
+      const output = document.createElement('canvas'), ctx = output.getContext('2d');
+      output.width = 1800;
+      ctx.font = '24px Arial';
+      const titleLines = canvasTextLines(ctx, chartSnapshot.title, 1680);
+      ctx.font = '19px Arial';
+      const contextLines = canvasTextLines(ctx, `${snapshot.tabName} · ${snapshot.context} · Diagrammwerte: ${chartSnapshot.unit}`, 1680);
+      const sourceText = 'Wissensbasierte Planung · ' + sourceCredit(snapshot.tabName) + ' · Eigene Auswertung. Export: ' + snapshot.createdAt.slice(0, 10) + '. Quellen und Nutzungsbedingungen: Menü Quellen.';
+      const sourceLines = canvasTextLines(ctx, sourceText, 1680);
+      const chartTop = 48 + titleLines.length * 32 + contextLines.length * 26;
+      output.height = chartTop + chartHeight + sourceLines.length * 25 + 72;
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, output.width, output.height);
+      ctx.fillStyle = '#0f172a'; ctx.font = 'bold 24px Arial'; let y = 42;
+      titleLines.forEach(line => { ctx.fillText(line, 60, y); y += 32; });
+      ctx.fillStyle = '#475569'; ctx.font = '19px Arial';
+      contextLines.forEach(line => { ctx.fillText(line, 60, y); y += 26; });
+      ctx.drawImage(canvas, 60, chartTop);
+      y = chartTop + chartHeight + 38;
+      sourceLines.forEach(line => { ctx.fillText(line, 60, y); y += 25; });
+      const blob = await new Promise(resolve => output.toBlob(resolve, 'image/png'));
+      if (!blob) throw new Error('Das PNG konnte nicht erstellt werden.');
+      downloadExport(blob, snapshot, 'png', chartSnapshot.title);
+    } finally { chart.destroy(); }
+  }
+  function sourceCredit(name) {
+    if (/Maut/i.test(name)) return 'BALM / Toll Collect GmbH; © BKG 2025, dl-de/by-2-0';
+    if (/Prognose/i.test(name)) return 'BMV (Hrsg.), Verkehrsprognose 2040, Teil 2, VB970423; Bereitstellung BASt / Mobilithek';
+    if (/Luft/i.test(name)) return 'Eurostat: AVIA_GOOC / AVIA_GOOA / AVIA_GOR_DE';
+    if (/Straße/i.test(name)) return 'Kraftfahrt-Bundesamt (KBA), dl-de/by-2-0';
+    if (/Überblick|Übersicht/i.test(name)) return 'KBA und Destatis, dl-de/by-2-0';
+    return 'Statistisches Bundesamt (Destatis), dl-de/by-2-0';
+  }
+  async function exportExcelSnapshot(snapshot) {
+    await loadExportLibrary('assets/vendor/exceljs/exceljs.min.js');
+    const workbook = new ExcelJS.Workbook();
+    workbook.creator = 'Wissensbasierte Planung'; workbook.created = new Date(snapshot.createdAt);
+    let rowCount = 0;
+    const addSheet = (name, rows, data = false) => {
+      if (data) { rowCount += Math.max(0, rows.length - 1); if (rowCount > EXPORT_ROW_LIMIT) throw new Error('Die Auswahl überschreitet 2.000 Datenzeilen. Bitte grenzen Sie die Auswertung ein.'); }
+      const sheet = workbook.addWorksheet(name.slice(0, 31));
+      rows.forEach(row => sheet.addRow(row.map(value => typeof value === 'number' ? (Number.isFinite(value) ? value : null) : value == null ? null : String(value))));
+      sheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      sheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF17613C' } };
+      sheet.views = [{ state: 'frozen', ySplit: 1 }];
+      sheet.columns.forEach((column, i) => { column.width = i === 0 ? 42 : 30; column.alignment = { vertical: 'top', wrapText: true }; });
+      return sheet;
+    };
+    addSheet('Auswahl und Quellen', [ ['Merkmal', 'Angabe'], ['Modul', snapshot.tabName], ['Auswahl', snapshot.context], ['Exportzeit (UTC)', snapshot.createdAt], ['Bearbeitungsstand Tool', 'September 2026'], ['Umfang', 'Sichtbare Kennzahlen, Tabellenzeilen und Diagrammwerte; keine vollständigen Ausgangsdaten. Tabellen und Kennzahlen enthalten ihre angezeigte Rundung. Diagrammwerte sind numerisch; Einheit jeweils laut Achse bzw. Diagrammtitel.'], ['Nachnutzung', 'Originalquellen und Nutzungsbedingungen beachten; eigene Aufbereitung durch Wissensbasierte Planung.'], ...snapshot.notes.filter(Boolean).map(n => ['Fachlicher Hinweis', n]), ...snapshot.sources.map(s => ['Quelle und Lizenz', s]) ]);
+    addSheet('Kennzahlen', [['Kennzahl', 'Wert wie angezeigt', 'Einheit / Einordnung'], ...snapshot.kpis], true);
+    snapshot.tables.forEach((table, i) => addSheet(`Tabelle ${i + 1}`, [['Darstellung', table.title], ...table.rows], true));
+    snapshot.charts.forEach((chart, index) => {
+      const axes = Object.entries(chart.config.options?.scales || {}).map(([key, axis]) => `${key}: ${axis.title?.text || 'Einheit laut Diagrammtitel'}`).join('; ');
+      const datasets = chart.config.data.datasets;
+      const labels = chart.config.data.labels || [];
+      const rows = [['Diagramm', chart.title], ['Einheit der Diagrammwerte', chart.unit], ['Achsen', axes || chart.title], ['Kategorie', ...datasets.filter(d => !d.hidden).map(d => Array.isArray(d.label) ? d.label.join(' ') : d.label || 'Wert')]];
+      labels.forEach((label, i) => {
+        if (chart.hiddenIndices.includes(i)) return;
+        rows.push([Array.isArray(label) ? label.join(' ') : label, ...datasets.filter(d => !d.hidden).map(d => { const v = d.data[i]; return v && typeof v === 'object' ? JSON.stringify(v) : v; })]);
+      });
+      addSheet(`Diagramm ${index + 1}`, rows, true);
+    });
+    downloadExport(new Blob([await workbook.xlsx.writeBuffer()], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }), snapshot, 'xlsx');
+  }
+
+  // GeoPackage 1.3: WGS84, a bounded vector subset, no basemap or raw properties.
+  function encodeGpkgGeometry(geometry) {
+    const bytes = [];
+    const u32 = n => { const b = new Uint8Array(4); new DataView(b.buffer).setUint32(0, n, true); bytes.push(...b); };
+    const number = n => { const b = new Uint8Array(8); new DataView(b.buffer).setFloat64(0, n, true); bytes.push(...b); };
+    const point = coordinates => { number(coordinates[0]); number(coordinates[1]); };
+    const line = coordinates => { u32(coordinates.length); coordinates.forEach(point); };
+    const write = g => {
+      const types = { Point: 1, LineString: 2, Polygon: 3, MultiPoint: 4, MultiLineString: 5, MultiPolygon: 6 };
+      if (!types[g.type]) throw new Error('Diese Geometrie wird nicht unterstützt.');
+      bytes.push(1); u32(types[g.type]);
+      if (g.type === 'Point') point(g.coordinates);
+      else if (g.type === 'LineString') line(g.coordinates);
+      else if (g.type === 'Polygon') { u32(g.coordinates.length); g.coordinates.forEach(line); }
+      else { u32(g.coordinates.length); g.coordinates.forEach(c => write({ type: g.type.replace('Multi', ''), coordinates: c })); }
+    };
+    bytes.push(71, 80, 0, 1); u32(4326); write(geometry); return new Uint8Array(bytes);
+  }
+  async function exportGeoSnapshot(snapshot) {
+    if (!snapshot.localExtent || !snapshot.candidates.length || snapshot.candidates.length > EXPORT_FEATURE_LIMIT) throw new Error('Bitte zoomen Sie auf einen Ausschnitt mit 1 bis 100 Gebieten oder Standorten.');
+    await Promise.all([loadExportLibrary('assets/vendor/sqljs/sql-wasm.js'), loadExportLibrary('assets/vendor/polygon-clip.js')]);
+    const SQL = await initSqlJs({ locateFile: file => `assets/vendor/sqljs/${file}` });
+    const features = snapshot.candidates.map(feature => feature.geometry.type === 'Point' ? feature : { ...wbpClipPolygon(feature, snapshot.bbox), properties: feature.properties }).filter(f => f.geometry.coordinates.length);
+    if (!features.length) throw new Error('Im Ausschnitt liegen keine exportierbaren Geometrien.');
+    const db = new SQL.Database();
+    try {
+      db.run(`PRAGMA application_id = 1196444487; PRAGMA user_version = 10300;
+        CREATE TABLE gpkg_spatial_ref_sys (srs_name TEXT NOT NULL,srs_id INTEGER NOT NULL PRIMARY KEY,organization TEXT NOT NULL,organization_coordsys_id INTEGER NOT NULL,definition TEXT NOT NULL,description TEXT);
+        CREATE TABLE gpkg_contents (table_name TEXT NOT NULL PRIMARY KEY,data_type TEXT NOT NULL,identifier TEXT UNIQUE,description TEXT DEFAULT '',last_change DATETIME NOT NULL,min_x DOUBLE,min_y DOUBLE,max_x DOUBLE,max_y DOUBLE,srs_id INTEGER,FOREIGN KEY(srs_id) REFERENCES gpkg_spatial_ref_sys(srs_id));
+        CREATE TABLE gpkg_geometry_columns (table_name TEXT NOT NULL,column_name TEXT NOT NULL,geometry_type_name TEXT NOT NULL,srs_id INTEGER NOT NULL,z TINYINT NOT NULL,m TINYINT NOT NULL,PRIMARY KEY(table_name,column_name),FOREIGN KEY(table_name) REFERENCES gpkg_contents(table_name),FOREIGN KEY(srs_id) REFERENCES gpkg_spatial_ref_sys(srs_id));
+        CREATE TABLE kartenausschnitt (fid INTEGER PRIMARY KEY AUTOINCREMENT,geom BLOB NOT NULL,code TEXT,name TEXT,wert REAL,einheit TEXT,information TEXT);
+        CREATE TABLE auswahl (id INTEGER PRIMARY KEY AUTOINCREMENT,merkmal TEXT,angabe TEXT);`);
+      const wkt = 'GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563]],PRIMEM["Greenwich",0],UNIT["degree",0.0174532925199433],AUTHORITY["EPSG","4326"]]';
+      for (const row of [['Undefined Cartesian SRS',-1,'NONE',-1,'undefined','Undefined Cartesian coordinate reference system'],['Undefined geographic SRS',0,'NONE',0,'undefined','Undefined geographic coordinate reference system'],['WGS 84',4326,'EPSG',4326,wkt,'Longitude, latitude']]) db.run('INSERT INTO gpkg_spatial_ref_sys VALUES (?,?,?,?,?,?)',row);
+      const extent = [Infinity, Infinity, -Infinity, -Infinity];
+      const visit = coords => { if (typeof coords[0] === 'number') { extent[0]=Math.min(extent[0],coords[0]);extent[1]=Math.min(extent[1],coords[1]);extent[2]=Math.max(extent[2],coords[0]);extent[3]=Math.max(extent[3],coords[1]); } else coords.forEach(visit); };
+      for (const feature of features) {
+        visit(feature.geometry.coordinates);
+        const p = feature.properties;
+        db.run('INSERT INTO kartenausschnitt (geom,code,name,wert,einheit,information) VALUES (?,?,?,?,?,?)', [encodeGpkgGeometry(feature.geometry),String(p.code || ''),String(p.name || ''),Number.isFinite(p.value) ? p.value : null,String(p.unit || ''),p.information || '']);
+      }
+      const note = 'Geometrien am sichtbaren Kartenausschnitt geschnitten. Kennwerte gelten für vollständige Gebiete oder Standorte; keine anteilige Flächenberechnung. Keine Verbindungen oder Hintergrundkarten enthalten.';
+      db.run('INSERT INTO gpkg_contents VALUES (?,?,?,?,?,?,?,?,?,?)',['kartenausschnitt','features','Kartenausschnitt',note,snapshot.createdAt,...extent,4326]);
+      db.run('INSERT INTO gpkg_contents (table_name,data_type,identifier,description,last_change) VALUES (?,?,?,?,?)',['auswahl','attributes','Auswahl und Quellen','Filter und Quellenangaben',snapshot.createdAt]);
+      db.run("INSERT INTO gpkg_geometry_columns VALUES ('kartenausschnitt','geom','GEOMETRY',4326,0,0)");
+      for (const row of [['Modul',snapshot.tabName],['Auswahl',snapshot.context],['Exportzeit (UTC)',snapshot.createdAt],['Kartenausschnitt WGS84',JSON.stringify(snapshot.bbox)],['Umfang',note],['Konzeption und Aufbereitung','Wissensbasierte Planung; Bearbeitungsstand September 2026'],...snapshot.notes.map(n=>['Hinweis',n]),...snapshot.sources.map(s=>['Quelle und Lizenz',s])]) db.run('INSERT INTO auswahl (merkmal,angabe) VALUES (?,?)',row);
+      downloadExport(new Blob([db.export()], { type: 'application/geopackage+sqlite3' }), snapshot, 'gpkg');
+    } finally { db.close(); }
+  }
+  async function runExport(button, statusId, work) {
+    const status = document.getElementById(statusId);
+    button.disabled = true; status.textContent = 'Download wird vorbereitet …';
+    try { await work(); status.textContent = 'Datei wurde zum Download bereitgestellt.'; }
+    catch (error) { status.textContent = error.message || 'Der Export ist fehlgeschlagen. Bitte erneut versuchen.'; console.error('Export failed:', error); }
+    finally { button.disabled = false; }
+  }
+  function setupExportActions() {
+    const expandHint = document.createElement('div');
+    expandHint.id = 'chartExpandHint';
+    expandHint.className = 'chart-expand-hint';
+    expandHint.setAttribute('role', 'tooltip');
+    expandHint.textContent = 'Diagramm vergrößern';
+    expandHint.hidden = true;
+    document.body.append(expandHint);
+    const hideExpandHint = () => { expandHint.hidden = true; };
+    window.addEventListener('resize', hideExpandHint);
+    document.addEventListener('scroll', hideExpandHint, true);
+    document.addEventListener('keydown', event => { if (event.key === 'Escape') hideExpandHint(); });
+    document.querySelectorAll('.tab-pane canvas').forEach(canvas => {
+      const button = document.createElement('button');
+      button.id = `enlarge-${canvas.id}`; button.type = 'button'; button.className = 'btn-chart-enlarge'; button.setAttribute('aria-label', 'Diagramm vergrößern'); button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H3v5m0-5 6 6m7-6h5v5m0-5-6 6M3 16v5h5m-5 0 6-6m12 1v5h-5m5 0-6-6"/></svg>'; button.disabled = true;
+      const header = canvas.closest('.card').querySelector('.card-header');
+      let actions = header.querySelector('.card-actions');
+      if (!actions) { actions = document.createElement('div'); actions.className = 'card-actions'; header.append(actions); }
+      actions.append(button);
+      button.setAttribute('aria-describedby', expandHint.id);
+      const showExpandHint = () => {
+        if (button.disabled) return;
+        const rect = button.getBoundingClientRect();
+        expandHint.hidden = false;
+        expandHint.style.left = `${Math.max(8, Math.min(rect.right - expandHint.offsetWidth, innerWidth - expandHint.offsetWidth - 8))}px`;
+        expandHint.style.top = `${rect.bottom + 8}px`;
+      };
+      button.addEventListener('mouseenter', showExpandHint);
+      button.addEventListener('focus', showExpandHint);
+      button.addEventListener('mouseleave', hideExpandHint);
+      button.addEventListener('blur', hideExpandHint);
+      button.addEventListener('click', hideExpandHint);
+      bindDialog(button.id, 'modalChartLarge', () => {
+        const source = Chart.getChart(canvas); if (!source) return;
+        document.querySelectorAll('.chart-hover-tooltip.is-visible, .chart-axis-label-tooltip.is-visible').forEach(node => node.classList.remove('is-visible'));
+        enlargedSnapshot = captureExportSnapshot(); const chartSnapshot = snapshotChart(source);
+        enlargedSnapshot.charts = [chartSnapshot];
+        document.getElementById('largeChartTitle').textContent = chartSnapshot.title;
+        document.getElementById('largeChartContext').textContent = `${enlargedSnapshot.tabName} · ${enlargedSnapshot.context} · Diagrammwerte: ${chartSnapshot.unit}`;
+        document.getElementById('largeChartStatus').textContent = '';
+        document.querySelector('.large-chart-canvas').style.height = chartSnapshot.config.options?.indexAxis === 'y' && chartSnapshot.config.data.labels.length >= 12 ? `${chartSnapshot.config.data.labels.length * 40 + 110}px` : 'clamp(320px, 60vh, 720px)';
+        enlargedChart?.destroy();
+        enlargedChart = createSnapshotChart(document.getElementById('largeChartCanvas'), chartSnapshot);
+      });
+    });
+    Chart.register({ id: 'wbpExportActions', afterUpdate(chart) { const button = document.getElementById(`enlarge-${chart.canvas.id}`); if (button) button.disabled = !chart.data.datasets?.length; }, beforeDestroy(chart) { const button = document.getElementById(`enlarge-${chart.canvas.id}`); if (button) button.disabled = true; } });
+    bindDialog('btnExportModal', 'modalExport', () => {
+      exportSnapshot = captureExportSnapshot();
+      document.getElementById('exportContext').textContent = `${exportSnapshot.tabName} · ${exportSnapshot.context}`;
+      document.getElementById('exportStatus').textContent = exportSnapshot.ready ? '' : 'Die Auswertung wird noch geladen oder ist nicht verfügbar. Bitte schließen und nach dem Laden erneut öffnen.';
+      const select = document.getElementById('exportChartSelect'); select.replaceChildren();
+      exportSnapshot.charts.forEach((chart, i) => { const option = document.createElement('option'); option.value = String(i); option.textContent = chart.title; select.append(option); });
+      if (!exportSnapshot.charts.length) { const option = document.createElement('option'); option.textContent = 'Kein Diagramm in dieser Auswahl verfügbar'; select.append(option); }
+      document.getElementById('exportPng').disabled = !exportSnapshot.charts.length;
+      document.getElementById('exportExcel').disabled = !exportSnapshot.ready || !(exportSnapshot.kpis.length || exportSnapshot.charts.length || exportSnapshot.tables.length);
+      const count = exportSnapshot.candidates.length;
+      document.getElementById('exportGeo').disabled = !exportSnapshot.ready || !exportSnapshot.localExtent || !count || count > EXPORT_FEATURE_LIMIT;
+      document.getElementById('exportGeoScope').textContent = !exportSnapshot.localExtent ? 'Bitte schließen und näher in die Karte zoomen: Der Ausschnitt darf höchstens 250 km breit und 250 km hoch sein.' : count > EXPORT_FEATURE_LIMIT ? `${count} Objekte im Ausschnitt. Bitte schließen und näher in die Karte zoomen (höchstens 100).` : count ? `Bis zu ${count} Gebiete / Standorte im aktuellen Ausschnitt.` : 'Keine exportierbaren Gebiete oder Standorte in diesem Ausschnitt.';
+    });
+    document.getElementById('exportPng').addEventListener('click', event => { const snapshot = exportSnapshot, chart = snapshot.charts[Number(document.getElementById('exportChartSelect').value)]; runExport(event.currentTarget, 'exportStatus', () => exportChartPng(chart, snapshot)); });
+    document.getElementById('exportExcel').addEventListener('click', event => { const snapshot = exportSnapshot; runExport(event.currentTarget, 'exportStatus', () => exportExcelSnapshot(snapshot)); });
+    document.getElementById('exportGeo').addEventListener('click', event => { const snapshot = exportSnapshot; runExport(event.currentTarget, 'exportStatus', () => exportGeoSnapshot(snapshot)); });
+    document.getElementById('largeChartPng').addEventListener('click', event => { const snapshot = enlargedSnapshot; const chart = snapshotChart(enlargedChart); chart.title = snapshot.charts[0].title; chart.unit = snapshot.charts[0].unit; runExport(event.currentTarget, 'largeChartStatus', () => exportChartPng(chart, snapshot)); });
+  }
+
   // Start on DOM ready
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

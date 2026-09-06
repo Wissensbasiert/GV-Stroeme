@@ -466,3 +466,110 @@ Die ausschließlich lesende Antigravity-/Gemini-Zweitprüfung ergab einen veralt
 - Der Hinweis zum DuckDB-Makro `nst_c1c7` wurde als vorsorgliche Robustheitsidee bewertet und nicht umgesetzt. Die aktive Verarbeitung ist verbindlich auf dreistellige NST-Feincodes ausgelegt; dieses Eingabeformat wird durch `validate_nst_fine_codes.py` abgesichert.
 
 Der vollständige Frontend-Build, `node --check js/app.js`, gezielte Bundle-Prüfungen der drei Korrekturen sowie sämtliche aktiven Validatoren für Luftfracht, Seeverkehr, Hafenprofile, NST-Feincodes, Relationsabdeckung, Mautdaten und VP2040 bestanden. Der reale Browserlauf bei 1.600 × 950 Pixeln bestätigte für Straße und Intermodal im Jahr 2016 die Hovers ohne 2015- und Selbstvergleich sowie einen korrekt bezeichneten negativen Prognosesaldo. Es traten keine JavaScript-Laufzeitfehler und kein horizontaler Seitenüberlauf auf. Der bekannte optionale Abruf von `favicon.ico` blieb als nicht funktionsrelevanter 404-Hinweis bestehen. Der exakte Nullsaldo-Zweig wurde zusätzlich als Grenzwertprüfung der erzeugten dreistufigen Logik geprüft. Die JavaScript-Cache-Version wurde auf `20260904-antigravity-regression1` erhöht.
+
+
+### 10.17 Fehlerkorrekturen, kleinere Datenpakete und wiederholbare Browserprüfung vom 05.09.2026
+
+Der Nutzer hat die Behebung der bestätigten Fehler und die Bearbeitung der drei technischen Hebel ausdrücklich beauftragt. Umgesetzt wurden gezieltes Nachladen kleinerer Datenpakete, gemeinsame Codebausteine sowie zuverlässige Wiederholungen nach Ladefehlern. Die bestehende Änderung der Dashboard-Roadmap blieb unangetastet.
+
+**Umsetzung:**
+
+- Die Luftfracht-Relationstabelle verwendet bei der Spaltenüberschrift „Menge (t)“ durchgehend Tonnen, auch bei historischen Salden. Frankfurt/Main–Shanghai Pudong zeigt für 2024 nun korrekt 215.169,2 statt 215,2. Werte mit sichtbarer Einheit außerhalb der Tabelle behalten ihre kompakte Darstellung.
+- Gemeinsame Zahlenformatierung, Datenladewege, Dialogsteuerung und nationale Aggregation liegen in `js/shared/`. Die Aggregationsfunktion stimmt, abgesehen von expliziten Parametern und Leerraum, mit dem vorherigen Quellstand überein; die fachliche Berechnung wurde nicht verändert.
+- Dialoge halten den Tastaturfokus innerhalb des offenen Fensters. Escape und Schließen führen zum tatsächlichen Auslöser zurück, auch beim über das Logo geöffneten Quellenfenster. Das Logo ist jetzt ebenfalls per Tastatur bedienbar.
+- Fehlgeschlagene Start-, Modul-, Regions- und Steckbriefanfragen werden nicht dauerhaft als fehlgeschlagene Promise gespeichert. Eine gemeinsame Fehleranzeige bietet „Erneut versuchen“. Auch die Monats- und Relationsabfrage der Mautdaten besitzt eine direkte Wiederholung. Ungültige oder fehlgeschlagene Antworten werden nicht als gültige leere Ergebnisse ausgegeben.
+- Der gemeinsame Datenabruf hat eine 30-Sekunden-Grenze. Überholte Mautanfragen werden abgebrochen; spätere Antworten älterer Regions- oder Jahresauswahlen überschreiben keine neuere Auswahl. Das Bezugsjahr und seine Geometrie werden gemeinsam übernommen.
+- Die kanonischen Daten bleiben erhalten. Für die Auslieferung werden ausschließlich regionale NST-20-Details beziehungsweise Prognoserelationen ausgelagert. Der Browser lädt bei Bedarf die vollständigen Details der ausgewählten Region; es gibt keine zusätzliche Rangbegrenzung, Rundung oder fachliche Verdichtung.
+
+**Gemessene Paketgrößen, unkomprimiert:**
+
+| Datenumfang | Bisher | Jetzt |
+|---|---:|---:|
+| Übersicht, Grundpaket | 20.814.827 Bytes | 10.464.486 Bytes |
+| Zusätzliche Übersichtsdetails Duisburg | im Gesamtpaket | 40.218 Bytes |
+| Prognose, Grundpaket | 171.737.099 Bytes | 9.203.156 Bytes |
+| Zusätzliche Prognoserelationen Duisburg, beide Szenarien | im Gesamtpaket | 428.370 Bytes |
+
+Der erste Prognoseaufruf für Duisburg benötigt damit für diese Prognosepakete rund 94,4 Prozent weniger Daten. Die Aussage betrifft das übertragene Datenvolumen, nicht eine gemessene Ladezeit unter produktiven Netzbedingungen. Die Paketprüfung bestätigte 896 Auslieferungsdateien einschließlich Manifesten. Sämtliche Datensätze lassen sich aus Grundpaket und Details vollständig rekonstruieren; Quellfingerabdrücke und Auslieferungsdateien stimmen überein.
+
+**Prüfnachweise:**
+
+- `node scripts/frontend/build_delivery_data.cjs --check`: bestanden; vollständiger Vergleich aller Partitionen gegen die unveränderten kanonischen Daten.
+- `node scripts/validation/validate_frontend_loading.cjs`: bestanden; Fehlerwiederholung, Zusammenfassung paralleler Anfragen, HTTP- und JSON-Fehler, Zeitbegrenzung, Abbruch sowie feste Mengenskalierung.
+- Luftfracht- und Mautvalidator: bestanden. Die übrigen Rohdatenpipelines wurden nicht neu ausgeführt, da keine fachlichen Quellwerte, Zuordnungen oder Berechnungen geändert wurden. Die geänderten Python-Dateien wurden syntaktisch geprüft.
+- Frontend-Build und JavaScript-Syntaxprüfung: bestanden. Die generierten HTML-, CSS- und JavaScript-Dateien entsprechen ihrer Quellzusammensetzung.
+- Chrome-Prüfung: alle neun Module; nationale und Duisburger Istwerte; Prognosewerte, Szenarien, Tonnenkilometer und Güterfilter; Luftfrachtwerte und Salden; fünf Dialogauslöser mit Tastaturführung; Ansichten mit 1.600 × 950, 1.366 × 768 und 390 × 844 Pixeln ohne horizontalen Seitenüberlauf.
+- Absichtlich ausgelöste Fehler: Startzusammenfassung, regionale Zusammenfassung, Luftfrachtmodul, Prognosegrundpaket, Prognoseregion, Mautmonate und Mautrelationen. Alle ließen sich durch die vorgesehene Wiederholung beheben. Ein verzögert eintreffendes älteres Geodatenpaket und ein verspäteter Fehler einer zuvor ausgewählten Region überschrieben den neueren Auswahlstand nicht.
+- Der reale Mautabruf in normalem Chrome bestätigte Juli 2026 und Duisburger Relationen. Der zuvor beobachtete HTTP-500-Fehler trat im Headless-Testmodus auf; im normalen Browsermodus war derselbe öffentliche Endpunkt erfolgreich. Der Browserprüfer verwendet deshalb standardmäßig den normalen Chrome-Modus. An Nutzer- oder Systemkonfigurationen wurde nichts geändert.
+- Der abschließende Browserlauf enthält keine JavaScript-Laufzeitfehler. Screenshots und maschinenlesbare Ergebnisse liegen unter `C:/Users/paulh/.codex/visualizations/2026/09/05/01a0726d-16d5-7872-b94d-06e55ba1e171/Umsetzung_2026-09-05/`.
+
+Die lokalen Änderungen sind geprüft. Eine Bereitstellung auf dem Produktivserver oder eine neue vollständige Rohdatenrevision ist damit nicht erfolgt. Die Anleitungen für Paketaufbau, gemeinsame Auslieferung und wiederholbare lokale Chrome-Prüfung wurden in `README_MAINTENANCE.md`, `ANLEITUNG_DATENAKTUALISIERUNG.md`, dem Projekt-README und der Skriptübersicht ergänzt.
+
+
+## 10.18 Diagrammvergrößerung, begrenzte Exporte und Maut-Vorjahresvergleich (05.09.2026)
+
+**Status: lokal umgesetzt und geprüft; keine Produktivbereitstellung.** Die offenen Anforderungen 14.1 und 14.2 der Dashboard-Roadmap wurden umgesetzt. KI-Modularisierung und Datenanbindung bleiben als weiterer Ausbau offen; das Interface enthält jetzt sechs auswählbare Beispiele und einen entsprechenden Einführungstext, weiterhin ausdrücklich ohne echte KI-Abfrage.
+
+**Bedienung und Dateiausgabe:**
+
+- Alle zwölf vorhandenen Diagramme in neun Modulen haben auf Desktop/Laptop eine größere interaktive Ansicht; auf 390 Pixel breiten Mobilansichten ist der Auslöser ausgeblendet. Datenreihen und Kategorien wurden gegen die kleinen Originaldiagramme verglichen. Lange Gütergruppenbezeichnungen werden umgebrochen; bei umfangreichen Diagrammen lässt sich innerhalb des Fensters scrollen. Getrennte Achsen und Legenden des kleinen Diagramms werden übernommen.
+- Export liegt in visueller und Tastaturreihenfolge zwischen Quellen und KI fragen. PNG-Ausgabe: 1.800 Pixel Breite, weißer Hintergrund, Titel, aktuelle Auswahl, ausdrücklich genannte Diagrammeinheit und Quellenvermerk. Excel-Ausgabe: Kennzahlen, aktuelle Tabellen und Diagrammdaten mit Quellenbogen; maximal 2.000 Datenzeilen. Die Wiederöffnung bestätigte numerische Werte (beispielsweise Frankfurt–Shanghai: 215.169,2 t), korrekte Skalierung der nationalen Modal-Split-Werte in Mio. t und keine Zellformeln.
+- GeoPackage 1.3: höchstens 100 Gebiete/Standorte und 250 km × 250 km, geschnitten auf den sichtbaren Ausschnitt. Keine Verbindungslinien oder Basiskarte; explizite Attributauswahl und separate Tabelle mit Quellen und Auswahl. Der Testausschnitt enthielt 42 Objekte. SQLite-Integrität, Fremdschlüssel, gültige Geometrien innerhalb des Ausschnitts, numerische Kennwerte, Textcodes und EPSG:4326 wurden geprüft. Wiederöffnung über GeoPandas/GDAL bestanden. Ein zunächst ungeeigneter einfacher Polygonschnitt wurde vor der Abnahme durch eine Topologie erhaltende Schnittbibliothek ersetzt.
+- Initiale Übersicht: Deutschland-Ausschnitt vor dem Sichtbarwerden, keine anfängliche Zoomstufe 5. Frischer Desktop- und Mobilstart geprüft. Dialoge: Escape, Fokusführung und Rückkehr zum Auslöser; Laptop 1.366 × 768 und Mobilansicht 390 × 844 ohne horizontalen Seitenüberlauf.
+
+**Mautvergleich:**
+
+- Zusätzlicher Abruf desselben Monats im Vorjahr, ohne Rückfall auf einen anderen Monat. Vollständige Antworten werden nach Gemeinde, Monat und Richtung getrennt mit Abrufzeitpunkt für 15 Minuten gespeichert (höchstens 24 Einträge); der Export dokumentiert beide Abrufzeitpunkte.
+- Deterministische Prüfungen bestanden: tatsächlicher Nullwert gegenüber fehlendem Wert, absolute und prozentuale Änderung, nicht berechenbare Prozentänderung bei Vorjahreswert null, nicht veröffentlichter Partner und nicht verfügbarer Vorjahresmonat, doppelte Binnenfahrten in der kombinierten Richtung, Cachetrennung, Abbruch und Wiederholung nach Fehlern. Ein fehlgeschlagener Vorjahresabruf lässt aktuelle Daten sichtbar; die separate Wiederholung wurde im Browser erfolgreich geprüft.
+- Reale API in normalem Chrome: Duisburg, Juli 2026 und Juli 2025 erfolgreich. Zusätzlich am Verbindungshover Duisburg–Oberhausen geprüft: 14.680 gegenüber 16.100 Mautfahrten, Veränderung −1.420 Fahrten beziehungsweise −8,8 %. Gemeinde- und Verbindungshover nutzen dieselbe Vergleichsfunktion; beide Zeiträume werden genannt.
+
+**Wiederholbare Prüfer:** `validate_frontend_loading.cjs`, `validate_toll_collect_module.py`, `validate_toll_comparison.cjs`, `validate_frontend_browser.cjs`, `validate_frontend_exports.cjs` und `validate_export_files.py`: bestanden. Die beiden Browserprüfer decken die bisherigen Daten-/Fehlerabläufe und die neuen Funktionen ab; die abschließenden Läufe enthielten keine unbehandelten JavaScript-Fehler. Frontend-Zusammensetzung, Syntax und UTF-8 wurden geprüft. Unveränderte Rohdatenpipelines wurden nicht neu gerechnet.
+
+Screenshots, Downloads, Browserprotokolle und Nachweis des realen Mautabrufs: `C:/Users/paulh/.codex/visualizations/2026/09/05/01a0726d-16d5-7872-b94d-06e55ba1e171/Export_und_Vergleich_2026-09-05/`.
+
+**Verbleibende Grenze:** Die Exportoberfläche begrenzt den angebotenen Download, schützt jedoch die statischen Datenpakete nicht vor systematischem Abruf. Wirksame Rechte und Abruflimits müssen beim späteren Portal-/Serverausbau umgesetzt werden. Die dafür nötigen offenen Schritte stehen in der KI-Roadmap, Abschnitt 15. Der lokale Vorschauprozess auf Port 8000 bleibt für die Ansicht durch den Nutzer aktiv.
+
+
+## 10.19 Browser-Rückmeldungen: Diagramme, KI-Fragen, Flughafen-KPIs und Maut-Hover (06.09.2026)
+
+**Status: alle sieben Rückmeldungen lokal umgesetzt und geprüft. Keine Produktivbereitstellung.**
+
+- Vergrößerung: dezentes 28-Pixel-Symbol mit vier diagonalen Pfeilen innerhalb des Diagrammbereichs, mindestens 10 Pixel Randabstand, Hover-Titel und zugänglicher Name „Diagramm vergrößern“. Auf Mobilansichten weiterhin ausgeblendet. Alle zwölf Diagramme in neun Modulen geprüft.
+- KI-Fenster: sechs vollständige Fragen statt Stichpunkten; natürlicher Einführungstext in normaler Schreibweise. Die Fragen werden vollständig in das Eingabefeld übernommen. Der tatsächliche Stand der fehlenden Modellanbindung bleibt im vorhandenen Prototyp-Hinweis erkennbar.
+- Vergrößerte Diagramme: ausschließlich der native Tooltip mit Spitze; globalen externen Tooltip ausdrücklich mit `null` deaktiviert. Über tatsächliche Mausbewegungen geprüft: nativer Tooltip sichtbar, Spitze vorhanden, keine zusätzliche sichtbare HTML-Hover-Anzeige.
+- Flughafen-KPIs: Auswahl über Karte und Auswahlfeld aktualisiert alle vier Kennzahlen. Beispiel Leipzig/Halle, 2024, Fracht und Post, Gesamt: 1.383.319,1 t, −0,6 % gegenüber 2023, 28,9 % Anteil an 4.780.707 t veröffentlichten deutschen Flughafenwerten, Rang 2 von 22. Die anders abgegrenzte nationale Reihe von 4.687.640,8 t wird nicht als Nenner verwendet. Rücksetzen stellt die nationalen Kennzahlen wieder her.
+- Flughafengrenzfälle geprüft: Versand, Empfang, Saldo, reine Fracht-/Postflüge, nicht belastbare Flughafen-Flugzahlen 2025, fehlender Vorjahreswert, Vorjahreswert null, gleiche Ränge und unvollständige Richtungswerte. Salden benötigen beide Richtungswerte. Bei fehlenden Jahreswerten bleibt die ausgewählte Flughafenidentität erhalten; keine stillschweigende Rückkehr zu Deutschland.
+- Maut: Ladehinweis nach abgeschlossenem Vergleich ausgeblendet, auch bei regulär fehlendem Vorjahresmonat. Abruffehler mit Wiederholungsmöglichkeit bleiben erkennbar. Hover-Veränderungen enthalten ↗, ↘ oder →; bei fehlendem Vorjahresmonat wird aus der API-Monatsliste der letzte Berichtsmonat mit vorhandenem Vorjahresmonat bestimmt. Lücken und fehlende Einzelrelationen werden dadurch nicht als verfügbar behauptet.
+- Ansichten mit 1.600 × 1.000, 1.366 × 768 und 390 × 844 Pixeln geprüft; kein horizontaler Seitenüberlauf. Auch die sechste Frage ist auf Mobilgeräten erreichbar und auswählbar.
+
+**Prüfungen bestanden:** `validate_frontend_feedback.cjs`, aktualisierter `validate_frontend_exports.cjs`, `validate_airfreight_kpis.cjs`, erweiterter `validate_toll_comparison.cjs`, Luftfracht-Bundle-Prüfung sowie `validate_export_files.py` (numerische Excel-Werte und Quellen, PNG, 42 gültige geschnittene GeoPackage-Objekte in EPSG:4326). Die abschließenden Browserprotokolle enthalten keine unbehandelten JavaScript-Fehler. Frontend-Build, JavaScript-Syntax und UTF-8-Prüfung bestanden. Die fachlichen Ausgangsdaten wurden nicht verändert.
+
+Nachweise: `C:/Users/paulh/.codex/visualizations/2026/09/05/01a0726d-16d5-7872-b94d-06e55ba1e171/Feedback_2026-09-06/`, einschließlich `Exports/`.
+
+
+## 10.20 Diagrammlayout nach erneuten Browser-Rückmeldungen (06.09.2026)
+
+**Status: alle fünf Rückmeldungen lokal umgesetzt und in normalem Chrome geprüft. Keine Produktivbereitstellung.**
+
+- Alle zwölf Vergrößerungssymbole liegen jetzt in der Kopfzeile neben den Diagrammsteuerungen. Die bisherige Platzreservierung am unteren Diagrammrand entfällt. Weißer Hover-Hinweis statt Betriebssystem-Titel; zugänglicher Name, Tastaturfokus, Escape und Fokusrückkehr geprüft. Mobil bleiben die Symbole ausgeblendet. Verborgene Informationsfelder können die kleinen Diagrammkarten beim Fokussieren nicht mehr horizontal verschieben.
+- Diagrammkarten behalten eine Mindesthöhe; bei geringer Fensterhöhe scrollt der Inhaltsbereich. Die Übersicht nutzt für die sieben Gütergruppen der Dynamik eine begrenzte, scrollbar angelegte Legende mit vollständigen Bezeichnungen. Alle sieben Einträge sind erreichbar und lassen sich per Maus oder Tastatur ein-/ausblenden. Die vergrößerte Ansicht übernimmt ausgeblendete Reihen und zeigt ihre Legende weiterhin an.
+- Gemessene Zeichenfläche der Übersicht bei 1.479 × 912 Pixeln: Güterstruktur-Dynamik rund 148 Pixel hoch; vor der Änderung waren es rund 25 Pixel. Übersicht mit Status und Dynamik bei 2.119 × 1.272, 1.479 × 912, 1.366 × 768, 1.200 × 800 und 390 × 844 Pixeln geprüft: Zeichenflächen jeweils mindestens 130 Pixel hoch und kein horizontaler Seitenüberlauf. Auch die einzelnen Diagrammkarten von Schiene, Binnenschifffahrt und Seeverkehr haben auf Laptopansichten ausreichend Zeichenhöhe.
+- NST-Wechsel: alte Legendencontainer werden vor der neuen Diagramminstanz aufgelöst. 36 vollständige Zyklen 7 → 20 → 7 in Schiene, Binnenschifffahrt und Seeverkehr, jeweils Status/Dynamik und drei Desktop-/Laptopgrößen, bestanden. Rückkehr zur Ausgangshöhe mit höchstens zwei Pixeln Toleranz; kein zurückbleibender Scroll- oder Legendencontainer in der Sieben-Gruppen-Ansicht.
+- Maut-Hover: ausschließlich den Satz über abweichende Verfügbarkeit einzelner Relationen entfernt. Der dynamische letzte Berichtsmonat mit verfügbarem Vorjahresmonat bleibt erhalten.
+
+**Prüfungen:** `validate_chart_layout.cjs` mit 29 bestandenen Prüffällen und ohne unbehandelte JavaScript-Fehler; `validate_toll_comparison.cjs`, Frontend-Zusammensetzung, JavaScript-Syntax und UTF-8 geprüft. Der bestehende `validate_frontend_feedback.cjs` wurde auf die neue Position und den weißen Hinweis angepasst; die fachlichen Flughafenfälle wurden in diesem Änderungsschritt nicht erneut ausgeführt. Ausgangsdaten unverändert.
+
+Browserprotokoll und visuell geprüfte Screenshots: `C:/Users/paulh/.codex/visualizations/2026/09/05/01a0726d-16d5-7872-b94d-06e55ba1e171/Diagrammlayout_2026-09-06/`. Localhost auf Port 8000 bleibt für die Ansicht aktiv.
+
+
+## 10.21 Mobile Kartensteuerung und Kartenlegenden (06.09.2026)
+
+**Status: die beiden gemeldeten Darstellungsfehler lokal behoben und geprüft. Eine neue mobile Ansichtsumschaltung wurde nicht implementiert; sie ist vorerst ein Diskussionsvorschlag.**
+
+- Modulauswahl liegt auch über den angehobenen Leaflet-Steuerungen bei geöffnetem Kartenhinweis. Im Browser wurde am überlappenden Bereich zwischen Zoomknöpfen und Menü das tatsächlich vorderste Element geprüft.
+- Mobile Legenden sind eingeklappt als kompaktes Symbol bedienbar; 44-Pixel-Schaltfläche, zugänglicher Name und Auf-/Zu-Zustand. Alle neun Karten lassen sich über Touch öffnen und schließen. Dabei wurde auch die bislang fehlende Anbindung des Luftfracht-Legendenknopfs korrigiert.
+- Die vollständige Quellenzeile bleibt erhalten, auch mit mehrzeiligen BKG-/Mautangaben. Aus- und eingeklappte Legenden liegen oberhalb der tatsächlichen Quellenhöhe; gemessener Abstand mindestens sieben Pixel. Aufgeklappte Legenden bleiben im Kartenrahmen und scrollen bei Platzmangel intern.
+- Normales Chrome mit Touch-Emulation: alle neun Module bei 393 × 852 Pixeln; zusätzliche Mautkartenprüfungen bei 320, 430 und 768 Pixeln Breite ohne horizontalen Seitenüberlauf. 16 Prüffälle bestanden, keine unbehandelten JavaScript-Fehler.
+- Desktop bei 1.479 × 912 Pixeln: Abmessungen und Positionen von Modulraster, Diagrammzeile, beiden Übersichtsdiagrammen und Kartenlegende stimmen exakt mit dem vor dieser Änderung aufgenommenen Stand überein. Der mobile Darstellungsbereich und das Legendensymbol sind dort nicht aktiv.
+
+**Prüfungen:** `validate_mobile_maps.cjs`, Frontend-Zusammensetzung, JavaScript-Syntax und UTF-8. Keine Änderung von Daten oder Berechnungen; keine Produktivbereitstellung. Desktop-Vergleich, Browserprotokoll und Screenshots: `C:/Users/paulh/.codex/visualizations/2026/09/05/01a0726d-16d5-7872-b94d-06e55ba1e171/Mobile_Karten_2026-09-06/`.

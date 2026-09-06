@@ -1119,3 +1119,6 @@ if __name__ == "__main__":
         build_overview_tooltip_preview_from_existing_bundle()
     else:
         build_vp2040_bundle()
+        import subprocess
+        from pathlib import Path
+        subprocess.run(["node", str(Path(__file__).resolve().parents[1] / "frontend" / "build_delivery_data.cjs"), "--kind", "forecast"], check=True)

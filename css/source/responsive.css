@@ -80,6 +80,13 @@
   }
 }
 
+/* Preserve an actual plot area in the desktop analysis modules. If the viewport is
+   too short, the main panel scrolls instead of squeezing charts to a few pixels. */
+@media (min-width: 1281px) {
+  .module-layout-grid { min-height: 680px; }
+  .table-card-compact { min-height: 240px; }
+}
+
 /* Medium screens and narrow laptop windows: stack map and analytics before
    the two lower chart cards become too narrow for readable category axes. */
 @media (max-width: 1280px) {
@@ -595,4 +602,46 @@
   .mobile-module-option.active .mobile-module-check { visibility: visible; }
   .airfreight-map-actions { width: 100%; }
   .airfreight-map-actions .select-input-sm { flex: 1 1 150px; min-width: 0; }
+}
+
+/* The overview keeps room for time series and their complete scrollable legend. */
+#tab-overview .bottom-split-charts-row { min-height: 380px; }
+@media (max-width: 900px) {
+  #tab-overview .sub-chart-card { height: 360px; min-height: 360px; }
+}
+
+@media (min-width: 901px) {
+  .chart-card-single { min-height: 420px; }
+}
+
+/* Mobile map overlays stay below the module menu. Desktop stacking is unchanged. */
+@media (max-width: 900px) {
+  .main-content { isolation: isolate; }
+  .map-container-leaflet .leaflet-bottom.leaflet-left { width: 100%; }
+  .map-container-leaflet .leaflet-control-attribution {
+    max-width: calc(100% - 20px);
+    overflow-wrap: anywhere;
+  }
+  .choropleth-legend {
+    bottom: calc(var(--map-attribution-height, 24px) + 16px);
+    right: 12px;
+    max-width: calc(100% - 24px);
+    max-height: calc(100% - var(--map-attribution-height, 24px) - 32px);
+    overflow-y: auto;
+  }
+  .choropleth-legend .btn-legend-toggle { width: 44px; height: 44px; }
+  .choropleth-legend.collapsed {
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+    overflow: hidden;
+  }
+  .choropleth-legend.collapsed .legend-title { display: none; }
+  .choropleth-legend.collapsed .btn-legend-toggle {
+    border: 0;
+    border-radius: 7px;
+    font-size: 0;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='1.7' stroke-linecap='round'%3E%3Crect x='3' y='3' width='4' height='4' rx='1'/%3E%3Crect x='3' y='10' width='4' height='4' rx='1'/%3E%3Crect x='3' y='17' width='4' height='4' rx='1'/%3E%3Cpath d='M11 5h10M11 12h10M11 19h10'/%3E%3C/svg%3E") center / 22px 22px no-repeat;
+  }
+  .choropleth-legend .btn-legend-toggle:focus-visible { outline: 2px solid #17613c; outline-offset: -3px; }
 }

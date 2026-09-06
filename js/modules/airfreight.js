@@ -35,7 +35,7 @@
     if (direction === 'balance') {
       const hasOutbound = values.outbound !== null && values.outbound !== undefined;
       const hasInbound = values.inbound !== null && values.inbound !== undefined;
-      if (!hasOutbound && !hasInbound) return null;
+      if (!hasOutbound || !hasInbound) return null;
       return Number(values.outbound || 0) - Number(values.inbound || 0);
     }
     const value = values[direction];
@@ -45,6 +45,7 @@
   function formatAirfreightValue(value, metric = getAirfreightMetric(), withUnit = true, direction = getAirfreightDirection()) {
     if (value === null || value === undefined || !Number.isFinite(Number(value))) return '--';
     const numeric = Number(value);
+    if (!withUnit) return formatFixedUnitValue(numeric, { decimals: metric === 'flights' ? 0 : 1, signed: direction === 'balance' });
     const sign = direction === 'balance' && numeric > 0 ? '+' : '';
     if (metric === 'flights') {
       const formatted = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 }).format(numeric);
@@ -147,7 +148,7 @@
   }
 
   function ensureAirfreightAirportSelection(entries) {
-    if (state.selectedAirport && !entries.some(record => record.code === state.selectedAirport)) {
+    if (state.selectedAirport && airfreightData.airports?.[state.selectedAirport]?.country !== 'DE') {
       state.selectedAirport = null;
     }
   }
@@ -159,7 +160,8 @@
       const name = record.meta.name || record.code;
       return `<option value="${record.code}">${name} (${record.code})</option>`;
     }).join('');
-    select.innerHTML = `<option value="">Alle Flughäfen</option>${options}`;
+    const missingSelection = state.selectedAirport && !entries.some(record => record.code === state.selectedAirport) ? `<option value="${state.selectedAirport}">${airfreightData.airports[state.selectedAirport].name} (${state.selectedAirport}) – kein belastbarer Wert</option>` : '';
+    select.innerHTML = `<option value="">Alle Flughäfen</option>${options}${missingSelection}`;
     select.value = state.selectedAirport || '';
   }
 
@@ -280,41 +282,47 @@
   function renderAirfreightKpis(entries) {
     const metric = getAirfreightMetric();
     const direction = getAirfreightDirection();
-    const current = getAirfreightValue(airfreightData?.national?.[state.year], metric, direction);
-    const previousYear = String(Number(state.year) - 1);
-    const previous = getAirfreightValue(airfreightData?.national?.[previousYear], metric, direction);
-    const directionLabel = getAirfreightDirectionLabel(direction, true);
-    const metricLabel = metric === 'flights' ? 'Reine Luftfracht- und Luftpostflüge in Deutschland' : 'Luftfracht- und Luftpostaufkommen in Deutschland';
-    setText('airfreightNationalTitle', metricLabel);
-    setText('airfreightNationalValue', formatAirfreightValue(current, metric));
-    setText('airfreightNationalSub', directionLabel);
-
     const isBalance = direction === 'balance';
+    const code = state.selectedAirport;
+    const name = airfreightData.airports?.[code]?.name || code;
+    const previousYear = String(Number(state.year) - 1);
+    const airportMetricAvailable = isAirfreightAirportMetricYearAvailable();
+    const read = year => code
+      ? (isAirfreightAirportMetricYearAvailable(year, metric) ? getAirfreightValue(airfreightData.airportValues?.[year]?.[code], metric, direction) : null)
+      : getAirfreightValue(airfreightData.national?.[year], metric, direction);
+    const current = read(state.year), previous = read(previousYear);
+    const metricLabel = metric === 'flights' ? 'Reine Fracht- und Postflüge' : 'Luftfracht- und Luftpostaufkommen';
+    setText('airfreightNationalTitle', `${metricLabel} ${code ? '· ' + name : 'in Deutschland'}`);
+    setText('airfreightNationalValue', formatAirfreightValue(current, metric));
+    setText('airfreightNationalSub', current === null ? (code && !airportMetricAvailable ? 'Flughafenwerte derzeit nicht belastbar' : 'Kein veröffentlichter Wert für diese Auswahl') : getAirfreightDirectionLabel(direction, true));
     setText('airfreightYoYTitle', isBalance ? `Saldo ${previousYear}` : 'Veränderung zum Vorjahr');
     if (isBalance) {
       setText('airfreightYoYValue', formatAirfreightValue(previous, metric, true, 'balance'));
       setText('airfreightYoYSub', previous === null ? `Kein Vergleichswert für ${previousYear}` : 'Historischer Saldo; keine Prozentveränderung');
     } else {
       const change = current !== null && previous > 0 ? ((current - previous) / previous) * 100 : null;
-      setAirfreightHtml('airfreightYoYValue', change === null
-        ? '--'
-        : `<span style="color:${change >= 0 ? '#16a34a' : '#dc2626'};">${change >= 0 ? '+' : ''}${formatDeNum(change, 1)} %</span>`);
-      setText('airfreightYoYSub', previous === null ? `Kein Vergleichswert für ${previousYear}` : `gegenüber ${previousYear}`);
+      setAirfreightHtml('airfreightYoYValue', change === null ? '--' : `<span style="color:${change >= 0 ? '#16a34a' : '#dc2626'};">${change > 0 ? '↗ +' : change < 0 ? '↘ ' : '→ '}${formatDeNum(change, 1)} %</span>`);
+      setText('airfreightYoYSub', current === null ? 'Kein aktueller Vergleichswert' : previous === null ? `Kein Vergleichswert für ${previousYear}` : previous === 0 ? `Prozentänderung nicht berechenbar (${previousYear}: 0)` : `gegenüber ${previousYear}`);
     }
-
-    setText('airfreightAirportCountTitle', metric === 'flights'
-      ? 'Deutsche Flughäfen mit ausgewiesener Zahl reiner Fracht- und Postflüge'
-      : 'Deutsche Flughäfen mit ausgewiesenem Frachtaufkommen');
-    const airportMetricAvailable = isAirfreightAirportMetricYearAvailable();
-    setText('airfreightAirportCount', airportMetricAvailable ? String(entries.length) : '--');
-    setText('airfreightAirportCountSub', airportMetricAvailable ? 'Einschließlich veröffentlichter Nullwerte' : 'Flughafenwerte derzeit nicht belastbar');
-
-    const total = entries.reduce((sum, record) => sum + (direction === 'balance' ? Math.abs(record.value || 0) : Math.max(0, record.value || 0)), 0);
-    const topThree = entries.slice(0, 3).reduce((sum, record) => sum + (direction === 'balance' ? Math.abs(record.value || 0) : Math.max(0, record.value || 0)), 0);
-    setText('airfreightTop3Share', total > 0 ? `${formatDeNum((topThree / total) * 100, 1)} %` : '--');
-    setText('airfreightTop3Sub', airportMetricAvailable
-      ? (direction === 'balance' ? 'Anteil an der Summe absoluter Salden' : 'Anteil an der Summe der Flughafenwerte')
-      : 'Flughafenwerte derzeit nicht belastbar');
+    const magnitude = value => isBalance ? Math.abs(value) : Math.max(0, value);
+    const total = entries.reduce((sum, record) => sum + magnitude(record.value || 0), 0);
+    if (code) {
+      setText('airfreightAirportCountTitle', isBalance ? 'Anteil an den absoluten Flughafensalden' : 'Anteil an den deutschen Flughafenwerten');
+      setText('airfreightAirportCount', current !== null && total > 0 ? `${formatDeNum(magnitude(current) / total * 100, 1)} %` : '--');
+      setText('airfreightAirportCountSub', !airportMetricAvailable ? 'Flughafenwerte derzeit nicht belastbar' : isBalance ? 'Bezugsgröße: Summe der absoluten Salden' : 'Bezugsgröße: Summe veröffentlichter Flughafenwerte');
+      setText('airfreightTop3Title', isBalance ? 'Rang nach absolutem Saldo' : 'Rang unter deutschen Flughäfen');
+      const rank = current === null ? null : 1 + entries.filter(record => magnitude(record.value) > magnitude(current)).length;
+      setText('airfreightTop3Share', rank === null ? '--' : `${rank} von ${entries.length}`);
+      setText('airfreightTop3Sub', !airportMetricAvailable ? 'Flughafenwerte derzeit nicht belastbar' : current === null ? 'Kein veröffentlichter Flughafenwert' : 'Gleiche Werte erhalten denselben Rang');
+    } else {
+      setText('airfreightAirportCountTitle', metric === 'flights' ? 'Deutsche Flughäfen mit ausgewiesener Zahl reiner Fracht- und Postflüge' : 'Deutsche Flughäfen mit ausgewiesenem Frachtaufkommen');
+      setText('airfreightAirportCount', airportMetricAvailable ? String(entries.length) : '--');
+      setText('airfreightAirportCountSub', airportMetricAvailable ? 'Einschließlich veröffentlichter Nullwerte' : 'Flughafenwerte derzeit nicht belastbar');
+      const topThree = entries.slice(0, 3).reduce((sum, record) => sum + magnitude(record.value || 0), 0);
+      setText('airfreightTop3Title', 'Konzentration auf die Top 3');
+      setText('airfreightTop3Share', total > 0 ? `${formatDeNum(topThree / total * 100, 1)} %` : '--');
+      setText('airfreightTop3Sub', airportMetricAvailable ? (isBalance ? 'Anteil an der Summe absoluter Salden' : 'Anteil an der Summe der Flughafenwerte') : 'Flughafenwerte derzeit nicht belastbar');
+    }
   }
 
   function renderAirfreightMap(entries, relations) {
@@ -364,6 +372,7 @@
         renderAirfreightTab();
         updateAnalysisSummary();
       });
+      marker.wbpExport = { code: record.code, name: name || record.code, value: record.value, unit: metric === 'tonnes' ? 't' : 'Flüge' };
       mapLayers.airfreight.airportsLookup[record.code] = marker;
     });
 

@@ -115,9 +115,9 @@ def main() -> None:
         "Mautdaten-Verbindungsendpunkte, angemessene Linienbreiten oder dezente Deutschlandgrenze fehlen.",
     )
     require(
-        "fetchTollRelationsForDirection('outbound')" in app
-        and "fetchTollRelationsForDirection('inbound')" in app
-        and "state.tollDirection === 'both'" in app
+        "fetchTollRelationsForDirection('outbound', scope, signal)" in app
+        and "fetchTollRelationsForDirection('inbound', scope, signal)" in app
+        and "scope.direction === 'both'" in app
         and "distanceWeighted" in app
         and "one relation, not one outbound and one inbound trip" in app,
         "Die kombinierte Darstellung beider Richtungen ist nicht nachvollziehbar implementiert.",

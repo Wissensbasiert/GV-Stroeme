@@ -292,11 +292,9 @@
   let fullCentroids = {};
   let summaryData = {};
   let nationalSummaryData = {};
-  let summaryDataLoad = null;
   // Compact 2019/2040 values for the regional overview tooltip. This keeps
   // the large forecast relation cube deferred until the forecast tab opens.
   let overviewForecastTooltipData = null;
-  let overviewForecastTooltipDataLoad = null;
   const loadedRegionRelations = {};
   let choroplethData = {};
   // Large datasets are requested only when their respective module is opened.
@@ -317,7 +315,6 @@
   let centroidsVp2040 = {};
   let crosswalkSpatialVp = [];
   let crosswalkNstVp = [];
-  const deferredModuleLoads = {};
   const nutsToVpCell = {};
   const vpCellToNuts = {};
 
@@ -391,6 +388,7 @@
           });
         }
         mapViewportInitialized[mapKey] = true;
+        map.getContainer().dataset.viewportReady = 'true';
       });
     };
 
@@ -445,68 +443,6 @@
     "20": "20 Sonstige Güter a.n.g."
   };
 
-  // German Number Formatter Helper
-  function formatDeNum(val, maxDecimals = 1, minDecimals = 0) {
-    if (val === null || val === undefined || isNaN(val)) return '--';
-    return Number(val).toLocaleString('de-DE', {
-      minimumFractionDigits: minDecimals,
-      maximumFractionDigits: maxDecimals
-    });
-  }
-
-  function setText(id, value) {
-    const element = document.getElementById(id);
-    if (element) element.textContent = value;
-  }
-
-  // Quantities use one decimal place by default. Very small non-zero values
-  // retain further precision so an existing relation never appears as zero.
-  function formatQuantity(val, standardDecimals = 1) {
-    if (val === null || val === undefined || isNaN(val)) return '--';
-    const absolute = Math.abs(Number(val));
-    const decimals = absolute > 0 && absolute < 0.01 ? 3 : (absolute > 0 && absolute < 0.1 ? 2 : standardDecimals);
-    return formatDeNum(val, decimals, decimals);
-  }
-
-  // Verkehrsleistungen behalten in einer Ansicht die etablierte Einheit. Bei
-  // sehr kleinen positiven tkm-Werten wird nur so weit präzisiert, wie es
-  // lesbar bleibt; darunter steht ein begrenzter, aber nicht irreführend
-  // gerundeter Wert.
-  function formatTkmQuantity(val, standardDecimals = 1, fixedDecimals = false) {
-    if (val === null || val === undefined || isNaN(val)) return '--';
-    const numeric = Number(val);
-    const absolute = Math.abs(numeric);
-    if (absolute === 0) return formatDeNum(0, standardDecimals, fixedDecimals ? standardDecimals : 0);
-    if (absolute < 0.000001) {
-      return `${numeric < 0 ? '−' : ''}<${formatDeNum(0.000001, 6, 6)}`;
-    }
-    const decimals = absolute < 0.00001 ? 6
-      : absolute < 0.0001 ? 5
-      : absolute < 0.001 ? 4
-      : absolute < 0.01 ? 3
-      : absolute < 0.1 ? 2
-      : standardDecimals;
-    const finalDecimals = Math.max(standardDecimals, decimals);
-    return formatDeNum(numeric, finalDecimals, fixedDecimals ? finalDecimals : 0);
-  }
-
-  function formatTrafficValue(val, unit, standardDecimals = 1) {
-    return String(unit).includes('tkm')
-      ? formatTkmQuantity(val, standardDecimals)
-      : formatDeNum(val, standardDecimals);
-  }
-  // Composition charts must calculate their share from the visible values of
-  // the hovered year. This keeps the percentage consistent with all filters.
-  function formatDynamicChartShare(context, unitText, suffix = '') {
-    const value = Number(context.raw);
-    const valuesAtYear = context.chart.data.datasets
-      .map(dataset => Number(dataset.data?.[context.dataIndex]))
-      .filter(Number.isFinite);
-    const total = valuesAtYear.reduce((sum, item) => sum + Math.abs(item), 0);
-    const share = total > 0 ? formatDeNum(Math.abs(value) / total * 100, 1) : '0,0';
-    return ` ${context.dataset.label}: ${formatTrafficValue(value, unitText, 2)} ${unitText} (${share} %${suffix})`;
-  }
-
   function getLatestConsolidatedOverviewYear(regYears, isTkm) {
     const metricKey = isTkm ? 'modes_tkm' : 'modes_tonnes';
     return Object.keys(regYears || {})
@@ -552,26 +488,12 @@
   // ----------------------------------------------------
   async function loadRegionRelations(regionId) {
     if (!regionId) return {};
-    if (loadedRegionRelations[regionId]) {
-      return loadedRegionRelations[regionId];
-    }
-    try {
-      // Regional relation files are rebuilt independently of the application
-      // bundle.  Do not reuse a browser copy after a data rebuild: otherwise
-      // the table and map can silently show a previous pipeline state.
-      const res = await fetch(
-        `data/processed/relations/${regionId}.json?v=20260901-international-relations`,
-        { cache: 'no-store' }
-      );
-      if (res.ok) {
-        const data = await res.json();
-        loadedRegionRelations[regionId] = data;
-        return data;
-      }
-    } catch (e) {
-      console.warn(`Could not load relations for ${regionId}`, e);
-    }
-    return {};
+    if (loadedRegionRelations[regionId]) return loadedRegionRelations[regionId];
+    return requestDataOnce(`relations:${regionId}`, async () => {
+      const data = await fetchJson(`data/processed/relations/${encodeURIComponent(regionId)}.json`);
+      loadedRegionRelations[regionId] = data;
+      return data;
+    });
   }
 
   function getRegionRelations(regionId) {
@@ -586,25 +508,31 @@
     return nationalSummaryData;
   }
 
-  // Master Region Switcher
+  // Publish only the latest selection after its required detail data arrives.
+  let regionSelectionSequence = 0;
+  let geometrySelectionSequence = 0;
   async function setRegion(regionId) {
-    if (!regionId || regionId === 'DE' || regionId === 'ALL') {
-      state.region = null;
-      const input = document.getElementById('regionSearchInput');
-      if (input) input.value = 'Deutschland';
-      updateAnalysisSummary();
-      renderAll();
-      return;
-    }
-    state.region = regionId;
+    const sequence = ++regionSelectionSequence;
+    state.region = !regionId || regionId === 'DE' || regionId === 'ALL' ? null : regionId;
+    const selectedRegion = state.region;
     const input = document.getElementById('regionSearchInput');
-    const curr = regionsData[regionId];
-    if (input && curr) {
-      input.value = `${curr.name} (${curr.id})`;
-    }
+    const curr = regionsData[selectedRegion];
+    if (input) input.value = selectedRegion ? (curr ? `${curr.name} (${curr.id})` : selectedRegion) : 'Deutschland';
     updateAnalysisSummary();
-    await Promise.all([ensureSummaryData(), loadRegionRelations(regionId)]);
-    renderAll();
+    const tabId = state.activeTab;
+    setModuleLoadingState(tabId, true);
+    try {
+      const [summaryLoaded] = await Promise.all([ensureSummaryData(selectedRegion), loadRegionRelations(selectedRegion)]);
+      if (!summaryLoaded) throw new Error('Regional summary unavailable');
+      if (state.activeTab === 'tab-forecast' && !await ensureModuleData('forecast')) throw new Error('Forecast region unavailable');
+      if (sequence !== regionSelectionSequence) return;
+      setModuleLoadingState(tabId, false);
+      renderAll();
+    } catch (error) {
+      if (sequence !== regionSelectionSequence) return;
+      console.error('Could not load selected region:', error);
+      showDataLoadError(document.getElementById(state.activeTab), 'Die Daten der ausgewählten Region konnten nicht geladen werden.', () => setRegion(selectedRegion));
+    }
   }
 
   function updateAnalysisSummary() {
@@ -681,6 +609,8 @@
     if (button) {
       button.textContent = collapsed ? '+' : '−';
       button.title = collapsed ? 'Legende maximieren' : 'Legende minimieren';
+      button.setAttribute('aria-label', collapsed ? 'Legende öffnen' : 'Legende schließen');
+      button.setAttribute('aria-expanded', String(!collapsed));
     }
   }
 
@@ -792,17 +722,32 @@
   // ----------------------------------------------------
   async function init() {
     setupEventListeners();
+    setupExportActions();
     observeMissingComparisons();
     updateGlobalControlAvailability();
     initLeafletMaps();
     setModuleLoadingState('tab-overview', true);
     const overviewNotice = document.querySelector('#tab-overview .module-loading-status');
     if (overviewNotice) overviewNotice.textContent = 'Startansicht wird geladen …';
-    await loadData();
-    setupRegionAutocomplete();
+    await loadInitialView();
+  }
+
+  let initialDataReady = false;
+  let regionAutocompleteReady = false;
+  async function loadInitialView() {
+    setModuleLoadingState('tab-overview', true);
+    try {
+      await requestDataOnce('initial-data', loadData);
+      if (!await ensureSummaryData()) throw new Error('Summary unavailable');
+    } catch (error) {
+      console.error('Could not initialize dashboard:', error);
+      showDataLoadError(document.getElementById('tab-overview'), 'Die Startdaten konnten nicht geladen werden.', loadInitialView);
+      return;
+    }
+    initialDataReady = true;
+    if (!regionAutocompleteReady) { setupRegionAutocomplete(); regionAutocompleteReady = true; }
     // The overview charts need the regional summary cube.  Drawing them once
     // before and once after its background load caused the visible double draw.
-    await ensureSummaryData();
     setInitialYearToLatestCompleteData();
     renderAll();
     // Load the compact preview after first render and refresh only the visible
@@ -819,127 +764,6 @@
     };
     requestAnimationFrame(refreshInitialOverview);
     setModuleLoadingState('tab-overview', false);
-  }
-
-  function setModuleLoadingState(tabId, isLoading) {
-    const pane = document.getElementById(tabId);
-    if (!pane) return;
-    pane.setAttribute('aria-busy', String(isLoading));
-    let notice = pane.querySelector('.module-loading-status');
-    if (!notice) {
-      notice = document.createElement('div');
-      notice.className = 'module-loading-status';
-      notice.setAttribute('role', 'status');
-      notice.textContent = 'Fachdaten werden geladen …';
-      pane.insertAdjacentElement('afterbegin', notice);
-    }
-    notice.hidden = !isLoading;
-  }
-
-  // Processed dashboard data can be rebuilt while the local server keeps
-  // running.  Prefer correctness over reusing a stale browser response.
-  async function fetchJson(url, fallback) {
-    const response = await fetch(url, { cache: 'no-store' });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json();
-  }
-
-  function hasRegionalSummaryData() {
-    return Object.keys(summaryData || {}).length > 0;
-  }
-
-  async function ensureSummaryData() {
-    if (hasRegionalSummaryData()) return true;
-    if (!summaryDataLoad) {
-      summaryDataLoad = fetchJson('data/processed/web_summary_by_region.json', {})
-        .then(data => {
-          summaryData = data;
-          nationalSummaryData = computeNationalSummaries();
-          return true;
-        })
-        .catch(error => {
-          console.error('Could not load regional summary data:', error);
-          return false;
-        });
-    }
-    return summaryDataLoad;
-  }
-
-  async function ensureOverviewForecastTooltipData() {
-    if (overviewForecastTooltipData) return true;
-    if (!overviewForecastTooltipDataLoad) {
-      overviewForecastTooltipDataLoad = fetchJson('data/processed/web_forecast_overview_tooltip.json?v=20260824a', null)
-        .then(data => {
-          overviewForecastTooltipData = data?.scenarios ? data : null;
-          return Boolean(overviewForecastTooltipData);
-        })
-        .catch(error => {
-          // The overview stays fully usable when the optional preview is not
-          // available; only its forecast block is omitted from tooltips.
-          console.warn('Could not load overview forecast tooltip data:', error);
-          return false;
-        });
-    }
-    return overviewForecastTooltipDataLoad;
-  }
-
-  async function ensureModuleData(moduleName) {
-    const available = {
-      maritime: () => Boolean(maritimeData),
-      airfreight: () => Boolean(airfreightData),
-      intermodal: () => Boolean(intermodalData),
-      forecast: () => Boolean(forecastData),
-      toll: () => Boolean(tollMunicipalityData)
-    };
-    if (available[moduleName]?.()) return true;
-    if (deferredModuleLoads[moduleName]) return deferredModuleLoads[moduleName];
-
-    const loaders = {
-      maritime: async () => { maritimeData = await fetchJson('data/processed/web_maritime.json?v=20260821n', {}); },
-      airfreight: async () => { airfreightData = await fetchJson('data/processed/web_airfreight.json?v=20260904-airfreight-dataquality1', {}); },
-      // This file is regenerated by the data pipeline.  The explicit revision
-      // clears copies from older application sessions; no-store also protects
-      // later data refreshes when the frontend bundle itself is unchanged.
-      intermodal: async () => {
-        intermodalData = await fetchJson(
-          'data/processed/web_intermodal.json?v=20260901-international-relations',
-          {}
-        );
-      },
-      forecast: async () => {
-        const [forecastRes, centroidsRes, spatialCrosswalkRes, nstCrosswalkRes] = await Promise.all([
-          fetchJson('data/processed/web_forecast_2040.json?v=20260821modalbygroup', null),
-          fetchJson('data/processed/nuts_centroids_vp2040.json', {}),
-          fetchJson('data/crosswalks/crosswalk_spatial_vp2040.json', []),
-          fetchJson('data/crosswalks/crosswalk_nst_vp2040.json', [])
-        ]);
-        forecastData = forecastRes;
-        centroidsVp2040 = centroidsRes;
-        crosswalkSpatialVp = spatialCrosswalkRes;
-        crosswalkNstVp = nstCrosswalkRes;
-        if (Array.isArray(crosswalkSpatialVp)) {
-          crosswalkSpatialVp.forEach(item => {
-            const cid = String(item.cell_id);
-            if (item.nuts3_2024) nutsToVpCell[item.nuts3_2024] = cid;
-            if (item.nuts3_2016) nutsToVpCell[item.nuts3_2016] = cid;
-            if (item.ags_5stellig) nutsToVpCell[item.ags_5stellig] = cid;
-            vpCellToNuts[cid] = item.nuts3_2024 || item.nuts3_2016 || cid;
-          });
-        }
-      },
-      toll: async () => {
-        tollMunicipalityData = await fetchJson('data/processed/toll_municipalities.json?v=20260902a', null);
-        initializeTollModule();
-      }
-    };
-
-    deferredModuleLoads[moduleName] = loaders[moduleName]()
-      .then(() => true)
-      .catch(error => {
-        console.error(`Could not load ${moduleName} module data:`, error);
-        return false;
-      });
-    return deferredModuleLoads[moduleName];
   }
 
   function formatDataYearRange(years) {
@@ -977,134 +801,17 @@
     refreshDataCoverageText();
   }
 
-  // Precompute National Aggregates from summaryData & benchmarkData
-  function computeNationalSummaries() {
-    const national = {};
-    const years = ['2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024', '2025'];
-    
-    years.forEach(yr => {
-      const b = benchmarkData[yr] || {};
-      const bModes = b.modes || {};
-      
-      const obj = {
-        total_tonnes: b.total_tonnes || 0,
-        total_tkm: b.total_tkm || 0,
-        modes_tonnes: {
-          road: bModes.road?.tonnes || 0,
-          rail: bModes.rail?.tonnes || 0,
-          iww: bModes.iww?.tonnes || 0
-        },
-        modes_tkm: {
-          road: bModes.road?.tkm || 0,
-          rail: bModes.rail?.tkm || 0,
-          iww: bModes.iww?.tkm || 0
-        },
-        modes_direction_tonnes: { road: { inbound: 0, outbound: 0 }, rail: { inbound: 0, outbound: 0 }, iww: { inbound: 0, outbound: 0 } },
-        modes_direction_tkm: { road: { inbound: 0, outbound: 0 }, rail: { inbound: 0, outbound: 0 }, iww: { inbound: 0, outbound: 0 } },
-        directions_tonnes: { inbound: 0, outbound: 0 },
-        directions_tkm: { inbound: 0, outbound: 0 },
-        groups_7_tonnes: { all: {}, inbound: {}, outbound: {}, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0 },
-        groups_7_tkm: { all: {}, inbound: {}, outbound: {}, '1': 0, '2': 0, '3': 0, '4': 0, '5': 0, '6': 0, '7': 0 },
-        by_mode_groups: { road: { all: {}, inbound: {}, outbound: {} }, rail: { all: {}, inbound: {}, outbound: {} }, iww: { all: {}, inbound: {}, outbound: {} } },
-        by_mode_groups_tkm: { road: { all: {}, inbound: {}, outbound: {} }, rail: { all: {}, inbound: {}, outbound: {} }, iww: { all: {}, inbound: {}, outbound: {} } },
-        by_mode_divisions: { road: {}, rail: {}, iww: {} },
-        by_mode_divisions_tkm: { road: {}, rail: {}, iww: {} }
-      };
-
-      Object.keys(summaryData).forEach(nutsId => {
-        if (nutsId.length === 5) {
-          const rData = summaryData[nutsId]?.[yr];
-          if (!rData) return;
-          ['road', 'rail', 'iww'].forEach(m => {
-            obj.modes_direction_tonnes[m].inbound += (rData.modes_direction_tonnes?.[m]?.inbound || 0) / 2;
-            obj.modes_direction_tonnes[m].outbound += (rData.modes_direction_tonnes?.[m]?.outbound || 0) / 2;
-            obj.modes_direction_tkm[m].inbound += (rData.modes_direction_tkm?.[m]?.inbound || 0) / 2;
-            obj.modes_direction_tkm[m].outbound += (rData.modes_direction_tkm?.[m]?.outbound || 0) / 2;
-          });
-
-          // Inbound & Outbound
-          obj.directions_tonnes.inbound += (rData.directions_tonnes?.inbound || 0) / 2;
-          obj.directions_tonnes.outbound += (rData.directions_tonnes?.outbound || 0) / 2;
-          obj.directions_tkm.inbound += (rData.directions_tkm?.inbound || 0) / 2;
-          obj.directions_tkm.outbound += (rData.directions_tkm?.outbound || 0) / 2;
-
-          // NST 7
-          const g7 = rData.groups_7_tonnes || {};
-          const g7Map = g7.all || g7;
-          Object.keys(g7Map).forEach(k => {
-            obj.groups_7_tonnes[k] = (obj.groups_7_tonnes[k] || 0) + (g7Map[k] || 0) / 2;
-            obj.groups_7_tonnes.all[k] = (obj.groups_7_tonnes.all[k] || 0) + (g7Map[k] || 0) / 2;
-          });
-          ['inbound', 'outbound'].forEach(direction => Object.entries(g7[direction] || {}).forEach(([k, amount]) => {
-            obj.groups_7_tonnes[direction][k] = (obj.groups_7_tonnes[direction][k] || 0) + (amount || 0) / 2;
-          }));
-          const g7tkm = rData.groups_7_tkm || {};
-          const g7tkmMap = g7tkm.all || g7tkm;
-          Object.keys(g7tkmMap).forEach(k => {
-            obj.groups_7_tkm[k] = (obj.groups_7_tkm[k] || 0) + (g7tkmMap[k] || 0) / 2;
-            obj.groups_7_tkm.all[k] = (obj.groups_7_tkm.all[k] || 0) + (g7tkmMap[k] || 0) / 2;
-          });
-          ['inbound', 'outbound'].forEach(direction => Object.entries(g7tkm[direction] || {}).forEach(([k, amount]) => {
-            obj.groups_7_tkm[direction][k] = (obj.groups_7_tkm[direction][k] || 0) + (amount || 0) / 2;
-          }));
-
-          // Mode divisions 20 & Mode groups 7
-          ['road', 'rail', 'iww'].forEach(m => {
-            const divMap = rData.by_mode_divisions?.[m]?.all || rData.by_mode_divisions?.[m] || {};
-            Object.keys(divMap).forEach(k => {
-              const padK = k.padStart(2, '0');
-              obj.by_mode_divisions[m][padK] = (obj.by_mode_divisions[m][padK] || 0) + (divMap[k] || 0) / 2;
-            });
-            const divTkmMap = rData.by_mode_divisions_tkm?.[m]?.all || rData.by_mode_divisions_tkm?.[m] || {};
-            Object.keys(divTkmMap).forEach(k => {
-              const padK = k.padStart(2, '0');
-              obj.by_mode_divisions_tkm[m][padK] = (obj.by_mode_divisions_tkm[m][padK] || 0) + (divTkmMap[k] || 0) / 2;
-            });
-            const grpMap = rData.by_mode_groups?.[m]?.all || rData.by_mode_groups?.[m] || {};
-            Object.keys(grpMap).forEach(k => {
-              obj.by_mode_groups[m][k] = (obj.by_mode_groups[m][k] || 0) + (grpMap[k] || 0) / 2;
-              obj.by_mode_groups[m].all[k] = (obj.by_mode_groups[m].all[k] || 0) + (grpMap[k] || 0) / 2;
-            });
-            ['inbound', 'outbound'].forEach(direction => Object.entries(rData.by_mode_groups?.[m]?.[direction] || {}).forEach(([k, amount]) => {
-              obj.by_mode_groups[m][direction][k] = (obj.by_mode_groups[m][direction][k] || 0) + (amount || 0) / 2;
-            }));
-            const grpTkmMap = rData.by_mode_groups_tkm?.[m]?.all || rData.by_mode_groups_tkm?.[m] || {};
-            Object.keys(grpTkmMap).forEach(k => {
-              obj.by_mode_groups_tkm[m][k] = (obj.by_mode_groups_tkm[m][k] || 0) + (grpTkmMap[k] || 0) / 2;
-              obj.by_mode_groups_tkm[m].all[k] = (obj.by_mode_groups_tkm[m].all[k] || 0) + (grpTkmMap[k] || 0) / 2;
-            });
-            ['inbound', 'outbound'].forEach(direction => Object.entries(rData.by_mode_groups_tkm?.[m]?.[direction] || {}).forEach(([k, amount]) => {
-              obj.by_mode_groups_tkm[m][direction][k] = (obj.by_mode_groups_tkm[m][direction][k] || 0) + (amount || 0) / 2;
-            }));
-          });
-        }
-      });
-
-      if (!obj.total_tonnes) {
-        obj.total_tonnes = obj.modes_tonnes.road + obj.modes_tonnes.rail + obj.modes_tonnes.iww;
-      }
-      national[yr] = obj;
-    });
-    return national;
-  }
-
   // Load All Precomputed JSON Data with Error Resilience
   async function loadData() {
-    const fetchSafe = (url, fallback = {}) =>
-      fetchJson(url, fallback).catch(err => {
-        console.warn(`Could not load ${url}:`, err);
-        return fallback;
-      });
-
     try {
       const [regRes, centRes, choroRes, benRes, nstRes, geoRes, stateBoundaryRes] = await Promise.all([
-        fetchSafe('data/processed/web_regions.json', {}),
-        fetchSafe('data/processed/nuts_centroids_full.json', {}),
-        fetchSafe('data/processed/web_choropleth.json', {}),
-        fetchSafe('data/processed/national_benchmarks.json', {}),
-        fetchSafe('data/processed/dim_nst2007.json', {}),
-        fetchSafe('data/processed/nuts3_de_2024_display.geojson', null),
-        fetchSafe('data/processed/nuts1_de_boundaries.geojson', null)
+        fetchJson('data/processed/web_regions.json', {}),
+        fetchJson('data/processed/nuts_centroids_full.json', {}),
+        fetchJson('data/processed/web_choropleth.json', {}),
+        fetchJson('data/processed/national_benchmarks.json', {}),
+        fetchJson('data/processed/dim_nst2007.json', {}),
+        fetchJson('data/processed/nuts3_de_2024_display.geojson', null),
+        fetchJson('data/processed/nuts1_de_boundaries.geojson', null)
       ]);
 
       regionsData = regRes;
@@ -1134,7 +841,7 @@
         await Promise.all([ensureSummaryData(), loadRegionRelations(state.region)]);
       }
     } catch (err) {
-      console.error("Error loading data bundle:", err);
+      throw err;
     }
   }
 
@@ -1373,6 +1080,7 @@
       item.setAttribute('aria-selected', item.classList.contains('active') ? 'true' : 'false');
       item.addEventListener('click', async (e) => {
         e.preventDefault();
+        if (!initialDataReady) { await loadInitialView(); if (!initialDataReady) return; }
         document.querySelectorAll('#mainNav .nav-item').forEach(i => {
           i.classList.remove('active');
           i.setAttribute('aria-selected', 'false');
@@ -1392,43 +1100,21 @@
         const activeMapKey = tabId.replace('tab-', '');
 
         const deferredModule = ({
-          'tab-maritime': 'maritime',
-          'tab-airfreight': 'airfreight',
-          'tab-intermodal': 'intermodal',
-          'tab-forecast': 'forecast',
-          'tab-toll': 'toll'
+          'tab-maritime': 'maritime', 'tab-airfreight': 'airfreight',
+          'tab-intermodal': 'intermodal', 'tab-forecast': 'forecast', 'tab-toll': 'toll'
         })[tabId];
-        if (deferredModule) {
-          setModuleLoadingState(tabId, true);
-          const loaded = await ensureModuleData(deferredModule);
-          if (!loaded) {
-            const pane = document.getElementById(tabId);
-            const notice = pane?.querySelector('.module-loading-status');
-            if (pane) pane.setAttribute('aria-busy', 'false');
-            if (notice) {
-              notice.textContent = 'Die Fachdaten konnten nicht geladen werden. Bitte laden Sie die Seite erneut.';
-              notice.hidden = false;
-            }
-            return;
-          }
-          setModuleLoadingState(tabId, false);
-          if (state.activeTab !== tabId) return;
+        setModuleLoadingState(tabId, true);
+        const summaryLoaded = await ensureSummaryData();
+        let loaded = summaryLoaded && (!deferredModule || await ensureModuleData(deferredModule));
+        if (loaded && state.region && ['tab-overview', 'tab-road', 'tab-rail', 'tab-iww'].includes(tabId)) {
+          try { await loadRegionRelations(state.region); } catch (error) { loaded = false; }
         }
-
-        if (['tab-road', 'tab-rail', 'tab-iww'].includes(tabId)) {
-          setModuleLoadingState(tabId, true);
-          const loaded = await ensureSummaryData();
-          if (!loaded) {
-            const notice = document.querySelector(`#${tabId} .module-loading-status`);
-            if (notice) {
-              notice.textContent = 'Die Fachdaten konnten nicht geladen werden. Bitte laden Sie die Seite erneut.';
-              notice.hidden = false;
-            }
-            return;
-          }
-          setModuleLoadingState(tabId, false);
-          if (state.activeTab !== tabId) return;
+        if (!loaded) {
+          showDataLoadError(target, 'Die Fachdaten konnten nicht geladen werden.', () => item.click());
+          return;
         }
+        setModuleLoadingState(tabId, false);
+        if (state.activeTab !== tabId) return;
 
         if (tabId === 'tab-forecast') {
           document.getElementById('controlGroupYear')?.style.setProperty('display', 'none');
@@ -1467,21 +1153,29 @@
       });
     });
 
-    // Year Selector
+    // Year-specific boundaries and their data year are committed together.
     document.getElementById('selectYear')?.addEventListener('change', async e => {
-      state.year = e.target.value;
-      
-      let geojsonFile = 'data/processed/nuts3_de_2024_display.geojson';
-      if (parseInt(state.year) <= 2020) geojsonFile = 'data/processed/nuts3_de_2016_display.geojson';
-      else if (parseInt(state.year) <= 2023) geojsonFile = 'data/processed/nuts3_de_2021_display.geojson';
-
+      const selectedYear = e.target.value;
+      const sequence = ++geometrySelectionSequence;
+      const vintage = Number(selectedYear) <= 2020 ? '2016' : Number(selectedYear) <= 2023 ? '2021' : '2024';
+      const tabId = state.activeTab;
+      setModuleLoadingState(tabId, true);
       try {
-        geojsonNuts3 = await fetch(geojsonFile).then(r => r.json());
-      } catch (err) {
-        console.warn("Using fallback geometry:", err);
+        const geometry = await requestDataOnce(`geometry:${vintage}`, () => fetchJson(`data/processed/nuts3_de_${vintage}_display.geojson`));
+        if (sequence !== geometrySelectionSequence) return;
+        state.year = selectedYear;
+        geojsonNuts3 = geometry;
+        setModuleLoadingState(tabId, false);
+        renderAll();
+      } catch (error) {
+        if (sequence !== geometrySelectionSequence) return;
+        document.getElementById('selectYear').value = state.year;
+        showDataLoadError(document.getElementById(tabId), 'Die Grenzen für das ausgewählte Datenjahr konnten nicht geladen werden.', () => {
+          const select = document.getElementById('selectYear');
+          select.value = selectedYear;
+          select.dispatchEvent(new Event('change'));
+        });
       }
-
-      renderAll();
     });
 
     // Forecast Scenario Selector
@@ -1553,7 +1247,7 @@
     });
 
     // Map Legend Minimizing / Maximizing
-    ['overview', 'road', 'toll', 'rail', 'iww', 'intermodal', 'maritime', 'forecast'].forEach(k => {
+    ['overview', 'road', 'toll', 'rail', 'iww', 'intermodal', 'maritime', 'airfreight', 'forecast'].forEach(k => {
       const btn = document.getElementById(`btnToggleLegend_${k}`);
       const leg = document.getElementById(`${k}MapLegend`) || document.getElementById(`${k}ChoroplethLegend`);
       if (btn && leg) {
@@ -1752,46 +1446,16 @@
       input.focus();
     };
 
-    // Modals Handling
-    const setupModal = (btnId, modalId) => {
-      const btn = document.getElementById(btnId);
-      const modal = document.getElementById(modalId);
-      if (btn && modal) {
-        btn.addEventListener('click', async () => {
-          modal.classList.add('active');
-          modal.querySelector('.modal-close')?.focus();
-          if (modalId === 'modalSteckbrief') await prepareSteckbriefModal();
-          if (modalId === 'modalHelp' || modalId === 'modalLicenses') await refreshDataCoverage();
-          if (modalId === 'modalAi') {
-            requestAnimationFrame(() => document.getElementById('aiQuestionInput')?.focus());
-          }
-        });
-        modal.querySelectorAll('.modal-close, [data-close]')?.forEach(c => {
-          c.addEventListener('click', () => {
-            modal.classList.remove('active');
-            btn.focus();
-          });
-        });
-        modal.addEventListener('click', e => {
-          if (e.target === modal) {
-            modal.classList.remove('active');
-            btn.focus();
-          }
-        });
-        document.addEventListener('keydown', e => {
-          if (e.key === 'Escape' && modal.classList.contains('active')) {
-            modal.classList.remove('active');
-            btn.focus();
-          }
-        });
-      }
+    const onDialogOpen = async modalId => {
+      if (modalId === 'modalSteckbrief') await prepareSteckbriefModal();
+      if (modalId === 'modalHelp' || modalId === 'modalLicenses') await refreshDataCoverage();
+      if (modalId === 'modalAi') requestAnimationFrame(() => document.getElementById('aiQuestionInput')?.focus());
     };
-
-    setupModal('btnAiModal', 'modalAi');
-    setupModal('btnSteckbriefModal', 'modalSteckbrief');
-    setupModal('btnHelpModal', 'modalHelp');
-    setupModal('btnLicensesModal', 'modalLicenses');
-    setupModal('brandLogoBtn', 'modalLicenses');
+    bindDialog('btnAiModal', 'modalAi', onDialogOpen);
+    bindDialog('btnSteckbriefModal', 'modalSteckbrief', onDialogOpen);
+    bindDialog('btnHelpModal', 'modalHelp', onDialogOpen);
+    bindDialog('btnLicensesModal', 'modalLicenses', onDialogOpen);
+    bindDialog('brandLogoBtn', 'modalLicenses', onDialogOpen);
 
     document.getElementById('aiQuestionForm')?.addEventListener('submit', event => {
       event.preventDefault();
@@ -1986,12 +1650,13 @@
         // Give also initially hidden module maps a valid, neutral view. Without
         // this Leaflet can cache a 0 x 0 size and clamp the first fitBounds call
         // to maxZoom 18. The precise Germany/coast fit follows on activation.
-        center: [51.175, 10.425],
-        zoom: 5,
+        ...(cfg.key === 'overview' ? {} : { center: [51.175, 10.425], zoom: 5 }),
         // Fractional zoom lets fitBounds use the card height accurately instead
         // of rounding to a different whole zoom step in another browser.
         zoomSnap: 0.1
       });
+      // Fit before adding tiles: the first overview frame already shows Germany.
+      if (cfg.key === 'overview') map.fitBounds(GERMANY_BOUNDS, { padding: [8, 8], animate: false });
       map.createPane('connectionPane');
       map.getPane('connectionPane').style.zIndex = 450;
       map.createPane('stateBoundaryPane');
@@ -2032,6 +1697,15 @@
         position: 'bottomleft',
         prefix: false
       }).addTo(map);
+      // Credits can wrap to several lines on phones, especially in the toll map.
+      // Keep the mobile legend above their actual height, including later updates.
+      const attribution = map.attributionControl.getContainer();
+      const mapFrame = el.closest('.map-container-leaflet');
+      const attributionObserver = new ResizeObserver(() => {
+        mapFrame?.style.setProperty('--map-attribution-height', `${attribution.getBoundingClientRect().height}px`);
+      });
+      attributionObserver.observe(attribution);
+      map.on('unload', () => attributionObserver.disconnect());
 
       // German localized OpenStreetMap Basemap (DE designations & labels)
       L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png', {
@@ -2405,6 +2079,7 @@
         const isTkm = state.metric === 'tkm';
         const unit = isTkm ? 'Mrd. tkm' : 'Mio. t';
         const divisor = isTkm ? 1e9 : 1e6;
+        layer.wbpExport = { code: nutsId, name: nutsName, value: val, unit: isTkm ? 'tkm' : 't' };
         const previousYear = String(Number(state.year) - 1);
         const previousRecord = choroplethData?.[previousYear]?.[nutsId];
         const baselineRecord = state.year === '2016' ? null : choroplethData?.['2016']?.[nutsId];
@@ -2832,6 +2507,8 @@
         ${spiderHtml}
       </div>
     `;
+
+    setLegendCollapsedState(legendEl, isCollapsed);
 
     // Rebind the toggle button on dynamically updated legend
     const btn = legendEl.querySelector('.btn-legend-toggle');
@@ -3769,12 +3446,19 @@
     if (bodyEl) {
       bodyEl.innerHTML = '<div class="steckbrief-loading" role="status">Steckbrief wird aus den Regionaldaten erstellt …</div>';
     }
-    await Promise.all([
-      ensureSummaryData(),
-      ensureModuleData('intermodal'),
-      ensureModuleData('forecast'),
-      state.region ? loadRegionRelations(state.region) : Promise.resolve()
-    ]);
+    if (bodyEl) delete bodyEl.dataset.loadError;
+    const region = state.region;
+    try {
+      const results = await Promise.all([
+        ensureSummaryData(region), ensureModuleData('intermodal'), ensureModuleData('forecast'), loadRegionRelations(region)
+      ]);
+      if (results.some(result => result === false)) throw new Error('Profile data incomplete');
+      if (region !== state.region) return prepareSteckbriefModal();
+    } catch (error) {
+      console.error('Could not prepare profile:', error);
+      showDataLoadError(bodyEl, 'Der Steckbrief konnte nicht vollständig geladen werden.', prepareSteckbriefModal);
+      return;
+    }
     renderSteckbriefModal();
   }
 
@@ -4633,6 +4317,7 @@
     const ctx = document.getElementById('chartCommodity');
     if (!ctx) return;
     if (chartCommodity) chartCommodity.destroy();
+    renderScrollableChartLegend('chartCommodity', null, false);
 
     const regYears = getActiveRegionSummary();
     const isTkm = state.metric === 'tkm';
@@ -4759,7 +4444,8 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { 
+            legend: {
+              display: false,
               position: 'bottom',
               align: 'start',
               labels: { 
@@ -4787,6 +4473,7 @@
           }
         }
       });
+      renderScrollableChartLegend('chartCommodity', chartCommodity, true);
     }
   }
 
@@ -4922,6 +4609,9 @@
   const subChartInstances = {};
 
   function setScrollableChartCanvas(canvasId, enabled, contentHeight = 0) {
+    // Normalize the previous legend container before creating the next Chart.
+    // Otherwise its resize observer remains attached to a removed wrapper.
+    renderScrollableChartLegend(canvasId, null, false);
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
     const chartWrap = canvas.closest('.chart-canvas-wrap');
@@ -5014,7 +4704,21 @@
     const legend = existing || document.createElement('div');
     legend.id = `${canvasId}-legend`;
     legend.className = 'chart-scroll-legend';
-    legend.innerHTML = chart.data.datasets.map(dataset => `<span><i style="background:${dataset.borderColor};"></i>${dataset.label}</span>`).join('');
+    legend.replaceChildren(...chart.data.datasets.map((dataset, index) => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.setAttribute('aria-pressed', String(chart.isDatasetVisible(index)));
+      const swatch = document.createElement('i');
+      swatch.style.background = dataset.borderColor;
+      swatch.setAttribute('aria-hidden', 'true');
+      item.append(swatch, document.createTextNode(dataset.label));
+      item.addEventListener('click', () => {
+        chart.setDatasetVisibility(index, !chart.isDatasetVisible(index));
+        item.setAttribute('aria-pressed', String(chart.isDatasetVisible(index)));
+        chart.update();
+      });
+      return item;
+    }));
     if (!existing) plot.insertAdjacentElement('afterend', legend);
     chartWrap?.classList.add('chart-with-scroll-legend');
     requestAnimationFrame(() => chart.resize());
@@ -5172,32 +4876,32 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { 
+            legend: {
               display: !is20,
               position: 'bottom',
               align: 'start',
-              labels: { 
-                boxWidth: 10, 
+              labels: {
+                boxWidth: 10,
                 padding: 8,
-                font: { size: 11, weight: '600' } 
-              } 
+                font: { size: 11, weight: '600' }
+              }
             },
-            tooltip: { 
-              callbacks: { 
+            tooltip: {
+              callbacks: {
                 title: items => `Jahr: ${items[0]?.label}`,
                 label: c => formatDynamicChartShare(c, unitText)
-              } 
+              }
             }
           },
-          scales: { 
+          scales: {
             x: {
               ticks: { font: { size: 11, weight: '600' } }
             },
-            y: { 
-              beginAtZero: state.direction !== 'balance', 
+            y: {
+              beginAtZero: state.direction !== 'balance',
               title: { display: true, text: unitText, font: { size: 11, weight: '600' } },
               ticks: { font: { size: 11 } }
-            } 
+            }
           }
         }
       });

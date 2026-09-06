@@ -1,8 +1,10 @@
       <section id="tab-toll" class="tab-pane">
         <div id="tollStatusBanner" class="toll-status-banner" role="status" hidden>
           <span id="tollStatusText"></span>
+          <button type="button" id="btnRetryToll" class="btn-header data-retry-button" hidden>Erneut versuchen</button>
           <button type="button" id="btnOpenRoadModule" class="toll-status-link" hidden>Straßengüterverkehr öffnen</button>
         </div>
+        <div id="tollComparisonNotice" class="toll-comparison-notice" role="status" hidden></div>
         <div class="module-layout-grid">
           <div class="card map-card-tall">
             <div class="card-header">
@@ -68,7 +70,7 @@
                 <table class="data-table toll-relations-table" id="tableTollRelations">
                   <thead>
                     <tr>
-                      <th>Partnergemeinde</th>
+                      <th>Partner<wbr>gemeinde</th>
                       <th class="numeric">Mautfahrten</th>
                       <th class="numeric">Fahrleistung</th>
                       <th class="numeric">Ø Distanz</th>

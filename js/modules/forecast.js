@@ -509,6 +509,7 @@
         const regInfo = sc?.regions?.[nutsId];
         const val = choroDict[nutsId] || 0;
 
+        layer.wbpExport = { code: nutsId, name: cName, value: val, unit: isTkm ? 'tkm' : 't' };
         const details = getForecastRegionTooltipDetails(regInfo, isTkm);
 
         let dirText = 'Gesamtaufkommen';

@@ -290,3 +290,19 @@ Ein Datenstand ist erst freigabefähig, wenn:
 ## 9. Verantwortliche Fortschreibung dieser Anleitung
 
 Diese Anleitung wird gemeinsam mit der Pipeline aktualisiert, wenn sich mindestens einer der folgenden Punkte ändert: Quelle oder Dateiformat, Zeitfenster, räumlicher Gebietsstand, Gütersystematik, Berechnungsregel, Szenarioliste, Ausgabedatei oder Prüfschritt. Ein neues Datenrelease ohne solche methodische Änderung wird ausschließlich als Release im Freigabeprotokoll ergänzt.
+
+
+## 10. Abgeleitete Browserpakete seit 05.09.2026
+
+Nach jeder Änderung an `web_summary_by_region.json`, `national_benchmarks.json` oder `web_forecast_2040.json` müssen die daraus abgeleiteten Browserpakete aktualisiert werden. Sie enthalten dieselben Werte und Schlüssel; die Aufteilung verändert keine fachliche Abgrenzung oder Aggregationsregel.
+
+`build_web_data_bundle_v5.py` erzeugt am Ende automatisch die Übersichtspakete. Der vollständige CLI-Aufruf von `pipeline_vp2040.py` erzeugt anschließend automatisch die Prognosepakete. Bei einzeln erneuerten nationalen Benchmarks, einem direkten Funktionsaufruf statt des Prognose-CLI oder Änderungen an der gemeinsamen nationalen Aggregation ist der Paket-Build zusätzlich ausdrücklich auszuführen:
+
+```powershell
+node scripts/frontend/build_delivery_data.cjs
+node scripts/frontend/build_delivery_data.cjs --check
+```
+
+Mit `--kind summary` beziehungsweise `--kind forecast` ist die gezielte Erzeugung möglich. `--check` schreibt keine Dateien und vergleicht jede ausgelieferte Partition und ihre Prüfsummen mit dem aktuellen kanonischen Bestand. Der Builder prüft für jeden Datensatz die vollständige Rekonstruktion aus Grundpaket und Regionsdetails einschließlich Nullwerten, Zahlen, Güterschlüsseln und führenden Nullen. Die nationale Zusammenfassung verwendet die unverändert ausgelagerte Funktion in `js/shared/national-summary.js`.
+
+Erst nach bestandener Paketprüfung folgen Frontend-Build und Browserprüfung nach `README_MAINTENANCE.md`. Beim Übertragen einer Version sind die beiden `web_*_core.json`, der vollständige Ordner `data/processed/delivery/` und die generierten Frontend-Dateien gemeinsam zu übernehmen. Die kanonischen Quelldateien bleiben für fachliche Validatoren erhalten. Ein Paket-Build ist kein erneuter Rohdatenabruf und keine Produktivfreigabe.

@@ -299,3 +299,43 @@ Die sichtbaren Quellenangaben werden **erst mit der tatsächlichen Freischaltung
 ## 13. Nächster Pflegezyklus
 
 Bei einem neuen Eurostat-Release werden die drei Tabellen getrennt aktualisiert, `scripts/pipelines/build_airfreight_data.py` und `scripts/validation/validate_airfreight_bundle.py` ausgeführt sowie Datenstände, Quellenhinweise und Browseransicht gemeinsam geprüft. Abweichende letzte Berichtsjahre bleiben ausdrücklich sichtbar und werden nicht durch Rückfallwerte kaschiert.
+
+## 14. Weitere Weiterentwicklungspunkte
+
+### 14.1 Ruhiger Einstieg in die Übersichtskarte
+
+**Lokal umgesetzt und geprüft am 05.09.2026.** Die Karte wird bereits mit dem Deutschland-Ausschnitt initialisiert und erst nach der Größenanpassung sichtbar. Prüfstand: QS-Plan, Abschnitt 10.18. Die folgende Beschreibung dokumentiert die Anforderung.
+
+Beim Start des Dashboards soll die Übersichtskarte unmittelbar im vorgesehenen Deutschland-Ausschnitt erscheinen. Der derzeit kurz sichtbare, weiter gefasste Europa-Ausschnitt mit anschließendem ruckartigen Wechsel nach Deutschland ist zu vermeiden.
+
+Vorrangig soll der Deutschland-Ausschnitt bereits als initialer Kartenstand gesetzt werden. Falls ein nachträglicher Wechsel technisch erforderlich bleibt, muss er als durchgehende, ruhige Kartenanimation umgesetzt und auf Desktop sowie Mobilgeräten geprüft werden. Zwischenstände, sichtbares Neuladen oder ein abruptes „Zucken“ der Karte dürfen nicht auftreten.
+
+### 14.2 Vorjahresvergleich für Mautdaten
+
+**Lokal umgesetzt am 05.09.2026.** Der gleiche Vorjahresmonat wird zusätzlich und unabhängig von der aktuellen Darstellung geladen. Vollständig abgerufene Monatsantworten werden für 15 Minuten in der Sitzung gespeichert (höchstens 24 Gemeinde-Monat-Richtungs-Kombinationen), einschließlich Abrufzeitpunkt. Gemeinde- und Verbindungshover verwenden denselben Vergleich. Aktuelle Werte bleiben bei einem fehlgeschlagenen Vorjahresabruf nutzbar. Prüfstand: QS-Plan, Abschnitt 10.18. Die folgende Beschreibung dokumentiert die Anforderung.
+
+Für die Mautdaten soll ergänzend ein Vergleich mit dem entsprechenden Monat des Vorjahres angeboten werden. Grundlage ist jeweils der von den Nutzenden ausgewählte Berichtsmonat; als Vergleichszeitraum gilt derselbe Monat zwölf Monate zuvor.
+
+Die Funktion darf nur dort einen Vergleich ausgeben, wo für beide Zeitpunkte tatsächlich Werte vorliegen. Dies betrifft insbesondere den jeweils neuesten verfügbaren Monat: Der Vorjahresvergleich wird erst angezeigt, wenn auch der Monat zwölf Monate zuvor vollständig verfügbar ist. Fehlende Vergleichsdaten werden nicht geschätzt und nicht durch ältere Monate ersetzt.
+
+Für die Umsetzung sind folgende Schritte vorzusehen:
+
+- zusätzliche API-Abfragen für die jeweils benötigten Vorjahresmonate,
+- eine nachvollziehbare Zwischenspeicherung der abgerufenen Monatsstände einschließlich Datenstand und Abrufzeitpunkt,
+- die Berechnung der absoluten und prozentualen Veränderung gegenüber dem Vorjahresmonat erst auf Grundlage der beiden tatsächlich verfügbaren Werte,
+- eine eindeutige Behandlung von Null- und fehlenden Ausgangswerten, damit keine irreführenden Prozentangaben entstehen,
+- die Anzeige der Vergleichswerte in den Hover-Informationen sowohl für Partnerkommunen als auch für die dargestellten Verbindungen,
+- fachliche und technische Prüfungen zu Datenverfügbarkeit, Berechnung und sichtbarer Kennzeichnung des Vergleichszeitraums.
+
+Die Darstellung soll immer erkennen lassen, auf welchen aktuellen Monat und welchen Vorjahresmonat sie sich bezieht. Der Vorjahresvergleich ist eine Ergänzung der bestehenden Monatsauswertung; er darf weder die aktuellen Werte ersetzen noch die Interpretation fehlender Daten als tatsächliche Veränderung nahelegen.
+
+
+### 14.3 Diagramme vergrößern und begrenzte Exporte
+
+**Lokal umgesetzt am 05.09.2026; Prüfstand im QS-Plan, Abschnitt 10.18.** Auf Desktop und Laptop öffnet der Knopf unter jedem Diagramm eine größere interaktive Ansicht. Daten, sichtbare Reihen, Einheit und Auswahl werden übernommen; lange Gütergruppenbezeichnungen werden umgebrochen. Auf schmalen Mobilansichten ist der Knopf ausgeblendet.
+
+Der Menüpunkt „Export“ liegt zwischen „Quellen“ und „KI fragen“. Einzelne Diagramme können als PNG mit 1.800 Pixeln Breite einschließlich Auswahl und Quellenvermerk heruntergeladen werden. Excel enthält Kennzahlen, sichtbare Tabellenzeilen und Diagrammwerte des aktiven Moduls einschließlich Quellen, Einheiten und Filterkontext; Obergrenze: 2.000 Datenzeilen. Unskalierte numerische Tabellenwerte und Diagrammwerte bleiben Zahlen, Regionencodes bleiben Text.
+
+GeoPackage 1.3 enthält ausschließlich Gebiete und Standorte im aktuellen Kartenausschnitt: höchstens 100 Objekte und 250 km × 250 km. Die Geometrien werden am Ausschnitt geschnitten; Kennwerte gelten weiterhin für die vollständigen Gebiete. Verbindungen und Hintergrundkarte werden nicht ausgegeben. Quellen und Auswahlinformationen liegen als zusätzliche Attributtabelle bei.
+
+**Weiter offen:** serverseitige Rechte und wirksame Mengen-/Abrufbegrenzungen im späteren Portal. Die lokalen Exportgrenzen sind eine Bedienregel und kein Schutz der statisch ausgelieferten Bestände gegen systematischen Abruf. KI-Modularisierung, vollständige Analysefunktionen und zusätzliche bedarfsabhängige Datenquellen stehen weiterhin offen in `ROADMAP_ANALYSEASSISTENT_PORTAL.md`, Abschnitt 15.

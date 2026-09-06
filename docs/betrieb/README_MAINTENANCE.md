@@ -21,6 +21,7 @@ Wichtige Zuordnung:
 
 - `js/modules/maritime.js`: Seeverkehr und Häfen
 - `js/modules/forecast.js`: Verkehrsprognose 2040
+- `js/shared/`: gemeinsame Zahlenformatierung, Datenladewege, Dialogsteuerung und unveränderte nationale Aggregation
 - `html/modules/`: sichtbare Analysebereiche
 - `css/source/`: Basis, Komponenten, Fachmodule und responsive Darstellung
 
@@ -31,3 +32,82 @@ Die Sicherung vor dieser Umstellung liegt unter
 `backups/before-modular-refactor-20260819-0100/`. Sie enthält die damals
 ausgelieferten Fassungen von Oberfläche, Styles, Logik und den drei nun
 nachgeladenen Fachdaten-Dateien.
+
+
+## Datenpakete und lokale Browserprüfung seit 05.09.2026
+
+Die fachlichen Gesamtdateien bleiben als kanonischer Prüfbestand erhalten. Der Browser lädt für Übersicht und Prognose kleinere Grundpakete und nur die Details der ausgewählten Region:
+
+| Auslieferung | Inhalt |
+|---|---|
+| `data/processed/web_summary_core.json` | Karten- und Zeitreihenwerte aller Regionen sowie vorberechnete nationale Kennwerte |
+| `data/processed/delivery/summary/{Region}.json` | regionale NST-20-Details aller vorhandenen Jahre |
+| `data/processed/web_forecast_core.json` | Prognosekennwerte, Karten und Strukturwerte für beide Szenarien |
+| `data/processed/delivery/forecast/{Region}.json` | sämtliche bisherigen Relationen dieser Region, beide Szenarien und alle Gütergruppen |
+| `data/processed/delivery/*-manifest.json` | Quellfingerabdrücke, Dateigrößen und Prüfsummen |
+
+Erzeugen und gegen den aktuellen kanonischen Bestand prüfen:
+
+```powershell
+node scripts/frontend/build_delivery_data.cjs
+node scripts/frontend/build_delivery_data.cjs --check
+python scripts/frontend/build_frontend.py all
+node scripts/validation/validate_frontend_loading.cjs
+node scripts/frontend/serve_preview.cjs 8000
+```
+
+Der Datenpaket-Build verwendet Node.js ohne zusätzliche Pakete. Der reine Frontend-Build erzeugt HTML, CSS und JavaScript; er ersetzt keinen Datenpaket-Build. Für eine Veröffentlichung müssen die beiden Grundpakete, der vollständige Ordner `delivery/` und die generierten Browserdateien gemeinsam aus einem bestandenen Prüfstand übernommen werden. Die bestehenden übrigen Fachdaten bleiben erforderlich.
+
+Die Browserprüfung wird in einem zweiten Terminal gestartet. Playwright und etwaige Abhängigkeiten liegen ausschließlich außerhalb des Projektordners unter `C:\tmp`; der angegebene Modulpfad muss auf die tatsächlich vorhandene Installation zeigen:
+
+```powershell
+$env:PLAYWRIGHT_MODULE_PATH = 'C:\tmp\kita_playwright_qa\node_modules\playwright'
+node scripts/validation/validate_frontend_browser.cjs http://127.0.0.1:8000 C:\tmp\gueterstroeme-browser-qa
+```
+
+Der Prüflauf verwendet das installierte Chrome im normalen Browsermodus und schließt seinen Browser anschließend. Im Durchgang vom 05.09.2026 lieferte die öffentliche Maut-API im Headless-Modus HTTP 500, im normalen Chrome dagegen HTTP 200 und echte Relationen. `QA_HEADLESS=1` ist deshalb nur eine optionale technische Variante und kein Ersatz für die Prüfung des Live-Mautmoduls. Eine externe Nichtverfügbarkeit wird im JSON-Prüfprotokoll ausdrücklich als solche ausgewiesen.
+
+Fehlgeschlagene Datenanfragen bleiben erneut ausführbar. Start-, Modul-, Regions- und Steckbrieffehler zeigen eine Wiederholungsmöglichkeit statt scheinbar gültiger Leerwerte. Datenanfragen enden nach spätestens 30 Sekunden; veraltete Regions- und Jahresantworten überschreiben keine neuere Auswahl. Die gemeinsame Dialogsteuerung hält den Tastaturfokus im offenen Dialog und gibt ihn beim Schließen an dessen tatsächlichen Auslöser zurück.
+
+
+## Diagrammvergrößerung, Exporte und Mautvergleich (05.09.2026)
+
+`js/modules/export.js` erfasst beim Öffnen einen unveränderlichen Stand des aktiven Moduls. PNG und Excel übernehmen dessen Auswahl. Diagramme werden aus ihrer tatsächlichen Chart.js-Konfiguration neu gezeichnet; lokale Legenden und fixierte Achsen erhalten in der großen Ansicht eine eigenständige Darstellung. Das Schließen erfolgt über die gemeinsame Dialogsteuerung, einschließlich Fokusführung.
+
+Excel: maximal 2.000 Datenzeilen; numerische Diagrammwerte mit ausdrücklicher Skalierung, unskalierte rechtsbündige Tabellenwerte als Zahlen, sonst angezeigter Text. Keine Formeln werden erzeugt. Der Quellenbogen enthält fachliche Hinweise und Filter. GeoPackage: höchstens 100 Gebiete/Standorte und 250 km Seitenlänge; EPSG:4326; Topologie erhaltender Polygonschnitt; Kennwerte bleiben Werte der vollständigen Gebiete. Keine Relationslinien oder Basiskarten. Die Felder sind ausdrücklich freigegeben (`code`, `name`, `wert`, `einheit`, `information`); vollständige Rohattribute werden nicht übernommen.
+
+Die dafür benötigten Bibliotheken liegen mit Lizenzen unter `assets/vendor/` und werden erst bei Bedarf geladen. Bei der gemeinsamen Auslieferung muss dieser Ordner einschließlich `sqljs/sql-wasm.wasm` vollständig enthalten sein. Pflege und feste Paketversionen: `assets/vendor/README.md`. Paketinstallation und Bündelung ausschließlich unter `C:\tmp`, anschließend dort aufräumen. Eine Bibliotheksaktualisierung verlangt eine erneute Browser- und Dateiprüfung.
+
+`js/shared/toll-comparison.js` lädt denselben Vorjahresmonat anhand der von der API gemeldeten Monatsverfügbarkeit. Der Sitzungscache ist nach Gemeinde, Monat und Richtung getrennt, auf 24 vollständige Antworten und 15 Minuten Gültigkeit begrenzt. Aktueller und vorheriger Abrufzeitpunkt stehen im Export. Fehlende Relationen, fehlende Werte und ein Vorjahreswert von null erzeugen keine vermeintliche Prozentänderung. Anfragen übernehmen einen festen Auswahlstand und werden bei neuen Auswahlen abgebrochen; verspätete Antworten überschreiben diesen nicht.
+
+```powershell
+node scripts/validation/validate_toll_comparison.cjs
+node scripts/validation/validate_frontend_exports.cjs http://127.0.0.1:8000/ C:\tmp\gueterstroeme-export-pruefung
+python -B scripts/validation/validate_export_files.py C:\tmp\gueterstroeme-export-pruefung
+```
+
+Die Browserprüfung verwendet den oben dokumentierten externen Playwright-Pfad und normales Chrome. Sie lädt echte lokale Dashboarddaten und verwendet für wiederholbare Maut-Grenzfälle gekennzeichnete API-Testantworten. Der reale Vorjahresabruf ist zusätzlich im Browser zu prüfen. Die Dateiprüfung benötigt die vorhandene Datenanalyseumgebung mit openpyxl, Pillow, Shapely und GeoPandas samt GIS-Lesetreiber. Exportgrenzen im Browser sind keine Zugriffskontrolle; deren spätere Durchsetzung auf dem Server bleibt Roadmap-Arbeit.
+
+
+### Anpassungen nach Browser-Rückmeldungen vom 06.09.2026
+
+- Diagramme öffnen sich über ein 24-Pixel-Symbol mit vier diagonalen Pfeilen in der Kopfzeile, neben den vorhandenen Diagrammsteuerungen. Es belegt keine Zeichenfläche. Der weiße Hinweis „Diagramm vergrößern“ erscheint bei Maus und Tastaturfokus; der zugängliche Name bleibt erhalten. Mobil bleibt das Symbol ausgeblendet.
+- Die Übersicht und die einzelnen Diagrammkarten der Analyse-Module schützen die Diagrammhöhe durch Mindestgrößen; bei geringer Fensterhöhe scrollt der Inhaltsbereich. Die Güterstruktur-Dynamik besitzt eine begrenzte, scrollbar angelegte Legende mit vollständigen Bezeichnungen. Datenreihen lassen sich per Maus oder Tastatur ein-/ausblenden; die größere Ansicht übernimmt diesen Zustand.
+- Beim Wechsel der NST-Ebene werden alte Legendencontainer vor der neuen Diagramminstanz entfernt. Damit misst und beobachtet das neue Diagramm wieder seinen tatsächlichen Elterncontainer. Dies gilt gemeinsam für Schiene, Binnenschifffahrt und Seeverkehr.
+- Der Maut-Hover nennt weiterhin den letzten Berichtsmonat mit verfügbarem Vorjahresvergleich; der Zusatz über möglicherweise abweichende Einzelrelationen wurde entfernt.
+- Vergrößerte Diagramme verwenden ausschließlich den nativen Chart.js-Tooltip mit Spitze. `external: null` verhindert die Übernahme der globalen HTML-Tooltip-Funktion; `undefined` würde auf diese globale Voreinstellung zurückfallen und zwei Anzeigen erzeugen.
+- Die KI-Beispiele sind vollständige Fragen; Einführungstext in normaler Schreibweise. Der vorhandene Hinweis auf die fehlende Modellanbindung bleibt korrekt erhalten.
+- Luftfracht-KPIs folgen der Flughafenauswahl: Flughafenwert, Vorjahresänderung, Anteil an der Summe veröffentlichter deutscher Flughafenwerte, Rang. Ohne Auswahl gilt die bisherige nationale Darstellung. Nationalreihe und Flughafenreihe werden nicht miteinander verrechnet. Salden: historischer Saldo statt Prozentänderung; Anteil und Rang nach absolutem Saldo. Ranggleichheit bei gleichen Werten; fehlende oder nicht belastbare Flughafenwerte bleiben fehlend und löschen die Flughafenauswahl nicht. Ein Saldo benötigt beide Richtungswerte.
+- Der Maut-Vergleichshinweis verschwindet nach erfolgreichem Laden und bei regulär fehlendem Vergleichsmonat. Ladezustand und wiederholbare Abruffehler bleiben sichtbar. Hover-Inhalte zeigen Richtungspfeile und nennen bei fehlendem Vorjahresmonat den letzten Berichtsmonat, für den beide Monate in der API-Verfügbarkeitsliste enthalten sind. Daraus wird keine lückenlose Zeitreihe und keine Verfügbarkeit jeder einzelnen Relation abgeleitet.
+
+Zusätzliche Prüfungen: `validation/validate_frontend_feedback.cjs` (gleiche Parameter wie beim Export-Browserprüfer), `validation/validate_airfreight_kpis.cjs` und die ergänzten Monatsverfügbarkeitsfälle in `validation/validate_toll_comparison.cjs`.
+
+Diagrammlayout separat prüfen: `node scripts/validation/validate_chart_layout.cjs http://127.0.0.1:8000/ C:\tmp\gueterstroeme-layout-pruefung` (externer Playwright-Pfad wie oben). Geprüft werden tatsächliche Zeichenflächen auf fünf Fenstergrößen, alle zwölf Kopfzeilensymbole, helle Hinweise, Legendenbedienung und wiederholtes Umschalten 7 → 20 → 7 in drei Modulen.
+
+
+### Mobile Karten: Menüebene und kompakte Legende (06.09.2026)
+
+- Bis 900 Pixel Fensterbreite hält ein eigener Darstellungsbereich die Kartensteuerung unterhalb der mobilen Modulauswahl. Die Desktop-Regeln bleiben unverändert.
+- Eingeklappte mobile Legenden zeigen nur ein antippbares Legendensymbol. Aufgeklappt bleiben Titel und Erklärung erhalten. Beide Zustände haben einen zugänglichen Namen und `aria-expanded`; die Luftfrachtlegende ist jetzt ebenfalls an die gemeinsame Umschaltung angeschlossen.
+- Die Höhe der Quellenzeile wird je Karte beobachtet. Die mobile Legende sitzt acht Pixel oberhalb der Quellenzeile; lange Quellenangaben umbrechen innerhalb der Karte. Umfangreiche Legenden können innerhalb des Kartenrahmens scrollen. Quellen und Lizenzen bleiben vollständig erhalten.
+- Prüfung: `node scripts/validation/validate_mobile_maps.cjs http://127.0.0.1:8000/ C:\tmp\gueterstroeme-mobile-pruefung`. Optional als viertes Argument eine vor der Änderung gespeicherte Desktop-Geometrie-JSON übergeben; Playwright bleibt außerhalb des Projekts wie oben beschrieben.

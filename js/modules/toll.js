@@ -37,6 +37,7 @@
   let tollRelations = [];
   let tollLoadedSelectionKey = null;
   let tollRequestSequence = 0;
+  let tollRelationsController = null;
   let tollRequestPending = false;
   let tollApiFailed = false;
   let tollMunicipalityMapReady = false;
@@ -109,18 +110,14 @@
       orderByFields: 'monat DESC',
       f: 'json'
     });
-    tollMonthAvailabilityPromise = fetch(`${TOLL_API_QUERY_URL}?${params.toString()}`, {
-      cache: 'no-store',
-      headers: { Accept: 'application/json' }
-    }).then(async response => {
-      if (!response.ok) throw new Error(`HTTP ${response.status}`);
-      const payload = await response.json();
+    tollMonthAvailabilityPromise = fetchJson(`${TOLL_API_QUERY_URL}?${params.toString()}`).then(payload => {
       if (payload?.error) throw new Error(payload.error.message || 'API-Fehler');
       const months = [...new Set((payload?.features || [])
         .map(feature => parseTollApiMonth(feature?.attributes?.monat))
         .filter(Boolean))]
         .sort((a, b) => b.localeCompare(a));
       if (!months.length) throw new Error('Die API meldet keine verfügbaren Berichtsmonate.');
+      tollAvailableMonths = months;
       return months;
     }).catch(error => {
       tollMonthAvailabilityPromise = null;
@@ -133,6 +130,7 @@
     const select = document.getElementById('selectTollMonth');
     if (!select) return;
     select.disabled = true;
+    setTollStatus('loading', 'Verfügbare Berichtsmonate werden geladen …');
     select.innerHTML = '<option value="">Monate werden geladen …</option>';
     try {
       const months = await fetchTollAvailableMonths();
@@ -316,6 +314,11 @@
       state.showTollConnections = event.target.checked;
       if (!tollRequestPending) renderTollMap(getVisibleTollRows());
     });
+    document.getElementById('btnRetryToll')?.addEventListener('click', async event => {
+      event.currentTarget.disabled = true;
+      if (!state.tollMonth) await buildTollMonthOptions();
+      else await loadTollRelations();
+    });
     document.getElementById('btnOpenRoadModule')?.addEventListener('click', () => {
       document.querySelector('#mainNav .nav-item[data-tab="tab-road"]')?.click();
     });
@@ -331,6 +334,8 @@
     banner.classList.toggle('is-loading', kind === 'loading');
     text.textContent = message || '';
     link.hidden = !showRoadLink;
+    const retry = document.getElementById('btnRetryToll');
+    if (retry) { retry.hidden = kind !== 'error'; retry.disabled = false; }
   }
 
   function setTollMapEmpty(message = '', kind = '') {
@@ -666,6 +671,7 @@
   }
 
   function renderTollEmptySelection() {
+    updateTollComparisonNotice();
     clearTollMap();
     setTollStatus('', '');
     renderStateBoundaries('toll');
@@ -681,7 +687,7 @@
     scheduleTollMunicipalityBoundaryRefresh();
   }
 
-  async function fetchTollFeaturePage(where, offset) {
+  async function fetchTollFeaturePage(where, offset, signal) {
     const params = new URLSearchParams({
       where,
       outFields: '*',
@@ -691,12 +697,7 @@
       resultRecordCount: String(TOLL_PAGE_SIZE),
       f: 'geojson'
     });
-    const response = await fetch(`${TOLL_API_QUERY_URL}?${params.toString()}`, {
-      cache: 'no-store',
-      headers: { Accept: 'application/geo+json, application/json' }
-    });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    const payload = await response.json();
+    const payload = await fetchJson(`${TOLL_API_QUERY_URL}?${params.toString()}`, null, { signal });
     if (payload?.error) throw new Error(payload.error.message || 'API-Fehler');
     if (!Array.isArray(payload?.features)) {
       throw new Error('Die API-Antwort enthält keine GeoJSON-Features.');
@@ -704,18 +705,19 @@
     return payload;
   }
 
-  async function fetchTollRelationsForDirection(tollDirection) {
+  async function fetchTollRelationsForDirection(tollDirection, scope, signal) {
+    const { municipality, month } = scope;
     const isOutbound = tollDirection === 'outbound';
     const agsField = isOutbound ? 'ags_start' : 'ags_ziel';
     const direction = isOutbound ? 0 : 1;
     const where = (
-      `${agsField} = '${state.tollMunicipality}' AND ` +
-      `monat = DATE '${state.tollMonth}-01' AND richtung = ${direction}`
+      `${agsField} = '${municipality}' AND ` +
+      `monat = DATE '${month}-01' AND richtung = ${direction}`
     );
     const features = [];
     let offset = 0;
     while (true) {
-      const payload = await fetchTollFeaturePage(where, offset);
+      const payload = await fetchTollFeaturePage(where, offset, signal);
       const page = payload.features;
       features.push(...page);
       if (!payload.exceededTransferLimit) break;
@@ -726,30 +728,31 @@
       const properties = feature?.properties || {};
       const missing = TOLL_REQUIRED_FIELDS.filter(field => !(field in properties));
       if (missing.length) throw new Error(`Unvollständiger Feldsatz: ${missing.join(', ')}`);
-      if (String(properties[agsField]) !== state.tollMunicipality || Number(properties.richtung) !== direction) {
+      if (String(properties[agsField]) !== municipality || Number(properties.richtung) !== direction) {
         throw new Error('Die API-Antwort weicht von Gemeinde oder Richtung der Abfrage ab.');
       }
     });
     return features;
   }
 
-  async function fetchTollRelations() {
-    if (state.tollDirection === 'both') {
+  async function fetchTollRelations(scope, signal) {
+    if (scope.direction === 'both') {
       const [outbound, inbound] = await Promise.all([
-        fetchTollRelationsForDirection('outbound'),
-        fetchTollRelationsForDirection('inbound')
+        fetchTollRelationsForDirection('outbound', scope, signal),
+        fetchTollRelationsForDirection('inbound', scope, signal)
       ]);
       return [...outbound, ...inbound];
     }
-    return fetchTollRelationsForDirection(state.tollDirection);
+    return fetchTollRelationsForDirection(scope.direction, scope, signal);
   }
 
   function numericTollValue(value) {
+    if (value === null || value === undefined || value === '') return null;
     const number = Number(value);
     return Number.isFinite(number) ? number : null;
   }
 
-  function normalizeTollFeatures(features) {
+  function normalizeTollFeatures(features, scope = { municipality: state.tollMunicipality, direction: state.tollDirection }) {
     const grouped = new Map();
     features.forEach(feature => {
       const properties = feature.properties || {};
@@ -761,8 +764,8 @@
       // A municipal internal trip occurs in both directional API views. It is
       // one relation, not one outbound and one inbound trip, so retain the
       // outbound record once in the combined display.
-      if (state.tollDirection === 'both'
-        && partnerAgs === state.tollMunicipality
+      if (scope.direction === 'both'
+        && partnerAgs === scope.municipality
         && !isOutbound) return;
       const trips = numericTollValue(properties.anzahl_befahrungen) || 0;
       let row = grouped.get(partnerAgs);
@@ -771,6 +774,7 @@
           partnerAgs,
           partnerName: String(properties[partnerNameField] || properties.name || partnerAgs),
           trips: 0,
+          tripsValid: true, mileageValid: true,
           mileage: 0,
           distanceWeighted: 0,
           timeWeighted: 0,
@@ -780,6 +784,8 @@
         };
         grouped.set(partnerAgs, row);
       }
+      row.tripsValid &&= numericTollValue(properties.anzahl_befahrungen) !== null;
+      row.mileageValid &&= numericTollValue(properties.fahrleistung_km) !== null;
       row.trips += trips;
       row.mileage += numericTollValue(properties.fahrleistung_km) || 0;
       const distance = numericTollValue(properties.distanz_km_mittelw);
@@ -797,8 +803,8 @@
     return [...grouped.values()].map(row => ({
       partnerAgs: row.partnerAgs,
       partnerName: row.partnerName,
-      trips: row.trips,
-      mileage: row.mileage,
+      trips: row.tripsValid ? row.trips : null,
+      mileage: row.mileageValid ? row.mileage : null,
       distance: row.distanceWeight > 0 ? row.distanceWeighted / row.distanceWeight : null,
       time: row.timeWeight > 0 ? row.timeWeighted / row.timeWeight : null,
       geometry: row.geometry
@@ -807,14 +813,20 @@
 
   async function loadTollRelations() {
     if (state.activeTab !== 'tab-toll' || !tollModuleInitialized) return;
+    tollRelationsController?.abort();
+    tollRelationsController = new AbortController();
+    const requestId = ++tollRequestSequence;
     const selectionKey = getTollSelectionKey();
     if (!selectionKey) {
-      if (!selectionKey) renderTollEmptySelection();
+      tollRequestPending = false;
+      setModuleLoadingState('tab-toll', false);
+      renderTollEmptySelection();
       return;
     }
-    const requestId = ++tollRequestSequence;
     tollRequestPending = true;
     tollApiFailed = false;
+    tollComparison = { status: 'loading', month: previousTollYearMonth(state.tollMonth), rows: new Map() };
+    updateTollComparisonNotice();
     setTollStatus('', '');
     setModuleLoadingState('tab-toll', true);
     const loadingNotice = document.querySelector('#tab-toll .module-loading-status');
@@ -823,13 +835,15 @@
     const body = document.getElementById('tableTollRelationsBody');
     if (body) body.innerHTML = '<tr><td colspan="5" class="empty-state-cell">Live-Daten werden geladen …</td></tr>';
     try {
-      const features = await fetchTollRelations();
+      const scope = { municipality: state.tollMunicipality, month: state.tollMonth, direction: state.tollDirection };
+      const snapshot = await getTollMonthlySnapshot(scope, tollRelationsController.signal);
       if (requestId !== tollRequestSequence) return;
-      tollRelations = normalizeTollFeatures(features);
+      tollRelations = snapshot.rows;
       tollLoadedSelectionKey = selectionKey;
       tollApiFailed = false;
       setTollStatus('', '');
       renderTollData();
+      loadTollComparison(scope, requestId, tollRelationsController.signal);
     } catch (error) {
       if (requestId !== tollRequestSequence) return;
       console.error('Could not load live Toll Collect relations:', error);
@@ -846,6 +860,7 @@
   }
 
   function renderTollApiError() {
+    updateTollComparisonNotice();
     const keepMunicipalityViewport = Boolean(mapLayers.toll.municipalityBoundaries);
     clearTollMap();
     setTollMapEmpty('Die Mautdaten-API ist derzeit nicht erreichbar.');
@@ -1008,6 +1023,7 @@
           <div><strong>Fahrleistung:</strong> ${formatDeNum(row.mileage, 0)} km</div>
           <div><strong>Mittlere Distanz:</strong> ${formatDeNum(row.distance, 1, 1)} km</div>
           <div><strong>Mittlere Fahrzeit:</strong> ${formatDeNum(row.time, 1, 1)} Min.</div>
+          ${buildTollComparisonTooltip(row)}
           <div class="toll-map-tooltip-context">Platz ${row.rank} · Anteil der Mautfahrten: <strong>${formatTollTripShare(row.tripShare)} %</strong></div>
         </div>
       </div>`;
@@ -1135,6 +1151,7 @@
       },
       onEachFeature: (feature, layer) => {
         const row = feature.properties.tollRow;
+        layer.wbpExport = { code: row.partnerAgs, name: row.partnerName || row.partnerAgs, value: row[metric.field], unit: metric.unit };
         mapLayers.toll.partnerLayers[row.partnerAgs] = layer;
         bindTollHoverTooltip(
           layer,

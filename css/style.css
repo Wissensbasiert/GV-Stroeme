@@ -1224,7 +1224,8 @@ body {
 #btnHelpModal { order: 1; }
 #btnSteckbriefModal { order: 2; }
 #btnLicensesModal { order: 3; }
-#btnAiModal { order: 4; }
+#btnExportModal { order: 4; }
+#btnAiModal { order: 5; }
 
 .btn-header {
   display: flex;
@@ -1881,7 +1882,7 @@ svg:focus {
   flex-direction: column;
   height: 100%;
   min-height: 0;
-  overflow: hidden;
+  overflow: clip;
   container-type: inline-size;
 }
 
@@ -2002,12 +2003,16 @@ svg:focus {
   font-weight: 600;
   color: #334155;
 }
-.chart-scroll-legend span {
+.chart-scroll-legend button {
+  padding: 0; border: 0; background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer;
   display: flex;
   align-items: flex-start;
   gap: 5px;
   line-height: 1.25;
 }
+.chart-scroll-legend button[aria-pressed='false'] { opacity: .5; text-decoration: line-through; }
+.chart-scroll-legend button:focus-visible { outline: 2px solid #17613c; outline-offset: 1px; }
+.sub-chart-card .chart-scroll-legend { grid-template-columns: 1fr; }
 .chart-scroll-legend i {
   display: inline-block;
   flex: 0 0 9px;
@@ -2626,6 +2631,49 @@ svg:focus {
   align-items: center;
   gap: 5px;
 }
+
+/* A failed request is not an empty result. Keep the recovery action visible. */
+[data-load-error="true"] > :not(.module-loading-status) { display: none !important; }
+.module-loading-status { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 0.75rem; }
+.data-retry-button { white-space: nowrap; }
+.data-retry-button:focus-visible { outline: 3px solid #2563eb; outline-offset: 3px; }
+
+.data-retry-button[hidden] { display: none; }
+
+/* Reveal the initial map only after its final container size has been fitted. */
+#overviewLeafletMap:not([data-viewport-ready="true"]) { visibility: hidden; }
+
+.toll-comparison-notice { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 7px 12px; margin-bottom: 10px; font-size: 0.78rem; color: var(--text-muted); background: #f0f7f4; border-radius: 8px; }
+.toll-comparison-notice[hidden] { display: none; }
+.toll-comparison-tooltip { border-top: 1px solid #e2e8f0; margin-top: 7px; padding-top: 7px; font-size: 0.76rem; line-height: 1.5; }
+
+/* Shared chart actions and scoped exports. */
+.btn-chart-enlarge { display: grid; place-items: center; flex: 0 0 24px; width: 24px; height: 24px; padding: 3px; color: #64748b; background: transparent; border: 1px solid transparent; border-radius: 5px; cursor: pointer; }
+.chart-expand-hint { position: fixed; z-index: 100001; padding: 8px 11px; color: #334155; background: #fff; border: 1px solid #dbe4ee; border-radius: 6px; box-shadow: 0 4px 14px #0f172a1a; font-size: .78rem; line-height: 1.4; pointer-events: none; }
+.chart-expand-hint[hidden] { display: none; }
+.chart-expand-hint::before { content: ''; position: absolute; right: 8px; top: -5px; width: 8px; height: 8px; background: #fff; border-top: 1px solid #dbe4ee; border-left: 1px solid #dbe4ee; transform: rotate(45deg); }
+.btn-chart-enlarge svg { width: 17px; height: 17px; }
+.btn-chart-enlarge:hover { background: #e2f0e7; }
+.btn-chart-enlarge:focus-visible { outline: 2px solid #17613c; outline-offset: 3px; }
+.btn-chart-enlarge:disabled { opacity: .45; cursor: default; }
+.export-dialog { width: min(720px, 94vw); max-width: 720px; }
+.export-context { color: #475569; font-size: .84rem; line-height: 1.6; margin: 0 0 16px; }
+.export-option { border-top: 1px solid #e2e8f0; padding: 16px 0; }
+.export-option h4 { margin: 0 0 7px; }
+.export-option p { font-size: .85rem; line-height: 1.55; margin: 0 0 12px; color: #475569; }
+.export-option label { display: block; font-size: .82rem; margin-bottom: 5px; }
+.export-option select { width: 100%; margin-bottom: 10px; }
+.export-option .btn-header, .chart-export-footer .btn-header { color: #17613c; border-color: #b9d4c3; background: #f0f7f2; }
+.export-option button:disabled { opacity: .45; cursor: default; }
+.export-status { font-size: .85rem; line-height: 1.5; min-height: 1.5em; }
+.large-chart-dialog { width: min(1380px, 94vw); max-width: 1380px; }
+.large-chart-dialog .modal-body { padding-top: 12px; }
+.large-chart-canvas { position: relative; width: 100%; height: clamp(320px, 60vh, 720px); }
+.chart-export-footer { display: flex; justify-content: flex-end; align-items: center; gap: 12px; padding-top: 16px; font-size: .8rem; }
+@media (max-width: 767px) { .btn-chart-enlarge { display: none; } .export-dialog .modal-body { padding: 16px; } }
+
+#modalChartLarge .large-chart-dialog { width: min(1380px, 94vw); max-width: 1380px; }
+#modalExport .export-dialog { width: min(720px, 94vw); max-width: 720px; }
 /* Intermodal / SGKV Layout */
 .sgkv-kpi-grid {
   display: grid;
@@ -2943,12 +2991,13 @@ svg:focus {
   display: none;
 }
 .ki-examples-panel > p {
-  margin: 0 0 8px;
+  margin: 0 0 10px;
   color: #64748b;
-  font-size: 0.67rem;
-  font-weight: 700;
-  letter-spacing: 0.035em;
-  text-transform: uppercase;
+  font-size: 0.8rem;
+  font-weight: 400;
+  line-height: 1.5;
+  letter-spacing: normal;
+  text-transform: none;
 }
 .ki-suggestions {
   display: grid;
@@ -4012,6 +4061,13 @@ svg:focus {
   }
 }
 
+/* Preserve an actual plot area in the desktop analysis modules. If the viewport is
+   too short, the main panel scrolls instead of squeezing charts to a few pixels. */
+@media (min-width: 1281px) {
+  .module-layout-grid { min-height: 680px; }
+  .table-card-compact { min-height: 240px; }
+}
+
 /* Medium screens and narrow laptop windows: stack map and analytics before
    the two lower chart cards become too narrow for readable category axes. */
 @media (max-width: 1280px) {
@@ -4527,4 +4583,46 @@ svg:focus {
   .mobile-module-option.active .mobile-module-check { visibility: visible; }
   .airfreight-map-actions { width: 100%; }
   .airfreight-map-actions .select-input-sm { flex: 1 1 150px; min-width: 0; }
+}
+
+/* The overview keeps room for time series and their complete scrollable legend. */
+#tab-overview .bottom-split-charts-row { min-height: 380px; }
+@media (max-width: 900px) {
+  #tab-overview .sub-chart-card { height: 360px; min-height: 360px; }
+}
+
+@media (min-width: 901px) {
+  .chart-card-single { min-height: 420px; }
+}
+
+/* Mobile map overlays stay below the module menu. Desktop stacking is unchanged. */
+@media (max-width: 900px) {
+  .main-content { isolation: isolate; }
+  .map-container-leaflet .leaflet-bottom.leaflet-left { width: 100%; }
+  .map-container-leaflet .leaflet-control-attribution {
+    max-width: calc(100% - 20px);
+    overflow-wrap: anywhere;
+  }
+  .choropleth-legend {
+    bottom: calc(var(--map-attribution-height, 24px) + 16px);
+    right: 12px;
+    max-width: calc(100% - 24px);
+    max-height: calc(100% - var(--map-attribution-height, 24px) - 32px);
+    overflow-y: auto;
+  }
+  .choropleth-legend .btn-legend-toggle { width: 44px; height: 44px; }
+  .choropleth-legend.collapsed {
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
+    overflow: hidden;
+  }
+  .choropleth-legend.collapsed .legend-title { display: none; }
+  .choropleth-legend.collapsed .btn-legend-toggle {
+    border: 0;
+    border-radius: 7px;
+    font-size: 0;
+    background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23475569' stroke-width='1.7' stroke-linecap='round'%3E%3Crect x='3' y='3' width='4' height='4' rx='1'/%3E%3Crect x='3' y='10' width='4' height='4' rx='1'/%3E%3Crect x='3' y='17' width='4' height='4' rx='1'/%3E%3Cpath d='M11 5h10M11 12h10M11 19h10'/%3E%3C/svg%3E") center / 22px 22px no-repeat;
+  }
+  .choropleth-legend .btn-legend-toggle:focus-visible { outline: 2px solid #17613c; outline-offset: -3px; }
 }

@@ -15,10 +15,14 @@ Die Anwendung ist statisch und muss wegen der geladenen Datendateien über einen
 Die ausgelieferten Browserdateien werden aus den modularen Quellen erzeugt:
 
 ```powershell
+node scripts/frontend/build_delivery_data.cjs
 python scripts/frontend/build_frontend.py all
+node scripts/frontend/serve_preview.cjs 8000
 ```
 
-Direkte Änderungen an `index.html`, `css/style.css` oder `js/app.js` sind zu vermeiden; maßgeblich sind die Quellen unter `html/`, `css/source/` und `js/source/` beziehungsweise `js/modules/`.
+Die Vorschau ist unter `http://127.0.0.1:8000` erreichbar und wird mit Strg+C beendet. Der Server liest Dateien vom synchronisierten Laufwerk vor der Übertragung vollständig ein. Falls der Port belegt ist, einen anderen freien Port verwenden.
+
+Direkte Änderungen an `index.html`, `css/style.css` oder `js/app.js` sind zu vermeiden; maßgeblich sind die Quellen unter `html/`, `css/source/` und `js/source/` beziehungsweise `js/modules/` und `js/shared/`.
 
 ## Projektstruktur
 
@@ -28,8 +32,9 @@ Direkte Änderungen an `index.html`, `css/style.css` oder `js/app.js` sind zu ve
 | `scripts/` | Datenaufbereitung, Frontend-Build, Prüfungen und Hilfsskripte |
 | `data/raw/` | amtliche und weitere Ausgangsdaten |
 | `data/processed/` | aufbereitete Daten für das Dashboard |
-| `html/`, `css/source/`, `js/source/`, `js/modules/` | bearbeitbare Frontend-Quellen |
+| `html/`, `css/source/`, `js/source/`, `js/modules/`, `js/shared/` | bearbeitbare Frontend-Quellen |
 | `index.html`, `css/style.css`, `js/app.js` | generierte Browserdateien |
 | `data_catalog.json` | maschinenlesbarer Datenkatalog |
 
 Umfangreiche Rohdaten, lokale Sicherungen und Arbeitsergebnisse sind bewusst nicht Bestandteil der Git-Historie. Die große Prognosedatei `data/processed/web_forecast_2040.json` wird über Git Large File Storage (Git LFS) verwaltet.
+Die abgeleiteten Browserpakete unter `data/processed/delivery/` sowie `web_summary_core.json` und `web_forecast_core.json` können vollständig aus den versionierten Ausgangspaketen erzeugt werden. Nach einer Wiederherstellung aus Git zuerst den oben genannten Datenpaket-Build ausführen; für die Prognose muss die Git-LFS-Datei lokal verfügbar sein.

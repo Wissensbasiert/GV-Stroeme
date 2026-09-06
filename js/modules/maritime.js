@@ -346,6 +346,7 @@
           fillOpacity: (portFlow === 0) ? 0.25 : (isAnotherSelected ? 0.45 : 0.95)
         }).addTo(mapLayers.maritime.portsGroup);
 
+        marker.wbpExport = { code: p.unlocode, name: p.name, value: portFlow, unit: 't' };
         mapLayers.maritime.portsLookup[p.unlocode] = { marker, originalRadius: radius };
 
         // Lightweight Hover Tooltip with smart dynamic decimal formatting

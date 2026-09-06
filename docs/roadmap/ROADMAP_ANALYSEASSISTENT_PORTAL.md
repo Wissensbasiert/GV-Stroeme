@@ -256,3 +256,22 @@ Nach der vorgesehenen letzten Datenprüfung wird zunächst Etappe 0 abgeschlosse
 
 Diese Tabelle bildet die verbindliche Brücke zwischen fachlicher Datenprüfung und technischer Entwicklung. Erst auf dieser Grundlage werden Datenfunktionen, API und KI-Anbindung programmiert.
 
+
+
+## 15. Offener Ausbau: gemeinsamer Analyseunterbau und flexible Ergebnisdarstellung
+
+**Ergänzung vom 05.09.2026; Datenfunktionen und KI-Anbindung weiterhin offen.** Die sechs beispielhaften Fragen im Interface dienen als Zielbild und spätere Abnahmefälle. Der Prototyp erhält dadurch noch keine Modell- oder Datenverbindung.
+
+Dashboard und Assistent sollen auf denselben geprüften Kennzahlen aufbauen. Standardkennwerte, Karten, Filter, Datenstände und der regionale Steckbrief bleiben direkt zugänglich. Individuelle Regionsvergleiche, Kombinationen mehrerer Auswertungen und zielgruppengerechte Zusammenfassungen werden vorrangig über den Assistenten angeboten. Häufig verwendete Auswertungen können später als eigene Bedienfunktion ergänzt werden.
+
+Ergänzend zu den Abschnitten 5 und 6 bleiben folgende Arbeiten offen:
+
+- [ ] Die vollständigen vorhandenen Analysebestände serverseitig erschließen. Die auf Top-Relationen gekürzten Webdateien sind keine ausreichende Grundlage für beliebige Quelle-Ziel-Abfragen. `fact_od_flows.parquet` ist als vorhandener Ausgangsbestand zu prüfen; regionale Kennwerte und Prognosewerte behalten ihre jeweiligen Quellenabgrenzungen.
+- [ ] Geprüfte Funktionen für Regionsvergleich, konkrete Verbindung, Güterstruktur, Zeitvergleich und Prognosevergleich einschließlich eindeutiger Parameter, Einheiten, Gebietsstände und Bezugsjahre definieren. Ein gemeinsames vollständiges Bezugsjahr wird ausdrücklich genannt; fehlende Jahre werden nicht still ersetzt.
+- [ ] Verfügbarkeit und Datenqualität je Kombination aus Raum, Jahr, Richtung, Verkehrsträger und Güterart mitliefern. Null, fehlend, nicht veröffentlicht und eingeschränkt belastbar müssen unterschieden werden; entsprechende Quellkennzeichnungen sind bei der Verarbeitung zu erhalten.
+- [ ] Wiederverwendbare Antwortbausteine für Vergleichstabellen, Diagramme, kurze Texte, Quellen und Export erstellen. Die KI erhält geprüfte Ergebnisse und erläutert sie; die Zahlenberechnung liegt in den kontrollierten Datenfunktionen.
+- [ ] Die sechs sichtbaren Beispielfragen als erste Abnahmefälle konkretisieren: Duisburg–Magdeburg; Schienengütergruppen Köln–Hamburg; Hamburgs Straßenverkehrspartner; Magdeburger Schienenentwicklung seit 2016; regionaler Prognosezuwachs 2019–2040; regionale Kurzfassung für eine Verwaltungsvorlage.
+- [ ] Zusätzliche Quellen gezielt nach tatsächlichem Bedarf erschließen: terminalbezogene Kapazitäten und Auslastungen, betriebliche Angebote sowie Modelle und Annahmen für Kosten- oder Emissionsvergleiche.
+- [ ] Serverseitige Rechte, Mengen- und Abrufbegrenzungen für Analyse und Export im späteren Portal vorsehen. Eine Beschränkung der Exportoberfläche allein schützt statisch ausgelieferte Daten nicht vor systematischem Abruf.
+
+**Bestätigte Datengrenze:** Die vorhandenen Straßen-Verflechtungsdaten enthalten Gesamtmengen je Quelle-Ziel-Paar, aber keine Gütergliederung dieser einzelnen Verbindung. Regionale Güterstrukturen dürfen nicht als belegte Güterstruktur einer bestimmten Straßenrelation ausgegeben werden. Für Schiene und Binnenschiff enthält der vorhandene Relationsbestand Güterhauptgruppen. Eine darüber hinausgehende Modellierung benötigt eine gesonderte fachliche Entscheidung und sichtbare Kennzeichnung.

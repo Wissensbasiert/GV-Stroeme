@@ -35,3 +35,21 @@ Welche Reihenfolge und welche Prüfungen für eine konkrete Datenaktualisierung 
 - Dateien unter `legacy/` nicht in automatisierte Abläufe aufnehmen. Sie bleiben nur zur Nachvollziehbarkeit früherer Entwicklungsstände erhalten.
 - Generierte Browserdateien nicht direkt pflegen; Änderungen erfolgen in den modularen Frontend-Quellen und werden anschließend mit dem Frontend-Build zusammengesetzt.
 - Keine Paketumgebungen, Caches oder großen temporären Dateien im Projektordner anlegen.
+
+## Browserpakete und wiederholbare Oberflächenprüfung
+
+- `frontend/build_delivery_data.cjs`: erstellt kompakte Übersicht und Prognose sowie regionale Detailpakete; `--check` prüft den gesamten Auslieferungsbestand ohne Änderung.
+- `frontend/serve_preview.cjs`: lokaler Testserver mit vollständigem Einlesen synchronisierter Dateien; ausschließlich auf `127.0.0.1`, Standardport 8000.
+- `validation/validate_frontend_loading.cjs`: prüft erneute Anfragen nach Fehlern, gemeinsame parallele Anfragen, HTTP-/JSON-Fehler, Zeitbegrenzung, Abbruch und feste Tabelleneinheiten.
+- `validation/validate_frontend_browser.cjs`: tatsächliche Chrome-Prüfung aller neun Module, ausgewählter Kennwerte, Filter, Dialoge, responsiver Darstellung sowie absichtlich ausgelöster Fehler und schneller Auswahlwechsel. Aufruf und externe Playwright-Abhängigkeit sind in `docs/betrieb/README_MAINTENANCE.md` dokumentiert.
+
+- `validation/validate_toll_comparison.cjs`: fachliche Grenzfälle des Monatsvergleichs, fehlende und Nullwerte, Binnenverkehr in beiden Richtungen sowie vollständiger, nach Auswahl getrennter Cache mit Wiederholung und Abbruch.
+- `validation/validate_frontend_exports.cjs`: größere Diagramme und ihre tatsächlichen Daten in allen Modulen, sechs KI-Beispiele, Exportdownloads, Mengenbegrenzung, Tastatur/Mobilansicht sowie wiederholbare Vorjahresfälle der Maut-API.
+- `validation/validate_export_files.py`: öffnet die Browserdownloads erneut mit Excel- und GIS-Lesern; prüft Zahlen, Einheiten, Formelfreiheit, PNG-Auflösung sowie GeoPackage-Struktur, gültige geschnittene Geometrien und EPSG:4326. Aufruf mit dem Ausgabeordner des Export-Browserprüfers.
+
+- `validation/validate_frontend_feedback.cjs`: Diagrammsymbole in der Kopfzeile mit hellem Hover-Hinweis, genau ein Tooltip mit Spitze in allen Modulen, sechs Fragen, Flughafen-KPIs nach Karte/Filter, Richtungen und fehlende Jahreswerte, Laptop-/Mobilansicht. Parameter: lokale URL mit abschließendem `/` und externer Ausgabeordner.
+- `validation/validate_airfreight_kpis.cjs`: Anteil mit passendem Flughafen-Nenner, Ranggleichheit, Vorjahreswert null, unvollständiger Saldo und beibehaltene Auswahl bei fehlendem Jahr.
+
+- `validation/validate_chart_layout.cjs`: Mindestzeichenflächen bei fünf Bildschirmgrößen, zwölf Kopfzeilensymbole, weißer Hinweis und Fokusführung, scrollbare Legende mit Tastaturbedienung sowie Größenrückkehr nach NST-Wechseln in Schiene, Binnenschiff und Seeverkehr. Parameter: lokale URL und externer Ausgabeordner.
+
+- `validation/validate_mobile_maps.cjs`: echte Touch-Bedienung der neun Kartenlegenden, Menü vor Kartensteuerung per Trefferprüfung, Abstand zu vollständigen Quellenangaben und schmale Mobilansichten. Optionaler Vergleich mit zuvor gespeicherten Desktop-Abmessungen. Parameter: lokale URL, externer Ausgabeordner, optional Desktop-Geometrie-JSON.

@@ -36,11 +36,14 @@
           </form>
           <button type="button" class="ki-examples-toggle" id="aiExamplesToggle" aria-expanded="false" aria-controls="aiExamples">Was kann ich fragen?</button>
           <div class="ki-examples-panel" id="aiExamples" hidden>
-            <p>Beispielfragen</p>
+            <p>Vergleichen Sie Regionen, untersuchen Sie Verkehrsbeziehungen oder lassen Sie Entwicklungen zusammenfassen. Wählen Sie eine Frage als Ausgangspunkt und passen Sie diese bei Bedarf an.</p>
             <div class="ki-suggestions" aria-label="Beispielfragen">
-              <button type="button" class="ki-suggestion" data-ai-question="Welche Regionen haben bis 2040 den stärksten Zuwachs im Schienengüterverkehr?">Wo wächst der Schienengüterverkehr bis 2040 am stärksten?</button>
-              <button type="button" class="ki-suggestion" data-ai-question="Welche Gütergruppen prägen die aktuell ausgewählte Region?">Welche Gütergruppen prägen die ausgewählte Region?</button>
-              <button type="button" class="ki-suggestion" data-ai-question="Welches sind die wichtigsten Verkehrsrelationen von und nach Berlin?">Welches sind die wichtigsten Verkehrsrelationen von und nach Berlin?</button>
+              <button type="button" class="ki-suggestion" data-ai-question="Wie unterscheiden sich Duisburg und Magdeburg beim Güteraufkommen, Modal Split und bei der Güterstruktur?">Wie unterscheiden sich Duisburg und Magdeburg beim Güteraufkommen, Modal Split und bei der Güterstruktur?</button>
+              <button type="button" class="ki-suggestion" data-ai-question="Welche Gütergruppen werden auf der Schiene von Köln nach Hamburg transportiert?">Welche Gütergruppen werden auf der Schiene von Köln nach Hamburg transportiert?</button>
+              <button type="button" class="ki-suggestion" data-ai-question="Welche Regionen sind Hamburgs wichtigste Partner im Straßengüterverkehr?">Welche Regionen sind Hamburgs wichtigste Partner im Straßengüterverkehr?</button>
+              <button type="button" class="ki-suggestion" data-ai-question="Wie hat sich der Schienengüterverkehr in Magdeburg seit 2016 entwickelt?">Wie hat sich der Schienengüterverkehr in Magdeburg seit 2016 entwickelt?</button>
+              <button type="button" class="ki-suggestion" data-ai-question="Wo wächst das Schienengüteraufkommen laut Prognose von 2019 bis 2040 am stärksten?">Wo wächst das Schienengüteraufkommen laut Prognose von 2019 bis 2040 am stärksten?</button>
+              <button type="button" class="ki-suggestion" data-ai-question="Welche zentralen Befunde zur ausgewählten Region gehören in eine Verwaltungsvorlage?">Welche zentralen Befunde zur ausgewählten Region gehören in eine Verwaltungsvorlage?</button>
             </div>
           </div>
           <p class="ki-prototype-note" id="aiPrototypeNotice"><strong>Interface-Prototyp:</strong> Noch keine echte KI- oder Datenabfrage; Zahlen werden nicht simuliert.</p>
@@ -100,6 +103,10 @@
           <li><strong>Auswahl:</strong> Klicken Sie auf Regionen, Seehäfen, Flughäfen oder andere interaktive Elemente, um die dazugehörigen Auswertungen einzugrenzen. Nicht unterstützte Filter sind deaktiviert; eine Erläuterung erscheint beim Überfahren mit dem Mauszeiger.</li>
           <li><strong>Steckbrief:</strong> Nach Auswahl einer Region fasst der Steckbrief die wichtigsten Kennzahlen, Strukturen, Verbindungen und den Ausblick bis 2040 für den betrachteten Raum zusammen. Er kann über den Browser als PDF gespeichert werden.</li>
         </ul>
+        <h4>Diagramme vergrößern und Ergebnisse mitnehmen</h4>
+        <p>Auf Desktop und Laptop öffnet das kleine Symbol mit vier Pfeilen in der Kopfzeile des Diagramms eine größere, interaktive Ansicht. Beim Darüberfahren erscheint „Diagramm vergrößern“. Dort können Sie das Diagramm auch als PNG herunterladen. Unter „Export“ in der Menüleiste stehen einzelne Diagramme und die aktuelle Auswertung als Excel-Datei bereit; Filter, Einheiten und Quellen werden mitgegeben.</p>
+        <p>Ein GeoPackage enthält die Gebiete und Standorte eines kleinen sichtbaren Kartenausschnitts: höchstens 100 Objekte und 250 km × 250 km. Zoomen Sie dafür zunächst näher in die Karte. Geometrien werden am Ausschnitt geschnitten; ihre Kennwerte gelten weiterhin für die vollständigen Gebiete. Hintergrundkarte und Verbindungen sind nicht enthalten.</p>
+        <p>Im Mautmodul zeigen die Gemeinde- und Verbindungsinformationen zusätzlich den gleichen Monat des Vorjahres, sofern beide Werte veröffentlicht sind. Fehlende Vorjahreswerte werden gekennzeichnet; bei einem Vorjahreswert von null wird keine Prozentänderung berechnet.</p>
         <h4>Datenstand und Vergleichbarkeit</h4>
         <p>Die Datenabdeckung unterscheidet sich nach Verkehrsträger und Statistik. Die im Tool verfügbaren Zeiträume werden aus den geladenen Daten ermittelt:</p>
         <ul class="data-coverage-list" id="helpDataCoverageList" aria-live="polite">
@@ -123,6 +130,7 @@
         <p class="source-tool-meta">Konzeption und Datenaufbereitung: Wissensbasierte Planung, Dr. Paul Hebes, Berater für wissensbasierte Planung und Entscheidungsgrundlagen.<br>Bearbeitungsstand: September 2026.</p>
         <p class="source-tool-impressum">Vollständige Anbieterangaben, Impressum und Datenschutz: <a href="https://wissensbasiert.de/impressum/" target="_blank" rel="noopener noreferrer">wissensbasiert.de/impressum</a>.</p>
         <p class="source-tool-intro">Die Anwendung führt amtliche und öffentlich bereitgestellte Ausgangsdaten für Analysezwecke zusammen. Für Definitionen, Aktualität und Nachnutzung gelten jeweils die Originalquellen und die dort genannten Nutzungsbedingungen.</p>
+        <p class="source-tool-intro">Exportbibliotheken und ihre Lizenztexte: <a href="assets/vendor/README.md" target="_blank" rel="noopener noreferrer">Technische Lizenzübersicht</a>.</p>
         <div class="source-list">
           <section class="source-item"><h4>Straßengüterverkehr</h4><p><strong>Kraftfahrt-Bundesamt (KBA):</strong> Güterverkehrsstatistik; regionale Verflechtungen und Güterstrukturen. <a href="https://www.govdata.de/dl-de/by-2-0" target="_blank" rel="noopener noreferrer">Datenlizenz Deutschland – Namensnennung – Version 2.0</a>; eigene Berechnung und Darstellung.</p></section>
           <section class="source-item"><h4>Mautdaten</h4><p><strong>Bundesamt für Logistik und Mobilität / Toll Collect GmbH:</strong> monatliche Start-Ziel-Relationen aus dem Lkw-Maut-Portal, live und gemeindebezogen abgerufen. <a href="https://www.govdata.de/dl-de/by-2-0" target="_blank" rel="noopener noreferrer">Datenlizenz Deutschland – Namensnennung – Version 2.0</a>. Gemeindegeometrien: <a href="https://gdz.bkg.bund.de/index.php/default/open-data/wfs-verwaltungsgebiete-1-250-000-stand-01-01-wfs-vg250.html" target="_blank" rel="noopener noreferrer">WFS VG250</a>; Quellenvermerk <a href="https://www.bkg.bund.de" target="_blank" rel="noopener noreferrer">© BKG 2025</a> <a href="https://www.govdata.de/dl-de/by-2-0" target="_blank" rel="noopener noreferrer">dl-de/by-2-0</a>, <a href="https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_vg_nuts.pdf" target="_blank" rel="noopener noreferrer">Datenquellen</a>; eigene Auswertung und Darstellung.</p></section>
@@ -135,6 +143,28 @@
     </div>
   </div>
 
-  <script src="js/app.js?v=20260904-antigravity-regression1"></script>
+
+  <div class="modal-backdrop" id="modalExport" aria-labelledby="exportTitle">
+    <div class="modal-dialog export-dialog">
+      <button class="modal-close" type="button">&times;</button>
+      <div class="modal-header"><h3 id="exportTitle">Aktuelle Auswertung exportieren</h3></div>
+      <div class="modal-body">
+        <p id="exportContext" class="export-context"></p>
+        <div class="export-option"><h4>Diagramm als PNG</h4><p>Einzelnes Diagramm in hoher Auflösung mit Titel, Auswahl und Quellenvermerk.</p><label for="exportChartSelect">Diagramm auswählen</label><select id="exportChartSelect" class="select-input"></select><button class="btn-header" id="exportPng" type="button">PNG herunterladen</button></div>
+        <div class="export-option"><h4>Aktuelle Auswertung als Excel</h4><p>Kennzahlen, angezeigte Tabellenzeilen und Diagrammwerte dieses Moduls – einschließlich Einheiten, Filtern und Quellen. Höchstens 2.000 Datenzeilen.</p><button class="btn-header" id="exportExcel" type="button">Excel herunterladen</button></div>
+        <div class="export-option"><h4>Kartenausschnitt als GeoPackage</h4><p>Gebiete und Standorte im sichtbaren Ausschnitt, höchstens 100 Objekte und 250 km × 250 km. Verbindungen, Hintergrundkarte und außerhalb liegende Daten sind nicht enthalten. Angeschnittene Gebiete behalten ihre vollständigen Kennwerte.</p><p id="exportGeoScope"></p><button class="btn-header" id="exportGeo" type="button">GeoPackage herunterladen</button></div>
+        <p class="export-status" id="exportStatus" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+  <div class="modal-backdrop" id="modalChartLarge" aria-labelledby="largeChartTitle">
+    <div class="modal-dialog large-chart-dialog">
+      <button class="modal-close" type="button">&times;</button>
+      <div class="modal-header"><h3 id="largeChartTitle">Diagramm</h3></div>
+      <div class="modal-body"><p id="largeChartContext" class="export-context"></p><div class="large-chart-canvas"><canvas id="largeChartCanvas"></canvas></div><div class="chart-export-footer"><button class="btn-header" id="largeChartPng" type="button">PNG herunterladen</button><span id="largeChartStatus" role="status"></span></div></div>
+    </div>
+  </div>
+
+  <script src="js/app.js?v=20260906-mobile3"></script>
 </body>
 </html>
