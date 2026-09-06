@@ -51,6 +51,7 @@ const pass = (name, detail) => { results.push({name, detail, status:'passed'}); 
   await tab('overview');
   for (const [width,height] of [[2119,1272],[1479,912],[1366,768],[1200,800],[390,844]]) {
     await p.setViewportSize({width,height});
+    if (width<=900) await p.locator('#tab-overview-view-charts').click();
     for (const mode of ['snapshot','trend']) {
       await p.locator(`#toggleCommodityGroup [data-view="${mode}"]`).click();
       await p.locator(`#toggleModalSplitGroup [data-view="${mode}"]`).click();

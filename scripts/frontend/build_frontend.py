@@ -25,6 +25,7 @@ BUNDLES = {
             ROOT / "js" / "shared" / "national-summary.js",
             ROOT / "js" / "shared" / "data-access.js",
             ROOT / "js" / "shared" / "dialogs.js",
+            ROOT / "js" / "shared" / "mobile-views.js",
             ROOT / "js" / "shared" / "toll-comparison.js",
             ROOT / "js" / "modules" / "maritime.js",
             ROOT / "js" / "modules" / "airfreight.js",

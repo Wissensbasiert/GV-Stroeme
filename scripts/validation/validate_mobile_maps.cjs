@@ -39,7 +39,7 @@ const pass=(name,detail)=>{results.push({name,detail,status:'passed'});console.l
   await pane.locator('.leaflet-container').evaluate(n=>n.classList.add('wbp-tooltip-open'));
   const occlusion=await pane.evaluate(n=>{const z=n.querySelector('.leaflet-control-zoom'),m=document.getElementById('mobileModuleMenu'),zr=z.getBoundingClientRect(),mr=m.getBoundingClientRect();const left=Math.max(zr.left,mr.left),right=Math.min(zr.right,mr.right),top=Math.max(zr.top,mr.top),bottom=Math.min(zr.bottom,mr.bottom);return{overlap:right>left&&bottom>top,menuOnTop:right>left&&bottom>top?m.contains(document.elementFromPoint((left+right)/2,(top+bottom)/2)):null}});
   if(occlusion.overlap)assert.equal(occlusion.menuOnTop,true);
-  if(key==='overview'){assert.equal(occlusion.overlap,true);await shot('04-menue-ueber-zoom')}
+  if(key==='rail'){assert.equal(occlusion.overlap,true);await shot('04-menue-ueber-zoom')}
   await pane.locator('.leaflet-container').evaluate(n=>n.classList.remove('wbp-tooltip-open'));
   await p.locator('#btnMobileModule').tap();
   pass('Mobile menu, legend and credits: '+key,{geometry,occlusion});

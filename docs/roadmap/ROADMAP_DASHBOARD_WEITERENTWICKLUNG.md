@@ -208,6 +208,12 @@ Nach dem Öffnen erscheint eine gruppierte Modulliste entsprechend der Desktop-S
 
 Die mobile Auswahl muss per Berührung und Tastatur bedienbar sein. Nach einer Auswahl schließt sie sich und setzt den Fokus nachvollziehbar auf den Modulwahlschalter beziehungsweise den Beginn des neu geöffneten Moduls zurück.
 
+### 8.1 Mobile Analyseansichten innerhalb eines Moduls
+
+**Lokal umgesetzt am 06.09.2026; Prüfstand im QS-Plan, Abschnitt 10.22.** Bis 900 Pixel Fensterbreite wählt die zusätzliche Leiste „Karte | Relationen | Diagramme“ genau eine Ergebnisansicht. Kennzahlen und gemeinsame Orientierung bleiben oberhalb der Auswahl. Die Desktop-Anordnung bleibt bestehen.
+
+Ohne räumliche Auswahl erklärt die Orientierung den Kartentipp und die Auswahl unter „Aktuell → Raum & Zeit“. Eine Schaltfläche öffnet direkt das passende bestehende Einstellungsfeld. Nach Regions-, Gemeinde-, Hafen- oder Flughafenauswahl wird der gewählte Ort genannt; „Relationen ansehen“ bietet einen freiwilligen nächsten Schritt. Es erfolgt kein automatischer Ansichtswechsel. Filter, Daten und Kartenausschnitt bleiben beim Umschalten erhalten. Der Export umfasst weiterhin die gesamte aktuelle Modulauswertung.
+
 ## 9. Farb- und Symbolsystem
 
 Das Luftfrachtmodul erhält ein eigenes Flugzeug- beziehungsweise Luftfracht-Symbol und eine feste Akzentfarbe, die sich ausreichend von Schiene, Binnenschifffahrt, Seeverkehr und Prognose unterscheidet. Die Farbe wird konsistent in Navigation, Kennzahlen, Karte, Diagrammen und aktiven Zuständen verwendet.
@@ -332,7 +338,7 @@ Die Darstellung soll immer erkennen lassen, auf welchen aktuellen Monat und welc
 
 ### 14.3 Diagramme vergrößern und begrenzte Exporte
 
-**Lokal umgesetzt am 05.09.2026; Prüfstand im QS-Plan, Abschnitt 10.18.** Auf Desktop und Laptop öffnet der Knopf unter jedem Diagramm eine größere interaktive Ansicht. Daten, sichtbare Reihen, Einheit und Auswahl werden übernommen; lange Gütergruppenbezeichnungen werden umgebrochen. Auf schmalen Mobilansichten ist der Knopf ausgeblendet.
+**Lokal umgesetzt am 05.09.2026; Prüfstand im QS-Plan, Abschnitt 10.18.** Auf Desktop und Laptop öffnet das Symbol in der Kopfzeile jedes Diagramms eine größere interaktive Ansicht. Daten, sichtbare Reihen, Einheit und Auswahl werden übernommen; lange Gütergruppenbezeichnungen werden umgebrochen. Auf schmalen Mobilansichten ist der Knopf ausgeblendet.
 
 Der Menüpunkt „Export“ liegt zwischen „Quellen“ und „KI fragen“. Einzelne Diagramme können als PNG mit 1.800 Pixeln Breite einschließlich Auswahl und Quellenvermerk heruntergeladen werden. Excel enthält Kennzahlen, sichtbare Tabellenzeilen und Diagrammwerte des aktiven Moduls einschließlich Quellen, Einheiten und Filterkontext; Obergrenze: 2.000 Datenzeilen. Unskalierte numerische Tabellenwerte und Diagrammwerte bleiben Zahlen, Regionencodes bleiben Text.
 

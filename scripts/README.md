@@ -53,3 +53,5 @@ Welche Reihenfolge und welche Prüfungen für eine konkrete Datenaktualisierung 
 - `validation/validate_chart_layout.cjs`: Mindestzeichenflächen bei fünf Bildschirmgrößen, zwölf Kopfzeilensymbole, weißer Hinweis und Fokusführung, scrollbare Legende mit Tastaturbedienung sowie Größenrückkehr nach NST-Wechseln in Schiene, Binnenschiff und Seeverkehr. Parameter: lokale URL und externer Ausgabeordner.
 
 - `validation/validate_mobile_maps.cjs`: echte Touch-Bedienung der neun Kartenlegenden, Menü vor Kartensteuerung per Trefferprüfung, Abstand zu vollständigen Quellenangaben und schmale Mobilansichten. Optionaler Vergleich mit zuvor gespeicherten Desktop-Abmessungen. Parameter: lokale URL, externer Ausgabeordner, optional Desktop-Geometrie-JSON.
+
+- `validation/validate_mobile_views.cjs`: Desktop-Vergleich aller neun Module bei zwei Größen; mobile Register, passende Einstellungsfelder, Regions-/Jahreswechsel, echter Kartentipp, unveränderter Kartenausschnitt, Zurücksetzen, Tastatur und 320–900 Pixel breite Ansichten. Parameter: lokale URL, externer Ausgabeordner und optional vorher gespeicherte Desktop-Geometrie-JSON.

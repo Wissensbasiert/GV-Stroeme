@@ -9,7 +9,7 @@
   function exportText(node) {
     if (!node) return '';
     const copy = node.cloneNode(true);
-    copy.querySelectorAll('svg, button, .info-tooltip-wrap, .map-tooltip-filter-hint').forEach(n => n.remove());
+    copy.querySelectorAll('svg, button, .info-tooltip-wrap, .map-tooltip-filter-hint, .mobile-setting-label').forEach(n => n.remove());
     return copy.textContent.replace(/\s+/g, ' ').trim();
   }
   function exportTableCell(cell) {
@@ -61,15 +61,22 @@
     chart.update('none');
     return chart;
   }
+  function isExportViewElement(node) {
+    if (node.getClientRects().length) return true;
+    // Mobile tabs only hide presentation panels, not parts of the analysis.
+    // Preserve the same scoped export when the user switches between those views.
+    return mobileAnalysisQuery.matches && !!node.closest('.tab-pane.active [data-mobile-view-panel]')
+      && !node.closest('[hidden]') && node.style.display !== 'none';
+  }
   function captureExportSnapshot() {
     const pane = document.getElementById(state.activeTab);
     const ready = pane && pane.getAttribute('aria-busy') !== 'true' && pane.dataset.loadError !== 'true';
     const tabName = exportText(document.querySelector(`#mainNav [data-tab="${state.activeTab}"]`));
     const context = [...document.querySelectorAll('.analysis-summary-item')].filter(n => !n.hidden && n.style.display !== 'none').map(exportText).filter(Boolean).join(' · ');
     const sources = [...document.querySelectorAll('#modalLicenses .source-item')].map(n => [exportText(n), ...[...n.querySelectorAll('a[href]')].map(a => a.href)].join('\n'));
-    const charts = ready ? [...pane.querySelectorAll('canvas')].filter(c => c.getClientRects().length).map(c => Chart.getChart(c)).filter(Boolean).map(snapshotChart) : [];
-    const kpis = ready ? [...pane.querySelectorAll('.kpi-card')].filter(n => n.getClientRects().length).map(n => [exportText(n.querySelector('.kpi-title')), exportText(n.querySelector('.kpi-value')), exportText(n.querySelector('.kpi-sub'))]) : [];
-    const tables = ready ? [...pane.querySelectorAll('table')].filter(n => n.getClientRects().length).map(table => ({ title: exportText(table.closest('.card')?.querySelector('.card-title')) || 'Tabelle', rows: [...table.querySelectorAll('tr')].filter(n => n.getClientRects().length).map(row => [...row.querySelectorAll('th,td')].map(exportTableCell)) })) : [];
+    const charts = ready ? [...pane.querySelectorAll('canvas')].filter(isExportViewElement).map(c => Chart.getChart(c)).filter(Boolean).map(snapshotChart) : [];
+    const kpis = ready ? [...pane.querySelectorAll('.kpi-card')].filter(isExportViewElement).map(n => [exportText(n.querySelector('.kpi-title')), exportText(n.querySelector('.kpi-value')), exportText(n.querySelector('.kpi-sub'))]) : [];
+    const tables = ready ? [...pane.querySelectorAll('table')].filter(isExportViewElement).map(table => ({ title: exportText(table.closest('.card')?.querySelector('.card-title')) || 'Tabelle', rows: [...table.querySelectorAll('tr')].filter(isExportViewElement).map(row => [...row.querySelectorAll('th,td')].map(exportTableCell)) })) : [];
     const notes = [...pane.querySelectorAll('.info-tooltip-box')].map(exportText);
     const key = state.activeTab.replace('tab-', '');
     const map = maps[key];

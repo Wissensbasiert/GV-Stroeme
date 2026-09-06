@@ -573,3 +573,19 @@ Browserprotokoll und visuell geprüfte Screenshots: `C:/Users/paulh/.codex/visua
 - Desktop bei 1.479 × 912 Pixeln: Abmessungen und Positionen von Modulraster, Diagrammzeile, beiden Übersichtsdiagrammen und Kartenlegende stimmen exakt mit dem vor dieser Änderung aufgenommenen Stand überein. Der mobile Darstellungsbereich und das Legendensymbol sind dort nicht aktiv.
 
 **Prüfungen:** `validate_mobile_maps.cjs`, Frontend-Zusammensetzung, JavaScript-Syntax und UTF-8. Keine Änderung von Daten oder Berechnungen; keine Produktivbereitstellung. Desktop-Vergleich, Browserprotokoll und Screenshots: `C:/Users/paulh/.codex/visualizations/2026/09/05/01a0726d-16d5-7872-b94d-06e55ba1e171/Mobile_Karten_2026-09-06/`.
+
+
+## 10.22 Mobile Umschaltung Karte / Relationen / Diagramme (06.09.2026)
+
+**Status: lokal umgesetzt und geprüft; keine Produktivbereitstellung.** Der zuvor abgestimmte Vorschlag aus Abschnitt 10.21 ist damit umgesetzt. Vor der Änderung wurde Commit `b28b93f735b009146f11c1d382c15502d9c6f808` auf `origin/codex/stand-vor-mobiler-ansicht-20260906` gesichert und die Remote-Commit-ID kontrolliert. Die zunächst vom automatischen Freigabesystem abgelehnten abgeleiteten Datenpakete wurden aus dem Push entfernt. Ihre Ausgangsdaten waren bereits auf `origin/main` vorhanden; 896 daraus vollständig reproduzierbare Ausgaben wurden geprüft. Die Wiederherstellung ist im Projekt-README beschrieben.
+
+- Alle neun Module besitzen mobil eine gemeinsame Orientierung und drei Ergebnisansichten. Kennzahlen bleiben erhalten. Hinweise und Verknüpfungen verwenden die tatsächlich sichtbare Bezeichnung „Aktuell → Raum & Zeit“; das richtige Regions-, Gemeinde-, Hafen- oder Flughafenfeld wird geöffnet und fokussiert.
+- Die Auswahl bleibt beim Umschalten erhalten. Beispiel Duisburg: Relationstabelle und Diagramme, anschließend Jahreswechsel auf 2023 aus der Diagrammansicht, ohne Verlust von Region oder aktiver Ansicht. Ein echter Kartentipp auf Berlin aktualisiert die Auswahl, ohne automatisch zu den Relationen zu wechseln. Zurücksetzen auf Deutschland stellt den Auswahlhinweis wieder her.
+- Kartenausschnitt und Zoom stimmen vor und nach dem Wechsel über Relationen und Diagramme exakt überein. Die von Leaflet sonst erzeugte Pixelrundung beim Wiedereinblenden wurde berücksichtigt. Diagramme werden nach dem Einblenden korrekt vermessen.
+- Mobile Ansichten bei 393 × 852 Pixeln in allen neun Modulen, zusätzlich 320, 430, 768 und 900 Pixel Breite: genau ein Ergebnisbereich sichtbar, verborgene Bereiche nicht fokussierbar, kein horizontaler Seitenüberlauf. Pfeiltasten sowie Home/End funktionieren in der Registerleiste. Beim Vergrößern zum Desktop erscheinen alle Ergebnisbereiche wieder.
+- Desktop: alle neun Module bei 1.479 × 912 und 2.119 × 1.272 Pixeln mit dem Stand vor der Änderung verglichen. Positionen und Abmessungen von Modulraster, Karten und Diagrammen bleiben innerhalb eines Pixels identisch. Die neue Navigationsleiste bleibt dort unsichtbar.
+- Export aus der mobilen Kartenansicht: beide Diagramme bleiben auswählbar. Zusätzlich Excel heruntergeladen und mit openpyxl geöffnet: Kennzahlen, Quellenbogen, zehn Duisburger Relationen und beide Diagrammblätter vorhanden. Groot-Rijnmond: numerischer Wert 30.252,2 in 1.000 Tonnen bei Berichtsjahr 2024; die visuell verborgene Relationstabelle wurde vollständig übernommen.
+
+**Prüfungen:** `validate_mobile_views.cjs`: 36 bestandene Fälle, keine unbehandelten JavaScript-Fehler. Zusätzliche Excel-Wiederöffnung, Frontend-Zusammensetzung, JavaScript-Syntax und UTF-8 geprüft. Die vorhandenen Karten- und Diagrammlayout-Prüfer wurden an die Register angepasst; die fachlichen Datenpipelines wurden nicht verändert.
+
+Nachweise einschließlich Desktop-Ausgangsmaßen, Screenshots, Browserprotokoll und Excel-Datei: `C:/Users/paulh/.codex/visualizations/2026/09/05/01a0726d-16d5-7872-b94d-06e55ba1e171/Mobile_Ansichten_2026-09-06/`. Localhost auf Port 8000 bleibt aktiv.

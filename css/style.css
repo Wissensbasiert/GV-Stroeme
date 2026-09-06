@@ -4626,3 +4626,28 @@ svg:focus {
   }
   .choropleth-legend .btn-legend-toggle:focus-visible { outline: 2px solid #17613c; outline-offset: -3px; }
 }
+
+/* One results view at a time on mobile; original cards stay in their desktop DOM. */
+.mobile-analysis-navigation, .mobile-setting-label { display: none; }
+@media (max-width: 900px) {
+  .desktop-setting-label { display: none; }
+  .mobile-setting-label { display: inline; }
+  .mobile-analysis-navigation { display: block; margin-bottom: 12px; border: 1px solid #dbe4ee; border-radius: 10px; background: #fff; }
+  .mobile-analysis-context { padding: 12px; }
+  .mobile-analysis-title { display: block; color: #0f172a; font-size: .9rem; line-height: 1.4; }
+  .mobile-analysis-hint { margin: 6px 0 10px; font-size: .8rem; line-height: 1.5; color: #475569; }
+  .mobile-analysis-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .mobile-analysis-actions button { min-height: 44px; padding: 8px 12px; background: #f0f7f4; color: #17613c; border: 1px solid #bed9ca; border-radius: 6px; font: inherit; font-size: .8rem; cursor: pointer; }
+  .mobile-analysis-actions [hidden] { display: none; }
+  .mobile-analysis-tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 4px; gap: 4px; border-top: 1px solid #e2e8f0; background: #f5f8fc; border-radius: 0 0 10px 10px; }
+  .mobile-analysis-tabs button { min-width: 0; min-height: 44px; padding: 8px 4px; border: 1px solid transparent; border-radius: 6px; background: transparent; color: #475569; font: inherit; font-size: .82rem; font-weight: 600; cursor: pointer; }
+  .mobile-analysis-tabs button[aria-selected="true"] { color: #17613c; border-color: #bed9ca; background: #fff; box-shadow: 0 1px 3px #0f172a0d; }
+  .mobile-analysis-navigation button:focus-visible { outline: 2px solid #17613c; outline-offset: -2px; }
+  .tab-pane[data-mobile-view="map"] .right-analytics-column,
+  .tab-pane[data-mobile-view="relations"] [data-mobile-view-panel="map"],
+  .tab-pane[data-mobile-view="relations"] [data-mobile-view-panel="charts"],
+  .tab-pane[data-mobile-view="charts"] [data-mobile-view-panel="map"],
+  .tab-pane[data-mobile-view="charts"] [data-mobile-view-panel="relations"] { display: none; }
+  .tab-pane[data-mobile-view="charts"] .chart-card-single { height: 400px; min-height: 400px; flex: none; }
+  .tab-pane[data-mobile-view="charts"] .sub-chart-card { height: 380px; min-height: 380px; }
+}

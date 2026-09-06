@@ -111,3 +111,15 @@ Diagrammlayout separat prüfen: `node scripts/validation/validate_chart_layout.c
 - Eingeklappte mobile Legenden zeigen nur ein antippbares Legendensymbol. Aufgeklappt bleiben Titel und Erklärung erhalten. Beide Zustände haben einen zugänglichen Namen und `aria-expanded`; die Luftfrachtlegende ist jetzt ebenfalls an die gemeinsame Umschaltung angeschlossen.
 - Die Höhe der Quellenzeile wird je Karte beobachtet. Die mobile Legende sitzt acht Pixel oberhalb der Quellenzeile; lange Quellenangaben umbrechen innerhalb der Karte. Umfangreiche Legenden können innerhalb des Kartenrahmens scrollen. Quellen und Lizenzen bleiben vollständig erhalten.
 - Prüfung: `node scripts/validation/validate_mobile_maps.cjs http://127.0.0.1:8000/ C:\tmp\gueterstroeme-mobile-pruefung`. Optional als viertes Argument eine vor der Änderung gespeicherte Desktop-Geometrie-JSON übergeben; Playwright bleibt außerhalb des Projekts wie oben beschrieben.
+
+
+### Mobile Analyseansichten (06.09.2026)
+
+- `js/shared/mobile-views.js` ergänzt bis 900 Pixel Fensterbreite die Ansichten „Karte“, „Relationen“ und „Diagramme“ in allen neun Modulen. Kennzahlen und Auswahlhinweis bleiben oberhalb der Umschaltung. Die vorhandenen Karten und Auswertungen werden weder kopiert noch im Desktop-DOM verschoben.
+- Pro Modul bleibt die gewählte Ansicht erhalten. Ansichtswechsel verändern keine Filter und führen nicht zu neuen Datenabfragen. Verborgene Ansichtsbereiche sind mobil auch für Fokus und Hilfstechniken ausgeblendet; beim Wechsel zum Desktop werden alle Bereiche wieder freigegeben.
+- Die mobile Anleitung benennt „Aktuell → Raum & Zeit“. Ihre Schaltfläche öffnet das bestehende Einstellungsfeld und fokussiert je nach Modul die Regions-, Gemeinde-, Hafen- oder Flughafenauswahl. Nach einer Auswahl bleibt die Ansicht erhalten; „Relationen ansehen“ ist ein freiwilliger nächster Schritt.
+- Karten und Diagramme werden nach dem Einblenden neu vermessen. Kartenausschnitt und Zoom werden beim Ansichtswechsel wiederhergestellt, einschließlich der sonst von Leaflet verursachten Rundung auf ganze Pixel.
+- Der Export bleibt eine Auswertung des gesamten aktiven Moduls. Die lediglich durch mobile Ansichtsregister verborgenen Tabellen und Diagramme bleiben enthalten; alle bisherigen Filter und Exportgrenzen gelten weiter.
+- Prüfung: `node scripts/validation/validate_mobile_views.cjs http://127.0.0.1:8000/ C:\tmp\gueterstroeme-mobile-views-pruefung [Desktop-Geometrie-JSON]`. Externe Playwright-Installation wie oben. Die bestehenden Diagrammlayout- und Kartenprüfer berücksichtigen die neuen Register.
+
+Der Stand vor dieser Änderung ist unter `codex/stand-vor-mobiler-ansicht-20260906`, Commit `b28b93f735b009146f11c1d382c15502d9c6f808`, auf dem bestehenden GitHub-Remote gesichert. Abgeleitete Browserpakete werden nach Wiederherstellung gemäß Projekt-README aus den bereits versionierten Ausgangspaketen erzeugt; die Reproduzierbarkeit aller 896 Ausgabedateien wurde vor der Sicherung geprüft.

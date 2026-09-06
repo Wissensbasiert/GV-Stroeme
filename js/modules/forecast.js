@@ -829,7 +829,7 @@
           <td colspan="4" style="text-align:center; color:#475569; padding:28px 16px; font-size:0.86rem; line-height:1.6;">
             <div class="empty-state-icon"><img src="assets/icons/map.svg" alt="" aria-hidden="true"></div>
             <strong style="color:#0f172a; font-size:0.95rem;">Deutschland aktiv</strong><br>
-            <span style="color:#64748b; font-size:0.81rem;">Bitte wählen Sie in der Karte per <strong>Mausklick eine Region</strong> aus oder öffnen Sie <strong>Aktuelle Einstellungen → Raum &amp; Zeit</strong> und wählen Sie dort eine Region aus, um relationale Verflechtungen und Partnerregionen anzuzeigen.</span><br><br>
+            <span style="color:#64748b; font-size:0.81rem;">Bitte wählen Sie in der Karte per <strong>Mausklick eine Region</strong> aus oder öffnen Sie <strong><span class="desktop-setting-label">Aktuelle Einstellungen</span><span class="mobile-setting-label">Aktuell</span> → Raum &amp; Zeit</strong> und wählen Sie dort eine Region aus, um relationale Verflechtungen und Partnerregionen anzuzeigen.</span><br><br>
             <span style="color:#475569; font-size:0.79rem;">${nationalScopeText}</span>
           </td>
         </tr>

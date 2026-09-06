@@ -681,7 +681,7 @@
     setText('tollRelationsTitle', `Top ${state.topX} Relationen: Gemeinde auswählen`);
     setTollTableMessage(
       'Gemeinde auswählen',
-      'Zoomen Sie in die Karte und wählen Sie per <strong>Mausklick eine Gemeinde</strong> aus. Alternativ öffnen Sie <strong>Aktuelle Einstellungen → Raum &amp; Zeit</strong> und nutzen dort die Gemeindesuche. Danach werden die wichtigsten Relationen angezeigt.'
+      'Zoomen Sie in die Karte und wählen Sie per <strong>Mausklick eine Gemeinde</strong> aus. Alternativ öffnen Sie <strong><span class="desktop-setting-label">Aktuelle Einstellungen</span><span class="mobile-setting-label">Aktuell</span> → Raum &amp; Zeit</strong> und nutzen dort die Gemeindesuche. Danach werden die wichtigsten Relationen angezeigt.'
     );
     setMapDefaultViewport('toll', true);
     scheduleTollMunicipalityBoundaryRefresh();
