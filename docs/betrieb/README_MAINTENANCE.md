@@ -123,3 +123,26 @@ Diagrammlayout separat prüfen: `node scripts/validation/validate_chart_layout.c
 - Prüfung: `node scripts/validation/validate_mobile_views.cjs http://127.0.0.1:8000/ C:\tmp\gueterstroeme-mobile-views-pruefung [Desktop-Geometrie-JSON]`. Externe Playwright-Installation wie oben. Die bestehenden Diagrammlayout- und Kartenprüfer berücksichtigen die neuen Register.
 
 Der Stand vor dieser Änderung ist unter `codex/stand-vor-mobiler-ansicht-20260906`, Commit `b28b93f735b009146f11c1d382c15502d9c6f808`, auf dem bestehenden GitHub-Remote gesichert. Abgeleitete Browserpakete werden nach Wiederherstellung gemäß Projekt-README aus den bereits versionierten Ausgangspaketen erzeugt; die Reproduzierbarkeit aller 896 Ausgabedateien wurde vor der Sicherung geprüft.
+
+### Steckbrief: Kurzfazit, Top 5 und PDF (07.09.2026)
+
+Der Einstieg im Steckbrief besteht bei vollständiger Datenbasis aus etwa acht bis zehn Sätzen in drei Absätzen: Aufkommen und historische Entwicklung; Verkehrsträger mit Bundesvergleich sowie wichtigste Gütergruppen insgesamt und je Richtung; Saldo und stärkste Beziehung, getrennte KV-Anteile sowie Ausblick bis 2040. Die Formulierungen entstehen in `renderSteckbriefModal()` in `js/source/core-head.js` aus denselben Profildaten wie die folgenden Abschnitte.
+
+- Das Profil bleibt eine Auswertung aller Güter und beider Richtungen in Tonnen. Modulfilter zu Gütergruppe, Richtung und Verkehrsleistung verändern es nicht. Der bestehende Profiljahr-Mechanismus bleibt maßgeblich.
+- Modalanteile verwenden die Summe der drei Verkehrsträgermengen im Profiljahr. Der Vergleich nennt den Verkehrsträger mit der größten absoluten Anteilsabweichung zum bundesweiten Modal Split. Er ist kein ungewichteter Durchschnitt der Regionen; beim Deutschlandprofil entfällt der Selbstvergleich.
+- Die beiden größten NST-7-Gruppen werden mit ihren Anteilen an der aufgeschlüsselten Gütermenge genannt, zusätzlich der Bundesanteil der führenden Gruppe. Versand und Empfang nennen jeweils ihre größte Gruppe mit dem Anteil innerhalb der betreffenden Richtung. Fehlende Richtungsaufschlüsselungen werden nicht aus der Gesamtstruktur geschätzt.
+- Gegenwärtige und prognostizierte Beziehungen zeigen jeweils höchstens fünf positive Einträge, absteigend nach Menge. Die Ist-Richtungen werden wie bisher zuerst je Partner zusammengeführt. Die Gütergruppenliste bleibt bei drei Einträgen.
+- Die Prognose bleibt P1, gesamter Landverkehr, Vergleich 2019–2040. Wachstum, Rückgang und auf eine Nachkommastelle unveränderte Entwicklung werden sprachlich unterschieden. Ein tatsächlicher Prognosewert null ist ein Rückgang um 100 Prozent; fehlender oder nullwertiger Basiswert bleibt nicht vergleichbar.
+- PDF verwendet weiterhin den vorhandenen Browser-Druckknopf und dieselben Inhalte. Absatzabstände, ungeteilte Abschnitte und Tabellenzeilen bleiben erhalten. Lange mobile Titel umbrechen vor dem Druckknopf, ohne ihn zu überlagern.
+
+Prüfung mit externer Playwright-Installation wie oben:
+
+```powershell
+node scripts/validation/validate_steckbrief.cjs http://127.0.0.1:8000/ C:/tmp/gueterstroeme-steckbrief
+python -B scripts/validation/validate_steckbrief_pdf.py C:/tmp/gueterstroeme-steckbrief
+```
+
+Der PDF-Prüfer benötigt PyMuPDF (`fitz`), liest die fünf Browserexporte erneut und rendert alle Seiten zur anschließenden Sichtprüfung.
+
+
+Die sprachliche Überarbeitung nach `wbp-writing` vom 07.09.2026 integriert Mengenanteile in den Satz statt in Klammern. Verkehrsträger erhalten passende Artikel und Anteilsbezeichnungen. Gleiche führende Gütergruppen werden für Versand und Empfang gemeinsam genannt; unterschiedliche Gruppen, Ranggleichheit und fehlende Richtungsdaten haben eigene Formulierungen. Binnenverkehr wird als „der Binnenverkehr in …“ bezeichnet, eine externe Verbindung als „Verkehrsbeziehung … mit …“. Die Prognose nennt weiterhin explizit P1, Landverkehr und den Vergleich 2019–2040. Die ausführlichen Gütergruppenbezeichnungen bleiben unverändert.

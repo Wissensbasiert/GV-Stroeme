@@ -589,3 +589,27 @@ Browserprotokoll und visuell geprüfte Screenshots: `C:/Users/paulh/.codex/visua
 **Prüfungen:** `validate_mobile_views.cjs`: 36 bestandene Fälle, keine unbehandelten JavaScript-Fehler. Zusätzliche Excel-Wiederöffnung, Frontend-Zusammensetzung, JavaScript-Syntax und UTF-8 geprüft. Die vorhandenen Karten- und Diagrammlayout-Prüfer wurden an die Register angepasst; die fachlichen Datenpipelines wurden nicht verändert.
 
 Nachweise einschließlich Desktop-Ausgangsmaßen, Screenshots, Browserprotokoll und Excel-Datei: `C:/Users/paulh/.codex/visualizations/2026/09/05/01a0726d-16d5-7872-b94d-06e55ba1e171/Mobile_Ansichten_2026-09-06/`. Localhost auf Port 8000 bleibt aktiv.
+
+## 10.23 Steckbrief: erweiterter Einstieg und Top 5 (07.09.2026)
+
+**Status: lokal umgesetzt und geprüft; keine Veröffentlichung.** Die Nutzeranforderung umfasst eine strukturierte Zusammenfassung mit Güterstruktur, Bundesvergleich und Verkehrsprognose sowie fünf statt drei Beziehungen bei weiterhin funktionsfähigem PDF-Export.
+
+- Kurzfazit mit acht Sätzen in drei Absätzen bei vollständiger Datenbasis. Nenner und Bezugsjahre entsprechen den Profilabschnitten. Gütergruppen insgesamt sowie die jeweils wichtigste Versand-/Empfangsgruppe werden genannt; nationale Anteile werden im selben Profiljahr verglichen. Beim Deutschlandprofil entfällt der Selbstvergleich. KV-Anteile bleiben nach Verkehrsträger getrennt.
+- Zwei Relationslisten mit je fünf positiven Einträgen; Ist-Partner werden vor der Begrenzung über beide Richtungen zusammengeführt. Die separate Gütergruppenliste bleibt unverändert bei drei Gruppen.
+- Prognose: P1 2040 gegenüber 2019, ausschließlich Landverkehr. Grenzfälle für Wachstum, Rückgang, unverändertes Niveau, Zielwert null sowie fehlenden/undefinierten/nullwertigen Basis- oder Zielwert geprüft. Ein gültiger Zielwert null ergibt −100 Prozent; fehlende Vergleichsbasis erzeugt keine Änderungsrate.
+- Normales Chrome: Deutschland, Duisburg, Berlin und Bottrop mit echten lokalen Daten geprüft. Sichtbare Modal- und Güteranteile sowie Prognoseraten wurden gegen die JSON-Werte gerechnet. Duisburg: 108,2 Mio. t im Profiljahr 2024, 38,5 Prozent Binnenschiffsanteil, Prognose −10 Prozent gegenüber 2019. Berlin: Prognose +19,5 Prozent; Bottrop: −31,9 Prozent. Keine unbehandelten JavaScript-Fehler.
+- Modulfilter für Tonnenkilometer, Versand und eine einzelne Gütergruppe verändern das vollständige Profil nicht. Druckknopf ruft weiterhin den Browserdruck auf. Mobile Kopfzeile bei 320 und 390 Pixeln ohne Überschneidung des langen Titels mit dem Druckknopf; scrollbare Zusammenfassung, beide Top-5-Listen und Quellen erreichbar. Rückkehr zum Desktop geprüft.
+- Fünf PDFs (vier Profile und ein Export aus der mobilen Ansicht) erneut geöffnet: jeweils drei A4-Seiten, vollständiges Kurzfazit, alle Tabellenzeilen und Quellen, Text innerhalb der Seitenränder, keine beschädigten Unicode-Zeichen. Gerenderte Seiten und mobile Screenshots visuell geprüft; keine abgeschnittenen Inhalte oder Tabellenzeilen.
+
+**Prüfungen:** `validate_steckbrief.cjs` (10 bestandene Prüfpunkte), `validate_steckbrief_pdf.py`, `validate_frontend_loading.cjs`, Frontend-Build, JavaScript-Syntax und UTF-8. Fachliche Rohdatenpipelines wurden nicht verändert oder neu gerechnet. Vorhandene nicht zugehörige unversionierte Dateien bleiben erhalten.
+
+Nachweise: `C:/Users/paulh/.codex/visualizations/2026/09/07/01a07b4d-7ef3-7300-af07-a2f8e9283af2/Steckbrief/` (Browserprotokoll, PDFs, PDF-Prüfbericht und Seitenbilder). Vorschau auf Port 8000 bleibt verfügbar.
+
+
+### Sprachliche Nachbearbeitung des Kurzfazits mit WBP Writing (07.09.2026)
+
+Die Satzbausteine aus Abschnitt 10.23 wurden nach dem WBP-Stil für Web-/Produkttexte überarbeitet. Drei Absätze bleiben erhalten; zugunsten kürzerer Sätze sind es je nach Datenlage etwa acht bis zehn Sätze. Anteile stehen im Fließtext ohne Klammern. Artikel bei Verkehrsträgern, natürliche Anteilsbezeichnungen, die Unterscheidung von Binnenverkehr und externer Verbindung sowie gemeinsame Nennung identischer führender Gütergruppen verbessern den Lesefluss. Salden werden als „mehr Güter empfangen als versandt“ beziehungsweise umgekehrt beschrieben; Prognosen als höheres/geringeres Aufkommen gegenüber 2019. Datenbasis, Nenner und Rangfolge bleiben unverändert.
+
+**Prüfung:** `validate_steckbrief.cjs` ergänzt sieben Formulierungsfälle (gleiche/verschiedene Gütergruppen, Ranggleichheit, nur Versand/nur Empfang, nullwertige und fehlende Richtungsdaten), prüft Klammerfreiheit sowie Berlin mit Binnenverkehr und Duisburg mit externer Verbindung. Erneuter Browservergleich für vier Profile und die mobile Darstellung; insgesamt elf bestandene Prüfpunkte ohne unbehandelte JavaScript-Fehler. `validate_steckbrief_pdf.py` prüft erneut fünf vollständige PDF-Exporte; jeweils drei A4-Seiten. UTF-8, Syntax und Frontend-Build geprüft. Lokale Umsetzung.
+
+Nachweise: `C:/Users/paulh/.codex/visualizations/2026/09/07/01a07b4d-7ef3-7300-af07-a2f8e9283af2/Steckbrief_WBP_Text/`.

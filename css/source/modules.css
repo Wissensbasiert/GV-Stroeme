@@ -460,6 +460,7 @@
   gap: 11px;
   min-width: 0;
 }
+.steckbrief-modal-title-wrap > div { min-width: 0; }
 .steckbrief-modal-title-wrap .header-icon {
   width: 22px;
   height: 22px;
@@ -572,6 +573,7 @@
   font-size: 0.9rem;
   line-height: 1.62;
 }
+.steckbrief-summary p + p { margin-top: 9px; }
 .steckbrief-section {
   margin-bottom: 16px;
   padding: 17px 19px;

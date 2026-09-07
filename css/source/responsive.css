@@ -409,6 +409,11 @@
   .modal-dialog-xl .steckbrief-modal-header {
     align-items: flex-start;
     padding: 16px 50px 14px 18px;
+    gap: 12px;
+  }
+  .modal-dialog-xl .steckbrief-modal-header h3 {
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
   .steckbrief-print-button {
     padding: 7px 8px;
@@ -460,6 +465,7 @@
 @media print {
   @page { size: A4; margin: 12mm; }
 
+  body { background: #ffffff !important; }
   body > * { display: none !important; }
   #modalSteckbrief {
     position: static !important;
@@ -487,6 +493,7 @@
   }
   #modalSteckbrief .modal-body {
     display: block !important;
+    background: #ffffff !important;
     padding: 0 !important;
     overflow: visible !important;
   }

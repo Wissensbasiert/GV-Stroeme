@@ -3504,7 +3504,7 @@
         name: row.isBinnen ? `Binnenverkehr in ${regionName}` : (row.name || regionsData[row.id]?.name || row.id)
       }))
       .sort((a, b) => b.tonnes - a.tonnes)
-      .slice(0, 3);
+      .slice(0, 5);
   }
 
   function getProfileForecastRelations(regionId) {
@@ -3513,7 +3513,7 @@
     return [...rows]
       .filter(row => Number(row.tonnes || 0) > 0)
       .sort((a, b) => Number(b.tonnes || 0) - Number(a.tonnes || 0))
-      .slice(0, 3)
+      .slice(0, 5)
       .map(row => {
         const partnerId = row.partner_id || row.dest_id || row.orig_id;
         return {
@@ -3572,7 +3572,7 @@
       : record?.modes?.[mode]?.tonnes);
     const total = getTotal(target);
     const baselineTotal = getTotal(baseline);
-    if (!(total > 0) || !(baselineTotal > 0)) return null;
+    if (total === null || total < 0 || !(baselineTotal > 0)) return null;
 
     const modeLabels = { road: 'Straße', rail: 'Schiene', iww: 'Binnenschiff' };
     const modeRows = Object.keys(modeLabels)
@@ -3680,6 +3680,41 @@
   // Render a fact-based regional profile.  The language is generated only
   // from transparent thresholds and the displayed values; no text is stored
   // per region and no AI service is used.
+  // Grammatical variants keep repeated groups, ties and missing directions
+  // readable without inferring a direction from the overall goods structure.
+  function getProfileDirectionalGoodsSentence(groups, formatShare) {
+    const leading = direction => {
+      const rows = Object.entries(groups?.[direction] || {})
+        .filter(([, value]) => typeof value === 'number' && Number.isFinite(value) && value > 0)
+        .sort((a, b) => b[1] - a[1]);
+      const total = rows.reduce((sum, [, value]) => sum + value, 0);
+      if (!total) return null;
+      return {
+        id: rows[0][0],
+        label: `„${NST_GROUPS_7[rows[0][0]] || `Gütergruppe ${rows[0][0]}`}“`,
+        share: formatShare(rows[0][1] / total * 100),
+        tied: rows.length > 1 && rows[0][1] === rows[1][1]
+      };
+    };
+    const outbound = leading('outbound');
+    const inbound = leading('inbound');
+    if (!outbound && !inbound) return 'Für Versand und Empfang liegt keine auswertbare Güterstruktur vor.';
+    const describe = (row, direction) => row.tied
+      ? `Im ${direction} zählt die Gütergruppe ${row.label} mit ${row.share} zu den größten`
+      : `Im ${direction} führt die Gütergruppe ${row.label} mit ${row.share}`;
+    if (!outbound || !inbound) {
+      const available = outbound || inbound;
+      return `${describe(available, outbound ? 'Versand' : 'Empfang')}; für den ${outbound ? 'Empfang' : 'Versand'} liegt keine auswertbare Güterstruktur vor.`;
+    }
+    if (outbound.id === inbound.id && !outbound.tied && !inbound.tied) {
+      return `Die Gütergruppe ${outbound.label} führt sowohl im Versand mit ${outbound.share} als auch im Empfang mit ${inbound.share}.`;
+    }
+    if (outbound.tied || inbound.tied) {
+      return `${describe(outbound, 'Versand')}; ${describe(inbound, 'Empfang').replace(/^Im /, 'im ')}.`;
+    }
+    return `${describe(outbound, 'Versand')}, im Empfang die Gütergruppe ${inbound.label} mit ${inbound.share}.`;
+  }
+
   function renderSteckbriefModal() {
     const isNational = !state.region;
     const regMeta = isNational
@@ -3720,9 +3755,6 @@
       return { mode, value, share, nationalShare, ...modeDefinitions[mode] };
     });
     const leadingMode = [...modeRows].sort((a, b) => b.share - a.share)[0];
-    const modeDifference = leadingMode?.nationalShare === null || leadingMode?.nationalShare === undefined
-      ? null
-      : leadingMode.share - leadingMode.nationalShare;
 
     const groups = getProfileGroups(current);
     const nationalGroups = getProfileGroups(national);
@@ -3757,9 +3789,11 @@
       : '–';
     const forecastSentence = !forecastOutlook
       ? ''
-      : forecastOutlook.totalChange >= 0
-        ? `Für das gesamte Güteraufkommen im Landverkehr (Straße, Schiene und Binnenschiff) wird im Prognosefall P1 bis 2040 gegenüber 2019 ein Anstieg um ${formatDeNum(forecastOutlook.totalChange, 1)} % erwartet.`
-        : `Für das gesamte Güteraufkommen im Landverkehr (Straße, Schiene und Binnenschiff) wird im Prognosefall P1 bis 2040 gegenüber 2019 ein Rückgang um ${formatDeNum(Math.abs(forecastOutlook.totalChange), 1)} % erwartet.`;
+      : Math.abs(forecastOutlook.totalChange) < 0.05
+        ? 'Für 2040 geht die Basisprognose P1 von einem gegenüber 2019 unveränderten Güteraufkommen im Landverkehr aus.'
+        : forecastOutlook.totalChange >= 0
+        ? `Für 2040 erwartet die Basisprognose P1 im Landverkehr ein um ${formatDeNum(forecastOutlook.totalChange, 1)} % höheres Güteraufkommen als 2019.`
+        : `Für 2040 erwartet die Basisprognose P1 im Landverkehr ein um ${formatDeNum(Math.abs(forecastOutlook.totalChange), 1)} % geringeres Güteraufkommen als 2019.`;
     const profileScopeId = isNational ? 'DE' : state.region;
     const kvRows = [
       {
@@ -3810,10 +3844,10 @@
           <div class="steckbrief-section-heading"><span>Ausblick bis 2040</span><small>Basisprognose P1 · Vergleich 2019–2040</small></div>
           <div class="steckbrief-forecast-grid">
             <div class="steckbrief-forecast-card"><span>Aufkommen 2040</span><strong>${formatMio(forecastOutlook.total)}</strong><small>Landverkehr im Prognosefall P1</small></div>
-            <div class="steckbrief-forecast-card"><span>Entwicklung ggü. 2019</span><strong class="${profileChangeClass(forecastOutlook.totalChange)}">${forecastChangeText}</strong><small>${forecastOutlook.totalChange >= 0 ? 'Zunahme' : 'Rückgang'} des Aufkommens</small></div>
+            <div class="steckbrief-forecast-card"><span>Entwicklung ggü. 2019</span><strong class="${profileChangeClass(forecastOutlook.totalChange)}">${forecastChangeText}</strong><small>${Math.abs(forecastOutlook.totalChange) < 0.05 ? 'Unverändertes Niveau' : forecastOutlook.totalChange > 0 ? 'Zunahme des Aufkommens' : 'Rückgang des Aufkommens'}</small></div>
             ${forecastOutlook.strongestModeChange ? `<div class="steckbrief-forecast-card"><span>Größte absolute Veränderung</span><strong>${forecastOutlook.strongestModeChange.label}</strong><small>${formatSignedMio(forecastOutlook.strongestModeChange.change)} gegenüber 2019</small></div>` : ''}
           </div>
-          ${forecastRelations.length ? `<div class="steckbrief-section-heading"><span>Stärkste prognostizierte Beziehungen 2040</span><small>Top 3 · alle Güter · beide Richtungen</small></div><div class="steckbrief-relation-table-wrap"><table class="steckbrief-relation-table"><thead><tr><th>Beziehung</th><th>Menge</th></tr></thead><tbody>${forecastRelations.map((relation, index) => `<tr><td><span class="steckbrief-rank">${index + 1}</span><strong>${escapeProfileHtml(relation.name)}</strong>${relation.isBinnen ? '<span class="steckbrief-badge">Binnenverkehr</span>' : ''}</td><td>${formatMio(relation.tonnes)}</td></tr>`).join('')}</tbody></table></div>` : ''}
+          ${forecastRelations.length ? `<div class="steckbrief-section-heading"><span>Stärkste prognostizierte Beziehungen 2040</span><small>Top 5 · alle Güter · beide Richtungen</small></div><div class="steckbrief-relation-table-wrap"><table class="steckbrief-relation-table"><thead><tr><th>Beziehung</th><th>Menge</th></tr></thead><tbody>${forecastRelations.map((relation, index) => `<tr><td><span class="steckbrief-rank">${index + 1}</span><strong>${escapeProfileHtml(relation.name)}</strong>${relation.isBinnen ? '<span class="steckbrief-badge">Binnenverkehr</span>' : ''}</td><td>${formatMio(relation.tonnes)}</td></tr>`).join('')}</tbody></table></div>` : ''}
         </section>`;
 
     const titleEl = document.getElementById('steckbriefModalTitle');
@@ -3840,19 +3874,60 @@
         : totalChange < -2
           ? `Seit ${baseYear} ist das Güteraufkommen um ${formatDeNum(Math.abs(totalChange), 1)} % gesunken.`
           : `Seit ${baseYear} bewegt sich das Güteraufkommen auf ähnlichem Niveau.`;
-    const modeSentence = modeDifference !== null && Math.abs(modeDifference) >= 5
-      ? `Der Anteil ${leadingMode.label === 'Straße' ? 'der Straße' : `der ${leadingMode.label}`} liegt ${formatDeNum(Math.abs(modeDifference), 1)} Prozentpunkte ${modeDifference > 0 ? 'über' : 'unter'} dem Bundeswert.`
+    // Compare shares in the same profile year; the national benchmark is
+    // the aggregate modal split, not the unweighted mean of regional shares.
+    const rankedModes = [...modeRows].sort((a, b) => b.share - a.share);
+    const distinctiveMode = !isNational && modeRows.every(row => row.nationalShare !== null)
+      ? [...modeRows].sort((a, b) => Math.abs(b.share - b.nationalShare) - Math.abs(a.share - a.nationalShare))[0]
+      : null;
+    const modeGrammar = {
+      road: { route: 'die Straße', share: 'der Straßenanteil' },
+      rail: { route: 'die Schiene', share: 'der Schienenanteil' },
+      iww: { route: 'die Binnenschifffahrt', share: 'der Anteil der Binnenschifffahrt' }
+    };
+    const modeComparison = !distinctiveMode
+      ? ''
+      : Math.abs(distinctiveMode.share - distinctiveMode.nationalShare) < 0.05
+        ? ' Die Anteile der Verkehrsträger entsprechen gerundet dem Bundeswert.'
+        : ` Damit liegt ${modeGrammar[distinctiveMode.mode].share} ${formatDeNum(Math.abs(distinctiveMode.share - distinctiveMode.nationalShare), 1)} Prozentpunkte ${distinctiveMode.share > distinctiveMode.nationalShare ? 'über' : 'unter'} dem Bundeswert.`;
+    const modeParts = rankedModes.map((row, index) => index === 0
+      ? `Auf ${modeGrammar[row.mode].route} entfallen ${formatShare(row.share)} des Güteraufkommens`
+      : `auf ${modeGrammar[row.mode].route} ${formatShare(row.share)}`);
+    const modeSentence = `${modeParts.slice(0, -1).join(', ')} und ${modeParts.at(-1)}.${modeComparison}`;
+    const summaryGoods = groupRows.slice(0, 2);
+    const goodsComparison = !isNational && topGroup?.nationalShare !== null && topGroup?.nationalShare !== undefined
+      ? ` gegenüber ${formatShare(topGroup.nationalShare)} bundesweit`
       : '';
-    const balanceSentence = balanceShare >= 5
-      ? `Der Raum weist einen ${balance > 0 ? 'Versand' : 'Empfang'}süberschuss von ${formatMio(Math.abs(balance))} auf.`
-      : '';
+    const summaryGoodsSentence = summaryGoods.length
+      ? `${summaryGoods.length === 1 ? 'Die größte Gütergruppe ist' : 'Die größten Gütergruppen sind'} ${summaryGoods.map((row, index) => `„${row.label}“ mit ${formatShare(row.share)}${index === 0 ? goodsComparison : ''}`).join(' sowie ')}.`
+      : 'Für die Güterstruktur liegt keine auswertbare Aufschlüsselung vor.';
+    const directionalGoodsSentence = getProfileDirectionalGoodsSentence(current.groups_7_tonnes, formatShare);
+    const hasDirectionalVolumes = ['outbound', 'inbound'].every(direction => Number.isFinite(current.directions_tonnes?.[direction]));
+    const balanceSentence = !hasDirectionalVolumes
+      ? 'Für einen Vergleich von Versand und Empfang fehlen Mengenangaben.'
+      : balanceShare >= 5
+        ? `Es werden ${formatMio(Math.abs(balance))} mehr Güter ${balance > 0 ? 'versandt als empfangen' : 'empfangen als versandt'}.`
+        : 'Die Mengen im Versand und Empfang sind annähernd ausgeglichen.';
+    const relationSentence = !relations.length
+      ? ''
+      : relations[0].isBinnen
+        ? `Die mengenstärkste Verkehrsbeziehung ist der Binnenverkehr in ${regMeta.name} mit ${formatMio(relations[0].tonnes)}.`
+        : `Die mengenstärkste Verkehrsbeziehung besteht mit ${relations[0].name} und umfasst ${formatMio(relations[0].tonnes)}.`;
+    const kvSummary = kvRows.filter(row => row.share !== null && row.amount > 0);
+    const kvSentence = !hasKvData
+      ? 'Für den kombinierten Verkehr liegen keine auswertbaren Angaben vor.'
+      : !hasKvVolume
+        ? 'Für Schienen-KV und containerisierten Binnenschiffsverkehr ist im Profiljahr kein Aufkommen ausgewiesen.'
+        : kvSummary.length
+          ? `Auf den kombinierten Verkehr entfallen ${kvSummary.map(row => `${formatShare(row.share)} ${row.css === 'rail' ? 'des Schienengüteraufkommens' : 'des Güteraufkommens in der Binnenschifffahrt'}`).join(' und ')}.`
+          : 'Für den kombinierten Verkehr sind Mengen, jedoch keine auswertbaren Anteile ausgewiesen.';
     const goodsSentence = !topGroup
       ? 'Für die Güterstruktur liegt keine auswertbare Aufschlüsselung vor.'
       : isPronouncedGroup
         ? `${topGroup.label} prägen die Güterstruktur mit ${formatShare(topGroup.share)}; das sind ${formatDeNum(groupDifference, 1)} Prozentpunkte mehr als im Bundesvergleich.`
         : `${topGroup.label} sind mit ${formatShare(topGroup.share)} die größte ausgewiesene Gütergruppe.`;
     const relationHtml = !state.region
-      ? '<div class="steckbrief-empty-note">Für Deutschland wird keine Rangfolge regionaler Partner ausgewiesen. Wählen Sie einen Kreis oder eine kreisfreie Stadt, um die drei stärksten Beziehungen zu sehen.</div>'
+      ? '<div class="steckbrief-empty-note">Für Deutschland wird keine Rangfolge regionaler Partner ausgewiesen. Wählen Sie einen Kreis oder eine kreisfreie Stadt, um die fünf stärksten Beziehungen zu sehen.</div>'
       : relations.length === 0
         ? '<div class="steckbrief-empty-note">Für das Profiljahr liegen keine auswertbaren regionalen Beziehungen vor.</div>'
         : `<div class="steckbrief-relation-table-wrap"><table class="steckbrief-relation-table"><thead><tr><th>Beziehung</th><th>Menge</th></tr></thead><tbody>${relations.map((relation, index) => `
@@ -3869,7 +3944,9 @@
 
         <section class="steckbrief-summary">
           <div class="steckbrief-summary-label">Kurzfazit</div>
-          <p><strong>${escapeProfileHtml(regMeta.name)}</strong>: Im Jahr ${profileYear} wurden ${formatMio(total)} Güter bewegt. ${trendSentence} ${modeSentence} ${balanceSentence} ${forecastSentence}</p>
+          <p><strong>${escapeProfileHtml(regMeta.name)}</strong>: Im Jahr ${profileYear} wurden im Landverkehr ${formatMio(total)} Güter bewegt. ${trendSentence}</p>
+          <p>${escapeProfileHtml(modeSentence)} ${escapeProfileHtml(summaryGoodsSentence)} ${escapeProfileHtml(directionalGoodsSentence)}</p>
+          <p>${escapeProfileHtml([balanceSentence, relationSentence].filter(Boolean).join(' '))} ${escapeProfileHtml(kvSentence)} ${escapeProfileHtml(forecastSentence || 'Ein vergleichbarer Ausblick bis 2040 ist für diesen Raum nicht verfügbar.')}</p>
         </section>
 
         <section class="steckbrief-section">
@@ -3905,7 +3982,7 @@
         </section>
 
         <section class="steckbrief-section">
-          <div class="steckbrief-section-heading"><span>Stärkste Verkehrsbeziehungen</span><small>Top 3 im Jahr ${profileYear}</small></div>
+          <div class="steckbrief-section-heading"><span>Stärkste Verkehrsbeziehungen</span><small>Top 5 im Jahr ${profileYear}</small></div>
           ${relationHtml}
         </section>
 

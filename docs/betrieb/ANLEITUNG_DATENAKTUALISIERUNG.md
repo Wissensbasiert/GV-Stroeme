@@ -306,3 +306,11 @@ node scripts/frontend/build_delivery_data.cjs --check
 Mit `--kind summary` beziehungsweise `--kind forecast` ist die gezielte Erzeugung möglich. `--check` schreibt keine Dateien und vergleicht jede ausgelieferte Partition und ihre Prüfsummen mit dem aktuellen kanonischen Bestand. Der Builder prüft für jeden Datensatz die vollständige Rekonstruktion aus Grundpaket und Regionsdetails einschließlich Nullwerten, Zahlen, Güterschlüsseln und führenden Nullen. Die nationale Zusammenfassung verwendet die unverändert ausgelagerte Funktion in `js/shared/national-summary.js`.
 
 Erst nach bestandener Paketprüfung folgen Frontend-Build und Browserprüfung nach `README_MAINTENANCE.md`. Beim Übertragen einer Version sind die beiden `web_*_core.json`, der vollständige Ordner `data/processed/delivery/` und die generierten Frontend-Dateien gemeinsam zu übernehmen. Die kanonischen Quelldateien bleiben für fachliche Validatoren erhalten. Ein Paket-Build ist kein erneuter Rohdatenabruf und keine Produktivfreigabe.
+
+## 11. Steckbrief nach Datenaktualisierungen prüfen (07.09.2026)
+
+Nach Änderungen der regionalen/nationalen Übersicht oder der VP2040-Daten zusätzlich den Steckbrief mit `scripts/validation/validate_steckbrief.cjs` und seine PDFs mit `scripts/validation/validate_steckbrief_pdf.py` prüfen (Aufruf in `README_MAINTENANCE.md`). Für einen neuen Jahrgang sind die Browser-Sollwerte aus den neuen Datenpaketen maßgeblich; die Prüfauswahl umfasst Deutschland, Duisburg, Berlin und Bottrop.
+
+Die narrative Zusammenfassung nutzt das gemeinsame Profiljahr, NST-7-Anteile insgesamt und je Richtung sowie nationale Anteile desselben Jahres. Güteranteile beziehen sich auf die Summe der ausgewiesenen Gütergruppen. Der Zukunftssatz vergleicht ausschließlich P1 2040 mit dem VP2040-Basisjahr 2019; er darf nicht als Entwicklung ab dem Profiljahr formuliert werden. Schienen-KV und containerisierter Binnenschiffsverkehr bleiben getrennte Teilmärkte. Ist- und Prognoserelationen liefern jeweils bis zu fünf positive Beziehungen; fehlende Beziehungen werden nicht ergänzt.
+
+Die Erweiterung vom 07.09.2026 verändert weder Rohdaten noch Pipeline-Aggregation oder Auslieferungspakete. Für sie genügt der Frontend-Build; bei künftigen Datenänderungen gilt weiterhin Abschnitt 10.

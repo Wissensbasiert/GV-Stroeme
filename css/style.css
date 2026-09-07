@@ -3136,6 +3136,7 @@ svg:focus {
   gap: 11px;
   min-width: 0;
 }
+.steckbrief-modal-title-wrap > div { min-width: 0; }
 .steckbrief-modal-title-wrap .header-icon {
   width: 22px;
   height: 22px;
@@ -3248,6 +3249,7 @@ svg:focus {
   font-size: 0.9rem;
   line-height: 1.62;
 }
+.steckbrief-summary p + p { margin-top: 9px; }
 .steckbrief-section {
   margin-bottom: 16px;
   padding: 17px 19px;
@@ -4390,6 +4392,11 @@ svg:focus {
   .modal-dialog-xl .steckbrief-modal-header {
     align-items: flex-start;
     padding: 16px 50px 14px 18px;
+    gap: 12px;
+  }
+  .modal-dialog-xl .steckbrief-modal-header h3 {
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
   .steckbrief-print-button {
     padding: 7px 8px;
@@ -4441,6 +4448,7 @@ svg:focus {
 @media print {
   @page { size: A4; margin: 12mm; }
 
+  body { background: #ffffff !important; }
   body > * { display: none !important; }
   #modalSteckbrief {
     position: static !important;
@@ -4468,6 +4476,7 @@ svg:focus {
   }
   #modalSteckbrief .modal-body {
     display: block !important;
+    background: #ffffff !important;
     padding: 0 !important;
     overflow: visible !important;
   }
