@@ -20,6 +20,7 @@ Die Benutzeroberfläche bleibt grundsätzlich für beide Pakete gleich. Die Bere
 - Das Dashboard liegt als statische Browseranwendung mit modular aufgebauten HTML-, CSS- und JavaScript-Quellen vor.
 - Ein gestalteter Interface-Prototyp des Analyseassistenten ist lokal integriert. Er besitzt noch keine Verbindung zu einem KI-Modell oder einer serverseitigen Datenschnittstelle.
 - Der Prototyp verwendet die Bezeichnung **Analyseassistent** und das Datenkorridor-Symbol `assets/icons/gueterstrom-ki-variante-c-datenkorridor.svg`.
+- Ein Informations-Hover im Kopf des Analyseassistenten erläutert die vorgesehene EU-Verarbeitung, die Nutzung der geprüften Datenbasis, den Ausschluss eines Modelltrainings mit Kundenanfragen und die verbleibende Möglichkeit fehlerhafter KI-Erläuterungen.
 - Der Entwicklungsstand ist im GitHub-Zweig `ki-interface-prototype` versioniert. Der Hauptzweig bleibt davon getrennt.
 - Die automatisierte und browserseitige Korrekturregression des Dashboards ist bestanden.
 - In der manuellen Prüftabelle sind H-01 und H-02 bestanden. H-03 bis H-10 bleiben als acht nutzerseitige Freigabefälle offen.
@@ -79,6 +80,8 @@ Für jeden Fragetyp wird vor der Programmierung festgelegt:
 - erwartetes Antwortformat,
 - bekannte Einschränkungen und Nichtvergleichbarkeiten,
 - Prüffragen mit fachlich erwarteten Ergebnissen.
+
+Nach Abschluss der Datenfreigabe wird hierfür in einem separaten Arbeitschat ein fachlich geprüfter Testkatalog vorbereitet. Aus zuvor festgelegten Nutzenden-Perspektiven werden 100 bis 200 Kandidatfragen erzeugt, nach Fragetypen gebündelt und zu einer repräsentativen, fachlich prüfbaren Auswahl verdichtet. KI-gestützte Erzeugung darf Vielfalt und Formulierung der Kandidatfragen beschleunigen, ersetzt aber weder die fachliche Auswahl noch die Prüfung der erwarteten Ergebnisse. Für jede tatsächlich genutzte Testfrage sind zulässige Datenbasis, erwartete Kennzahl und Einheit, Quellenhinweis, Einschränkungen und erwartete Ergebnislogik festzulegen.
 
 ## 6. Kontrollierte Daten- und Abfrageschicht
 
@@ -188,6 +191,7 @@ Für den Assistenten wird ein eigener Abnahmekatalog aufgebaut. Er umfasst minde
 - Browserprüfung auf Desktop und Mobilgeräten.
 
 Eine Antwort gilt nur dann als bestanden, wenn Datenwert und fachliche Einordnung korrekt sind. Sprachlich überzeugende, aber fachlich falsche Antworten dürfen nicht freigegeben werden.
+Der Testkatalog aus Abschnitt 5 ist hierfür die fachliche Grundlage; seine repräsentative Auswahl ist vor einem Modellvergleich auf Vollständigkeit der erwarteten Ergebnisse zu prüfen.
 
 ## 11. Datenschutz, Sicherheit und Betrieb
 
@@ -214,8 +218,10 @@ Standardmäßig sollten Fragen nicht dauerhaft gespeichert werden. Falls eine Ge
 
 ### Etappe 1 – Fachliches Detailkonzept
 
-**Ergebnis:** zehn bis fünfzehn Fragetypen mit Datenquelle, Parametern, Antwortformat und Prüferwartung.  
-**Freigabepunkt:** fachliche Bestätigung des Fragen- und Antwortkatalogs.
+**Ergebnis:** zehn bis fünfzehn Fragetypen mit Datenquelle, Parametern, Antwortformat und Prüferwartung sowie ein aus 100 bis 200 Kandidatfragen verdichteter, fachlich geprüfter Testkatalog.
+**Freigabepunkt:** fachliche Bestätigung des Fragen- und Antwortkatalogs einschließlich zulässiger Datenbasis und erwarteter Ergebnislogik je Testfrage.
+
+Erst nach diesem Freigabepunkt wird ein lokaler, nicht produktiver Pilot mit einem zu vergleichenden Modellkandidaten und einem freigegebenen Datenumfang vorbereitet. Anbieter, Modell und konkrete technische Ausgestaltung sind damit noch nicht festgelegt.
 
 ### Etappe 2 – Datenfunktionen und Analyse-API
 
@@ -252,9 +258,9 @@ Vor beziehungsweise während der Umsetzung sind folgende Punkte ausdrücklich zu
 
 ## 14. Unmittelbar nächster Arbeitsschritt
 
-Nach der vorgesehenen letzten Datenprüfung wird zunächst Etappe 0 abgeschlossen. Anschließend wird für Etappe 1 eine kompakte Arbeitstabelle mit zehn bis fünfzehn typischen Nutzerfragen erstellt. Für jede Frage werden die benötigten Filter, Datenfelder, Berechnungen, Quellenhinweise und erwarteten Antwortbestandteile festgelegt.
+Nach der vorgesehenen letzten Datenprüfung wird zunächst Etappe 0 abgeschlossen. Anschließend wird in einem separaten Arbeitschat für Etappe 1 ein fachlich geprüfter Testkatalog erarbeitet: 100 bis 200 Kandidatfragen aus vorab festgelegten Nutzenden-Perspektiven werden nach Fragetypen gebündelt und zu einer repräsentativen, fachlich prüfbaren Auswahl verdichtet. Für jede tatsächlich genutzte Testfrage werden zulässige Datenbasis, erwartete Kennzahl und Einheit, Quellenhinweis, Einschränkungen und erwartete Ergebnislogik festgelegt.
 
-Diese Tabelle bildet die verbindliche Brücke zwischen fachlicher Datenprüfung und technischer Entwicklung. Erst auf dieser Grundlage werden Datenfunktionen, API und KI-Anbindung programmiert.
+KI kann die Vielfalt und Formulierung der Kandidatfragen unterstützen, darf aber weder die fachliche Auswahl noch die Prüfung der erwarteten Ergebnisse ersetzen. Erst mit diesem Katalog wird der nächste lokale, nicht produktive Pilot mit einem zu vergleichenden Modellkandidaten und freigegebenem Datenumfang vorbereitet. Die verbindliche Zielarchitektur bleibt dabei die kontrollierte serverseitige Datenfunktion mit Analyse-API; freier Zugriff auf Datenbank, Dateisystem oder Modell ist nicht vorgesehen.
 
 
 

@@ -2861,6 +2861,30 @@ svg:focus {
   font-size: 1.22rem;
   line-height: 1.2;
 }
+.ki-modal-title-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.ki-info-tooltip .info-tooltip-box {
+  left: 50%;
+  width: 420px;
+  transform: translate(-50%, -4px);
+}
+.ki-info-tooltip:hover .info-tooltip-box,
+.ki-info-tooltip:focus-within .info-tooltip-box {
+  transform: translate(-50%, 0);
+}
+.ki-info-tooltip .info-tooltip-box::before {
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+.ki-info-tooltip-paragraph {
+  display: block;
+}
+.ki-info-tooltip-paragraph + .ki-info-tooltip-paragraph {
+  margin-top: 8px;
+}
 .ki-modal-body {
   display: flex;
   flex: 1 1 auto;
