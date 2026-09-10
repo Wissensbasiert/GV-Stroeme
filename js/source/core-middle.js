@@ -27,6 +27,7 @@
   }
 
   function renderIntermodalTab() {
+    renderIntermodalTerminals();
     const years = (intermodalData.years || []).map(Number).sort((a, b) => a - b);
     if (!years.length) return;
 
@@ -523,6 +524,7 @@
       ? `<span>≤ −${formatTrafficValue(maxValue * 0.8 / divisor, unit, 1)} ${unit}</span><span>≥ +${formatTrafficValue(maxValue * 0.8 / divisor, unit, 1)} ${unit}</span>`
       : `<span>&lt; ${formatTrafficValue(maxValue * 0.1 / divisor, unit, 1)} ${unit}</span><span>&gt; ${formatTrafficValue(maxValue * 0.8 / divisor, unit, 1)} ${unit}</span>`;
     legend.innerHTML = `<div class="legend-header"><span class="legend-title">${legendTitle}</span><button type="button" class="btn-legend-toggle" title="${collapsed ? 'Legende maximieren' : 'Legende minimieren'}">${collapsed ? '+' : '−'}</button></div><div class="legend-body" ${collapsed ? 'style="display:none;"' : ''}><div class="legend-scale">${scaleHtml}</div><div class="legend-labels">${scaleLabels}</div>${relationInfo}<div class="intermodal-map-scope">${year} · Kartenfläche: ${mapMarketLabel}</div></div>`;
+    syncIntermodalTerminalLegend();
     setLegendCollapsedState(legend, collapsed);
     legend.querySelector('.btn-legend-toggle')?.addEventListener('click', event => {
       event.preventDefault();

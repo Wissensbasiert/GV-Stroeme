@@ -613,3 +613,33 @@ Die Satzbausteine aus Abschnitt 10.23 wurden nach dem WBP-Stil für Web-/Produkt
 **Prüfung:** `validate_steckbrief.cjs` ergänzt sieben Formulierungsfälle (gleiche/verschiedene Gütergruppen, Ranggleichheit, nur Versand/nur Empfang, nullwertige und fehlende Richtungsdaten), prüft Klammerfreiheit sowie Berlin mit Binnenverkehr und Duisburg mit externer Verbindung. Erneuter Browservergleich für vier Profile und die mobile Darstellung; insgesamt elf bestandene Prüfpunkte ohne unbehandelte JavaScript-Fehler. `validate_steckbrief_pdf.py` prüft erneut fünf vollständige PDF-Exporte; jeweils drei A4-Seiten. UTF-8, Syntax und Frontend-Build geprüft. Lokale Umsetzung.
 
 Nachweise: `C:/Users/paulh/.codex/visualizations/2026/09/07/01a07b4d-7ef3-7300-af07-a2f8e9283af2/Steckbrief_WBP_Text/`.
+
+### Lokale KV-Terminalebene und Fragenkontingent-Vorschau (10.09.2026)
+
+**Prüfumfang:** zusätzliche Standortebene und lokale Kontingentanzeige. Keine neue Freigabe statistischer Daten, der B01–B07-Kette oder einer Server-/KI-Anbindung.
+
+**Daten:** `validate_terminals_quota.cjs` gleicht alle 1.468 ausgegebenen Standorte vollständig mit der Rohdatei ab: identische Namen und Koordinaten, Funktion nach dem Quellfeld `kategorie`, ausschließlich `name` und `function` als Ausgabeattribute und passender Quell-SHA-256. 756 Schiene/Straße, 285 Wasserstraße/Straße, 427 trimodal. 140 Containerdepots und 15 stillgelegte Anlagen ausgeschlossen. Rohdatei unverändert. Kein Abgleich der gegenwärtigen Betriebsbereitschaft mit externen Terminalbetreibern.
+
+**Kontingent:** 0 → 50, Sperre des 51. Versuchs, Monatsgrenze Europe/Berlin einschließlich UTC-Abweichung, Monatsrücksetzung, Erhalt gültiger gespeicherter Zähler, fehlerhafte/ungültige Speicherwerte und blockierter Browserspeicher bestanden. Die Oberfläche zählt nur lokale Testfragen, keine echten Lizenzverbräuche. Eine leere Eingabe erhöht den Zähler nicht; in der Browserprüfung blieb er bei 1 von 50. Neuladen erhielt den Teststand.
+
+**Browser:** Lokale Ansicht im Codex-Browser bei Desktopbreite und 390 × 844 Pixeln geprüft. Terminalschalter zunächst aus; 1.468 Marker nach Einschalten, 0 nach Ausschalten. Zustand bleibt beim Modulwechsel erhalten. Hamburg 2024: 20 Verbindungselemente bei ausgeschalteten Terminals; 1.468 Terminalmarker bei ausgeschalteten Verbindungen; KV-Schienenkennzahl bleibt jeweils 26,6 Mio. t. Per Klick geöffnetes bimodales KLV-Terminal Salzgitter und per Enter geöffnetes trimodales Hafen Braunschweig Containerterminal mit korrektem Inhalt geprüft. Linkziel, neues Fenster und rel-Absicherung kontrolliert. Intermodal-Map-Adresse über die offizielle SGKV-Seite bestätigt. Vollständiger Popup-Rahmen nach Korrektur der Abstände am Desktop bestätigt; auf der niedrigen mobilen Karte wird der Inhalt begrenzt und scrollbar, Rahmen innerhalb der Karte. KI-Zähler und Balken am Desktop und mobil visuell geprüft. Hover ist implementiert; der automatisierte Browsernachweis betrifft die angeklickte beziehungsweise per Tastatur geöffnete Information.
+
+**Technik:** Frontend-Build, `node --check js/app.js`, `validate_terminals_quota.cjs` und bestehender Prüfer `validate_frontend_loading.cjs` bestanden. Quellen-/Dokumenttexte UTF-8 eingelesen; bestehende, nicht zugehörige Änderungen erhalten. Ergänzte Betriebs-/Build-Anweisungen dokumentieren die neue Ausgabedatei. Die abschließende Nutzer-Sichtprüfung am Localhost steht aus.
+
+
+### Nachprüfung des Nutzerfeedbacks: Terminals und Kontingent (10.09.2026)
+
+Aktuelle Terminalebene: 213 ausschließlich deutsche Standorte nach `iso2 == DE`; vollständiger Quellvergleich mit `validate_terminals_quota.cjs` bestanden (109 Schiene/Straße, 13 Wasserstraße/Straße, 91 trimodal). Quellenwerte und Koordinaten unverändert, minimale Ausgabeattribute erhalten. Vorgängerausgabe gesichert. Frontend-Build, JavaScript-Syntax und vorhandene Kontingent-Grenzprüfungen bestanden.
+
+Browserkontrolle: 213 kleine blaue Rechtecke und passender Legendeneintrag nach Einschalten, jeweils 0 nach Ausschalten. Schalterhinweise wechseln korrekt zwischen „Terminals anzeigen“ und „Terminals ausblenden“; weißer Hinweis sichtbar, Hover-Regeln für beide Zustände vorhanden. Popup ElbePort Wittenberge zeigt Titeltrennlinie, Funktion und durch eine zweite Linie getrennten kleineren/kursiven SGKV-Verweis. Der Fragenzähler steht mit 58 × 3 Pixel Balken direkt unter dem Eingabefeld; keine dauerhaft sichtbare Kontingent-Vorschauzeile. Fragezeichen-Hinweis am Desktop und bei 390 × 844 Pixeln geprüft, mobile Sichtprüfung bestanden. Daten-/Lizenzlogik unverändert; weiterhin keine Server- oder KI-Freigabe.
+
+
+### Nachprüfung: abgeschnittene Hinweise und überlappende Kopfzeilen (10.09.2026)
+
+**Befunde behoben:** Kontingenthinweis konnte am unteren Dialogrand abgeschnitten werden; der Terminal-Hinweis blieb nach Mausbedienung durch Fokus geöffnet; Informationssymbole konnten bei schmalen Diagrammkarten in Status-/Dynamikschalter ragen.
+
+**Browsernachweis:** 63 Kopfzeilenkontrollen ohne Überschneidung und ohne über den Kopfzeilenrahmen hinausragende Titelteile/Bedienelemente. Breiten 1.366, 1.537, 1.767 und 2.119 Pixel; Übersicht, Straße, Schiene, Binnenschiff, See, Luft und KV, zusätzlich Status-/Dynamikvarianten bei 1.366/1.537/2.119. Prognose ebenfalls aufgerufen, dort keine passende Umschaltkopfzeile. KV-Dynamik separat bei 390 × 844 ohne Überschneidung oder Randüberlauf bestätigt.
+
+**Hinweise:** Nach tatsächlicher Zeigerbedienung und Verlassen des Terminalknopfes bleibt dieser fokussiert, der Hinweis ist aber verborgen (`hover=false`, `pointerFocus=true`, `visibility=hidden`). Anschließende Tastatureingabe entfernt die Zeigermarkierung und zeigt den Hinweis wieder (`focus-visible=true`). Der Kontingenthinweis liegt bei 1.537 × 1.272 sowie 390 × 844 vollständig innerhalb des Dialogrechtecks und oberhalb des Zählers; beide Darstellungen visuell geprüft.
+
+**Technik/Grenzen:** Frontend neu erzeugt, JavaScript-Syntax geprüft; bestehende Terminal-/Kontingentgrenzprüfung bestanden. Reine Oberflächenkorrektur, keine Änderung an Quelldaten, Statistiken, Lizenz- oder Modellanbindung. Temporäre Browsergrößen nach Prüfung zurückgesetzt.

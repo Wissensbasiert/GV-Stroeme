@@ -281,3 +281,14 @@ Ergänzend zu den Abschnitten 5 und 6 bleiben folgende Arbeiten offen:
 - [ ] Serverseitige Rechte, Mengen- und Abrufbegrenzungen für Analyse und Export im späteren Portal vorsehen. Eine Beschränkung der Exportoberfläche allein schützt statisch ausgelieferte Daten nicht vor systematischem Abruf.
 
 **Bestätigte Datengrenze:** Die vorhandenen Straßen-Verflechtungsdaten enthalten Gesamtmengen je Quelle-Ziel-Paar, aber keine Gütergliederung dieser einzelnen Verbindung. Regionale Güterstrukturen dürfen nicht als belegte Güterstruktur einer bestimmten Straßenrelation ausgegeben werden. Für Schiene und Binnenschiff enthält der vorhandene Relationsbestand Güterhauptgruppen. Eine darüber hinausgehende Modellierung benötigt eine gesonderte fachliche Entscheidung und sichtbare Kennzeichnung.
+
+## Ergänzung: sichtbares Fragenkontingent (10.09.2026)
+
+Die lokale KI-Oberfläche enthält jetzt die Kontingent-Vorschau „x von 50 Fragen gestellt“ mit Fortschrittsbalken. 50 Fragen pro Kalendermonat sind ein Demonstrationswert aus der Nutzeranforderung, keine abschließend festgelegte Lizenz. Testfragen erhöhen den Zähler; bei 50 wird weiteres Absenden gesperrt. Monat und Zähler werden innerhalb der Browsersitzung gespeichert, ohne Fragetexte. Monatswechsel nach Europe/Berlin; keine echte KI-Abfrage und keine Änderung an B01–B07.
+
+Bei der Testportal-Anbindung sind Limit, Verbrauch und Zeitraum aus dem angemeldeten Lizenzkonto zu beziehen und auf dem Server durchzusetzen. Die lokale Vorschau ist keine Zugriffskontrolle. Vor Aktivierung festlegen, welche erfolgreichen, abgewiesenen oder fehlgeschlagenen Anfragen das Kontingent belasten; parallele Anfragen, Wiederholungen und mehrere Sitzungen müssen konsistent behandelt werden. Die sichtbare Vorschau ist umgesetzt; Portal-, Abrechnungs- und Modellanbindung bleiben offen.
+
+
+### Kontingentanzeige nach Nutzerfeedback (10.09.2026)
+
+Die zuvor beschriebene prominente Kontingentanzeige wurde durch einen kleinen Balken mit „x von 50 Fragen“ links unter dem Eingabefeld ersetzt. Die dauerhaft sichtbare Kontingent-Vorschauzeile entfällt; ein Fragezeichen erläutert im hellen Hinweis das Monatskontingent und dessen Rücksetzung. Dies ändert nur die Oberfläche: 50 bleibt der lokale Demonstrationswert, serverseitige Lizenzzählung und Modellanbindung bleiben offen.

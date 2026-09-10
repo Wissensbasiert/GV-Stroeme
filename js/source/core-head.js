@@ -227,6 +227,7 @@
     showRailSpider: true,
     showIwwSpider: true,
     showIntermodalRelations: true,
+    showIntermodalTerminals: false,
     intermodalRailStructureView: 'snapshot',
     intermodalIwwStructureView: 'snapshot',
     activeTab: 'tab-overview',
@@ -1243,6 +1244,14 @@
       state.showIntermodalRelations = e.target.checked;
       renderIntermodalTab();
     });
+    document.getElementById('toggleIntermodalTerminals')?.addEventListener('click', () => {
+      state.showIntermodalTerminals = !state.showIntermodalTerminals;
+      renderIntermodalTerminals();
+    });
+    const terminalToggle = document.getElementById('toggleIntermodalTerminals');
+    terminalToggle?.addEventListener('pointerdown', () => { terminalToggle.dataset.pointerFocus = 'true'; });
+    terminalToggle?.addEventListener('blur', () => { delete terminalToggle.dataset.pointerFocus; });
+    terminalToggle?.addEventListener('keydown', () => { delete terminalToggle.dataset.pointerFocus; });
     document.getElementById('toggleForecastSpider')?.addEventListener('change', e => {
       state.showForecastSpider = e.target.checked;
       renderForecastSpiderLines();
@@ -1431,6 +1440,7 @@
         return;
       }
 
+      if (!consumeAiPreviewQuestion()) return;
       appendAiMessage('user', question);
       input.value = '';
       input.style.height = '';
@@ -1451,7 +1461,10 @@
     const onDialogOpen = async modalId => {
       if (modalId === 'modalSteckbrief') await prepareSteckbriefModal();
       if (modalId === 'modalHelp' || modalId === 'modalLicenses') await refreshDataCoverage();
-      if (modalId === 'modalAi') requestAnimationFrame(() => document.getElementById('aiQuestionInput')?.focus());
+      if (modalId === 'modalAi') {
+        refreshAiPreviewQuota();
+        requestAnimationFrame(() => document.getElementById('aiQuestionInput')?.focus());
+      }
     };
     bindDialog('btnAiModal', 'modalAi', onDialogOpen);
     bindDialog('btnSteckbriefModal', 'modalSteckbrief', onDialogOpen);
@@ -1504,7 +1517,10 @@
     // position. CSS supplies the two alternate anchor positions.
     document.querySelectorAll('.info-tooltip-wrap').forEach(wrap => {
       const positionTooltip = () => {
-        wrap.classList.remove('tooltip-align-right', 'tooltip-open-up');
+        wrap.classList.remove('tooltip-align-right');
+        // The quota help is anchored above its row inside a clipped dialog.
+        // Do not reset that explicit placement based on the larger viewport.
+        wrap.classList.toggle('tooltip-open-up', wrap.dataset.tooltipPlacement === 'above');
         requestAnimationFrame(() => {
           const box = wrap.querySelector('.info-tooltip-box');
           if (!box) return;

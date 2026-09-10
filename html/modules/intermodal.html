@@ -34,9 +34,11 @@
                 </span>
               </div>
               <div class="card-actions">
+                <button type="button" id="toggleIntermodalTerminals" class="kv-terminal-toggle info-tooltip-wrap tooltip-align-right" aria-label="Terminals" aria-describedby="intermodalTerminalToggleHint" aria-pressed="false" aria-controls="intermodalLeafletMap">Terminals<span class="info-tooltip-box" id="intermodalTerminalToggleHint" role="tooltip">Terminals anzeigen</span></button>
                 <label class="map-toggle-label"><input type="checkbox" id="toggleIntermodalRelations" checked> Verbindungen anzeigen</label>
               </div>
             </div>
+            <div id="intermodalTerminalStatus" class="kv-terminal-status" role="status" hidden></div>
             <div class="map-container-leaflet map-container-tall">
               <div id="intermodalLeafletMap" class="leaflet-map-frame"></div>
               <div class="choropleth-legend" id="intermodalMapLegend">

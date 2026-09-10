@@ -15,6 +15,8 @@ Alle Befehle werden aus dem Projektstamm ausgeführt. Die Unterordner zeigen Zwe
 
 ## Zentrale Aufrufe
 
+KV-Terminalebene: `python -B scripts/frontend/build_terminal_data.py` erzeugt die minimale Standortdatei aus dem lokalen GeoJSON. Anschließend Frontend neu bauen. `node scripts/validation/validate_terminals_quota.cjs` prüft Quelltreue, erlaubte Felder und die Grenzen des lokalen Fragenkontingents. Abgrenzung und Browserprüfung stehen in der Betriebsdokumentation und im Qualitätssicherungsplan unter der Ergänzung vom 10.09.2026.
+
 ```powershell
 python scripts/pipelines/pipeline_phase2_aggregations.py
 python scripts/pipelines/build_web_data_bundle_v5.py

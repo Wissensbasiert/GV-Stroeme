@@ -22,6 +22,8 @@ node scripts/frontend/serve_preview.cjs 8000
 
 Die Vorschau ist unter `http://127.0.0.1:8000` erreichbar und wird mit Strg+C beendet. Der Server liest Dateien vom synchronisierten Laufwerk vor der Übertragung vollständig ein. Falls der Port belegt ist, einen anderen freien Port verwenden.
 
+Die Terminalebene verwendet die versionierte Datei `data/processed/web_intermodal_terminals.geojson`. Nur bei einer Aktualisierung der lokal vorhandenen Terminal-Rohdatei ist zusätzlich `python -B scripts/frontend/build_terminal_data.py` auszuführen; für eine unveränderte Vorschau ist dieser Schritt nicht erforderlich.
+
 Direkte Änderungen an `index.html`, `css/style.css` oder `js/app.js` sind zu vermeiden; maßgeblich sind die Quellen unter `html/`, `css/source/` und `js/source/` beziehungsweise `js/modules/` und `js/shared/`.
 
 ## Projektstruktur

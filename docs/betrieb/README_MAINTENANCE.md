@@ -146,3 +146,30 @@ Der PDF-Prüfer benötigt PyMuPDF (`fitz`), liest die fünf Browserexporte erneu
 
 
 Die sprachliche Überarbeitung nach `wbp-writing` vom 07.09.2026 integriert Mengenanteile in den Satz statt in Klammern. Verkehrsträger erhalten passende Artikel und Anteilsbezeichnungen. Gleiche führende Gütergruppen werden für Versand und Empfang gemeinsam genannt; unterschiedliche Gruppen, Ranggleichheit und fehlende Richtungsdaten haben eigene Formulierungen. Binnenverkehr wird als „der Binnenverkehr in …“ bezeichnet, eine externe Verbindung als „Verkehrsbeziehung … mit …“. Die Prognose nennt weiterhin explizit P1, Landverkehr und den Vergleich 2019–2040. Die ausführlichen Gütergruppenbezeichnungen bleiben unverändert.
+
+
+### KV-Terminals und Kontingent-Vorschau (10.09.2026)
+
+Die Kartenkopfzeile des KV-Moduls enthält den Schalter „Terminals“. Er ist zunächst ausgeschaltet und steuert eine eigene Standortebene unabhängig von Verbindungen, Region, Jahr, Kennzahl und Richtung. Der Zustand bleibt beim Modulwechsel erhalten. Die Punktinformation zeigt ausschließlich Terminalname, bi-/trimodale Funktion und den Hinweis mit direktem Link zur Intermodal Map der SGKV (https://www.intermodal-map.com/). Maus-Hover ist interaktiv; ein Klick beziehungsweise Antippen öffnet dieselbe Information dauerhaft. Tastaturbedienung erfolgt über die Terminalmarker und Enter. Fehler beim Nachladen werden sichtbar angezeigt; erneutes Einschalten wiederholt den Abruf.
+
+Bearbeitbare Quellen: `js/modules/intermodal-terminals.js`, `html/modules/intermodal.html`, `css/source/modules.css`; Einbindung über `scripts/frontend/build_frontend.py`. `python -B scripts/frontend/build_terminal_data.py` erzeugt `data/processed/web_intermodal_terminals.geojson`. Diese Datei muss mit dem Frontend ausgeliefert werden. Die vollständige Rohdatei mit Betreiber- und Kontaktdaten wird vom Browser nicht angefordert. Details zur Klassifikation stehen in der Datenaktualisierungsanleitung.
+
+Im Analyseassistenten steht oberhalb des Eingabefelds „x von 50 Fragen gestellt“ mit Fortschrittsbalken. Die Anzeige ist ausdrücklich eine lokale Kontingent-Vorschau; nichtleere Testfragen werden gezählt, leere Eingaben und weitere Versuche nach 50 Fragen nicht. Der Teststand bleibt innerhalb derselben Browsersitzung auch beim Neuladen erhalten; gespeichert werden nur Monat und Zahl, keine Fragen. Monatswechsel richtet sich nach Europe/Berlin und wird beim Öffnen sowie Absenden geprüft. Ist Browserspeicher gesperrt, funktioniert die Anzeige für die laufende Seite. Ein neuer Browserkontext beginnt bei null. `js/shared/ai-quota.js` kapselt die Vorschau; echte Lizenzwerte und serverseitige Durchsetzung sind noch nicht angebunden.
+
+Prüfung: `node scripts/validation/validate_terminals_quota.cjs`, `node scripts/validation/validate_frontend_loading.cjs`, Frontend-Build und `node --check js/app.js`. Zusätzlich lokale Browserkontrolle von Schaltern, Punktinformation/Link, KI-Testfrage und schmaler Ansicht. Keine neue Gesamtfreigabe des Dashboards oder der KI.
+
+
+### Nachtrag zur Terminal- und Kontingentdarstellung (10.09.2026, Nutzerfeedback)
+
+Diese Ergänzung ersetzt die Darstellungsbeschreibung des vorangehenden Abschnitts: Die Terminalebene enthält ausschließlich Deutschland (`iso2 == DE`, 213 Standorte). Marker sind 12 × 9 Pixel große blaue Rechtecke mit weißem Rand und leichtem Schatten. Nur bei tatsächlich eingeblendeter Ebene erscheint derselbe Marker in der KV-Legende mit „KV-Terminals · Deutschland“; Filter-/Modulwechsel erhalten den Eintrag ohne Duplikate. Der Schalter besitzt einen hellen Hinweis „Terminals anzeigen“ beziehungsweise „Terminals ausblenden“ sowie Hover-Hervorhebung und Tastaturfokus. Titel und Terminalfunktion sind durch eine feine Linie getrennt; SGKV-Hinweis und Link stehen kleiner und kursiv hinter einer zweiten Linie.
+
+Das Fragenkontingent steht nun links direkt unter dem Eingabefeld: 58 × 3 Pixel kleiner Balken, „x von 50 Fragen“ und ein fokussierbares Fragezeichen. Die zuvor dauerhaft sichtbare Kontingent-Vorschauzeile und die zusätzliche Monatsüberschrift entfallen. Der weiße Hinweis am Fragezeichen erklärt Monatskontingent und Rücksetzung; die lokale Zählweise und der allgemeine Hinweis auf den Interface-Prototyp bleiben unverändert.
+
+
+### Nachtrag: Hinweisposition, Mausfokus und Diagrammkopfzeilen (10.09.2026)
+
+Der Kontingenthinweis ist über `data-tooltip-placement="above"` ausdrücklich oberhalb der Zählerzeile verankert. Die gemeinsame Hinweisausrichtung erhält diese Vorgabe; Bezugspunkt ist die Zählerzeile, nicht das Fragezeichen oder der größere Browserrahmen. Dadurch bleibt der Hinweis innerhalb des begrenzten KI-Dialogs.
+
+Der Terminalknopf unterscheidet Zeigerbedienung und Tastaturfokus: Nach `pointerdown` darf zurückbleibender Fokus den Hinweis außerhalb des Knopfes nicht offen halten. Tastatureingabe und Fokusverlust löschen die Zeigermarkierung. Der Hinweis selbst fängt keine Zeigerereignisse ab; Hover und Tastaturzugang bleiben erhalten.
+
+Kopfzeilen mit Umschaltgruppen nutzen modulübergreifend automatischen Zeilenumbruch nach tatsächlich verfügbarem Platz. Titelbereich und Schalter dürfen in getrennte Zeilen wechseln, Titeltexte bleiben innerhalb ihres Bereichs umbrechbar, Informationssymbole behalten ihre Breite. Diese Regel gilt auch oberhalb früherer Bildschirm- und Containergrenzen. Quellen: `css/source/components.css`, `css/source/modules.css`, `js/source/core-head.js` und `html/shell-tail.html`.

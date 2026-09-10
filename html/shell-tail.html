@@ -45,6 +45,14 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline></svg>
             </button>
           </form>
+          <div class="ki-quota">
+            <progress id="aiQuotaProgress" max="50" value="0" aria-labelledby="aiQuotaLabel" aria-describedby="aiQuotaHint"></progress>
+            <span id="aiQuotaLabel" aria-live="polite">0 von 50 Fragen</span>
+            <span class="info-tooltip-wrap tooltip-open-up ki-quota-info" data-tooltip-placement="above" tabindex="0" aria-label="Information zum Monatskontingent" aria-describedby="aiQuotaHint">
+              <span class="info-icon-btn" aria-hidden="true">?</span>
+              <span class="info-tooltip-box" id="aiQuotaHint" role="tooltip">0 von 50 Fragen des Monatskontingents genutzt.</span>
+            </span>
+          </div>
           <button type="button" class="ki-examples-toggle" id="aiExamplesToggle" aria-expanded="false" aria-controls="aiExamples">Was kann ich fragen?</button>
           <div class="ki-examples-panel" id="aiExamples" hidden>
             <p>Vergleichen Sie Regionen, untersuchen Sie Verkehrsbeziehungen oder lassen Sie Entwicklungen zusammenfassen. Wählen Sie eine Frage als Ausgangspunkt und passen Sie diese bei Bedarf an.</p>

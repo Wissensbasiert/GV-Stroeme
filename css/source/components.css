@@ -117,6 +117,36 @@
   min-height: 0;
 }
 
+/* View controls wrap according to available header space in every module.
+   Text may shrink inside its own row; the help icon never intrudes on controls. */
+.card-header:has(.toggle-group) {
+  flex-wrap: wrap;
+  gap: 7px 10px;
+}
+.card-header:has(.toggle-group) > .card-title {
+  flex: 1 1 12rem;
+  min-width: 0;
+  max-width: 100%;
+  width: auto;
+  flex-wrap: nowrap;
+  overflow-wrap: anywhere;
+}
+.card-header:has(.toggle-group) > .card-title > span:not(.info-tooltip-wrap) {
+  min-width: 0;
+}
+.card-header:has(.toggle-group) > .card-title > .info-tooltip-wrap {
+  flex: 0 0 auto;
+}
+.card-header:has(.toggle-group) > .card-actions {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+  width: auto;
+  margin-left: 0;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+
 .chart-canvas-wrap {
   flex: 1;
   min-height: 0;
