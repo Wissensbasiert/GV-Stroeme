@@ -178,3 +178,8 @@ Kopfzeilen mit Umschaltgruppen nutzen modulübergreifend automatischen Zeilenumb
 ### Dialogbedienung im Testrelease ui10 (10.09.2026)
 
 Der Header verweist mit einem normalen Link auf `https://wissensbasiert.de/`; das Logo ist kein Quellen-Dialogauslöser mehr. `js/shared/ai-client.js` verwaltet den begrenzten Nutzernachrichtenverlauf, leert das Feld beim Absenden und steuert `#aiWorking`. „Neuer Chat“ verwirft ausschließlich den lokalen Verlauf. `css/source/modules.css` setzt innere Listenabstände und die bei reduzierter Bewegung statische Arbeitsanzeige. Fachliche Vervollständigung und Jahrgangsprüfung liegen ausschließlich in `server/analyseassistent/dialogue.py`, nicht in Kartenfiltern oder Browserwerten. Aktueller Prüf-/Deploymentstand: neuester Nachtrag im Qualitätssicherungsplan.
+
+
+### Verbindliche GitHub- und Testreleasepflege (11.09.2026)
+
+Nach geprüften Änderungen den zugehörigen Stand auf GitHub `main` sichern. Testuploads übertragen standardmäßig nur geänderte Dateien. Auf AlwaysData bleiben der aktive Testrelease und zwei geprüfte Rückfallstände. Zuständigkeit, ausführbare Werkzeuge, Ausnahmen, Wiederherstellung und Abschlussnachweise: [RELEASE_UND_GITHUB.md](RELEASE_UND_GITHUB.md).
