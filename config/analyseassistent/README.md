@@ -1,0 +1,50 @@
+# Regelpaket für den Analyseassistenten
+
+**Version des Regelentwurfs: 0.1.0 · Fortschreibung: 10.09.2026 · Status: im lokalen Pilot und AlwaysData-Testrelease eingebunden; Kontofreigabe und gemeinsame Liveabnahme offen.**
+
+**Fortschreibung 10.09.2026:** `server/analyseassistent/` lädt diesen Systemprompt und implementiert einen begrenzten lokalen Ablauf. Der erste echte 45-Fälle-Modelllauf und gezielte Nachprüfungen sind erfolgt. Der Prompt präzisiert inzwischen konkrete Reproduktionsabfragen und Rückfragen bei fehlender Auswahl. Die folgenden Abschnitte beschreiben den ursprünglichen Vertragsentwurf; sie sind keine Freigabe aller Funktionen. Tatsächlich implementierter Umfang und offene Fachprüfungen: [Lokaler Pilot](../../docs/betrieb/ANALYSEASSISTENT_LOKALER_PILOT.md), Roadmap Abschnitt 24 und Qualitätssicherungsplan. Allgemeine Portalaktivierung und fachliche Gesamtabnahme bleiben offen.
+
+Dieses Paket wird durch die implementierte Serverlaufzeit geladen. Es enthält Regeln und Referenzen, keine Zugangsschlüssel. Der aktuelle AlwaysData-Testrelease verwendet seinen geprüften Paketstand; spätere lokale Änderungen werden erst mit einem neuen Release übernommen.
+
+## Welche Datei übernimmt welche Aufgabe?
+
+| Datei | Aufgabe | Später auf dem Server | Bei einer Modellanfrage mitsenden |
+|---|---|---|---|
+| [SYSTEM_PROMPT.md](SYSTEM_PROMPT.md) | Kurze Regeln für Frageverständnis und belegte Antwortauswahl | Als versionierte Textressource | Ja, als Anweisungstext bei jedem Modellaufruf; nicht bloß als Dateiname |
+| [FACHREGELN.json](FACHREGELN.json) | Fachregeln, Datenzustände, Prüfzuordnung und Laufzeitvorgaben | Als versionierte Konfiguration; benötigt ausdrückliche Verarbeitung durch Programmcode | Nicht vollständig; nur die zur Abfrage passenden Begriffe und Hinweise |
+| [DATENFUNKTIONEN.md](DATENFUNKTIONEN.md) | Eingaben, Ergebnisvertrag und fachliche Logik für alle 15 Fragetypen | Entwicklungsdokumentation; daraus entstehen ausführbare Funktionen | Nein; stattdessen nur die freigegebenen Funktionsbeschreibungen und aktuellen Ergebnisse |
+| [PRUEFUNG_UND_ANTWORTZEIT.md](PRUEFUNG_UND_ANTWORTZEIT.md) | Prüfung ohne zweite KI, Rückfallverhalten und Messplan | Entwicklungs- und Abnahmedokumentation | Nein |
+| [DARSTELLUNGSREFERENZEN.json](DARSTELLUNGSREFERENZEN.json) | Flughafennamen und nachgewiesene Gebietsstruktur 2024 aus vorhandenen Quellen | Private Referenz, im nächsten Release zu übernehmen | Nur die zur Antwort gehörenden belegten Angaben, nicht das gesamte Verzeichnis |
+
+Der [45-Fälle-Testkatalog](../../docs/roadmap/ANALYSEASSISTENT_ETAPPE1_TESTKATALOG.md) und die Referenzantworten bleiben interne Prüfunterlagen. Sie gehören nicht in jede Nutzeranfrage. Auch diese README ist kein Modellprompt. Eine `AGENTS.md` wird nicht als Laufzeitmechanismus vorausgesetzt: Die Serveranwendung muss die vorgesehenen Dateien ausdrücklich laden und verarbeiten.
+
+## Vorgesehener Ablauf
+
+1. Der Server prüft Zugang, erlaubten Funktionsumfang und vorhandene Filter. Eindeutige strukturierte Auswahlen benötigen keine KI zur Zuordnung.
+2. Bei freier Frage ordnet höchstens ein Modellaufruf die Frage einem erlaubten Fragetyp zu. Unklare Regionen, Zeiträume oder Abgrenzungen führen zu einer gezielten Rückfrage.
+3. Eine freigegebene Datenfunktion liefert Werte, Quellen, Datenzustände und passende, rechnerisch belegte Vergleichsaussagen. Daten werden vorab erschlossen; große Rohdateien werden nicht für jede Frage neu durchsucht.
+4. Die geprüfte Tabelle und eine feste Kurzfassung können direkt erscheinen. Optional wählt ein weiterer Modellaufruf aus belegten Aussagen eine kurze Zusammenfassung aus.
+5. Der Server prüft diese Auswahl gegen das aktuelle Ergebnis. Bei Fehler oder Zeitüberschreitung bleibt die feste Zusammenfassung verfügbar. Eine zweite KI zur Bewertung ist im Standardablauf nicht vorgesehen.
+
+Für einfache Vergleiche besteht die Absicherung aus geprüften Aussagen und Zahlenplatzhaltern. Das Modell darf passende Aussagen auswählen und ordnen; der Server setzt Zahlen und Namen ein. Eine beliebige freie Erläuterung wäre auf diesem Weg nicht vollständig prüfbar und ist in dieser ersten Fassung nicht als automatisch freizugebende Ausgabe vorgesehen.
+
+## Bereitstellung und Betrieb
+
+Das Paket soll mit einer späteren Serverversion gemeinsam versioniert werden. Prompt und Konfiguration werden beim Start dieser Version geladen, nicht für jede Frage erneut von der Festplatte gelesen. Der Promptinhalt wird dennoch jedem Modellaufruf als Kontext zugeordnet. Für Nachvollziehbarkeit sind Paketversion, tatsächliche Prüfsummen, Modellkennung und Datenstand gemeinsam zu protokollieren.
+
+Die Serverressourcen liegen außerhalb des öffentlich ausgelieferten Dashboardordners. Die aktuelle statische Anwendung und ihre Paketierung werden durch diese Dateierstellung nicht geändert. Rohdatenpfade, Prüfkatalog, Schlüssel und Portalbenutzerdaten gehören nicht in den Modellkontext. Für eine Frage werden nur erforderliche freigegebene Auszüge übermittelt.
+
+Die genannten Funktionen sind nicht pauschal im Portal aktiviert. Lokal stehen inzwischen 25 begrenzte Adapter und der Requesty-Zugang bereit; die bloße Erwähnung weiterer Funktionen in diesem Regelentwurf belegt keine Implementierung oder Datenfreigabe. Private Datenpakete und aktuelle Grenzen sind im lokalen Pilot und im Qualitätssicherungsplan dokumentiert.
+
+## Umfang und fachliche Grundlage
+
+Grundlage sind das [Detailkonzept](../../docs/roadmap/ANALYSEASSISTENT_ETAPPE1_DETAILKONZEPT.md), die 45 vorhandenen Testfälle und der [lokale Terra-Prüfbericht](../../outputs/analyseassistent_terra_probelauf_20260909/ERGEBNIS_TERRA_PROBELAUF.md). Die Arbeitsergebnisse unter `outputs/` sind lokale, nicht durch Git gesicherte Nachweise. Die zur Weiterarbeit nötigen Regeln und die Fehlerzuordnung sind deshalb im vorliegenden versionierbaren Paket enthalten; der Betrieb darf nicht von diesen lokalen Berichten abhängen.
+
+Zulässig sind vorhandene Dashboarddaten und sinnvoll aufbereitete vorhandene Rohdaten. Umweltbilanzen, Kosten, Kapazitäten und betriebliche Transportketten werden nicht als zusätzliche Datenprodukte vorbereitet. Für aktuelle Prüf- und Freigabestände bleibt der [Qualitätssicherungsplan](../../docs/qualitaet/QUALITÄTSSICHERUNGSPLAN.md) maßgeblich.
+
+
+## Geprüfte Darstellungsergänzung vom 10.09.2026
+
+`build_assistant_references.py --check` gleicht die kleine Referenzdatei vollständig mit den vorhandenen Originalpaketen ab. Flughafennamen werden getrennt von Regionsnamen verarbeitet, damit beispielsweise Hamburg als Stadt eindeutig bleibt. Geografische Länderangaben werden nicht übernommen: Für internationale Verkehrsrelationen gelten weiterhin die Länderkennungen der Verkehrsstatistik. Die Gebietsreferenz enthält ausdrücklich nur den Nachweis für 2024: 422 Einträge, davon 400 Kreise und 22 weitere Gebietseinträge. Die beiden zugrunde liegenden Quellenprüfsummen müssen beim Start zum B04–B06-Manifest passen. Der Hash der Referenz ist Teil der Laufzeit-Datenkennung und des Prüfgates. Die Methodikantwort erzeugt keine numerischen Analysefakten und belastet nach der bestehenden Buchungsregel kein Kontingent.
+
+67 lokale Prüfungen und die technische Bereitschaft aller 45 Eingaben bestehen. Diese Ergänzung ist lokal geprüft; der laufende ui05-Testrelease enthält sie noch nicht. Eine fachliche Freigabe aller 45 Antworten ist damit nicht erteilt.

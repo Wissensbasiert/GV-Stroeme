@@ -173,3 +173,8 @@ Der Kontingenthinweis ist über `data-tooltip-placement="above"` ausdrücklich o
 Der Terminalknopf unterscheidet Zeigerbedienung und Tastaturfokus: Nach `pointerdown` darf zurückbleibender Fokus den Hinweis außerhalb des Knopfes nicht offen halten. Tastatureingabe und Fokusverlust löschen die Zeigermarkierung. Der Hinweis selbst fängt keine Zeigerereignisse ab; Hover und Tastaturzugang bleiben erhalten.
 
 Kopfzeilen mit Umschaltgruppen nutzen modulübergreifend automatischen Zeilenumbruch nach tatsächlich verfügbarem Platz. Titelbereich und Schalter dürfen in getrennte Zeilen wechseln, Titeltexte bleiben innerhalb ihres Bereichs umbrechbar, Informationssymbole behalten ihre Breite. Diese Regel gilt auch oberhalb früherer Bildschirm- und Containergrenzen. Quellen: `css/source/components.css`, `css/source/modules.css`, `js/source/core-head.js` und `html/shell-tail.html`.
+
+
+### Dialogbedienung im Testrelease ui10 (10.09.2026)
+
+Der Header verweist mit einem normalen Link auf `https://wissensbasiert.de/`; das Logo ist kein Quellen-Dialogauslöser mehr. `js/shared/ai-client.js` verwaltet den begrenzten Nutzernachrichtenverlauf, leert das Feld beim Absenden und steuert `#aiWorking`. „Neuer Chat“ verwirft ausschließlich den lokalen Verlauf. `css/source/modules.css` setzt innere Listenabstände und die bei reduzierter Bewegung statische Arbeitsanzeige. Fachliche Vervollständigung und Jahrgangsprüfung liegen ausschließlich in `server/analyseassistent/dialogue.py`, nicht in Kartenfiltern oder Browserwerten. Aktueller Prüf-/Deploymentstand: neuester Nachtrag im Qualitätssicherungsplan.

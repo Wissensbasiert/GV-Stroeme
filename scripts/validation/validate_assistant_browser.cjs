@@ -1,0 +1,178 @@
+// Full dashboard UI against synthetic HTTP responses from verified local results.
+const fs = require('node:fs/promises');
+const path = require('node:path');
+const http = require('node:http');
+const crypto = require('node:crypto');
+const assert = require('node:assert/strict');
+const { chromium } = require(process.env.PLAYWRIGHT_MODULE_PATH || 'C:/tmp/kita_playwright_qa/node_modules/playwright');
+const root = path.resolve(__dirname, '../..');
+const release = path.resolve(process.argv[2]);
+const output = path.resolve(process.argv[3]);
+const requests = [], tests = [], errors = [];
+let browser, server, used = 0, remaining = 5, quotaReads = 0, scenario = 'answer';
+const record = name => { tests.push(name); console.log('PASS', name); };
+(async () => {
+  await fs.mkdir(output, {recursive:true});
+  const fixture = JSON.parse(await fs.readFile(path.join(root,'outputs/analyseassistent_runtime_20260910/customer_ui_fixture01.json'),'utf8'));
+  server = http.createServer(async (req,res) => {
+    try {
+      const route = new URL(req.url,'http://localhost').pathname;
+      if (route === '/api/tools/gueterstroeme/quota') {
+        quotaReads += 1;
+        res.setHeader('Content-Type','application/json');
+        return res.end(JSON.stringify({plan:'basic',limit:5,used,reserved:0,remaining,month:'2026-09',csrf_token:'synthetic-csrf'}));
+      }
+      if (route === '/api/tools/gueterstroeme/analysis') {
+        let body=''; for await (const chunk of req) body += chunk;
+        requests.push({body:JSON.parse(body),csrf:req.headers['x-wbp-csrf-token']});
+        if (scenario === 'disconnect') return req.socket.destroy();
+        await new Promise(resolve => setTimeout(resolve,800));
+        res.setHeader('Content-Type','application/json');
+        if (scenario === 'clarification') return res.end(JSON.stringify({status:'needs_clarification',answer:{title:'Noch eine kurze Rückfrage',paragraphs:['Für eine passende Antwort fehlen mir noch wichtige Angaben. Bitte ergänzen Sie:'],questions:['Auf welches Jahr bezieht sich Ihre Frage?'],tables:[],notes:[],sources:[],technical_details:{}}}));
+        const answer = structuredClone(fixture.result); answer.request_id=requests.at(-1).body.request_id;
+        if (scenario === 'xss') answer.answer.paragraphs.push('<img src=x onerror="window.injected=true">');
+        used += 1; remaining = Math.max(0,5-used);
+        return res.end(JSON.stringify(answer));
+      }
+      let target;
+      if (route === '/tools/gueterstroeme') target=path.join(release,'alwaysdata_portal/gueterstroeme_dashboard/index.html');
+      else if (route.startsWith('/static/')) target=path.resolve(release,'alwaysdata_portal','.'+decodeURIComponent(route));
+      else { res.statusCode=404; return res.end(); }
+      if (!target.startsWith(path.join(release,'alwaysdata_portal')+path.sep)) {res.statusCode=403;return res.end();}
+      const ext=path.extname(target), types={'.html':'text/html; charset=utf-8','.js':'text/javascript','.css':'text/css','.json':'application/json','.geojson':'application/geo+json','.svg':'image/svg+xml','.png':'image/png','.woff2':'font/woff2','.wasm':'application/wasm'};
+      res.setHeader('Content-Type',types[ext] || 'application/octet-stream');
+      if (ext === '.html') res.setHeader('Content-Security-Policy',"default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self' https://webgis.toll-collect.de; img-src 'self' data: blob: https://tile.openstreetmap.de; font-src 'self'; base-uri 'self'; frame-ancestors 'none'");
+      let content=await fs.readFile(target);
+      if (ext === '.html' && scenario === 'offline') content=Buffer.from(content.toString('utf8').replace('<meta name="wbp-gueterstroeme-assistant" content="/api/tools/gueterstroeme">',''));
+      res.end(content);
+    } catch (error) {res.statusCode=404;res.end();}
+  });
+  await new Promise(resolve => server.listen(0,'127.0.0.1',resolve));
+  const origin='http://127.0.0.1:'+server.address().port;
+  browser=await chromium.launch({channel:'chrome',headless:true});
+  const context=await browser.newContext({viewport:{width:1440,height:1000}});
+  await context.route('**/*',route => {
+    const url=new URL(route.request().url());
+    return url.origin === origin || (url.hostname === 'tile.openstreetmap.de' && route.request().resourceType()==='image') ? route.continue() : route.abort();
+  });
+  const page=await context.newPage(); page.on('pageerror',error => errors.push(error.message));
+  await page.goto(origin+'/tools/gueterstroeme');
+  await page.locator('.leaflet-overlay-pane canvas').first().waitFor({state:'visible'});
+  await page.evaluate(() => document.fonts.ready);
+  await page.screenshot({path:path.join(output,'gueterstroeme-preview.png'),clip:{x:0,y:0,width:1040,height:585}});
+  const portalLink=page.getByRole('link',{name:'Zurück zum Portal',exact:true});
+  assert.equal(await portalLink.innerText(),'Portal');
+  assert.equal(await portalLink.locator('svg').count(),1);
+  assert.equal(await portalLink.evaluate(el=>getComputedStyle(el).textDecorationLine),'none');
+  record('Portal link uses house icon without underline; real dashboard preview captured');
+  const homepage=page.getByRole('link',{name:'Wissensbasierte Planung – Homepage',exact:true});
+  assert.equal(await homepage.getAttribute('href'),'https://wissensbasiert.de/');
+  assert.equal(await page.locator('#brandLogoBtn').count(),0);
+  await page.locator('#btnAiModal').click();
+  await page.getByText('0 von 5 Fragen · 5 verfügbar',{exact:true}).waitFor();
+  assert.equal(await page.locator('#aiQuestionForm button').isEnabled(),true);
+  assert.equal(await page.locator('#aiUseContext, #aiContextLabel, #aiPrototypeNotice').count(),0);
+  assert.equal(await page.locator('#aiStatusNotice').isVisible(),false);
+  await page.locator('#aiExamplesToggle').click();
+  await page.locator('#aiExamples').waitFor({state:'visible'});
+  for (const viewport of [{width:1440,height:1000},{width:900,height:600},{width:390,height:844}]) {
+    await page.setViewportSize(viewport);
+    assert.equal(await page.evaluate(() => {
+      const title=document.querySelector('#aiStartPanel h4').getBoundingClientRect();
+      const form=document.getElementById('aiQuestionForm').getBoundingClientRect();
+      return title.bottom<=form.top;
+    }),true);
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth>innerWidth),false);
+    await page.screenshot({path:path.join(output,`beispiele-${viewport.width}.png`)});
+  }
+  await page.setViewportSize({width:1440,height:1000});
+  await page.locator('#aiExamplesToggle').click();
+  record('Open question input has no filter controls or footer; examples do not overlap title');
+  record('Server quota and local libraries loaded in the real dashboard');
+  const question='Welche Güter werden 2024 auf der Straßenverbindung Köln → Hamburg transportiert?';
+  await page.locator('#aiQuestionInput').fill(question);
+  await page.locator('#aiQuestionForm button').click();
+  await page.locator('#aiWorking').waitFor({state:'visible'});
+  assert.equal(await page.locator('#aiQuestionInput').inputValue(),'');
+  assert.equal(await page.locator('#aiWorking .ki-spinner').evaluate(el=>getComputedStyle(el).animationName),'ki-spin');
+  await page.screenshot({path:path.join(output,'arbeitsanzeige.png')});
+  await page.locator('#aiQuestionForm').evaluate(form => form.requestSubmit());
+  await page.getByText('1 von 5 Fragen · 4 verfügbar',{exact:true}).waitFor();
+  assert.equal(requests.length,1);assert.equal(requests[0].csrf,'synthetic-csrf');
+  assert.deepEqual(requests[0].body.confirmed,{});
+  assert.equal(typeof requests[0].body.request_id,'string');
+  assert(!('identity' in requests[0].body));
+  await page.locator('.ki-answer-table').first().waitFor();
+  assert.match(await page.locator('#aiConversation').innerText(),/67\.757/);
+  assert.equal(await page.locator('.ki-answer-sources').first().getAttribute('open'),null);
+  assert.equal(await page.locator('#aiConversation h4').first().evaluate(el => { const r=el.getBoundingClientRect(),c=document.getElementById('aiConversation').getBoundingClientRect(); return r.top>=c.top && r.bottom<=c.bottom; }),true);
+  record('Friendly T20 with table, hidden technical details and duplicate-submit protection');
+  await page.screenshot({path:path.join(output,'antwort-desktop.png')});
+  const followup=page.locator('#aiConversation .ki-suggestion').first();
+  await followup.click();assert.equal(requests.length,1);
+  await page.locator('#aiQuestionForm button').click();
+  await page.getByText('2 von 5 Fragen · 3 verfügbar',{exact:true}).waitFor();
+  assert.equal(requests[1].body.function,'rail_goods');
+  assert.deepEqual(requests[1].body.confirmed,fixture.result.answer.followups[0].parameters);
+  record('Suggested follow-up requires submit and retains verified direction and filters');
+  scenario='clarification';
+  await page.locator('#aiQuestionInput').fill('Welche Güter prägen Köln?');
+  await page.locator('#aiQuestionForm button').click();
+  await page.getByText('Auf welches Jahr bezieht sich Ihre Frage?',{exact:true}).waitFor();
+  assert.equal(await page.locator('#aiQuestionInput').inputValue(),'');
+  assert.equal(await page.locator('#aiWorking').isVisible(),false);
+  await page.setViewportSize({width:390,height:844});
+  await page.locator('#aiConversation .ki-message-assistant').last().scrollIntoViewIfNeeded();
+  assert.equal(await page.locator('.ki-message-content ul').last().evaluate(el=> { const list=el.getBoundingClientRect(), box=el.closest('.ki-message-content').getBoundingClientRect(); return list.left>=box.left && list.right<=box.right && parseFloat(getComputedStyle(el).paddingInlineStart)>=14; }),true);
+  await page.screenshot({path:path.join(output,'rueckfrage-mobil.png')});
+  await page.setViewportSize({width:1440,height:1000});
+  assert.deepEqual(requests.at(-1).body.confirmed,{});
+  assert(!('function' in requests.at(-1).body));
+  assert.match(await page.locator('#aiQuotaLabel').innerText(),/2 von 5/);
+  record('Clarification clears input, retains dialogue history, contains bullets and does not charge');
+  scenario='xss';
+  await page.locator('#aiQuestionInput').fill('2024');
+  await page.locator('#aiQuestionForm button').click();
+  await page.getByText('3 von 5 Fragen · 2 verfügbar',{exact:true}).waitFor();
+  assert.equal(await page.locator('#aiConversation img[src="x"]').count(),0);
+  assert.equal(await page.evaluate(() => window.injected),undefined);
+  assert.equal(requests.at(-1).body.question,'2024');
+  assert.equal(requests.at(-1).body.history.at(-1),'Welche Güter prägen Köln?');
+  record('Short reply sends earlier user messages; response strings cannot inject HTML');
+  await page.setViewportSize({width:390,height:844});
+  await page.locator('.ki-answer-table').last().scrollIntoViewIfNeeded();
+  await page.screenshot({path:path.join(output,'antwort-mobil.png')});
+  assert.equal(await page.locator('.ki-answer-table').last().evaluate(el => el.scrollWidth>el.clientWidth),true);
+  assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth),false);
+  record('Narrow viewport contains the response and its horizontally scrollable table');
+  await page.locator('#aiNewChat').click();
+  assert.equal(await page.locator('#aiConversation article').count(),0);
+  assert.match(await page.locator('#aiQuotaLabel').innerText(),/3 von 5/);
+  scenario='disconnect';
+  await page.locator('#aiQuestionInput').fill('Weitere Frage');
+  await page.locator('#aiQuestionForm button').click();
+  await page.getByText(/Der Abschluss der letzten Anfrage ist unklar/).waitFor();
+  assert.equal(requests.at(-1).body.history,undefined);
+  const count=requests.length;
+  assert.equal(await page.locator('#aiQuestionForm button').isDisabled(),true);
+  assert.equal(requests.length,count);
+  record('Disconnected request is not automatically retried and uncertain state blocks resubmit');
+  remaining=0;
+  await page.reload(); await page.locator('#btnAiModal').click();
+  await page.getByText(/Monatskontingent ist ausgeschöpft/).waitFor();
+  assert.equal(await page.locator('#aiQuestionForm button').isDisabled(),true);
+  record('Exhausted server quota disables sending');
+  scenario='offline'; const previousQuotaReads=quotaReads;
+  await page.reload(); await page.locator('#btnAiModal').click();
+  await page.getByText('Keine Portalverbindung',{exact:true}).waitFor();
+  assert.equal(await page.locator('#aiQuestionForm button').isDisabled(),true);
+  assert.equal(quotaReads,previousQuotaReads);
+  record('Standalone dashboard neither contacts the API nor simulates a quota');
+  assert.deepEqual(errors,[]);
+  const digest = async file => crypto.createHash('sha256').update(await fs.readFile(file)).digest('hex');
+  await fs.writeFile(path.join(output,'report.json'),JSON.stringify({passed:true,tests,external_model_calls:0,api:'synthetic responses from verified local result',page_errors:errors,release_manifest_sha256:await digest(path.join(release,'MANIFEST.sha256.json')),script_sha256:await digest(__filename),fixture_sha256:await digest(path.join(root,'outputs/analyseassistent_runtime_20260910/customer_ui_fixture01.json'))},null,2));
+})().catch(async error => {
+  console.error(error);
+  await fs.writeFile(path.join(output,'report.json'),JSON.stringify({passed:false,tests,error:String(error),page_errors:errors},null,2));
+  process.exitCode=1;
+}).finally(async () => { if(browser) await browser.close(); if(server) server.closeAllConnections(); if(server) await new Promise(resolve => server.close(resolve)); });

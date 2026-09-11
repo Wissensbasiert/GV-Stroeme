@@ -1796,3 +1796,7 @@ svg:focus {
 .leaflet-tile-pane {
   filter: grayscale(88%) opacity(0.68) brightness(1.03) contrast(0.92);
 }
+
+/* Portal navigation shares the existing header button layout. */
+a.btn-header { text-decoration: none; }
+a.btn-header svg { width: 16px; height: 16px; flex: 0 0 16px; }

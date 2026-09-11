@@ -1,0 +1,985 @@
+{
+  "date": "2026-09-09",
+  "status": "b01_to_b06_locally_validated_with_scope_and_comparability_limits_b07_open",
+  "case_count": 45,
+  "latest_local_validation": {
+    "roadmap_section": 23,
+    "b01": {"snapshot_id": "dea0378af6f4f6dea076", "checks_passed": 159},
+    "b02": {"snapshot_id": "cc36b3f63ef24d526897", "checks_passed": 178},
+    "b03": {"snapshot_id": "7deae62d547a876417ef", "checks_passed": 201},
+    "b0406": {"snapshot_id": "603097102c408e95a15e", "checks_passed": 199, "partner_checks_passed": 10},
+    "terminal_spatial_dialog": "requirement_only_roadmap_section_22_not_implemented",
+    "model_45_case_retest": "not_executed"
+  },
+  "scope": "Vorhandene Dashboard- und Rohdaten; keine neuen Umwelt-, Kosten-, Kapazitäts- oder betrieblichen Transportkettenprodukte.",
+  "source_paths": {
+    "D01": [
+      "data/processed/web_summary_by_region.json",
+      "data/raw/Straße/KBA/Versand_VE12_NUTS3_7Gueter/ve12_2010_2024.csv",
+      "data/raw/Straße/KBA/Empfang_VE13_NUTS3_7Gueter/ve13_2010_2024.csv"
+    ],
+    "D02": [
+      "data/processed/fact_od_flows.parquet",
+      "data/raw/Straße/KBA/VE7_Verflechtung_NUTS3/ve7_2010_2024.csv"
+    ],
+    "D03": [
+      "data/processed/national_benchmarks.json"
+    ],
+    "D04": [
+      "data/raw/SGV OpenData",
+      "data/raw/IWW OpenData",
+      "data/raw/Straße/KBA",
+      "data/crosswalks/crosswalk_nst_vp2040.json"
+    ],
+    "D05": [
+      "data/processed/web_forecast_2040.json",
+      "data/processed/web_forecast_core.json",
+      "data/raw/VP2040"
+    ],
+    "D06": [
+      "data/processed/web_intermodal.json"
+    ],
+    "D07": [
+      "data/processed/web_maritime.json",
+      "data/raw/MRTM OpenData"
+    ],
+    "D08": [
+      "data/processed/web_airfreight.json",
+      "data/raw/Luftverkehr/estat_avia_gor_de.tsv"
+    ],
+    "D09": [
+      "js/modules/toll.js",
+      "scripts/toll"
+    ],
+    "D10": [
+      "data/processed/nuts3_de_2024.geojson",
+      "data/raw/NUTS",
+      "data/crosswalks"
+    ]
+  },
+  "cases": [
+    {
+      "id": "T01",
+      "type": "F01",
+      "title": "Kernbefunde für eine Verwaltungsvorlage",
+      "question": "P1, Q001; „Welche zentralen Befunde zur ausgewählten Region gehören in eine Verwaltungsvorlage?“ UI-Beispiel.",
+      "parameters": "bestätigte Auswahl Duisburg `DEA12`; Ist 2024, t, alle Güter, alle drei Landverkehrsträger; VP separat 2019_BASE/2040_P1. Vollprofil ausdrücklich vereinbart, abweichende Modulfilter offengelegt.",
+      "source_ids": [
+        "D01",
+        "D03",
+        "D04",
+        "D05"
+      ],
+      "packages": [
+        "B01",
+        "B02"
+      ],
+      "work_class": "Bestand nutzen",
+      "preparation": "Profil aus vorhandenen Teilkennzahlen mit Quellen-, Binnen- und Prognosevertrag bereitstellen.",
+      "control": "108.215.313,5 t; Saldo −17.549.997,9 t; VP 115.374.997→103.871.423 t separat.",
+      "last_terra_assessment": "Nacharbeit",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T02",
+      "type": "F01",
+      "title": "Fehlende Regionsauswahl",
+      "question": "P1, Q002; „Wie viel Güterverkehr erzeugt und empfängt unsere Stadt?“",
+      "parameters": "kein bestätigter Stadtbezug; Jahr und gemeinte Verkehrsträger offen.",
+      "source_ids": [
+        "D01"
+      ],
+      "packages": [],
+      "work_class": "Eingabe klären",
+      "preparation": "Keine zusätzliche Datenaufbereitung; Region und dann Jahr/Umfang eindeutig bestimmen.",
+      "control": "Keine beliebige Regionszahl; Versand nicht als lokale Produktion auslegen.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T03",
+      "type": "F01",
+      "title": "Belegtes Profil statt Standortversprechen",
+      "question": "P3, Q053: Wie sieht eine belastbare Kurzbeschreibung des Standorts für ein Investorengespräch aus?",
+      "parameters": "Duisburg, 2024, alle Landverkehrsträger, t; gewünschte kurze Zusammenfassung.",
+      "source_ids": [
+        "D01",
+        "D05"
+      ],
+      "packages": [
+        "B01"
+      ],
+      "work_class": "Bestand nutzen",
+      "preparation": "Belegte Profilkennzahlen als Aussagen mit Quellen und Zählweise bereitstellen.",
+      "control": "Keine unbewertete Standortwertung; Zahlen wie T01 und Binnenhinweis erhalten.",
+      "last_terra_assessment": "Nacharbeit",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T04",
+      "type": "F02",
+      "title": "Hamburgs wichtigste Straßenpartner",
+      "question": "P1, Q004; „Welche Regionen sind Hamburgs wichtigste Partner im Straßengüterverkehr?“ UI-Beispiel.",
+      "parameters": "`DE600`, 2024, Straße, alle Güter, t, externe Partner, beide Richtungen; bestätigtes Ranking nach Tonnen, Top 5.",
+      "source_ids": [
+        "D02",
+        "D04"
+      ],
+      "packages": [
+        "B01"
+      ],
+      "work_class": "Aufbereitung ergänzen",
+      "preparation": "Vollständige Hamburger Außenrelationen mit ZS je Kennzahl verarbeiten; Partner vor Rangbildung aggregieren.",
+      "control": "Top 5 unverändert; Nenner 55.473.138 t; Kennzeichen bei 21.167.732 t Nenneranteil erhalten.",
+      "last_terra_assessment": "Nacharbeit",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T05",
+      "type": "F02",
+      "title": "Konkrete Verbindung statt Treffer in der Top-Liste",
+      "question": "P4, Q063; „Wie viel Ladung wird zwischen Duisburg und Magdeburg in jeder Richtung transportiert?“",
+      "parameters": "`DEA12` ↔ `DEE03`, 2024, Straße/Schiene/Binnenschiff getrennt, alle Güter, t.",
+      "source_ids": [
+        "D02",
+        "D04"
+      ],
+      "packages": [
+        "B01"
+      ],
+      "work_class": "Aufbereitung ergänzen",
+      "preparation": "Genaues OD-Paar und Gegenrichtung statt Top-Datei; Zeilenverfügbarkeit pro Modus erhalten.",
+      "control": "IWW 1.947/1.189 t; fehlende Straßen-/Schienenzeilen nicht 0.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T06",
+      "type": "F02",
+      "title": "Fehlender Top-Treffer und Gleichstand",
+      "question": "P8, Q146: Welche Beziehungen fehlen in der Top-Liste, obwohl Verkehr vorhanden ist?",
+      "parameters": "Fokusregion, 2024, Modus, Richtung, t, Top 2.",
+      "source_ids": [
+        "D02",
+        "D04"
+      ],
+      "packages": [
+        "B01"
+      ],
+      "work_class": "Synthetische Regelprüfung",
+      "preparation": "Vollständige OD-Auswahl und Ranggleichstand als allgemeine Abfragelogik.",
+      "control": "A/B/C bei Top 2; Nenner 710 t; D mit 10 t trotz fehlendem Top-Treffer abfragbar.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T07",
+      "type": "F03",
+      "title": "Duisburg und Magdeburg im gemeinsamen Jahr",
+      "question": "P1, Q003; „Wie unterscheiden sich Duisburg und Magdeburg beim Güteraufkommen, Modal Split und bei der Güterstruktur?“ UI-Beispiel.",
+      "parameters": "`DEA12`/`DEE03`, gemeinsames vollständiges Jahr 2024 explizit bestätigt; t; alle Landverkehrsträger; C1–C7; Versand plus Empfang.",
+      "source_ids": [
+        "D01",
+        "D04",
+        "D10"
+      ],
+      "packages": [
+        "B01",
+        "B04"
+      ],
+      "work_class": "Bestand nutzen",
+      "preparation": "Zwei gleichrangige Einzelregionen mit gemeinsamem Jahr; alle sieben Gütergruppen und gleiche Zählweise.",
+      "control": "Duisburg 108.215.313,5 t, Magdeburg 23.180.902,5 t; Strukturanteile gegen Regionalwerte.",
+      "last_terra_assessment": "Nacharbeit",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T08",
+      "type": "F03",
+      "title": "Frei abgegrenzter Wirtschaftsraum",
+      "question": "P8, Q151; „Können wir dieselbe Analyse für einen frei abgegrenzten Wirtschaftsraum wiederholen?“",
+      "parameters": "zunächst klären: Vereinigung ganzer Quellgebiete oder ein Polygon, das Kreise schneidet; 2024, t, Straße, Richtung extern/intern.",
+      "source_ids": [
+        "D02",
+        "D10"
+      ],
+      "packages": [
+        "B01",
+        "B04"
+      ],
+      "work_class": "Synthetisch und Eingabe klären",
+      "preparation": "Liste ganzer Regionen bestätigen; Innen- und Außenrelationen aus OD getrennt bilden.",
+      "control": "A+B: intern 100, externer Versand 40, Empfang 60, eindeutig 200 t; keine Kreisanteilsverteilung.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T09",
+      "type": "F03",
+      "title": "Ungeeignete Vergleichsräume und Ranggleichheit",
+      "question": "P3/P8, Q042/Q152; „Wie unterscheidet sich unser Güterprofil von drei vergleichbaren Wirtschaftsstandorten?“",
+      "parameters": "vorgegeben sind eine Stadt, ein Bundesland und ein Terminal; Vergleichskriterium offen.",
+      "source_ids": [
+        "D01",
+        "D10"
+      ],
+      "packages": [
+        "B04"
+      ],
+      "work_class": "Synthetisch und Eingabe klären",
+      "preparation": "Raumtyp und Vergleichszweck prüfen; ungleiche Einheiten getrennt behandeln.",
+      "control": "200/100/100 ergibt 1/2/2; Stadt und Knoten nicht gemeinsam ranken.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T10",
+      "type": "F04",
+      "title": "Magdeburger Schienenentwicklung seit 2016",
+      "question": "P1, Q005; „Wie hat sich der Schienengüterverkehr in Magdeburg seit 2016 entwickelt?“ UI-Beispiel.",
+      "parameters": "`DEE03`, 2016–2025, Schiene, t, alle Güter, Versand plus Empfang; Endjahr und Erfassungsprüfung offenlegen.",
+      "source_ids": [
+        "D01",
+        "D04",
+        "D10"
+      ],
+      "packages": [
+        "B02"
+      ],
+      "work_class": "Aufbereitung ergänzen",
+      "preparation": "Jahresreihe vorhanden; Monatsabdeckung, Gebietsstand und Revision je Jahr ergänzen.",
+      "control": "Zehn Magdeburger Jahreswerte erhalten; Sprünge 2018/19 und 2024/25 markieren, Ursachen offenlassen.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T11",
+      "type": "F04",
+      "title": "Zeitvergleich mit Null und fehlendem Basiswert",
+      "question": "P1/P8, Q020/Q143: Welche Zeitvergleiche lassen sich belastbar fortschreiben?",
+      "parameters": "Identisches Gebiet, Gütergruppe, Modus, Richtung und zwei bestätigte Jahre.",
+      "source_ids": [
+        "D01",
+        "D02",
+        "D04"
+      ],
+      "packages": [
+        "B02"
+      ],
+      "work_class": "Synthetische Regelprüfung",
+      "preparation": "Fehlwert- und Nullbasisregeln für Zeitvergleich.",
+      "control": "0→10 absolut +10, Rate undefiniert; 10→0 −100 %; fehlend ohne Rate.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T12",
+      "type": "F04",
+      "title": "Entwicklung erklären ohne unbelegte Ursache",
+      "question": "P8, Q149; „Warum steigt eine Gütergruppe stark an: reale Entwicklung, Erfassungsänderung oder räumliche Umgliederung?“",
+      "parameters": "Region, Gütergruppe, Richtung, zwei Jahre und Verkehrsträger zunächst bestätigen.",
+      "source_ids": [
+        "D04",
+        "D10"
+      ],
+      "packages": [
+        "B02"
+      ],
+      "work_class": "Eingabe klären",
+      "preparation": "Konkrete Reihe bestätigen, dann Abdeckungs-/Gebiets-/Klassifikationsnachweise aus vorhandenem Material.",
+      "control": "Befund und belegte Erfassungsänderung trennen; unbekannte Ursache bleibt unbekannt.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T13",
+      "type": "F05",
+      "title": "Absolutes und relatives Änderungsranking",
+      "question": "P2, Q023; „Welche Regionen verzeichnen seit 2019 die stärksten absoluten und relativen Rückgänge?“",
+      "parameters": "bestätigte vergleichbare Regionen, 2019/2024, Schiene, t, gleicher Richtungsbezug; Mindestbasis für prozentuale Rangfolge explizit.",
+      "source_ids": [
+        "D01",
+        "D02",
+        "D04",
+        "D10"
+      ],
+      "packages": [
+        "B02",
+        "B04"
+      ],
+      "work_class": "Synthetische Regelprüfung",
+      "preparation": "Vergleichbare Auswahl beider Jahre und getrennte absolute/relative Rankings.",
+      "control": "A führt absolut, D relativ mit −100 %; fehlende Basis ausschließen und benennen.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T14",
+      "type": "F05",
+      "title": "Kleine Ausgangswerte im Ranking",
+      "question": "P6/P8, Q104/Q152: Welche bisher kleinen Partner wachsen schnell, und wie robust ist das Ranking?",
+      "parameters": "2019/2024, identische Richtung/Güter, Rangmaß relativ; Mindestbasis noch nicht vereinbart.",
+      "source_ids": [
+        "D01",
+        "D02"
+      ],
+      "packages": [
+        "B01",
+        "B02"
+      ],
+      "work_class": "Synthetische Regelprüfung",
+      "preparation": "Basiswerte und explizite Mindestbasis als Abfrageparameter erhalten.",
+      "control": "1→10 = +900 %/+9 t; 1.000→1.500 = +50 %/+500 t; kein versteckter Ausschluss.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T15",
+      "type": "F05",
+      "title": "Mehr Schienenanteil trotz weniger Schienenmenge",
+      "question": "P7, Q126: Entsteht ein höherer Schienenanteil durch mehr Schiene oder weniger Straße?",
+      "parameters": "Zwei vollständige gemeinsame Jahre, dieselbe Region, alle Landverkehrsträger, t.",
+      "source_ids": [
+        "D01",
+        "D03"
+      ],
+      "packages": [
+        "B02"
+      ],
+      "work_class": "Synthetische Regelprüfung",
+      "preparation": "Anteile und Mengen je Zeitstand getrennt berechnen.",
+      "control": "20→18 t Schiene, Anteil 20→30 %, +10 Prozentpunkte; kein Verlagerungsnachweis.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T16",
+      "type": "F06",
+      "title": "Regionale Straßen-Güterstruktur",
+      "question": "P1/P3, Q006/Q041: Welche Güter prägen Versand und Empfang unserer Region?",
+      "parameters": "Duisburg, 2024, Straße, C1–C7, Versand/Empfang getrennt, t.",
+      "source_ids": [
+        "D01",
+        "D04"
+      ],
+      "packages": [
+        "B01",
+        "B03"
+      ],
+      "work_class": "Bestand nutzen",
+      "preparation": "Regionale C-Gruppen aus VE12/13, nicht aus Straße ALL im Regional-Parquet.",
+      "control": "Versand 26.371.111 t, Empfang 22.134.701 t; Rangfolge je Richtung korrekt.",
+      "last_terra_assessment": "Nacharbeit",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T17",
+      "type": "F06",
+      "title": "NST-20 auf NUTS-3 im Straßenmodul",
+      "question": "P8, Q145: Welche Gütergliederung erlaubt einen fairen Vergleich?",
+      "parameters": "Duisburg/Magdeburg 2024, Straße, gewünschte 20 Abteilungen, NUTS-3.",
+      "source_ids": [
+        "D01",
+        "D04"
+      ],
+      "packages": [
+        "B03"
+      ],
+      "work_class": "Begrenzte Alternative",
+      "preparation": "NST-20 auf Straße NUTS-3 bleibt unbelegt; C-Gruppen anbieten, VD3c auf NUTS-2 nur ausdrücklich separat.",
+      "control": "Keine künstliche 20er-Aufteilung; andere Raumebene/Population sichtbar.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T18",
+      "type": "F06",
+      "title": "Aktuelle Güterzuordnung statt veralteter Labels",
+      "question": "P8, Q147: Sind sieben Güterhauptgruppen zwischen Ist und Prognose inhaltlich identisch?",
+      "parameters": "Aktueller C1–C7-Vertrag und VP-Crosswalk; Codes als Text.",
+      "source_ids": [
+        "D04",
+        "D05"
+      ],
+      "packages": [
+        "B03"
+      ],
+      "work_class": "Bestand nutzen",
+      "preparation": "Verbindliches Klassifikationsregister aus aktuellem Crosswalk; alte Dimensionsdatei nicht als Autorität.",
+      "control": "031→C1; NST14/VP140→C6; alle sieben Gruppen richtig zugeordnet.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T19",
+      "type": "F07",
+      "title": "Schienengütergruppen Köln → Hamburg",
+      "question": "P4, Q062; „Welche Gütergruppen werden auf der Schiene von Köln nach Hamburg transportiert?“ UI-Beispiel.",
+      "parameters": "`DEA23` → `DE600`, 2024, Schiene, t, Versand, C1–C7; Jahr explizit vereinbart.",
+      "source_ids": [
+        "D02",
+        "D04"
+      ],
+      "packages": [
+        "B01",
+        "B03"
+      ],
+      "work_class": "Aufbereitung ergänzen",
+      "preparation": "C-Gruppen-OD mit Fehlstatus; vorhandene SGV-Feinpositionen für Rohkontrolle erhalten.",
+      "control": "C1 231, C7 199.620 t; Summe belegter Gruppen 199.851 t; C2–C6 ohne Nullnachweis.",
+      "last_terra_assessment": "Fachlicher Fehler",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T20",
+      "type": "F07",
+      "title": "Güter auf einer Straßenverbindung",
+      "question": "P5, Q096; „Welche Güter werden auf unserer geplanten Straßenverbindung bereits transportiert?“",
+      "parameters": "Köln → Hamburg, 2024, Straße, NST-20 gewünscht.",
+      "source_ids": [
+        "D02",
+        "D04"
+      ],
+      "packages": [
+        "B01"
+      ],
+      "work_class": "Begrenzte Alternative",
+      "preparation": "Straßen-OD mit Gesamtmenge und ZS aus VE7; keine Güteraufteilung auf dieser Verbindung.",
+      "control": "67.757 t mit eingeschränktem Aussagewert; kein abgeleitetes Straßen-OD-Güterdetail.",
+      "last_terra_assessment": "Nacharbeit",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T21",
+      "type": "F07",
+      "title": "Feinere Schienengüter auf der richtigen Richtung",
+      "question": "P6, Q103: Welche Gütergruppen gewinnen auf einer Schienenrelation an Bedeutung?",
+      "parameters": "Köln DEA23 → Hamburg DE600, 2023/2024, Schiene, NST-Feinpositionen, t.",
+      "source_ids": [
+        "D04"
+      ],
+      "packages": [
+        "B01",
+        "B02",
+        "B03"
+      ],
+      "work_class": "Aufbereitung ergänzen",
+      "preparation": "SGV-Feinpositionen je Richtung und Jahr einschließlich Monats-/Fehlwertstatus erhalten.",
+      "control": "2023 227.456, 2024 199.851 t belegte Zeilensummen; fehlende Feinpositionen ohne −100-%-Rate.",
+      "last_terra_assessment": "Fachlicher Fehler",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T22",
+      "type": "F08",
+      "title": "Nationaler Modal Split nach Verkehrsleistung",
+      "question": "P2, Q021; „Wie verteilt sich die deutsche Güterverkehrsleistung auf Straße, Schiene und Binnenschiff?“",
+      "parameters": "Deutschland, 2024, tkm, alle Güter, nationale Gesamtabgrenzung.",
+      "source_ids": [
+        "D03",
+        "D04"
+      ],
+      "packages": [
+        "B05"
+      ],
+      "work_class": "Bestand nutzen",
+      "preparation": "Nationale Nenner und Inlands-tkm mit Quellenvertrag aus bestehendem Bestand bereitstellen.",
+      "control": "B05-Rohquellenprüfung 09.09.2026: bekannte Summe 624.919.760.431 tkm, aber sieben Inlands_tkm-Zellen 2024 mit ZS=. unbekannt. Kein bestätigter vollständiger Nenner und kein vollständiger Modal Split; ursprüngliche Sollannahme nicht freigegeben.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T23",
+      "type": "F08",
+      "title": "Unvollständiges Modal-Split-Jahr",
+      "question": "P7, Q125, Variante mit ausdrücklichem Endjahr 2025; „Wie verändert sich der Modal Split unserer Region bis 2025?“",
+      "parameters": "Duisburg, 2016/2025, alle drei Landverkehrsträger, t.",
+      "source_ids": [
+        "D03"
+      ],
+      "packages": [],
+      "work_class": "Datenlücke ausgeben",
+      "preparation": "Fehlende Straßenwerte des gewünschten Jahres offenhalten; vorhandenes gemeinsames Jahr nur als Alternative.",
+      "control": "Kein vollständiger 2025-Split nur aus Schiene/IWW.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T24",
+      "type": "F08",
+      "title": "Regionaler Modal Split mit passendem Nenner",
+      "question": "P1/P7, Q003/Q125: Wie verteilt sich Duisburgs Güteraufkommen auf die Verkehrsträger?",
+      "parameters": "DEA12, 2024, t, Versand plus Empfang, alle Güter.",
+      "source_ids": [
+        "D01"
+      ],
+      "packages": [
+        "B01"
+      ],
+      "work_class": "Bestand nutzen",
+      "preparation": "Regionaler Modal Split mit D01-Zählweise als festem Metadatum.",
+      "control": "Duisburg 44,8/16,7/38,5 %; Binnen in beiden Richtungen enthalten.",
+      "last_terra_assessment": "Fachlicher Fehler",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T25",
+      "type": "F09",
+      "title": "Versand und Empfang sind keine Leerfahrten",
+      "question": "P6/P3, Q102/Q050; „Auf welchen Relationen oder in welchen Regionen sind die Richtungen besonders unausgeglichen?“",
+      "parameters": "Kontrollfall Duisburg, Straße, 2024, alle Güter; regionale Richtungswerte in t.",
+      "source_ids": [
+        "D01",
+        "D02",
+        "D04"
+      ],
+      "packages": [
+        "B01",
+        "B05"
+      ],
+      "work_class": "Bestand nutzen",
+      "preparation": "Versand/Empfang/Saldo getrennt; Transit-/Leerfahrtenbedeutung nicht hineininterpretieren.",
+      "control": "Duisburger Straße Saldo +4.236.410 t; keine Zahl für Leerfahrten.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T26",
+      "type": "F09",
+      "title": "Binnenverkehr und örtlicher Transit",
+      "question": "P1, Q007; „Wie groß sind Binnenverkehr, ein- und ausgehender Verkehr sowie Durchgangsverkehr in unserer Stadt?“",
+      "parameters": "Stadtgebiet, 2024, Straße, t; Binnen = Quelle und Ziel im Gebiet; Transit = Weg durch Gebiet bei beiden Endpunkten außerhalb.",
+      "source_ids": [
+        "D02",
+        "D10"
+      ],
+      "packages": [
+        "B01",
+        "B04"
+      ],
+      "work_class": "Synthetische Regelprüfung",
+      "preparation": "OD-Innen/Außen/Eindeutig mit Berührungszählung vergleichen.",
+      "control": "60 t eindeutig gegen 70 t Versand+Empfang; örtlicher Transit unbekannt.",
+      "last_terra_assessment": "Nacharbeit",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T27",
+      "type": "F09",
+      "title": "Nationaler Transit aus vorhandenen Rohquellen",
+      "question": "P2, Q026: Welchen Anteil hat Transit an der Verkehrsleistung in Deutschland?",
+      "parameters": "Deutschland, 2024, Schiene, tkm, amtliche Verkehrsbeziehung.",
+      "source_ids": [
+        "D03",
+        "D04"
+      ],
+      "packages": [
+        "B05"
+      ],
+      "work_class": "Aufbereitung ergänzen",
+      "preparation": "Nationale Verkehrsbeziehungen aus vollständiger SGV-Rohquelle aufbereiten; unzugeordnete Räume erhalten.",
+      "control": "Schienentransit 2024 13.622.343.988 tkm, Anteil 10,784 % am nationalen Schienennenner.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T28",
+      "type": "F10",
+      "title": "Größter prognostizierter Schienenzuwachs",
+      "question": "P2, Q022; „Wo wächst das Schienengüteraufkommen laut Prognose von 2019 bis 2040 am stärksten?“ UI-Beispiel.",
+      "parameters": "Deutschland, 400 im aktuellen NUTS-2024-Geometriebestand enthaltene Regionen, gemeinsame VP-IDs, 2019_BASE/2040_P1, Schiene, t, Gesamt inkl. Binnen einmal; „stärksten“ hier bestätigt als absoluter Zuwachs, Top 5.",
+      "source_ids": [
+        "D05",
+        "D10"
+      ],
+      "packages": [
+        "B04"
+      ],
+      "work_class": "Bestand nutzen",
+      "preparation": "VP-Ranking auf bestätigter NUTS-3-Grundgesamtheit, ungerundete Änderungen.",
+      "control": "Top absolut: Hamburg, Köln, Ludwigshafen, Bremerhaven, München; 400 passende Gebiete.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T29",
+      "type": "F10",
+      "title": "Ist-Entwicklung neben der Prognose",
+      "question": "P2, Q032; „Passt die beobachtete Entwicklung seit 2019 noch zur Verkehrsprognose?“",
+      "parameters": "Duisburg, alle Landverkehrsträger, t; Ist 2019/2024 versus VP 2019_BASE/2040_P1.",
+      "source_ids": [
+        "D01",
+        "D05",
+        "D10"
+      ],
+      "packages": [
+        "B02"
+      ],
+      "work_class": "Bestand nutzen",
+      "preparation": "Ist- und VP-Reihen mit verschiedenen Quellen-/Binnenverträgen getrennt bereitstellen.",
+      "control": "Keine Rate aus D01 2024 zu VP2040 als gleichartige Zeitreihe; VP-intern −10,0 %.",
+      "last_terra_assessment": "Nacharbeit",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T30",
+      "type": "F10",
+      "title": "Vorhandene Prognose mit Nullwerten und Szenariogrenze",
+      "question": "P8/P2, Q154/Q035: Wie wird die Prognose ohne Scheinsicherheit dargestellt?",
+      "parameters": "2019_BASE/2040_P1, gleiche Region und Kennzahl; alternative Szenarien ausdrücklich angefragt.",
+      "source_ids": [
+        "D05"
+      ],
+      "packages": [],
+      "work_class": "Synthetisch und Leistungsgrenze",
+      "preparation": "Null-/Fehlwertlogik innerhalb bestehendem P1; keine weitere Szenarioaufbereitung.",
+      "control": "100→0 −100 t/−100 %; 0→100 +100 t/undefinierte Rate; Beispiele synthetisch.",
+      "last_terra_assessment": "Nacharbeit",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T31",
+      "type": "F11",
+      "title": "Intermodale Teilmärkte getrennt",
+      "question": "P6/P8, Q117/Q153; „Wie unterscheiden sich die intermodalen Teilmärkte, und lassen sie sich zu einem KV-Gesamtwert addieren?“",
+      "parameters": "Deutschland, 2024, t und tkm jeweils getrennt, keine regionalen Filter.",
+      "source_ids": [
+        "D06"
+      ],
+      "packages": [],
+      "work_class": "Bestand nutzen",
+      "preparation": "Vorhandene nationale Teilmärkte mit jeweiligem Nenner getrennt ausgeben.",
+      "control": "Schiene 99.853.065 t, IWW 16.738.676,4 t; keine eindeutige KV-Gesamtsumme.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T32",
+      "type": "F11",
+      "title": "Regionaler intermodaler Anteil im Versand",
+      "question": "P4, Q071; „Wie groß ist der Anteil intermodaler Verkehre an der Schiene im Einzugsgebiet?“",
+      "parameters": "Einzugsgebiet hier ausdrücklich Duisburg `DEA12`, 2024, Schiene, t, externer Versand ohne Binnen.",
+      "source_ids": [
+        "D06"
+      ],
+      "packages": [],
+      "work_class": "Bestand nutzen",
+      "preparation": "Vorhandenen regionalen externen Versand mit Binnenabgrenzung verwenden.",
+      "control": "4.422.816 / 9.194.861 t = 48,10 %; Binnen nicht im Nenner.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T33",
+      "type": "F11",
+      "title": "Statistischer KV ist kein Verlagerungspotenzial",
+      "question": "P8/P1, Q153/Q011: Ist aus den vorhandenen KV-Mengen das Verlagerungspotenzial erkennbar?",
+      "parameters": "National oder genau bestätigte Region, 2024, Schiene/Binnenschiff getrennt, t.",
+      "source_ids": [
+        "D06"
+      ],
+      "packages": [],
+      "work_class": "Leistungsgrenze",
+      "preparation": "Statistische Teilmärkte als begrenzte Alternative; keine Potenzialpipeline.",
+      "control": "Keine realistisch verlagerbare Menge aus beobachteten KV-Mengen.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T34",
+      "type": "F12",
+      "title": "Flughafenprofil mit unterschiedlichen verfügbaren Jahren",
+      "question": "P4, Q074; „Wie unterscheiden sich Luftfrachtmenge und Zahl reiner Fracht- und Postflüge an unserem Flughafen?“",
+      "parameters": "Leipzig/Halle `EDDP`, ausdrücklich 2025, Fracht und Post, beide Richtungen.",
+      "source_ids": [
+        "D08"
+      ],
+      "packages": [],
+      "work_class": "Datenlücke ausgeben",
+      "preparation": "Kennzahlspezifische Zeitabdeckung erhalten; keine Flugzahl 2025 aus Tonnen ableiten.",
+      "control": "EDDP2025 1.390.729,8 t; Flughafenflüge 2025 nicht verfügbar, 2024 ggf. separate Alternative.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T35",
+      "type": "F12",
+      "title": "Veröffentlichte Luftfrachtpartner und richtiger Nenner",
+      "question": "P4, Q075; „Welche internationalen Flugverbindungen tragen den größten Teil unserer Luftfracht?“",
+      "parameters": "`EDDP`, 2024, t, Versand, externe Flughafenpartner, Top 5.",
+      "source_ids": [
+        "D08"
+      ],
+      "packages": [
+        "B01",
+        "B06"
+      ],
+      "work_class": "Aufbereitung ergänzen",
+      "preparation": "Vollständige veröffentlichte Flughafen-OD mit Partnerland/Jahr/Richtung; international explizit definieren.",
+      "control": "EDDP2024 Auslandspartner 662.332,0 t in 59 positiven Relationen; OBBI=Bahrain; Top-25 kein Nenner.",
+      "last_terra_assessment": "Fachlicher Fehler",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung.",
+      "parameter_clarification": "Für internationale Verbindungen Partnerland ungleich Deutschland; extern ist keine gleichbedeutende Abgrenzung."
+    },
+    {
+      "id": "T36",
+      "type": "F12",
+      "title": "Seehafenumschlag, TEU und Vergleichsjahre",
+      "question": "P4, Q064: Wie hoch sind Umschlag und Containeraufkommen unseres Seehafens im Zeitvergleich?",
+      "parameters": "Eindeutig benannter Seehafen, 2023/2024, Ein-/Ausladung, t und TEU getrennt.",
+      "source_ids": [
+        "D07"
+      ],
+      "packages": [
+        "B06"
+      ],
+      "work_class": "Eingabe klären",
+      "preparation": "Hafen auswählen; dann passende Umschläge/TEU 2023/24 und gegebenenfalls vollständige Partner aus MRTM.",
+      "control": "Ohne Hafen keine Sollzahl; t/TEU und Ein-/Ausladung getrennt.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T37",
+      "type": "F13",
+      "title": "Mautfahrten nach Richtung",
+      "question": "P6, Q109; „Wie viele mautpflichtige Fahrten entfallen auf unsere Zielgemeinde, getrennt nach Start und Ziel?“",
+      "parameters": "bestätigter achtstelliger AGS als Text, einzelner verfügbarer Monat, Start/Ziel und Binnenzählung.",
+      "source_ids": [
+        "D09"
+      ],
+      "packages": [
+        "B07"
+      ],
+      "work_class": "Synthetisch; realer Stand offen",
+      "preparation": "Bestehende lokale Mautauszüge auf Eignung für bestätigte Gemeinde/Monat prüfen; kein automatischer Liveabruf.",
+      "control": "Synthetisch Start 15, Ziel 25, Binnen 5; reales Abbild und Filter müssen separat belegt sein.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T38",
+      "type": "F13",
+      "title": "Vorjahresmonat und fehlende Angaben",
+      "question": "P6, Q108; „Welche mautpflichtigen Gemeindeverbindungen haben zuletzt besonders stark zugelegt?“",
+      "parameters": "fokussierte Gemeinde, Richtung, konkret bestätigter Monat/Vorjahresmonat, absolutes Ranking; einzelne Relation eindeutig.",
+      "source_ids": [
+        "D09"
+      ],
+      "packages": [
+        "B07"
+      ],
+      "work_class": "Synthetisch; realer Stand offen",
+      "preparation": "Gleichgerichtete Gemeinde-OD im bestätigten Monat und Vorjahresmonat als feste Stände.",
+      "control": "120/100 +20/+20 %; 120/fehlend ohne Vergleich; 120/0 +120, Rate undefiniert.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T39",
+      "type": "F13",
+      "title": "Monatliche Güterspitzen",
+      "question": "P4, Q072; „Welche saisonalen Güterspitzen sollten bei der Personalplanung berücksichtigt werden?“",
+      "parameters": "Magdeburg, Schiene, Gütergruppe und Richtung, vollständige Monatsjahre; Terminalbezug separat.",
+      "source_ids": [
+        "D04"
+      ],
+      "packages": [
+        "B02",
+        "B03"
+      ],
+      "work_class": "Synthetisch; Aufbereitung ergänzen",
+      "preparation": "SGV-Monate mit bestätigter Gütergruppe/Richtung erschließen; Personalplanung bleibt außerhalb.",
+      "control": "Elfmal 100 plus 200 = 1.300 t; Spitzenanteil 15,38 %; fehlender Monat verhindert vollständige Jahresbewertung.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T40",
+      "type": "F14",
+      "title": "Entfernungsstufen aus vorhandenen Rohdaten",
+      "question": "P6, Q111; „Wie verteilen sich Lkw-Fahrten unserer Region auf Nah-, Regional- und Fernverkehr?“",
+      "parameters": "Nürnberg, 2024, Versand; amtliche Entfernungsstufen und Fahrzeugpopulation vorab bestätigen.",
+      "source_ids": [
+        "D04"
+      ],
+      "packages": [
+        "B03"
+      ],
+      "work_class": "Aufbereitung ergänzen",
+      "preparation": "KBA VD2-V: FT_ENTF3, FT_I, ZS, Region und Population; Klassen aus Handbuch.",
+      "control": "Nürnberg Nah/Regional/Fern 698.880,8 / 400.300,5 / 476.759,4 Fahrten; Grenzen 50/150 km.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T41",
+      "type": "F14",
+      "title": "Vorhandene VD3c-Details auf NUTS-2",
+      "question": "P2/P8, Q039/Q145: Welche zusätzlichen Straßengüterdetails sind aus vorhandenen Daten nutzbar?",
+      "parameters": "NUTS-2-Gebiet DEA2, 2024, Versand, deutsche Lkw, 20 NST-Abteilungen; Gesamt/Inland explizit festlegen.",
+      "source_ids": [
+        "D04"
+      ],
+      "packages": [
+        "B01",
+        "B03"
+      ],
+      "work_class": "Aufbereitung ergänzen",
+      "preparation": "KBA VD3c-V/E NST-20 auf NUTS-2; TON/TKM/FT und Inland/Gesamt sowie ZS getrennt.",
+      "control": "DEA2: 20 Positionen mit Feld-/Flagvergleich; unterdrückte Gruppen nicht null; keine vollständige Summe behaupten.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T42",
+      "type": "F14",
+      "title": "Null, fehlend und Quellenkennzeichen",
+      "question": "P8, Q144; „Wie lassen sich veröffentlichte Nullwerte, fehlende Angaben und eingeschränkt belastbare Schätzwerte unterscheiden?“",
+      "parameters": "konkrete Quelle, Jahr, Region/Relation und Kennzahl.",
+      "source_ids": [
+        "D02",
+        "D04"
+      ],
+      "packages": [
+        "B01",
+        "B03"
+      ],
+      "work_class": "Synthetische Regelprüfung",
+      "preparation": "Quellenspezifische ZS-Definitionen und separate Verfügbarkeits-/Qualitätszustände.",
+      "control": "Exakte synthetische 0 von KBA-Zeichen 0 trennen; / unsicher, - nichts vorhanden, () eingeschränkt.",
+      "last_terra_assessment": "Nacharbeit",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T43",
+      "type": "F15",
+      "title": "Regional- und Deutschlandwerte widersprechen sich scheinbar",
+      "question": "P8, Q142; „Warum weichen die Summe der Regionalwerte und der Deutschlandwert voneinander ab?“",
+      "parameters": "2024, Landverkehr, t bzw. tkm explizit unterscheiden; D01 gegenüber D03.",
+      "source_ids": [
+        "D01",
+        "D02",
+        "D03",
+        "D04",
+        "D10"
+      ],
+      "packages": [
+        "B01",
+        "B04",
+        "B05"
+      ],
+      "work_class": "Bestand nutzen",
+      "preparation": "Metadaten für Gebietsgrundgesamtheit, Berührungszählung und nationale Leistung bereitstellen.",
+      "control": "422 Einträge=400 NUTS-3 plus22 andere; nicht als Deutschlandwert verwenden.",
+      "last_terra_assessment": "Nacharbeit",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    },
+    {
+      "id": "T44",
+      "type": "F15",
+      "title": "Reproduzierbare Analyse und belegte Kurzfassung",
+      "question": "P8, Q157; „Wie kann ein zweiter Prüfer einen Regions- oder Relationsvergleich vollständig reproduzieren?“",
+      "parameters": "Beispiel T07 oder T19, identischer Datenstand, alle Filter und Sortierregeln.",
+      "source_ids": [
+        "D01",
+        "D02",
+        "D04",
+        "D10"
+      ],
+      "packages": [
+        "B01"
+      ],
+      "work_class": "Bestand nutzen",
+      "preparation": "Wiederholbare Ergebnisbelege mit tatsächlichen Quellenhashes/Filtern/Formeln/Rundung.",
+      "control": "Konkreter T19-Bezug; unabhängige Reproduktion von 199.851 t; keine erfundenen Nullen.",
+      "last_terra_assessment": "Fachlicher Fehler",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung.",
+      "parameter_clarification": "Vollständiger Bezug: Köln DEA23 → Hamburg DE600, 2024, Schiene, Versand, belegte C-Gruppen, t und Anteil an belegter Relationssumme."
+    },
+    {
+      "id": "T45",
+      "type": "F15",
+      "title": "Fragen außerhalb des bestätigten Umfangs",
+      "question": "P5/P7/P4, Q082/Q121/Q066: Was kosten Transporte, welche Umweltbilanz haben sie und wie ausgelastet ist ein Terminal?",
+      "parameters": "Vom Nutzenden benannte Region/Relation/Knoten; gewünschte Kennzahl erkennen.",
+      "source_ids": [
+        "D01",
+        "D02",
+        "D06"
+      ],
+      "packages": [],
+      "work_class": "Leistungsgrenze",
+      "preparation": "Keine Kosten-/Umwelt-/Kapazitätsaufbereitung; nur belegte Verkehrskennwerte als Alternative.",
+      "control": "Keine Euro-, CO₂e- oder Auslastungszahl; kein externer Folgeauftrag.",
+      "last_terra_assessment": "Unauffällig",
+      "note": "Aufbereitungsbedarf ist nicht gleich Modellfehler; synthetische Bestehenskriterien belegen keine reale Datenabdeckung."
+    }
+  ],
+  "implementation_progress": {
+    "B01": {
+      "status": "validated_local",
+      "snapshot_id": "19ffa80c84ef939f75ed",
+      "checks_passed": 71,
+      "server_deployed": false,
+      "roadmap_section": 17
+    },
+    "B02": {
+      "status": "validated_local_with_comparability_limits",
+      "snapshot_id": "027b7422159248cf7dd0",
+      "b01_snapshot_id": "19ffa80c84ef939f75ed",
+      "checks_passed": 112,
+      "server_deployed": false,
+      "roadmap_section": 19,
+      "limits": [
+        "historical_rail_nuts_header_documentation_conflict",
+        "revision_status_not_documented",
+        "harmonized_comparisons_not_approved"
+      ]
+    },
+    "B03": {
+      "status": "validated_local_with_scope_and_comparability_limits",
+      "snapshot_id": "421123fa003af03e5929",
+      "b01_snapshot_id": "19ffa80c84ef939f75ed",
+      "b02_snapshot_id": "027b7422159248cf7dd0",
+      "checks_passed": 193,
+      "server_deployed": false,
+      "roadmap_section": 20,
+      "limits": [
+        "no_road_od_goods_detail",
+        "VD3c_NUTS2_only",
+        "German_goods_vehicles_loaded_trips_only",
+        "suppressed_values_not_zero",
+        "B02_comparability_limits_retained"
+      ]
+    },
+    "B04": {
+      "status": "validated_local_with_scope_and_comparability_limits",
+      "snapshot_id": "c36ed9b0929ac02c25e2",
+      "shared_store": "data/analysis/b0406",
+      "roadmap_section": 21,
+      "server_deployed": false
+    },
+    "B05": {
+      "status": "validated_local_T22_complete_denominator_not_confirmed",
+      "snapshot_id": "c36ed9b0929ac02c25e2",
+      "shared_store": "data/analysis/b0406",
+      "limits": ["seven_missing_road_domestic_tkm_cells_2024", "no_complete_T22_modal_split", "no_local_transit_or_empty_trips_inference"],
+      "roadmap_section": 21,
+      "server_deployed": false
+    },
+    "B06": {
+      "status": "validated_local_with_publication_and_weight_limits",
+      "snapshot_id": "c36ed9b0929ac02c25e2",
+      "shared_store": "data/analysis/b0406",
+      "limits": ["published_air_relations_only", "sea_missing_weights_unresolved", "TEU_not_applicable_separate_from_unknown", "T36_requires_port_selection"],
+      "roadmap_section": 21,
+      "server_deployed": false
+    },
+    "B04_B06_shared_validation": {
+      "main_checks_passed": 145,
+      "additional_checks_passed": 10,
+      "model_test_performed": false
+    }
+  }
+}

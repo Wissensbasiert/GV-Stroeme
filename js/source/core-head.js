@@ -1395,74 +1395,13 @@
       });
     });
 
-    // Analyseassistent interaction prototype. It deliberately demonstrates the
-    // intended workflow without inventing values or contacting a model.
-    const appendAiMessage = (kind, content) => {
-      const conversation = document.getElementById('aiConversation');
-      if (!conversation) return;
-
-      conversation.closest('.ki-modal-body')?.classList.add('has-conversation');
-
-      const message = document.createElement('article');
-      message.className = `ki-message ki-message-${kind}`;
-
-      const avatar = document.createElement('div');
-      avatar.className = 'ki-message-avatar';
-      if (kind === 'assistant') {
-        const icon = document.createElement('img');
-        icon.src = 'assets/icons/gueterstrom-ki-variante-c-datenkorridor.svg';
-        icon.alt = '';
-        avatar.appendChild(icon);
-      } else {
-        avatar.textContent = 'Sie';
-      }
-
-      const body = document.createElement('div');
-      body.className = 'ki-message-content';
-      if (typeof content === 'string') {
-        const paragraph = document.createElement('p');
-        paragraph.textContent = content;
-        body.appendChild(paragraph);
-      } else {
-        body.appendChild(content);
-      }
-
-      message.append(avatar, body);
-      conversation.appendChild(message);
-      conversation.scrollTop = conversation.scrollHeight;
-    };
-
-    const submitAiPrototypeQuestion = () => {
-      const input = document.getElementById('aiQuestionInput');
-      const question = input?.value.trim();
-      if (!question) {
-        input?.focus();
-        return;
-      }
-
-      if (!consumeAiPreviewQuestion()) return;
-      appendAiMessage('user', question);
-      input.value = '';
-      input.style.height = '';
-
-      const response = document.createDocumentFragment();
-      const title = document.createElement('strong');
-      title.textContent = 'Frage erkannt – Datenabfrage noch nicht verbunden.';
-      const explanation = document.createElement('p');
-      explanation.textContent = 'Im späteren Ausbau würde der Analyseassistent für Ihre Frage passende geprüfte Abfragen auswählen, die Daten auswerten und das Ergebnis mit Quellen und Einschränkungen erläutern. Dieser Interface-Test erzeugt bewusst keine Zahlen.';
-      const meta = document.createElement('span');
-      meta.className = 'ki-message-meta';
-      meta.textContent = 'Prototyp-Antwort · keine Modell- oder Datenverbindung';
-      response.append(title, explanation, meta);
-      appendAiMessage('assistant', response);
-      input.focus();
-    };
+    const aiClient = createAiClient();
 
     const onDialogOpen = async modalId => {
       if (modalId === 'modalSteckbrief') await prepareSteckbriefModal();
       if (modalId === 'modalHelp' || modalId === 'modalLicenses') await refreshDataCoverage();
       if (modalId === 'modalAi') {
-        refreshAiPreviewQuota();
+        await aiClient.open();
         requestAnimationFrame(() => document.getElementById('aiQuestionInput')?.focus());
       }
     };
@@ -1470,16 +1409,15 @@
     bindDialog('btnSteckbriefModal', 'modalSteckbrief', onDialogOpen);
     bindDialog('btnHelpModal', 'modalHelp', onDialogOpen);
     bindDialog('btnLicensesModal', 'modalLicenses', onDialogOpen);
-    bindDialog('brandLogoBtn', 'modalLicenses', onDialogOpen);
 
     document.getElementById('aiQuestionForm')?.addEventListener('submit', event => {
       event.preventDefault();
-      submitAiPrototypeQuestion();
+      aiClient.submit();
     });
     document.getElementById('aiQuestionInput')?.addEventListener('keydown', event => {
-      if (event.key === 'Enter' && !event.shiftKey) {
+      if (event.key === 'Enter' && !event.shiftKey && !event.isComposing) {
         event.preventDefault();
-        submitAiPrototypeQuestion();
+        aiClient.submit();
       }
     });
     document.getElementById('aiQuestionInput')?.addEventListener('input', event => {
@@ -1499,8 +1437,7 @@
       button.addEventListener('click', () => {
         const input = document.getElementById('aiQuestionInput');
         if (!input) return;
-        input.value = button.getAttribute('data-ai-question') || '';
-        input.dispatchEvent(new Event('input'));
+        aiClient.prepare(button.getAttribute('data-ai-question') || '');
         const examples = document.getElementById('aiExamples');
         const toggle = document.getElementById('aiExamplesToggle');
         if (examples) examples.hidden = true;

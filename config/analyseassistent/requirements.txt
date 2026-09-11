@@ -1,0 +1,3 @@
+# Lokal geprüfte Laufzeitversionen; Installation erst im Testportal-Release.
+duckdb==1.2.1
+jsonschema==4.25.1

@@ -1,0 +1,675 @@
+{
+  "package_id": "wbp_gueterstroeme_analyseassistent",
+  "version": "0.1.0",
+  "status": "draft_not_integrated",
+  "created_on": "2026-09-09",
+  "runtime_enabled": false,
+  "meaning": "Deklarative fachliche Konfiguration. Keine Regel wird ohne implementierte Auswertung und zugehörige Prüfungen ausgeführt.",
+  "scope": {
+    "existing_dashboard_and_raw_data_only": true,
+    "external_environment_cost_capacity_chain_products": false,
+    "test_cases_sent_to_model": false
+  },
+  "response_mode": "verified_statement_selection",
+  "free_factual_prose_enabled": false,
+  "result_statuses": [
+    "ok",
+    "partial",
+    "needs_clarification",
+    "not_available",
+    "out_of_scope",
+    "error"
+  ],
+  "value_states": {
+    "observed": {
+      "numeric": "source_value",
+      "description": "Veröffentlichter Wert; Qualitätsstatus separat."
+    },
+    "confirmed_zero": {
+      "numeric": 0,
+      "description": "Exakte Null durch Eingabe oder belegte Quellenregel bestätigt."
+    },
+    "rounded_zero": {
+      "numeric": 0,
+      "description": "Auf null gerundeter Wert; tatsächlicher Wert nicht zwingend null. Raten aus dieser Basis nicht freigeben."
+    },
+    "suppressed": {
+      "numeric": null,
+      "description": "Kein nutzbarer Zahlenwert; geprüftes Quellenzeichen und Ursache erhalten."
+    },
+    "missing_row": {
+      "numeric": null,
+      "description": "Keine Zeile nachgewiesen; Verkehrsfreiheit unbekannt."
+    },
+    "missing_value": {
+      "numeric": null,
+      "description": "Zeile vorhanden, benötigte Zahl fehlt."
+    },
+    "not_available": {
+      "numeric": null,
+      "description": "Gewünschte Dimension/Abgrenzung aus dieser Quelle nicht verfügbar."
+    }
+  },
+  "quality_states": [
+    "unflagged",
+    "restricted",
+    "unknown"
+  ],
+  "coverage_states": [
+    "complete_for_declared_scope",
+    "published_subset",
+    "incomplete",
+    "unknown"
+  ],
+  "comparability_states": [
+    "comparable",
+    "conditional",
+    "not_comparable",
+    "unknown"
+  ],
+  "kba_symbol_definitions": {
+    "applies_only_to": [
+      "VD2-V reference handbook October 2025 page 8",
+      "VD3c-V reference handbook October 2025 page 8"
+    ],
+    "interpretation": "Zeichen im Quellenkontext und im ZS-Feld prüfen; eine numerische 0 allein ist kein Beleg für ein Quellenzeichen.",
+    "0": "mehr als nichts, aber weniger als die Hälfte der kleinsten verwendeten Einheit",
+    "-": "nichts vorhanden",
+    ".": "Zahlenwert unbekannt oder geheim zu halten",
+    "/": "Wert ist nicht sicher genug",
+    "()": "Aussagewert eingeschränkt",
+    "ve7_restricted_symbol": {
+      "symbol": "()",
+      "meaning": "Aussagewert eingeschränkt",
+      "reference": "VE7 reference handbook December 2025 page 7"
+    },
+    "normalization": "Leerzeichen zwischen runden Klammern zur Zuordnung entfernen; Originalzeichen zusätzlich unverändert erhalten."
+  },
+  "latency_policy": {
+    "status": "measurement_pending_no_fixed_deadline",
+    "first_usable_response_p95_ms": null,
+    "interactive_deadline_ms": null,
+    "classification_call_budget_ms": null,
+    "data_lookup_budget_ms": null,
+    "optional_summary_call_budget_ms": null,
+    "post_validation_budget_ms": null,
+    "max_model_calls_per_question": 2,
+    "automatic_model_retries": 0,
+    "second_model_as_judge": false,
+    "shared_deadline": true,
+    "fallback": "Geprüfte Tabelle und feste Kurzfassung. Ohne geprüftes Datenergebnis gezielte Rückfrage oder begründeter Nichtverfügbarkeitsstatus; keine erfundenen Zahlen.",
+    "deadline_required_before_runtime_enablement": true,
+    "null_meaning": "Noch nicht festgelegt; keine unbegrenzte Wartefreigabe. Vor Aktivierung anhand von Messungen und technischer Infrastruktur konfigurieren.",
+    "decision_basis": "Tatsächliche Requesty-Laufzeiten einschließlich langsamer Anfragen und Parallelbetrieb messen; keine pauschale Fünf- oder Zehnsekunden-Abbruchregel."
+  },
+  "cache_policy": {
+    "preload_versioned_resources": true,
+    "read_large_raw_files_per_question": false,
+    "reuse_only_validated_data_results": true,
+    "required_key_dimensions": [
+      "function_contract_version",
+      "data_snapshot_id",
+      "source_scope",
+      "access_scope",
+      "normalized_parameters",
+      "unit",
+      "scale",
+      "counting_basis",
+      "population",
+      "goods_classification",
+      "rules_version"
+    ],
+    "validate_authorization_before_cache_read": true,
+    "persist_raw_questions_by_default": false,
+    "invalidate_on_source_or_rule_change": true
+  },
+  "functions": [
+    {
+      "id": "F01",
+      "name": "get_region_profile",
+      "enabled": false,
+      "status": "contract_only",
+      "test_ids": [
+        "T01",
+        "T02",
+        "T03"
+      ]
+    },
+    {
+      "id": "F02",
+      "name": "get_relations",
+      "enabled": false,
+      "status": "contract_only",
+      "test_ids": [
+        "T04",
+        "T05",
+        "T06"
+      ]
+    },
+    {
+      "id": "F03",
+      "name": "compare_regions",
+      "enabled": false,
+      "status": "contract_only",
+      "test_ids": [
+        "T07",
+        "T08",
+        "T09"
+      ]
+    },
+    {
+      "id": "F04",
+      "name": "get_time_series",
+      "enabled": false,
+      "status": "contract_only",
+      "test_ids": [
+        "T10",
+        "T11",
+        "T12"
+      ]
+    },
+    {
+      "id": "F05",
+      "name": "get_change_ranking",
+      "enabled": false,
+      "status": "contract_only",
+      "test_ids": [
+        "T13",
+        "T14",
+        "T15"
+      ]
+    },
+    {
+      "id": "F06",
+      "name": "get_goods_structure",
+      "enabled": false,
+      "status": "contract_only",
+      "test_ids": [
+        "T16",
+        "T17",
+        "T18"
+      ]
+    },
+    {
+      "id": "F07",
+      "name": "get_relation_goods",
+      "enabled": false,
+      "status": "contract_only",
+      "test_ids": [
+        "T19",
+        "T20",
+        "T21"
+      ]
+    },
+    {
+      "id": "F08",
+      "name": "get_modal_split",
+      "enabled": false,
+      "status": "contract_only",
+      "test_ids": [
+        "T22",
+        "T23",
+        "T24"
+      ]
+    },
+    {
+      "id": "F09",
+      "name": "get_direction_balance",
+      "enabled": false,
+      "status": "contract_only",
+      "test_ids": [
+        "T25",
+        "T26",
+        "T27"
+      ]
+    },
+    {
+      "id": "F10",
+      "name": "get_forecast_comparison",
+      "enabled": false,
+      "status": "contract_only",
+      "test_ids": [
+        "T28",
+        "T29",
+        "T30"
+      ]
+    },
+    {
+      "id": "F11",
+      "name": "get_intermodal_markets",
+      "enabled": false,
+      "status": "contract_only",
+      "test_ids": [
+        "T31",
+        "T32",
+        "T33"
+      ]
+    },
+    {
+      "id": "F12",
+      "name": "get_node_statistics",
+      "enabled": false,
+      "status": "contract_only",
+      "test_ids": [
+        "T34",
+        "T35",
+        "T36"
+      ]
+    },
+    {
+      "id": "F13",
+      "name": "get_monthly_comparison",
+      "enabled": false,
+      "status": "contract_only",
+      "test_ids": [
+        "T37",
+        "T38",
+        "T39"
+      ]
+    },
+    {
+      "id": "F14",
+      "name": "get_road_details",
+      "enabled": false,
+      "status": "contract_only",
+      "test_ids": [
+        "T40",
+        "T41",
+        "T42"
+      ]
+    },
+    {
+      "id": "F15",
+      "name": "explain_data_scope",
+      "enabled": false,
+      "status": "contract_only",
+      "test_ids": [
+        "T43",
+        "T44",
+        "T45"
+      ]
+    }
+  ],
+  "rules": [
+    {
+      "id": "A01",
+      "title": "Zahlenherkunft",
+      "requirement": "Zahlen und Ableitungen benötigen aktuelle Quellenbelege; keine Werte aus Modellwissen oder früheren Antworten.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R1",
+      "test_ids": [
+        "T01",
+        "T03",
+        "T44"
+      ]
+    },
+    {
+      "id": "A02",
+      "title": "Bestätigte Eingaben",
+      "requirement": "Entscheidende fehlende oder widersprüchliche Dimensionen klären; ausschließlich benannte sichtbare Standards zulassen.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R10",
+      "test_ids": [
+        "T02",
+        "T09",
+        "T12",
+        "T36"
+      ]
+    },
+    {
+      "id": "A03",
+      "title": "Raumebenen",
+      "requirement": "Gleichrangige Räume vergleichen. Regionsvereinigungen aus OD; keine flächenproportionale Verteilung. Gemischte Ebenen nicht als NUTS-3-Gesamtheit summieren.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R2",
+      "test_ids": [
+        "T08",
+        "T09",
+        "T43"
+      ]
+    },
+    {
+      "id": "A04",
+      "title": "Zeitabdeckung",
+      "requirement": "Gemeinsames bestätigtes Jahr, Monatsvollständigkeit, Gebietsstand und Revision prüfen; keine stillen Ersatzjahre.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R5",
+      "test_ids": [
+        "T07",
+        "T10",
+        "T12",
+        "T23",
+        "T34",
+        "T38",
+        "T39"
+      ]
+    },
+    {
+      "id": "A05",
+      "title": "Null und fehlend",
+      "requirement": "Fehlende Quellzeile ohne Quellenregel nicht nullsetzen. Exakte Null, gerundete Null, unterdrückt und unbekannt unterscheiden.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R7",
+      "test_ids": [
+        "T05",
+        "T06",
+        "T11",
+        "T19",
+        "T21",
+        "T30",
+        "T38",
+        "T42"
+      ]
+    },
+    {
+      "id": "A06",
+      "title": "Quellenzeichen",
+      "requirement": "Numerisches Feld und zugehöriges ZS gemeinsam lesen; Einschränkungen auch in abgeleiteten Anteilen erhalten. Zeichendefinition nach Quelle und Version.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R7",
+      "test_ids": [
+        "T04",
+        "T20",
+        "T40",
+        "T41",
+        "T42"
+      ]
+    },
+    {
+      "id": "A07",
+      "title": "Binnenzählung",
+      "requirement": "D01: Versand plus Empfang mit Binnen in beiden Richtungen. Eindeutige OD: jede Zeile einmal. VP-Binnen einmal. Keine stille Gleichsetzung.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R2",
+      "test_ids": [
+        "T01",
+        "T07",
+        "T08",
+        "T24",
+        "T26",
+        "T29",
+        "T37"
+      ]
+    },
+    {
+      "id": "A08",
+      "title": "Nationale Grundgesamtheit",
+      "requirement": "Nationale Werte aus D03; Straßenleistung als Inlands-tkm. Regionale Berührungswerte nicht als nationalen oder lokalen Streckenwert verwenden.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R3",
+      "test_ids": [
+        "T22",
+        "T27",
+        "T43"
+      ]
+    },
+    {
+      "id": "A09",
+      "title": "Anteilnenner",
+      "requirement": "Nenner positiv, passend und innerhalb der behaupteten Grundgesamtheit vollständig. Top-N ist kein Gesamtnenner. Veröffentlichte Teilmenge sichtbar abgrenzen.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R4",
+      "test_ids": [
+        "T04",
+        "T06",
+        "T19",
+        "T22",
+        "T23",
+        "T24",
+        "T32",
+        "T35"
+      ]
+    },
+    {
+      "id": "A10",
+      "title": "International und extern",
+      "requirement": "Internationale Partner nach bestätigtem Partnerlandfilter aus vollständigen veröffentlichten Relationen bestimmen. Externe Partner können inländisch sein.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R4",
+      "test_ids": [
+        "T35"
+      ]
+    },
+    {
+      "id": "A11",
+      "title": "Änderung",
+      "requirement": "Absolut Ziel minus Basis; relative Änderung nur bei positiver Basis. Fehlend nicht ersetzbar; Saldoänderungen ausschließlich absolut.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R5",
+      "test_ids": [
+        "T11",
+        "T13",
+        "T14",
+        "T21",
+        "T30",
+        "T38"
+      ]
+    },
+    {
+      "id": "A12",
+      "title": "Rangfolge",
+      "requirement": "Vollständig filtern und aggregieren, ungerundet sortieren. Gleiche Werte gleicher Rang; am Top-N-Rand alle Gleichstände, sekundär ID.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R6",
+      "test_ids": [
+        "T04",
+        "T06",
+        "T09",
+        "T13",
+        "T14",
+        "T16",
+        "T28"
+      ]
+    },
+    {
+      "id": "A13",
+      "title": "Kleine Basen",
+      "requirement": "Keine versteckte Mindestbasis. Absolut- und Prozentänderung samt Basis ausweisen; vereinbarte Ausschlüsse dokumentieren.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R6",
+      "test_ids": [
+        "T13",
+        "T14"
+      ]
+    },
+    {
+      "id": "A14",
+      "title": "Anteil und Menge",
+      "requirement": "Anteilsänderung in Prozentpunkten von Mengenänderung trennen; kein Verlagerungsnachweis aus Modalanteilen.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R4",
+      "test_ids": [
+        "T15",
+        "T22",
+        "T24"
+      ]
+    },
+    {
+      "id": "A15",
+      "title": "Güterklassifikation",
+      "requirement": "Aktueller C-Crosswalk; regionale Straßenstruktur nicht auf Straßen-OD übertragen; keine Rückzerlegung grober Gruppen.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R8",
+      "test_ids": [
+        "T16",
+        "T17",
+        "T18",
+        "T19",
+        "T20",
+        "T21",
+        "T41"
+      ]
+    },
+    {
+      "id": "A16",
+      "title": "Richtung",
+      "requirement": "Quelle und Ziel nicht tauschen. Versand minus Empfang ist Saldo; daraus keine Leerfahrten und keinen örtlichen Transit ableiten.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R2",
+      "test_ids": [
+        "T05",
+        "T16",
+        "T19",
+        "T20",
+        "T21",
+        "T25",
+        "T26",
+        "T27",
+        "T37"
+      ]
+    },
+    {
+      "id": "A17",
+      "title": "Prognose",
+      "requirement": "Nur vorhandene VP-Basis und P1; Ist und Prognose separat, keine interpolierten Jahrespfade oder zusätzlichen Szenarien.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R1",
+      "test_ids": [
+        "T01",
+        "T28",
+        "T29",
+        "T30"
+      ]
+    },
+    {
+      "id": "A18",
+      "title": "Intermodale Teilmärkte",
+      "requirement": "Schiene und Binnenschiff separat mit eigenem Nenner; kein additiver KV-Kettengesamtwert oder Verlagerungspotenzial.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R4",
+      "test_ids": [
+        "T31",
+        "T32",
+        "T33"
+      ]
+    },
+    {
+      "id": "A19",
+      "title": "Einheiten und Population",
+      "requirement": "t, tkm, Fahrten, Ladeeinheiten, TEU und Flüge getrennt; Inland/Gesamt und deutsche/europäische Lkw explizit.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R8",
+      "test_ids": [
+        "T17",
+        "T22",
+        "T34",
+        "T36",
+        "T37",
+        "T39",
+        "T40",
+        "T41",
+        "T43"
+      ]
+    },
+    {
+      "id": "A20",
+      "title": "Wortlaut und Belege",
+      "requirement": "Nur serverseitig geprüfte Aussagen auswählen. Rangfolgen richtungsspezifisch, keine unbelegten Ursachen oder Standortversprechen.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R10",
+      "test_ids": [
+        "T03",
+        "T12",
+        "T16",
+        "T33",
+        "T39"
+      ]
+    },
+    {
+      "id": "A21",
+      "title": "Metadaten",
+      "requirement": "Namen und Codes aus freigegebenem Register. Codes als Text einschließlich führender Nullen.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R8",
+      "test_ids": [
+        "T18",
+        "T35",
+        "T37",
+        "T44"
+      ]
+    },
+    {
+      "id": "A22",
+      "title": "Vollständige Darstellung",
+      "requirement": "Erforderliche Tabellen, Quellen und Grenzen unabhängig von Modellauswahl ergänzen. Auswahl aus Gütergruppen ausdrücklich als Auswahl beschriften.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R10",
+      "test_ids": [
+        "T01",
+        "T07",
+        "T16",
+        "T26",
+        "T29",
+        "T30",
+        "T44"
+      ]
+    },
+    {
+      "id": "A23",
+      "title": "Rundung",
+      "requirement": "Mit Quellpräzision rechnen; am Ende skalieren/runden. Falsche Dimensionen, Nenner oder Fehlstatus bestehen nie aufgrund einer Zahlentoleranz.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R9",
+      "test_ids": [
+        "T07",
+        "T11",
+        "T13",
+        "T19",
+        "T24",
+        "T30",
+        "T44"
+      ]
+    },
+    {
+      "id": "A24",
+      "title": "Vorgesehener Umfang",
+      "requirement": "Nur vorhandener Datenbestand und genehmigte Aufbereitung daraus. Keine neuen Umwelt-, Kosten-, Kapazitäts- oder Transportkettenprodukte.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R10",
+      "test_ids": [
+        "T03",
+        "T12",
+        "T17",
+        "T33",
+        "T39",
+        "T45"
+      ]
+    },
+    {
+      "id": "A25",
+      "title": "Synthetische Prüffälle",
+      "requirement": "Synthetische Beispiele ausdrücklich markieren; niemals als beobachtete Menge oder Beleg realer Datenabdeckung ausgeben.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R1",
+      "test_ids": [
+        "T06",
+        "T08",
+        "T09",
+        "T11",
+        "T13",
+        "T14",
+        "T15",
+        "T26",
+        "T30",
+        "T37",
+        "T38",
+        "T39",
+        "T42"
+      ]
+    },
+    {
+      "id": "A26",
+      "title": "Reproduzierbarkeit",
+      "requirement": "Tatsächlich verwendete Quellenstände, Prüfsummen, Filter, Formeln und Paketversion protokollieren. Gespräch oder Modell kann keinen Datenstand ersetzen.",
+      "enforced_by": "server_validation_and_rendering",
+      "detailconcept_rule": "R1",
+      "test_ids": [
+        "T10",
+        "T18",
+        "T29",
+        "T43",
+        "T44"
+      ]
+    }
+  ]
+}

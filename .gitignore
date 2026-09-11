@@ -23,3 +23,34 @@ venv/
 Thumbs.db
 *.log
 
+# Reproduzierbare lokale B01-Analysebestände, keine Browserauslieferung
+/data/analysis/b01/releases/
+/data/analysis/b01/current.json
+/data/analysis/b01/current.pending.json
+/data/analysis/b02/releases/
+/data/analysis/b02/current.json
+/data/analysis/b02/current.pending.json
+/data/analysis/b03/releases/
+/data/analysis/b03/current.json
+/data/analysis/b03/current.new.json
+/data/analysis/b0406/releases/
+/data/analysis/b0406/current.json
+
+# Lokale B07-Testabbilder, keine öffentliche Browserauslieferung
+/data/analysis/b07/releases/
+/data/analysis/b07/current.json
+/data/analysis/b07/current.pending.json
+
+# Reproduzierbare private Assistentenbestände und Browserpakete
+/data/analysis/assistant_support/releases/
+/data/analysis/assistant_support/current.json
+/data/processed/delivery/
+/data/processed/web_summary_core.json
+/data/processed/web_forecast_core.json
+
+# Lokale Anhänge, Zugangsdaten und Abhängigkeiten
+/.codex-remote-attachments/
+.env
+.env.*
+!.env.example
+node_modules/

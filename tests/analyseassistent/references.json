@@ -1,0 +1,631 @@
+[
+  {
+    "id": "T01",
+    "type": "F01",
+    "control": "108.215.313,5 t; Saldo −17.549.997,9 t; VP 115.374.997→103.871.423 t separat.",
+    "source_ids": [
+      "D01",
+      "D03",
+      "D04",
+      "D05"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T02",
+    "type": "F01",
+    "control": "Keine beliebige Regionszahl; Versand nicht als lokale Produktion auslegen.",
+    "source_ids": [
+      "D01"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "missing_context",
+    "missing_fields": [
+      "region",
+      "year",
+      "mode"
+    ],
+    "synthetic_control_is_not_real_data": true
+  },
+  {
+    "id": "T03",
+    "type": "F01",
+    "control": "Keine unbewertete Standortwertung; Zahlen wie T01 und Binnenhinweis erhalten.",
+    "source_ids": [
+      "D01",
+      "D05"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T04",
+    "type": "F02",
+    "control": "Top 5 unverändert; Nenner 55.473.138 t; Kennzeichen bei 21.167.732 t Nenneranteil erhalten.",
+    "source_ids": [
+      "D02",
+      "D04"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T05",
+    "type": "F02",
+    "control": "IWW 1.947/1.189 t; fehlende Straßen-/Schienenzeilen nicht 0.",
+    "source_ids": [
+      "D02",
+      "D04"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T06",
+    "type": "F02",
+    "control": "A/B/C bei Top 2; Nenner 710 t; D mit 10 t trotz fehlendem Top-Treffer abfragbar.",
+    "source_ids": [
+      "D02",
+      "D04"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "missing_context",
+    "missing_fields": [
+      "region",
+      "mode",
+      "direction"
+    ],
+    "synthetic_control_is_not_real_data": true
+  },
+  {
+    "id": "T07",
+    "type": "F03",
+    "control": "Duisburg 108.215.313,5 t, Magdeburg 23.180.902,5 t; Strukturanteile gegen Regionalwerte.",
+    "source_ids": [
+      "D01",
+      "D04",
+      "D10"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T08",
+    "type": "F03",
+    "control": "A+B: intern 100, externer Versand 40, Empfang 60, eindeutig 200 t; keine Kreisanteilsverteilung.",
+    "source_ids": [
+      "D02",
+      "D10"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "missing_context",
+    "missing_fields": [
+      "regions"
+    ],
+    "synthetic_control_is_not_real_data": true
+  },
+  {
+    "id": "T09",
+    "type": "F03",
+    "control": "200/100/100 ergibt 1/2/2; Stadt und Knoten nicht gemeinsam ranken.",
+    "source_ids": [
+      "D01",
+      "D10"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "missing_context",
+    "missing_fields": [
+      "regions",
+      "year"
+    ],
+    "synthetic_control_is_not_real_data": true
+  },
+  {
+    "id": "T10",
+    "type": "F04",
+    "control": "Zehn Magdeburger Jahreswerte erhalten; Sprünge 2018/19 und 2024/25 markieren, Ursachen offenlassen.",
+    "source_ids": [
+      "D01",
+      "D04",
+      "D10"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T11",
+    "type": "F04",
+    "control": "0→10 absolut +10, Rate undefiniert; 10→0 −100 %; fehlend ohne Rate.",
+    "source_ids": [
+      "D01",
+      "D02",
+      "D04"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "missing_context",
+    "missing_fields": [
+      "region",
+      "years",
+      "mode",
+      "direction"
+    ],
+    "synthetic_control_is_not_real_data": true
+  },
+  {
+    "id": "T12",
+    "type": "F04",
+    "control": "Befund und belegte Erfassungsänderung trennen; unbekannte Ursache bleibt unbekannt.",
+    "source_ids": [
+      "D04",
+      "D10"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "missing_context",
+    "missing_fields": [
+      "region",
+      "years",
+      "mode",
+      "group",
+      "direction"
+    ],
+    "synthetic_control_is_not_real_data": true
+  },
+  {
+    "id": "T13",
+    "type": "F05",
+    "control": "A führt absolut, D relativ mit −100 %; fehlende Basis ausschließen und benennen.",
+    "source_ids": [
+      "D01",
+      "D02",
+      "D04",
+      "D10"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "missing_context",
+    "missing_fields": [
+      "regions",
+      "direction"
+    ],
+    "synthetic_control_is_not_real_data": true
+  },
+  {
+    "id": "T14",
+    "type": "F05",
+    "control": "1→10 = +900 %/+9 t; 1.000→1.500 = +50 %/+500 t; kein versteckter Ausschluss.",
+    "source_ids": [
+      "D01",
+      "D02"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "missing_context",
+    "missing_fields": [
+      "region",
+      "mode",
+      "direction"
+    ],
+    "synthetic_control_is_not_real_data": true
+  },
+  {
+    "id": "T15",
+    "type": "F05",
+    "control": "20→18 t Schiene, Anteil 20→30 %, +10 Prozentpunkte; kein Verlagerungsnachweis.",
+    "source_ids": [
+      "D01",
+      "D03"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "missing_context",
+    "missing_fields": [
+      "region",
+      "years"
+    ],
+    "synthetic_control_is_not_real_data": true
+  },
+  {
+    "id": "T16",
+    "type": "F06",
+    "control": "Versand 26.371.111 t, Empfang 22.134.701 t; Rangfolge je Richtung korrekt.",
+    "source_ids": [
+      "D01",
+      "D04"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T17",
+    "type": "F06",
+    "control": "Keine künstliche 20er-Aufteilung; andere Raumebene/Population sichtbar.",
+    "source_ids": [
+      "D01",
+      "D04"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T18",
+    "type": "F06",
+    "control": "031→C1; NST14/VP140→C6; alle sieben Gruppen richtig zugeordnet.",
+    "source_ids": [
+      "D04",
+      "D05"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T19",
+    "type": "F07",
+    "control": "C1 231, C7 199.620 t; Summe belegter Gruppen 199.851 t; C2–C6 ohne Nullnachweis.",
+    "source_ids": [
+      "D02",
+      "D04"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T20",
+    "type": "F07",
+    "control": "67.757 t mit eingeschränktem Aussagewert; kein abgeleitetes Straßen-OD-Güterdetail.",
+    "source_ids": [
+      "D02",
+      "D04"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T21",
+    "type": "F07",
+    "control": "2023 227.456, 2024 199.851 t belegte Zeilensummen; fehlende Feinpositionen ohne −100-%-Rate.",
+    "source_ids": [
+      "D04"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T22",
+    "type": "F08",
+    "control": "Bekannte Summe 624.919.760.431 tkm; sieben unbekannte VE7-Inlands_tkm-Zellen. Kein vollständiger Drei-Modi-Nenner und kein vollständiger Modal Split.",
+    "source_ids": [
+      "D03",
+      "D04"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T23",
+    "type": "F08",
+    "control": "Kein vollständiger 2025-Split nur aus Schiene/IWW.",
+    "source_ids": [
+      "D03"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T24",
+    "type": "F08",
+    "control": "Duisburg 44,8/16,7/38,5 %; Binnen in beiden Richtungen enthalten.",
+    "source_ids": [
+      "D01"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T25",
+    "type": "F09",
+    "control": "Duisburger Straße Saldo +4.236.410 t; keine Zahl für Leerfahrten.",
+    "source_ids": [
+      "D01",
+      "D02",
+      "D04"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T26",
+    "type": "F09",
+    "control": "60 t eindeutig gegen 70 t Versand+Empfang; örtlicher Transit unbekannt.",
+    "source_ids": [
+      "D02",
+      "D10"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "missing_context",
+    "missing_fields": [
+      "region"
+    ],
+    "synthetic_control_is_not_real_data": true
+  },
+  {
+    "id": "T27",
+    "type": "F09",
+    "control": "Schienentransit 2024 13.622.343.988 tkm, Anteil 10,784 % am nationalen Schienennenner.",
+    "source_ids": [
+      "D03",
+      "D04"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T28",
+    "type": "F10",
+    "control": "Top absolut: Hamburg, Köln, Ludwigshafen, Bremerhaven, München; 400 passende Gebiete.",
+    "source_ids": [
+      "D05",
+      "D10"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T29",
+    "type": "F10",
+    "control": "Keine Rate aus D01 2024 zu VP2040 als gleichartige Zeitreihe; VP-intern −10,0 %.",
+    "source_ids": [
+      "D01",
+      "D05",
+      "D10"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T30",
+    "type": "F10",
+    "control": "100→0 −100 t/−100 %; 0→100 +100 t/undefinierte Rate; Beispiele synthetisch.",
+    "source_ids": [
+      "D05"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "missing_context",
+    "missing_fields": [
+      "region",
+      "metric"
+    ],
+    "synthetic_control_is_not_real_data": true
+  },
+  {
+    "id": "T31",
+    "type": "F11",
+    "control": "Schiene 99.853.065 t, IWW 16.738.676,4 t; keine eindeutige KV-Gesamtsumme.",
+    "source_ids": [
+      "D06"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T32",
+    "type": "F11",
+    "control": "4.422.816 / 9.194.861 t = 48,10 %; Binnen nicht im Nenner.",
+    "source_ids": [
+      "D06"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T33",
+    "type": "F11",
+    "control": "Keine realistisch verlagerbare Menge aus beobachteten KV-Mengen.",
+    "source_ids": [
+      "D06"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T34",
+    "type": "F12",
+    "control": "EDDP2025 1.390.729,8 t; Flughafenflüge 2025 nicht verfügbar, 2024 ggf. separate Alternative.",
+    "source_ids": [
+      "D08"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T35",
+    "type": "F12",
+    "control": "EDDP2024 Auslandspartner 662.332,0 t in 59 positiven Relationen; OBBI=Bahrain; Top-25 kein Nenner.",
+    "source_ids": [
+      "D08"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T36",
+    "type": "F12",
+    "control": "Ohne Hafen keine Sollzahl; t/TEU und Ein-/Ausladung getrennt.",
+    "source_ids": [
+      "D07"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "missing_context",
+    "missing_fields": [
+      "node"
+    ],
+    "synthetic_control_is_not_real_data": true
+  },
+  {
+    "id": "T37",
+    "type": "F13",
+    "control": "Synthetisch Start 15, Ziel 25, Binnen 5; reales Abbild und Filter müssen separat belegt sein.",
+    "source_ids": [
+      "D09"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T38",
+    "type": "F13",
+    "control": "120/100 +20/+20 %; 120/fehlend ohne Vergleich; 120/0 +120, Rate undefiniert.",
+    "source_ids": [
+      "D09"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T39",
+    "type": "F13",
+    "control": "Elfmal 100 plus 200 = 1.300 t; Spitzenanteil 15,38 %; fehlender Monat verhindert vollständige Jahresbewertung.",
+    "source_ids": [
+      "D04"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "missing_context",
+    "missing_fields": [
+      "group",
+      "direction",
+      "years"
+    ],
+    "synthetic_control_is_not_real_data": true
+  },
+  {
+    "id": "T40",
+    "type": "F14",
+    "control": "Nürnberg Nah/Regional/Fern 698.880,8 / 400.300,5 / 476.759,4 Fahrten; Grenzen 50/150 km.",
+    "source_ids": [
+      "D04"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T41",
+    "type": "F14",
+    "control": "DEA2: 20 Positionen mit Feld-/Flagvergleich; unterdrückte Gruppen nicht null; keine vollständige Summe behaupten.",
+    "source_ids": [
+      "D04"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T42",
+    "type": "F14",
+    "control": "Exakte synthetische 0 von KBA-Zeichen 0 trennen; / unsicher, - nichts vorhanden, () eingeschränkt.",
+    "source_ids": [
+      "D02",
+      "D04"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T43",
+    "type": "F15",
+    "control": "422 Einträge=400 NUTS-3 plus22 andere; nicht als Deutschlandwert verwenden.",
+    "source_ids": [
+      "D01",
+      "D02",
+      "D03",
+      "D04",
+      "D10"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T44",
+    "type": "F15",
+    "control": "Konkreter T19-Bezug; unabhängige Reproduktion von 199.851 t; keine erfundenen Nullen.",
+    "source_ids": [
+      "D01",
+      "D02",
+      "D04",
+      "D10"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  },
+  {
+    "id": "T45",
+    "type": "F15",
+    "control": "Keine Euro-, CO₂e- oder Auslastungszahl; kein externer Folgeauftrag.",
+    "source_ids": [
+      "D01",
+      "D02",
+      "D06"
+    ],
+    "evaluation": "pending_independent_review",
+    "model_test_kind": "concrete_query",
+    "missing_fields": [],
+    "synthetic_control_is_not_real_data": false
+  }
+]

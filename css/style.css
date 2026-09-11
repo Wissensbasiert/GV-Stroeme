@@ -1796,6 +1796,10 @@ svg:focus {
 .leaflet-tile-pane {
   filter: grayscale(88%) opacity(0.68) brightness(1.03) contrast(0.92);
 }
+
+/* Portal navigation shares the existing header button layout. */
+a.btn-header { text-decoration: none; }
+a.btn-header svg { width: 16px; height: 16px; flex: 0 0 16px; }
 /* Module Layout Grid: Tall Map on Left (Full Height), Analytics Stack on Right */
 .module-loading-status {
   margin: 0 0 10px;
@@ -2887,7 +2891,7 @@ svg:focus {
   flex-direction: column;
 }
 
-/* Güterstrom-KI: visual and interaction prototype, intentionally disconnected. */
+/* Güterstrom-KI: Portalassistent mit serverseitig geprüften Antworten. */
 .ki-modal-dialog {
   width: min(92%, 820px);
   max-width: 820px;
@@ -2970,6 +2974,7 @@ svg:focus {
   margin-top: 8px;
 }
 .ki-modal-body {
+  overflow-y: auto;
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -2980,7 +2985,7 @@ svg:focus {
 .ki-modal-main {
   display: flex;
   flex: 1 1 auto;
-  min-height: 0;
+  min-height: 170px;
 }
 .ki-start-panel {
   display: flex;
@@ -3073,6 +3078,17 @@ svg:focus {
 .ki-message-content p {
   margin: 0;
 }
+.ki-message-content ul, .ki-message-content ol {
+  margin: 6px 0;
+  padding-inline-start: 1.4em;
+  list-style-position: outside;
+}
+.ki-message-content li { padding-inline-start: 0.15em; }
+.ki-working { display:flex; align-items:center; justify-content:center; gap:9px; margin:0 0 10px; color:#334155; font-size:0.8rem; }
+.ki-working[hidden] { display:none; }
+.ki-spinner { width:17px; height:17px; flex:0 0 17px; border:2px solid #d4e9d9; border-top-color:#397d60; border-radius:50%; animation:ki-spin 0.9s linear infinite; }
+@keyframes ki-spin { to { transform:rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .ki-spinner { animation:none; } }
 .ki-message-meta {
   display: block;
   margin-top: 6px;
@@ -3087,6 +3103,8 @@ svg:focus {
   text-align: center;
 }
 .ki-examples-panel {
+  max-height: min(230px, 30vh);
+  overflow-y: auto;
   margin: 8px 0 0;
   padding: 12px;
   text-align: left;
@@ -3219,7 +3237,7 @@ svg:focus {
   background: #eef8f1;
   border-color: #63b472;
 }
-.ki-prototype-note {
+.ki-status-notice {
   margin: 16px 0 0;
   color: #7a8797;
   font-size: 0.62rem;
@@ -4089,6 +4107,22 @@ svg:focus {
 .airfreight-circle-medium { width: 15px; height: 15px; }
 .airfreight-circle-large { width: 20px; height: 20px; }
 .airfreight-line-sample { background: var(--accent-airfreight); border-top-color: var(--accent-airfreight); }
+
+/* Verified assistant responses inside the existing conversation. */
+.ki-answer-table { max-width:100%; overflow-x:auto; margin:12px 0; }
+.ki-answer-table table { width:100%; min-width:520px; border-collapse:collapse; font-size:.78rem; overflow-wrap:normal; }
+.ki-answer-table caption { text-align:left; font-weight:700; padding:5px 0; }
+.ki-answer-table th, .ki-answer-table td { padding:8px; border-bottom:1px solid #e2e8f0; text-align:left; vertical-align:top; }
+.ki-answer-table th, .ki-answer-table td:nth-child(3) { white-space:nowrap; }
+.ki-answer-table th { color:#355b5e; background:#eef6f1; }
+.ki-answer-table td:nth-child(2) { white-space:nowrap; text-align:right; font-variant-numeric:tabular-nums; }
+.ki-answer-notes { font-size:.77rem; color:#475569; padding-left:18px; }
+.ki-answer-sources { margin-top:12px; font-size:.74rem; }
+.ki-answer-sources summary { cursor:pointer; color:#355b5e; }
+.ki-answer-sources pre { white-space:pre-wrap; overflow-wrap:anywhere; max-height:240px; overflow:auto; font-size:.65rem; }
+.ki-message-content { min-width:0; overflow-wrap:anywhere; }
+
+.ki-status-notice[hidden] { display: none; }
 /* ============================================================
    RESPONSIVE MEDIA QUERIES
    ============================================================ */

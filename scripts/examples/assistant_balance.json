@@ -1,0 +1,5 @@
+{
+  "question": "Duisburg, 2024, Straße: Versand, Empfang und Saldo in Tonnen.",
+  "function": "balance",
+  "confirmed": {"region": "DEA12", "year": 2024, "mode": "road", "metric": "tonnes"}
+}

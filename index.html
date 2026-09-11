@@ -26,7 +26,7 @@
   <header class="app-header">
     <div class="app-header-top">
       <div class="brand-section">
-        <img src="assets/logo_wbp.svg" alt="Wissensbasierte Planung Logo" class="brand-logo" id="brandLogoBtn" title="Wissensbasierte Planung - Dr. Paul Hebes">
+        <a href="https://wissensbasiert.de/" target="_blank" rel="noopener noreferrer" aria-label="Wissensbasierte Planung – Homepage"><img src="assets/logo_wbp.svg" alt="Wissensbasierte Planung Logo" class="brand-logo" title="Wissensbasierte Planung – Homepage"></a>
         <div class="brand-title-wrap">
           <div class="brand-title">
             <span>Güterverkehrsströme Deutschland</span>
@@ -1555,9 +1555,9 @@
        MODALS
        ============================================================ -->
 
-  <!-- Analyseassistent: interaction prototype without model or data connection -->
+  <!-- Analyseassistent: freigeschalteter Portalzugang mit serverseitigem Kontingent -->
   <div class="modal-backdrop" id="modalAi" role="presentation">
-    <div class="modal-dialog ki-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="aiModalTitle" aria-describedby="aiPrototypeNotice">
+    <div class="modal-dialog ki-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="aiModalTitle">
       <button class="modal-close" data-close="modalAi" aria-label="Analyseassistent schließen">&times;</button>
       <div class="ki-modal-header">
         <div class="ki-modal-brand">
@@ -1571,7 +1571,7 @@
                 <span class="info-tooltip-box" id="aiSecurityTooltip" role="tooltip">
                   <span class="info-tooltip-title">Sichere und datenbasierte KI-Unterstützung</span>
                   <span class="ki-info-tooltip-paragraph">Die KI-Verarbeitung erfolgt über freigegebene Modelle in der EU. Alle Kennzahlen stammen aus der geprüften Datenbasis des Tools. Die KI erzeugt keine eigenen Werte, sondern erläutert und ordnet die berechneten Ergebnisse ein.</span>
-                  <span class="ki-info-tooltip-paragraph">Ihre Daten sind geschützt. Ihre Anfragen und die erzeugten Antworten werden nicht zum Training von KI-Modellen verwendet.</span>
+                  <span class="ki-info-tooltip-paragraph">Für die Auswertung werden Ihre Frage und die letzten Nachrichten dieses geöffneten Chats an das konfigurierte KI-Modell übermittelt. Kartenfilter werden nicht übernommen. Die Antworten stützen sich ausschließlich auf die im Tool verfügbaren Daten; fehlende Angaben werden im Gespräch geklärt. Beim Neuladen der Seite beginnt ein neuer Chat.</span>
                   <span class="ki-info-tooltip-paragraph">Trotz dieser Sicherungen können KI-generierte Erläuterungen Fehler enthalten. Bitte prüfen Sie wichtige Ergebnisse im fachlichen Zusammenhang.</span>
                 </span>
               </span>
@@ -1587,23 +1587,26 @@
           <div class="ki-conversation" id="aiConversation" aria-live="polite"></div>
         </div>
         <div class="ki-composer-area">
+          <div class="ki-working" id="aiWorking" role="status" hidden><span class="ki-spinner" aria-hidden="true"></span><span>Ihre Frage wird ausgewertet …</span></div>
+          <p class="ki-status-notice" id="aiStatusNotice" role="status" hidden></p>
           <form class="ki-question-form" id="aiQuestionForm">
             <label class="sr-only" for="aiQuestionInput">Frage an den Analyseassistenten</label>
-            <textarea id="aiQuestionInput" rows="1" maxlength="600" placeholder="Analyseassistenten fragen"></textarea>
-            <button type="submit" class="ki-send-button" aria-label="Frage testen">
-              <span>Frage testen</span>
+            <textarea id="aiQuestionInput" rows="1" maxlength="4000" placeholder="Analyseassistenten fragen"></textarea>
+            <button type="submit" class="ki-send-button" aria-label="Frage senden">
+              <span>Frage senden</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline></svg>
             </button>
           </form>
           <div class="ki-quota">
             <progress id="aiQuotaProgress" max="50" value="0" aria-labelledby="aiQuotaLabel" aria-describedby="aiQuotaHint"></progress>
-            <span id="aiQuotaLabel" aria-live="polite">0 von 50 Fragen</span>
+            <span id="aiQuotaLabel" aria-live="polite">Kontingent wird geprüft</span>
             <span class="info-tooltip-wrap tooltip-open-up ki-quota-info" data-tooltip-placement="above" tabindex="0" aria-label="Information zum Monatskontingent" aria-describedby="aiQuotaHint">
               <span class="info-icon-btn" aria-hidden="true">?</span>
-              <span class="info-tooltip-box" id="aiQuotaHint" role="tooltip">0 von 50 Fragen des Monatskontingents genutzt.</span>
+              <span class="info-tooltip-box" id="aiQuotaHint" role="tooltip">Kontingent wird geprüft des Monatskontingents genutzt.</span>
             </span>
           </div>
           <button type="button" class="ki-examples-toggle" id="aiExamplesToggle" aria-expanded="false" aria-controls="aiExamples">Was kann ich fragen?</button>
+          <button type="button" class="ki-examples-toggle" id="aiNewChat">Neuer Chat</button>
           <div class="ki-examples-panel" id="aiExamples" hidden>
             <p>Vergleichen Sie Regionen, untersuchen Sie Verkehrsbeziehungen oder lassen Sie Entwicklungen zusammenfassen. Wählen Sie eine Frage als Ausgangspunkt und passen Sie diese bei Bedarf an.</p>
             <div class="ki-suggestions" aria-label="Beispielfragen">
@@ -1615,7 +1618,6 @@
               <button type="button" class="ki-suggestion" data-ai-question="Welche zentralen Befunde zur ausgewählten Region gehören in eine Verwaltungsvorlage?">Welche zentralen Befunde zur ausgewählten Region gehören in eine Verwaltungsvorlage?</button>
             </div>
           </div>
-          <p class="ki-prototype-note" id="aiPrototypeNotice"><strong>Interface-Prototyp:</strong> Noch keine echte KI- oder Datenabfrage; Zahlen werden nicht simuliert.</p>
         </div>
       </div>
     </div>

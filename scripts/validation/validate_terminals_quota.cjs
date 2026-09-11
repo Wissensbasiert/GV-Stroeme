@@ -26,37 +26,7 @@ output.features.forEach((f, i) => {
   assert(!f.properties.name.includes('\uFFFD'));
 });
 
-const quotaCode = read('js/shared/ai-quota.js');
-function quotaContext(stored = null, failStorage = false) {
-  const elements = new Map();
-  const context = vm.createContext({ Intl, Date, document: {
-    getElementById(id) { if (!elements.has(id)) elements.set(id, {}); return elements.get(id); },
-    querySelector() { return this.getElementById('submit'); }
-  }, sessionStorage: {
-    getItem() { if (failStorage) throw Error('blocked'); return stored; },
-    setItem(key, value) { if (failStorage) throw Error('blocked'); stored = value; }
-  } });
-  vm.runInContext(quotaCode, context);
-  return { context, elements, run: code => vm.runInContext(code, context) };
-}
-const q = quotaContext();
-assert.equal(q.run('refreshAiPreviewQuota().used'), 0);
-for (let i = 0; i < 50; i++) assert(q.run('consumeAiPreviewQuestion()'));
-assert.equal(q.run('consumeAiPreviewQuestion()'), false);
-assert.equal(q.elements.get('aiQuotaProgress').value, 50);
-assert.equal(q.elements.get('submit').disabled, true);
-assert.equal(q.run('currentAiQuotaMonth(new Date("2026-09-30T21:59:59Z"))'), '2026-09');
-assert.equal(q.run('currentAiQuotaMonth(new Date("2026-09-30T22:00:00Z"))'), '2026-10');
-q.run('aiPreviewQuota.month = "2026-01"');
-assert.equal(q.run('refreshAiPreviewQuota().used'), 0);
-assert.equal(q.elements.get('submit').disabled, false);
-for (const bad of ['broken', 'null', '{}', '[]', '{"used":-1}', '{"used":51}']) {
-  assert.equal(quotaContext(bad).run('readAiPreviewQuota().used'), 0);
-}
-const month = q.run('currentAiQuotaMonth()');
-assert.equal(quotaContext(JSON.stringify({ month, used: 17 })).run('readAiPreviewQuota().used'), 17);
-for (const used of [-1, 51, 1.5, '12']) {
-  assert.equal(quotaContext(JSON.stringify({ month, used })).run('readAiPreviewQuota().used'), 0);
-}
-assert(quotaContext(null, true).run('consumeAiPreviewQuestion()'));
-console.log(`PASS: ${expected.length} terminal records match source names, functions and coordinates; minimal fields and source hash verified. Quota limit, month boundary, stored counts and unavailable storage passed.`);
+// The former browser quota has been replaced by the guarded portal API.
+assert(!read('scripts/frontend/build_frontend.py').includes('"ai-quota.js"'));
+assert(read('scripts/frontend/build_frontend.py').includes('"ai-client.js"'));
+console.log(`PASS: ${expected.length} terminal records match source; the delivery bundle uses the portal assistant client. Browser/HTTP behavior is checked separately.`);

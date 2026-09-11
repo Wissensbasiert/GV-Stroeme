@@ -1,0 +1,611 @@
+[
+  {
+    "id": "T01",
+    "question": "P1, Q001; „Welche zentralen Befunde zur ausgewählten Region gehören in eine Verwaltungsvorlage?“ UI-Beispiel.",
+    "parameter_guidance": "bestätigte Auswahl Duisburg `DEA12`; Ist 2024, t, alle Güter, alle drei Landverkehrsträger; VP separat 2019_BASE/2040_P1. Vollprofil ausdrücklich vereinbart, abweichende Modulfilter offengelegt.",
+    "confirmed": {
+      "region": "DEA12",
+      "year": 2024,
+      "metric": "tonnes",
+      "include_forecast": true
+    },
+    "structured_function": "region_profile",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T02",
+    "question": "P1, Q002; „Wie viel Güterverkehr erzeugt und empfängt unsere Stadt?“",
+    "parameter_guidance": "kein bestätigter Stadtbezug; Jahr und gemeinte Verkehrsträger offen.",
+    "confirmed": {},
+    "structured_function": null,
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T03",
+    "question": "P3, Q053: Wie sieht eine belastbare Kurzbeschreibung des Standorts für ein Investorengespräch aus?",
+    "parameter_guidance": "Duisburg, 2024, alle Landverkehrsträger, t; gewünschte kurze Zusammenfassung.",
+    "confirmed": {
+      "region": "DEA12",
+      "year": 2024,
+      "metric": "tonnes",
+      "include_forecast": false
+    },
+    "structured_function": "region_profile",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T04",
+    "question": "P1, Q004; „Welche Regionen sind Hamburgs wichtigste Partner im Straßengüterverkehr?“ UI-Beispiel.",
+    "parameter_guidance": "`DE600`, 2024, Straße, alle Güter, t, externe Partner, beide Richtungen; bestätigtes Ranking nach Tonnen, Top 5.",
+    "confirmed": {
+      "region": "DE600",
+      "year": 2024,
+      "mode": "road",
+      "metric": "tonnes",
+      "direction": "all",
+      "group": "ALL",
+      "top": 5,
+      "external": true
+    },
+    "structured_function": "partner_ranking",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T05",
+    "question": "P4, Q063; „Wie viel Ladung wird zwischen Duisburg und Magdeburg in jeder Richtung transportiert?“",
+    "parameter_guidance": "`DEA12` ↔ `DEE03`, 2024, Straße/Schiene/Binnenschiff getrennt, alle Güter, t.",
+    "confirmed": {
+      "origin": "DEA12",
+      "destination": "DEE03",
+      "year": 2024,
+      "metric": "tonnes"
+    },
+    "structured_function": "relation_matrix",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T06",
+    "question": "P8, Q146: Welche Beziehungen fehlen in der Top-Liste, obwohl Verkehr vorhanden ist?",
+    "parameter_guidance": "Fokusregion, 2024, Modus, Richtung, t, Top 2.",
+    "confirmed": {},
+    "structured_function": null,
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T07",
+    "question": "P1, Q003; „Wie unterscheiden sich Duisburg und Magdeburg beim Güteraufkommen, Modal Split und bei der Güterstruktur?“ UI-Beispiel.",
+    "parameter_guidance": "`DEA12`/`DEE03`, gemeinsames vollständiges Jahr 2024 explizit bestätigt; t; alle Landverkehrsträger; C1–C7; Versand plus Empfang.",
+    "confirmed": {
+      "regions": [
+        "DEA12",
+        "DEE03"
+      ],
+      "year": 2024,
+      "metric": "tonnes",
+      "direction": "all"
+    },
+    "structured_function": "compare_regions",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T08",
+    "question": "P8, Q151; „Können wir dieselbe Analyse für einen frei abgegrenzten Wirtschaftsraum wiederholen?“",
+    "parameter_guidance": "zunächst klären: Vereinigung ganzer Quellgebiete oder ein Polygon, das Kreise schneidet; 2024, t, Straße, Richtung extern/intern.",
+    "confirmed": {},
+    "structured_function": null,
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T09",
+    "question": "P3/P8, Q042/Q152; „Wie unterscheidet sich unser Güterprofil von drei vergleichbaren Wirtschaftsstandorten?“",
+    "parameter_guidance": "vorgegeben sind eine Stadt, ein Bundesland und ein Terminal; Vergleichskriterium offen.",
+    "confirmed": {},
+    "structured_function": null,
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T10",
+    "question": "P1, Q005; „Wie hat sich der Schienengüterverkehr in Magdeburg seit 2016 entwickelt?“ UI-Beispiel.",
+    "parameter_guidance": "`DEE03`, 2016–2025, Schiene, t, alle Güter, Versand plus Empfang; Endjahr und Erfassungsprüfung offenlegen.",
+    "confirmed": {
+      "region": "DEE03",
+      "start": 2016,
+      "end": 2025,
+      "mode": "rail",
+      "metric": "tonnes",
+      "direction": "all"
+    },
+    "structured_function": "regional_history",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T11",
+    "question": "P1/P8, Q020/Q143: Welche Zeitvergleiche lassen sich belastbar fortschreiben?",
+    "parameter_guidance": "Identisches Gebiet, Gütergruppe, Modus, Richtung und zwei bestätigte Jahre.",
+    "confirmed": {},
+    "structured_function": null,
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T12",
+    "question": "P8, Q149; „Warum steigt eine Gütergruppe stark an: reale Entwicklung, Erfassungsänderung oder räumliche Umgliederung?“",
+    "parameter_guidance": "Region, Gütergruppe, Richtung, zwei Jahre und Verkehrsträger zunächst bestätigen.",
+    "confirmed": {},
+    "structured_function": null,
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T13",
+    "question": "P2, Q023; „Welche Regionen verzeichnen seit 2019 die stärksten absoluten und relativen Rückgänge?“",
+    "parameter_guidance": "bestätigte vergleichbare Regionen, 2019/2024, Schiene, t, gleicher Richtungsbezug; Mindestbasis für prozentuale Rangfolge explizit.",
+    "confirmed": {},
+    "structured_function": null,
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T14",
+    "question": "P6/P8, Q104/Q152: Welche bisher kleinen Partner wachsen schnell, und wie robust ist das Ranking?",
+    "parameter_guidance": "2019/2024, identische Richtung/Güter, Rangmaß relativ; Mindestbasis noch nicht vereinbart.",
+    "confirmed": {},
+    "structured_function": null,
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T15",
+    "question": "P7, Q126: Entsteht ein höherer Schienenanteil durch mehr Schiene oder weniger Straße?",
+    "parameter_guidance": "Zwei vollständige gemeinsame Jahre, dieselbe Region, alle Landverkehrsträger, t.",
+    "confirmed": {},
+    "structured_function": null,
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T16",
+    "question": "P1/P3, Q006/Q041: Welche Güter prägen Versand und Empfang unserer Region?",
+    "parameter_guidance": "Duisburg, 2024, Straße, C1–C7, Versand/Empfang getrennt, t.",
+    "confirmed": {
+      "region": "DEA12",
+      "year": 2024,
+      "mode": "road",
+      "metric": "tonnes",
+      "directions": [
+        "outbound",
+        "inbound"
+      ],
+      "granularity": "C7"
+    },
+    "structured_function": "goods_structure",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T17",
+    "question": "P8, Q145: Welche Gütergliederung erlaubt einen fairen Vergleich?",
+    "parameter_guidance": "Duisburg/Magdeburg 2024, Straße, gewünschte 20 Abteilungen, NUTS-3.",
+    "confirmed": {
+      "topic": "road_goods_depth"
+    },
+    "structured_function": "explain_scope",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T18",
+    "question": "P8, Q147: Sind sieben Güterhauptgruppen zwischen Ist und Prognose inhaltlich identisch?",
+    "parameter_guidance": "Aktueller C1–C7-Vertrag und VP-Crosswalk; Codes als Text.",
+    "confirmed": {
+      "topic": "classification"
+    },
+    "structured_function": "explain_scope",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T19",
+    "question": "P4, Q062; „Welche Gütergruppen werden auf der Schiene von Köln nach Hamburg transportiert?“ UI-Beispiel.",
+    "parameter_guidance": "`DEA23` → `DE600`, 2024, Schiene, t, Versand, C1–C7; Jahr explizit vereinbart.",
+    "confirmed": {
+      "region": "DEA23",
+      "partner": "DE600",
+      "year": 2024,
+      "direction": "outbound",
+      "group": "ALL",
+      "nst": null,
+      "metric": "tonnes"
+    },
+    "structured_function": "rail_goods",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T20",
+    "question": "P5, Q096; „Welche Güter werden auf unserer geplanten Straßenverbindung bereits transportiert?“",
+    "parameter_guidance": "Köln → Hamburg, 2024, Straße, NST-20 gewünscht.",
+    "confirmed": {
+      "origin": "DEA23",
+      "destination": "DE600",
+      "year": 2024,
+      "metric": "tonnes"
+    },
+    "structured_function": "road_relation_goods_limit",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T21",
+    "question": "P6, Q103: Welche Gütergruppen gewinnen auf einer Schienenrelation an Bedeutung?",
+    "parameter_guidance": "Köln DEA23 → Hamburg DE600, 2023/2024, Schiene, NST-Feinpositionen, t.",
+    "confirmed": {
+      "region": "DEA23",
+      "partner": "DE600",
+      "years": [
+        2023,
+        2024
+      ],
+      "direction": "outbound",
+      "metric": "tonnes"
+    },
+    "structured_function": "rail_goods_history",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T22",
+    "question": "P2, Q021; „Wie verteilt sich die deutsche Güterverkehrsleistung auf Straße, Schiene und Binnenschiff?“",
+    "parameter_guidance": "Deutschland, 2024, tkm, alle Güter, nationale Gesamtabgrenzung.",
+    "confirmed": {
+      "year": 2024,
+      "metric": "tkm",
+      "mode": null
+    },
+    "structured_function": "national",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T23",
+    "question": "P7, Q125, Variante mit ausdrücklichem Endjahr 2025; „Wie verändert sich der Modal Split unserer Region bis 2025?“",
+    "parameter_guidance": "Duisburg, 2016/2025, alle drei Landverkehrsträger, t.",
+    "confirmed": {
+      "region": "DEA12",
+      "years": [
+        2016,
+        2025
+      ],
+      "metric": "tonnes",
+      "direction": "all"
+    },
+    "structured_function": "modal_history",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T24",
+    "question": "P1/P7, Q003/Q125: Wie verteilt sich Duisburgs Güteraufkommen auf die Verkehrsträger?",
+    "parameter_guidance": "DEA12, 2024, t, Versand plus Empfang, alle Güter.",
+    "confirmed": {
+      "region": "DEA12",
+      "year": 2024,
+      "metric": "tonnes",
+      "direction": "all"
+    },
+    "structured_function": "regional_modal_split",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T25",
+    "question": "P6/P3, Q102/Q050; „Auf welchen Relationen oder in welchen Regionen sind die Richtungen besonders unausgeglichen?“",
+    "parameter_guidance": "Kontrollfall Duisburg, Straße, 2024, alle Güter; regionale Richtungswerte in t.",
+    "confirmed": {
+      "region": "DEA12",
+      "year": 2024,
+      "mode": "road",
+      "metric": "tonnes"
+    },
+    "structured_function": "balance",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T26",
+    "question": "P1, Q007; „Wie groß sind Binnenverkehr, ein- und ausgehender Verkehr sowie Durchgangsverkehr in unserer Stadt?“",
+    "parameter_guidance": "Stadtgebiet, 2024, Straße, t; Binnen = Quelle und Ziel im Gebiet; Transit = Weg durch Gebiet bei beiden Endpunkten außerhalb.",
+    "confirmed": {},
+    "structured_function": null,
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T27",
+    "question": "P2, Q026: Welchen Anteil hat Transit an der Verkehrsleistung in Deutschland?",
+    "parameter_guidance": "Deutschland, 2024, Schiene, tkm, amtliche Verkehrsbeziehung.",
+    "confirmed": {
+      "year": 2024,
+      "mode": "rail",
+      "metric": "tkm"
+    },
+    "structured_function": "national",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T28",
+    "question": "P2, Q022; „Wo wächst das Schienengüteraufkommen laut Prognose von 2019 bis 2040 am stärksten?“ UI-Beispiel.",
+    "parameter_guidance": "Deutschland, 400 im aktuellen NUTS-2024-Geometriebestand enthaltene Regionen, gemeinsame VP-IDs, 2019_BASE/2040_P1, Schiene, t, Gesamt inkl. Binnen einmal; „stärksten“ hier bestätigt als absoluter Zuwachs, Top 5.",
+    "confirmed": {
+      "mode": "rail",
+      "metric": "tonnes",
+      "direction": "all",
+      "measure": "absolute",
+      "top": 5,
+      "descending": true
+    },
+    "structured_function": "forecast_ranking",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T29",
+    "question": "P2, Q032; „Passt die beobachtete Entwicklung seit 2019 noch zur Verkehrsprognose?“",
+    "parameter_guidance": "Duisburg, alle Landverkehrsträger, t; Ist 2019/2024 versus VP 2019_BASE/2040_P1.",
+    "confirmed": {
+      "region": "DEA12",
+      "observed_years": [
+        2019,
+        2024
+      ],
+      "metric": "tonnes",
+      "direction": "all"
+    },
+    "structured_function": "forecast_comparison",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T30",
+    "question": "P8/P2, Q154/Q035: Wie wird die Prognose ohne Scheinsicherheit dargestellt?",
+    "parameter_guidance": "2019_BASE/2040_P1, gleiche Region und Kennzahl; alternative Szenarien ausdrücklich angefragt.",
+    "confirmed": {},
+    "structured_function": null,
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T31",
+    "question": "P6/P8, Q117/Q153; „Wie unterscheiden sich die intermodalen Teilmärkte, und lassen sie sich zu einem KV-Gesamtwert addieren?“",
+    "parameter_guidance": "Deutschland, 2024, t und tkm jeweils getrennt, keine regionalen Filter.",
+    "confirmed": {
+      "region": "DE",
+      "year": 2024,
+      "modes": [
+        "rail",
+        "iww"
+      ],
+      "metrics": [
+        "tonnes",
+        "tkm"
+      ],
+      "direction": "all"
+    },
+    "structured_function": "intermodal_markets",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T32",
+    "question": "P4, Q071; „Wie groß ist der Anteil intermodaler Verkehre an der Schiene im Einzugsgebiet?“",
+    "parameter_guidance": "Einzugsgebiet hier ausdrücklich Duisburg `DEA12`, 2024, Schiene, t, externer Versand ohne Binnen.",
+    "confirmed": {
+      "region": "DEA12",
+      "year": 2024,
+      "modes": [
+        "rail"
+      ],
+      "metrics": [
+        "tonnes"
+      ],
+      "direction": "outbound"
+    },
+    "structured_function": "intermodal_markets",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T33",
+    "question": "P8/P1, Q153/Q011: Ist aus den vorhandenen KV-Mengen das Verlagerungspotenzial erkennbar?",
+    "parameter_guidance": "Für diesen Test ausdrücklich Deutschland 2024, Schiene und Binnenschiff getrennt, Tonnen; statistische Teilmärkte und Frage nach Verlagerungspotenzial.",
+    "confirmed": {
+      "region": "DE",
+      "year": 2024,
+      "modes": [
+        "rail",
+        "iww"
+      ],
+      "metrics": [
+        "tonnes"
+      ],
+      "direction": "all"
+    },
+    "structured_function": "intermodal_markets",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T34",
+    "question": "P4, Q074; „Wie unterscheiden sich Luftfrachtmenge und Zahl reiner Fracht- und Postflüge an unserem Flughafen?“",
+    "parameter_guidance": "Leipzig/Halle `EDDP`, ausdrücklich 2025, Fracht und Post, beide Richtungen.",
+    "confirmed": {
+      "kind": "air",
+      "node": "EDDP",
+      "year": 2025,
+      "direction": "all",
+      "metrics": [
+        "tonnes",
+        "flights"
+      ]
+    },
+    "structured_function": "node_profile",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T35",
+    "question": "P4, Q075; „Welche internationalen Flugverbindungen tragen den größten Teil unserer Luftfracht?“",
+    "parameter_guidance": "`EDDP`, 2024, t, Versand, internationale Flughafenpartner; Partnerland ungleich Deutschland, Top 5.",
+    "confirmed": {
+      "kind": "air",
+      "node": "EDDP",
+      "year": 2024,
+      "direction": "outbound",
+      "metric": "tonnes",
+      "international": true,
+      "top": 5
+    },
+    "structured_function": "node_partners",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T36",
+    "question": "P4, Q064: Wie hoch sind Umschlag und Containeraufkommen unseres Seehafens im Zeitvergleich?",
+    "parameter_guidance": "Eindeutig benannter Seehafen, 2023/2024, Ein-/Ausladung, t und TEU getrennt.",
+    "confirmed": {},
+    "structured_function": null,
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T37",
+    "question": "P6, Q109; „Wie viele mautpflichtige Fahrten entfallen auf unsere Zielgemeinde, getrennt nach Start und Ziel?“",
+    "parameter_guidance": "Lokaler Testumfang: Berlin, AGS 11000000 als Text; Juli 2026, Mautfahrten, Start/Ziel/Binnen getrennt.",
+    "confirmed": {
+      "ags": "11000000",
+      "month": "2026-07",
+      "comparison_month": null
+    },
+    "structured_function": "toll_month",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T38",
+    "question": "P6, Q108; „Welche mautpflichtigen Gemeindeverbindungen haben zuletzt besonders stark zugelegt?“",
+    "parameter_guidance": "Lokaler Testumfang: Berlin, AGS 11000000 als Text; Juli 2026, Mautfahrten, Start/Ziel/Binnen getrennt. Gewünschter Vergleich Juli 2025; keine Richtung oder einzelne Relation festgelegt.",
+    "confirmed": {
+      "ags": "11000000",
+      "month": "2026-07",
+      "comparison_month": "2025-07"
+    },
+    "structured_function": "toll_month",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T39",
+    "question": "P4, Q072; „Welche saisonalen Güterspitzen sollten bei der Personalplanung berücksichtigt werden?“",
+    "parameter_guidance": "Magdeburg, Schiene, Gütergruppe und Richtung, vollständige Monatsjahre; Terminalbezug separat.",
+    "confirmed": {},
+    "structured_function": null,
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T40",
+    "question": "P6, Q111; „Wie verteilen sich Lkw-Fahrten unserer Region auf Nah-, Regional- und Fernverkehr?“",
+    "parameter_guidance": "Nürnberg, 2024, Versand; amtliche Entfernungsstufen und Fahrzeugpopulation vorab bestätigen. Für diesen Test ausdrücklich Inlandspopulation I: deutsche Güterkraftfahrzeuge, Lastfahrten mit erfassten Inlandskilometern; tkm nur im Inland.",
+    "confirmed": {
+      "product": "VD2",
+      "year": 2024,
+      "region": "DE254",
+      "direction": "outbound",
+      "population": "I",
+      "metric": "trips",
+      "partner": null
+    },
+    "structured_function": "road_details",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T41",
+    "question": "P2/P8, Q039/Q145: Welche zusätzlichen Straßengüterdetails sind aus vorhandenen Daten nutzbar?",
+    "parameter_guidance": "NUTS-2-Gebiet DEA2, 2024, Versand, deutsche Lkw, 20 NST-Abteilungen; Gesamt/Inland explizit festlegen. Für diesen Test ausdrücklich Inlandspopulation I: deutsche Güterkraftfahrzeuge, Lastfahrten mit erfassten Inlandskilometern; tkm nur im Inland.",
+    "confirmed": {
+      "product": "VD3c",
+      "year": 2024,
+      "region": "DEA2",
+      "direction": "outbound",
+      "population": "I",
+      "metric": "tonnes",
+      "partner": null
+    },
+    "structured_function": "road_details",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T42",
+    "question": "P8, Q144; „Wie lassen sich veröffentlichte Nullwerte, fehlende Angaben und eingeschränkt belastbare Schätzwerte unterscheiden?“",
+    "parameter_guidance": "konkrete Quelle, Jahr, Region/Relation und Kennzahl.",
+    "confirmed": {
+      "topic": "source_flags"
+    },
+    "structured_function": "explain_scope",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T43",
+    "question": "P8, Q142; „Warum weichen die Summe der Regionalwerte und der Deutschlandwert voneinander ab?“",
+    "parameter_guidance": "2024, Landverkehr, t bzw. tkm explizit unterscheiden; D01 gegenüber D03.",
+    "confirmed": {
+      "topic": "regional_vs_national"
+    },
+    "structured_function": "explain_scope",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T44",
+    "question": "P8, Q157; „Wie kann ein zweiter Prüfer einen Regions- oder Relationsvergleich vollständig reproduzieren?“",
+    "parameter_guidance": "Köln DEA23 → Hamburg DE600, 2024, Schiene, Tonnen, Versand, Güterstruktur; aktueller gemeinsamer Datenstand.",
+    "confirmed": {
+      "region": "DEA23",
+      "partner": "DE600",
+      "year": 2024,
+      "direction": "outbound",
+      "group": "ALL",
+      "nst": null,
+      "metric": "tonnes"
+    },
+    "structured_function": "rail_goods",
+    "preparation_status": "ready",
+    "blocking_note": null
+  },
+  {
+    "id": "T45",
+    "question": "P5/P7/P4, Q082/Q121/Q066: Was kosten Transporte, welche Umweltbilanz haben sie und wie ausgelastet ist ein Terminal?",
+    "parameter_guidance": "Vom Nutzenden benannte Region/Relation/Knoten; gewünschte Kennzahl erkennen.",
+    "confirmed": {
+      "topic": "outside_scope"
+    },
+    "structured_function": "explain_scope",
+    "preparation_status": "ready",
+    "blocking_note": null
+  }
+]
