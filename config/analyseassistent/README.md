@@ -2,7 +2,7 @@
 
 **Dialogausbau 11.09.2026:** Der Laufzeitmodus `grounded_narrative` verbindet einen datenbasierten Verfügbarkeitskatalog, signierten Gesprächsstand und belegte sprachliche Erläuterungen. Freie numerische Fakten bleiben gesperrt. Der unten beschriebene Auswahlmodus ist der dokumentierte Vorgänger. Maßgeblich für die begrenzte Abnahme ist [der Beta-Prüfbericht](../../docs/qualitaet/ANALYSEASSISTENT_BETA_20260911.md); der aktuelle Live-Freigabestand steht im Qualitätssicherungsplan. `runtime_enabled=false` bleibt die unveränderte allgemeine Spezifikationsfreigabe und schaltet das ausdrücklich beauftragte Testportal nicht ab.
 
-**Version des Regelentwurfs: 0.2.1 · Fortschreibung: 11.09.2026 · Status: lokale Erweiterung des aktiven Beta-Stands; Mehrjahresrelation und rechnerische Veränderungen noch nicht neu bereitgestellt.**
+**Version des Regelentwurfs: 0.2.1 · Fortschreibung: 11.09.2026 · Status: auf der AlwaysData-Testsite im Release `portal-test-20260911-gueterstroeme-beta04` bereitgestellt und in der Linux-Laufzeit geprüft.**
 
 **Fortschreibung 10.09.2026:** `server/analyseassistent/` lädt diesen Systemprompt und implementiert einen begrenzten lokalen Ablauf. Der erste echte 45-Fälle-Modelllauf und gezielte Nachprüfungen sind erfolgt. Der Prompt präzisiert inzwischen konkrete Reproduktionsabfragen und Rückfragen bei fehlender Auswahl. Die folgenden Abschnitte beschreiben den ursprünglichen Vertragsentwurf; sie sind keine Freigabe aller Funktionen. Tatsächlich implementierter Umfang und offene Fachprüfungen: [Lokaler Pilot](../../docs/betrieb/ANALYSEASSISTENT_LOKALER_PILOT.md), Roadmap Abschnitt 24 und Qualitätssicherungsplan. Allgemeine Portalaktivierung und fachliche Gesamtabnahme bleiben offen.
 

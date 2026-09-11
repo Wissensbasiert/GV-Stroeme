@@ -94,6 +94,19 @@ try:
             report['guided_dialogue_verified']={'signed_context':True,'reverse_2025_tonnes':585052,'gap_2026_alternative_2025':True}
             report['configured_model']=os.environ.get('REQUESTY_MODEL')
             assert report['configured_model']=='vertex/gemini-3.7-flash@eu'
+            relation_question='Wie viel Güter sind in den letzten Jahren von Rosenheim nach Augsburg transportiert worden?'
+            relation,relation_audit=Service(datasets).analyze(relation_question,select_answer=False)
+            assert relation['function_id']=='relation_history'
+            assert relation['parameters']=={'origin':'DE213','destination':'DE271','metric':'tonnes',
+                'modes':['road','rail','iww'],'start':2020,'end':2024}
+            assert relation_audit['attempted_model_calls']==0
+            assert any('rechnerischen Rückgang um 50,99 %' in paragraph for paragraph in relation['answer']['paragraphs'])
+            assert any('kein nutzbarer Güterverkehrswert erfasst beziehungsweise veröffentlicht' in paragraph
+                for paragraph in relation['answer']['paragraphs'])
+            assert any('beweist nicht, dass tatsächlich kein Verkehr stattfand' in note for note in relation['answer']['notes'])
+            report['published_growth_verified']={'question':relation_question,'start_year':2020,'end_year':2024,
+                'rail_start_tonnes':2175,'rail_end_tonnes':1066,'calculated_decline_percent':50.99,
+                'missing_values_not_treated_as_zero':True,'external_model_calls':0}
     if sys.argv[4]=='requesty':
         report['stage']='requesty'
         from server.analyseassistent.requesty import Requesty
