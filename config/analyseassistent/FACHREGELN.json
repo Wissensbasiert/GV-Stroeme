@@ -10,7 +10,7 @@
     "external_environment_cost_capacity_chain_products": false,
     "test_cases_sent_to_model": false
   },
-  "response_mode": "verified_statement_selection",
+  "response_mode": "grounded_narrative",
   "free_factual_prose_enabled": false,
   "result_statuses": [
     "ok",

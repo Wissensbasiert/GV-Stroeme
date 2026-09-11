@@ -2,11 +2,39 @@
 import time
 
 import duckdb
+from .dialogue import available_years
+
+
+def missing_alternatives(result, datasets, deadline):
+    function = result.get('function_id')
+    p = result.get('parameters', {})
+    if function not in {'relation', 'rail_goods'} or result['status'] != 'not_available':
+        return None
+    candidates = []
+    years = available_years(datasets, function, p)
+    if years and p.get('year') not in years:
+        candidates.append(('latest_year', function, {**p, 'year': max(years)}))
+    if function == 'relation' and p.get('metric') in {'tonnes', 'tkm'}:
+        for mode in ['rail', 'road', 'iww']:
+            if mode != p['mode'] and p['year'] in datasets.manifests['b01']['years_by_mode'][mode]:
+                candidates.append((mode, 'relation', {**p, 'mode': mode}))
+    checks = {}
+    until = min(deadline or float('inf'), time.monotonic() + 5)
+    for key, fn, parameters in candidates[:3]:
+        if time.monotonic() >= until: break
+        record = {'function_id': fn, 'parameters': parameters, 'available': False, 'status': 'not_checked'}
+        checks[key] = record
+        try:
+            raw = datasets.query(fn, parameters, timeout_seconds=until-time.monotonic())
+        except (ValueError, KeyError, OSError, duckdb.Error):
+            continue
+        record.update(status=raw['status'], available=(raw.get('value') is not None if fn == 'relation' else any(r.get('value') is not None for r in raw.get('details', []))))
+    return {'data_snapshot_id': datasets.snapshot_id, 'checks': checks}
 
 
 def related_data(result, datasets, *, deadline=None):
     if result.get('function_id') != 'road_relation_goods_limit':
-        return None
+        return missing_alternatives(result, datasets, deadline)
     if result.get('data_snapshot_id') != datasets.snapshot_id:
         return None
     p = result['parameters']

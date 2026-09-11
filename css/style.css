@@ -2955,7 +2955,7 @@ a.btn-header svg { width: 16px; height: 16px; flex: 0 0 16px; }
   gap: 2px;
 }
 .ki-info-tooltip .info-tooltip-box {
-  left: 50%;
+  left: calc(50% + var(--ki-tooltip-shift, 0px));
   width: 420px;
   transform: translate(-50%, -4px);
 }
@@ -2964,7 +2964,7 @@ a.btn-header svg { width: 16px; height: 16px; flex: 0 0 16px; }
   transform: translate(-50%, 0);
 }
 .ki-info-tooltip .info-tooltip-box::before {
-  left: 50%;
+  left: calc(50% - var(--ki-tooltip-shift, 0px));
   transform: translateX(-50%) rotate(45deg);
 }
 .ki-info-tooltip-paragraph {

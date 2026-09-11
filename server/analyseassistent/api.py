@@ -61,12 +61,14 @@ class Application:
             if not 1 <= size <= 60000:
                 raise ValueError()
             body = json.loads(environ['wsgi.input'].read(size))
-            if not isinstance(body, dict) or set(body) - {'question', 'confirmed', 'function', 'request_id', 'history'}:
+            if not isinstance(body, dict) or set(body) - {'question', 'confirmed', 'function', 'request_id', 'history', 'conversation'}:
                 raise ValueError()
             question = body['question']
             if not isinstance(question, str) or not question.strip() or len(question) > 4000:
                 raise ValueError()
             validate_history(body.get('history'))
+            if 'conversation' in body and (not isinstance(body['conversation'], str) or len(body['conversation']) > 24000):
+                raise ValueError()
             request_id = body['request_id']
             reservation = self.quota.reserve(identity, request_id, fingerprint(body))
         except (ValueError, KeyError, TypeError):
@@ -81,6 +83,7 @@ class Application:
         try:
             options={'function':body.get('function')}
             if body.get('history'):options['history']=body['history']
+            if body.get('conversation'):options['conversation']=body['conversation']
             result, _audit = self.service.analyze(question, body.get('confirmed'), **options)
             charge = result['status'] in {'ok', 'partial'} and any(f.get('value') is not None for f in result.get('facts', []))
             response = ('200 OK', {**result, 'request_id': request_id})

@@ -1,5 +1,7 @@
 # Analyseassistent: lokaler Pilot und Übergabe an das Testportal
 
+**Nachtrag 11.09.2026:** Der neue Gesprächsablauf, der echte begrenzte Vergleich und die Browserabnahme sind im [Beta-Prüfbericht](../qualitaet/ANALYSEASSISTENT_BETA_20260911.md) dokumentiert. Der Client verwendet künftig `conversation` als serverseitig signierten Stand; `history` bleibt für ältere Clients verfügbar. Ausgangsfrage, bestätigte Auswahl und offene Rückfrage sind getrennt; frühere Zahlen werden erneut abgefragt. Gültigkeit zwei Stunden und Bindung an den Datenstand. Bei Schlüsselwechsel oder Neustart einer rein lokalen Laufzeit kann ein neuer Chat erforderlich sein. Die folgenden ui10-Abschnitte dokumentieren den Vorgänger.
+
 Stand: 10.09.2026. Release `portal-test-20260910-gueterstroeme-ui10` ist auf AlwaysData-Testsite 1067000 aktiv. Serverdateien, Linux-Laufzeit, Zugriffsschutz, Logo-/Info-/Arbeitsanzeige und Listenlayout sind geprüft. Der echte Browserdialog Berlin → Hamburg, Schiene, mit kurzer Antwort „Das aktuellste Jahr“ führt zur Auswertung 2025 ohne erneute Frage nach Richtung, Gütergruppe oder Einheit. Die Rückfrage bleibt unberechnet; Verbrauch nach der Auswertung 3/50, 47 verfügbar zum Prüfzeitpunkt. Keine Produktionsfreigabe oder fachliche Gesamtabnahme aller freien Fragen.
 
 ## Im Testportal verwenden

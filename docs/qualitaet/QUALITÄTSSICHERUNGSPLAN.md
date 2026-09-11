@@ -1,5 +1,7 @@
 # Qualitätssicherungsplan für das Güterströme-Dashboard
 
+**Nachtrag 11.09.2026 – geführtes Analysegespräch:** Die lokale Umsetzung besteht 77 Laufzeitprüfungen und einen begrenzten echten Requesty-Vergleich mit sechs Eingaben. Neu sind Verfügbarkeitskatalog, signierter Gesprächsstand, geprüfte Jahres-/Gegenrichtungsfortsetzungen und belegte Erläuterungen; Beta-Kennzeichnung, kundenorientierter Hover und entfernter technischer Nachweisbereich sind im Browser geprüft. Die Testbereitstellung läuft; deren abschließender Live-Nachweis wird im [Beta-Prüfbericht](ANALYSEASSISTENT_BETA_20260911.md) und hier ergänzt. Keine Produktionsfreigabe oder fachliche Gesamtabnahme beliebiger Fragen.
+
 **Stand:** 04.09.2026
 
 Ergänzungen zum Analyseassistenten vom 09.–10.09.2026 stehen am Dokumentende. Das eigene Testkonto ist freigeschaltet und ein angemeldeter Browser-/Kontingenttest bestanden; UI-Release ui10 ist einschließlich Serverdateien, Oberfläche und zweistufigem Jahresdialog geprüft. Für B01–B06 ist der letzte Nachprüfungsabschnitt maßgeblich; frühere Paketabschnitte dokumentieren die jeweiligen Vorgängerstände.

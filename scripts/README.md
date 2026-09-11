@@ -1,5 +1,7 @@
 # Skriptübersicht
 
+`validation/validate_assistant_dialogue.py` führt den begrenzten Sechs-Eingaben-Vergleich aus: `--root` wählt den isolierten Bestand unter `C:/tmp`, `--baseline` den alten Verlauf, `--requesty` erlaubt ausdrücklich echte Modellaufrufe. `--output` muss neu sein; keine automatischen Wiederholungen. Vorher-/Nachherstand in getrennten Prozessen prüfen. Der Bericht enthält Antworten, Audit und Verbrauch einschließlich verfügbarer Fehlerdiagnostik; kein fachlicher Gesamtfreigabenachweis und keine Portalbuchung.
+
 Alle Befehle werden aus dem Projektstamm ausgeführt. Die Unterordner zeigen Zweck und Status der Skripte.
 
 | Ordner | Zweck | Status |

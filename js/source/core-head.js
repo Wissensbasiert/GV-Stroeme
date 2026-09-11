@@ -1455,6 +1455,7 @@
     document.querySelectorAll('.info-tooltip-wrap').forEach(wrap => {
       const positionTooltip = () => {
         wrap.classList.remove('tooltip-align-right');
+        wrap.style.setProperty('--ki-tooltip-shift', '0px');
         // The quota help is anchored above its row inside a clipped dialog.
         // Do not reset that explicit placement based on the larger viewport.
         wrap.classList.toggle('tooltip-open-up', wrap.dataset.tooltipPlacement === 'above');
@@ -1462,7 +1463,14 @@
           const box = wrap.querySelector('.info-tooltip-box');
           if (!box) return;
           let bounds = box.getBoundingClientRect();
-          if (bounds.right > window.innerWidth - 12) {
+          if (wrap.classList.contains('ki-info-tooltip')) {
+            const dialog = wrap.closest('.ki-modal-dialog').getBoundingClientRect();
+            const left = Math.max(12, dialog.left + 8);
+            const right = Math.min(window.innerWidth - 12, dialog.right - 8);
+            const shift = Math.max(left - bounds.left, Math.min(0, right - bounds.right));
+            wrap.style.setProperty('--ki-tooltip-shift', `${shift}px`);
+            bounds = box.getBoundingClientRect();
+          } else if (bounds.right > window.innerWidth - 12) {
             wrap.classList.add('tooltip-align-right');
             bounds = box.getBoundingClientRect();
           }

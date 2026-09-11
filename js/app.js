@@ -1455,6 +1455,7 @@
     document.querySelectorAll('.info-tooltip-wrap').forEach(wrap => {
       const positionTooltip = () => {
         wrap.classList.remove('tooltip-align-right');
+        wrap.style.setProperty('--ki-tooltip-shift', '0px');
         // The quota help is anchored above its row inside a clipped dialog.
         // Do not reset that explicit placement based on the larger viewport.
         wrap.classList.toggle('tooltip-open-up', wrap.dataset.tooltipPlacement === 'above');
@@ -1462,7 +1463,14 @@
           const box = wrap.querySelector('.info-tooltip-box');
           if (!box) return;
           let bounds = box.getBoundingClientRect();
-          if (bounds.right > window.innerWidth - 12) {
+          if (wrap.classList.contains('ki-info-tooltip')) {
+            const dialog = wrap.closest('.ki-modal-dialog').getBoundingClientRect();
+            const left = Math.max(12, dialog.left + 8);
+            const right = Math.min(window.innerWidth - 12, dialog.right - 8);
+            const shift = Math.max(left - bounds.left, Math.min(0, right - bounds.right));
+            wrap.style.setProperty('--ki-tooltip-shift', `${shift}px`);
+            bounds = box.getBoundingClientRect();
+          } else if (bounds.right > window.innerWidth - 12) {
             wrap.classList.add('tooltip-align-right');
             bounds = box.getBoundingClientRect();
           }
@@ -5357,7 +5365,7 @@
     const send = form?.querySelector('button[type="submit"]');
     const base = '/api/tools/gueterstroeme';
     const connected = document.querySelector('meta[name="wbp-gueterstroeme-assistant"]')?.content === base;
-    let quota = null, csrf = '', busy = false, uncertain = false, followup = null, history = [];
+    let quota = null, csrf = '', busy = false, uncertain = false, followup = null, history = [], conversation = null;
     const node = (tag, text, className) => {
       const value = document.createElement(tag);
       if (text !== undefined) value.textContent = String(text);
@@ -5461,10 +5469,6 @@
         });
         fragment.append(choices);
       }
-      const details = node('details', undefined, 'ki-answer-sources'); details.append(node('summary', 'Quellen und Nachweise'));
-      (answer.sources || []).forEach(text => details.append(node('p', text)));
-      details.append(node('pre', JSON.stringify({ ...answer.technical_details, request_id: result.request_id }, null, 2)));
-      fragment.append(details);
       return message('assistant', fragment);
     }
     async function submit() {
@@ -5474,6 +5478,7 @@
       const confirmed = action?.parameters || {};
       const payload = { question, confirmed, request_id: crypto.randomUUID() };
       if (action?.function_id) payload.function = action.function_id;
+      else if (conversation) payload.conversation = conversation;
       else if (history.length) payload.history = history.slice();
       busy = true; updateSend(); input.disabled = true; form.setAttribute('aria-busy', 'true');
       message('user', question);
@@ -5484,6 +5489,7 @@
       try {
         const result = await jsonRequest(base + '/analysis', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-WBP-CSRF-Token': csrf }, body: JSON.stringify(payload) }, 210000);
         rendered = render(result);
+        conversation = typeof result.conversation === 'string' ? result.conversation : null;
         history = [...(action ? [] : history), question].slice(-6);
         while (history.reduce((sum, text) => sum + text.length, 0) > 6000) history.shift();
       } catch (error) {
@@ -5498,7 +5504,7 @@
     input.addEventListener('input', () => { if (followup && input.value.trim() !== followup.question) { followup = null; } });
     el('aiNewChat')?.addEventListener('click', () => {
       if (busy || uncertain) return;
-      history = []; followup = null; input.value = ''; input.style.height = '';
+      history = []; conversation = null; followup = null; input.value = ''; input.style.height = '';
       el('aiConversation').replaceChildren();
       el('aiConversation').closest('.ki-modal-body').classList.remove('has-conversation');
       notice(''); input.focus();

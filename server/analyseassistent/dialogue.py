@@ -43,6 +43,15 @@ def route_hint(question,names):
     return {'rail':'rail_goods','road':'road_relation_goods_limit'}.get(modes[0]) if len(modes)==1 else None
 
 
+def direct_route(question, names):
+    """Eng begrenzte Standardfrage; komplexere Anliegen bleiben bei der Modellplanung."""
+    if not re.fullmatch(r'\s*Welche Güter (?:gehen|gingen|werden transportiert)\s+(?:(?:19|20)\d{2}\s+)?(?:per|auf der)\s+(?:Schiene|Straße)\s+von\s+[^?\n]+\s+nach\s+[^?\n]+\??\s*', question, re.I):
+        return None
+    if re.search(r'\b(und|aber|warum|weil|prognose|vergleich|mehr|weniger|nur)\b', question, re.I):
+        return None
+    return route_hint(question,names)
+
+
 def available_years(datasets,function,parameters):
     """Jahrgänge des passenden Datenprodukts, ohne Ersatz für fehlende Werte."""
     if function=='rail_goods':

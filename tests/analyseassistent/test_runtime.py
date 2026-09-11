@@ -777,14 +777,15 @@ class RealData(unittest.TestCase):
                 self.calls.append((prompt,payload))
                 if payload['phase']=='plan': return plan(), {'model':'synthetic-test'}
                 return {'result_id':payload['result_id'],'data_snapshot_id':payload['data_snapshot_id'],
-                        'statement_ids':['s1'],'table_ids':[],'wording_variant':'compact'}, {'model':'synthetic-test'}
+                        'paragraphs':[{'text':'Der aktuelle Beleg lautet: {{f1}}.', 'evidence_ids':['f1']}]}, {'model':'synthetic-test'}
         model=Fake()
         result,_=Service(self.datasets,model).analyze('Duisburg',PARAMETERS)
         self.assertEqual(len(model.calls),2)
         self.assertEqual(model.calls[1][1]['question'],'Duisburg')
-        self.assertEqual(model.calls[1][1]['confirmed_parameters'],PARAMETERS)
+        self.assertIn('f1',model.calls[1][1]['evidence'])
+        self.assertIn('relation_years_by_mode',model.calls[0][1]['availability'])
         self.assertTrue(all(prompt==self.service.prompt for prompt,_ in model.calls))
-        self.assertEqual(result['answer_mode'],'model_selected_verified')
+        self.assertEqual(result['answer_mode'],'grounded_narrative')
         self.assertFalse(any(key in json.dumps(model.calls) for key in ['control','last_terra_assessment','references.json']))
 
     def test_failed_optional_model_preserves_result(self):
@@ -795,6 +796,73 @@ class RealData(unittest.TestCase):
         self.assertEqual(result['answer_mode'],'fixed_verified')
         self.assertEqual(audit['attempted_model_calls'],1)
         self.assertEqual([f['value'] for f in result['facts']],[26371111,22134701,4236410])
+
+
+class GuidedDialogue(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.datasets=Datasets(ROOT)
+
+    def initial(self):
+        fake=MagicMock()
+        fake.complete.return_value=(plan(function_id='rail_goods', parameters={'region':'DE300','partner':'DE600'},
+            parameter_origins={'region':'question','partner':'question'}, unresolved_fields=['year'], status='needs_clarification'),{})
+        service=Service(self.datasets,fake)
+        first,_=service.analyze('Welche Güter gehen per Schiene von Berlin nach Hamburg?',select_answer=False)
+        return service,first
+
+    def test_signed_year_reverse_and_new_year_requery_real_data(self):
+        service,first=self.initial()
+        self.assertEqual(first['missing_fields'],['year'])
+        latest,audit=service.analyze('Das aktuellste Jahr',conversation=first['conversation'],select_answer=False)
+        self.assertEqual(latest['parameters']['year'],2025)
+        self.assertEqual(audit['attempted_model_calls'],0)
+        reverse,audit=service.analyze('Und in Gegenrichtung?',conversation=latest['conversation'],select_answer=False)
+        self.assertEqual(reverse['parameters']['direction'],'inbound')
+        self.assertEqual(audit['attempted_model_calls'],0)
+        raw=self.datasets.query('rail_goods',reverse['parameters'])
+        self.assertEqual(reverse['facts'][-1]['value'],raw['published_sum'])
+        changed,_=service.analyze('Und 2024?',conversation=reverse['conversation'],select_answer=False)
+        self.assertEqual(changed['parameters']['year'],2024)
+        self.assertEqual(changed['parameters']['direction'],'inbound')
+        self.assertEqual(changed['conversation_state']['initial_question'],first['conversation_state']['initial_question'])
+
+    def test_forged_state_and_snapshot_are_rejected(self):
+        from server.analyseassistent.conversation import unpack,pack
+        service,first=self.initial()
+        with self.assertRaises(ValueError):service.analyze('2024',conversation=first['conversation']+'x')
+        state=unpack(first['conversation'],service.conversation_key,self.datasets.snapshot_id)
+        state['snapshot']='forged'
+        with self.assertRaises(ValueError): service.analyze('2024',conversation=pack(state,service.conversation_key))
+        self.assertNotIn('facts',state['last_result'])
+
+    def test_independent_topic_does_not_inherit_old_places_or_year(self):
+        from server.analyseassistent.conversation import resume,unpack
+        service,first=self.initial()
+        state=unpack(first['conversation'],service.conversation_key,self.datasets.snapshot_id)
+        for text in ['Wie entwickelt sich die Luftfracht?', 'Wie hoch sind die nationalen Mengen 2024?', 'Welche Güter gehen von Köln nach Hamburg?']:
+            effective,confirmed,function,transition=resume(text,state,self.datasets)
+            self.assertEqual((effective,confirmed,function,transition),(text,{},None,'new_topic'))
+
+    def test_gap_and_alternative_are_queried_and_not_zero(self):
+        service=Service(self.datasets)
+        params={'year':2024,'origin':'DEA23','destination':'DE600','mode':'iww','group':'ALL','metric':'tonnes'}
+        result,_=service.analyze('Köln Hamburg',params,function='relation')
+        self.assertEqual(result['source_status'],'missing_row')
+        self.assertIsNone(result['facts'][0]['value'])
+        self.assertIn('keinen veröffentlichten Eintrag',result['answer']['paragraphs'][0])
+        self.assertTrue(result['answer']['followups'])
+        for item in result['answer']['followups']:
+            self.assertIsNotNone(self.datasets.query(item['function_id'],item['parameters'])['value'])
+
+    def test_narrative_cannot_insert_numbers_causes_or_foreign_evidence(self):
+        from server.analyseassistent.narrative import apply_narrative,evidence
+        service=Service(self.datasets)
+        result,_=service.analyze('Duisburg',PARAMETERS,function='balance')
+        records=evidence(result,result['answer'])
+        for text,ids in [('Ergebnis: 999 Tonnen {{f1}}',['f1']),('Aufgrund guter Kapazität: {{f1}}',['f1']),('{{f999}}',['f999'])]:
+            payload={'result_id':result['result_id'],'data_snapshot_id':result['data_snapshot_id'],'paragraphs':[{'text':text,'evidence_ids':ids}]}
+            with self.assertRaises(ValueError):apply_narrative(result,result['answer'],payload,records)
 
 
 if __name__=='__main__': unittest.main()

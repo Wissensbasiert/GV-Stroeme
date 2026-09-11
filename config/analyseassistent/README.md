@@ -1,5 +1,7 @@
 # Regelpaket für den Analyseassistenten
 
+**Dialogausbau 11.09.2026:** Der neue Laufzeitmodus `grounded_narrative` verbindet einen datenbasierten Verfügbarkeitskatalog, signierten Gesprächsstand und belegte sprachliche Erläuterungen. Freie numerische Fakten bleiben gesperrt. Der unten beschriebene Auswahlmodus ist der dokumentierte Vorgänger. Maßgeblich für die begrenzte Abnahme ist [der Beta-Prüfbericht](../../docs/qualitaet/ANALYSEASSISTENT_BETA_20260911.md); der aktuelle Live-Freigabestand steht im Qualitätssicherungsplan. `runtime_enabled=false` bleibt die unveränderte allgemeine Spezifikationsfreigabe und schaltet das ausdrücklich beauftragte Testportal nicht ab.
+
 **Version des Regelentwurfs: 0.1.0 · Fortschreibung: 10.09.2026 · Status: im lokalen Pilot und AlwaysData-Testrelease eingebunden; Kontofreigabe und gemeinsame Liveabnahme offen.**
 
 **Fortschreibung 10.09.2026:** `server/analyseassistent/` lädt diesen Systemprompt und implementiert einen begrenzten lokalen Ablauf. Der erste echte 45-Fälle-Modelllauf und gezielte Nachprüfungen sind erfolgt. Der Prompt präzisiert inzwischen konkrete Reproduktionsabfragen und Rückfragen bei fehlender Auswahl. Die folgenden Abschnitte beschreiben den ursprünglichen Vertragsentwurf; sie sind keine Freigabe aller Funktionen. Tatsächlich implementierter Umfang und offene Fachprüfungen: [Lokaler Pilot](../../docs/betrieb/ANALYSEASSISTENT_LOKALER_PILOT.md), Roadmap Abschnitt 24 und Qualitätssicherungsplan. Allgemeine Portalaktivierung und fachliche Gesamtabnahme bleiben offen.

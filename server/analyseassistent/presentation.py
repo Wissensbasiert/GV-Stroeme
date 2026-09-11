@@ -78,8 +78,26 @@ def present(result,datasets):
         answer['paragraphs']=['Ihre Frage konnte wegen eines technischen Problems nicht beantwortet werden. Bitte versuchen Sie es später noch einmal. Diese fehlgeschlagene Auswertung zählt nicht zu Ihrem Monatskontingent.']
         return answer
     if status=='not_available':
-        answer['title']='Diese Auswertung ist noch nicht verfügbar'
-        answer['paragraphs']=['Die gewünschte Auswertung kann ich mit dem derzeit vorbereiteten Datenangebot noch nicht liefern. Daraus lässt sich nicht schließen, dass kein Verkehr stattfindet.']
+        answer['title']='Für diese Auswahl fehlt eine belastbare Zahlenangabe'
+        source_status = result.get('source_status')
+        reason = {'missing_row':'Im vorhandenen Datenbestand gibt es für diese Verbindung oder Auswahl keinen veröffentlichten Eintrag.',
+                  'not_available':'Die angefragte Auswahl ist durch dieses Datenprodukt nicht abgedeckt.',
+                  'suppressed':'Der Wert ist in der Quelle unterdrückt und kann nicht beziffert werden.',
+                  'partial':'Die vorhandenen Quellzeilen enthalten unbekannte Werte; eine vollständige Menge lässt sich deshalb nicht angeben.'}.get(source_status,
+                  'Die gewünschte Auswertung kann ich mit dem derzeit vorbereiteten Datenangebot noch nicht liefern.')
+        answer['paragraphs']=[reason+' Daraus lässt sich nicht schließen, dass kein Verkehr stattfindet.']
+        if p.get('year'): answer['notes'].append('Angefragtes Bezugsjahr: '+str(p['year'])+'.')
+        answer['suggestions']=[]; answer['followups']=[]
+        for check in result.get('related_data',{}).get('checks',{}).values():
+            if not check.get('available'): continue
+            alt=check['parameters']; mode=MODES.get(alt.get('mode'),'Schiene')
+            origin=alt.get('origin') or alt.get('region'); destination=alt.get('destination') or alt.get('partner')
+            text=f"Für {mode} im Jahr {alt['year']} ist eine Zahlenangabe für diese Auswahl vorhanden."
+            answer['paragraphs'].append(text)
+            question=f"Zeige die verfügbare Auswertung von {name(origin,datasets)} nach {name(destination,datasets)} für {mode} {alt['year']}."
+            answer['suggestions'].append(question)
+            answer['followups'].append({'question':question,'function_id':check['function_id'],'parameters':alt})
+        answer['notes'].append('Eine vorgeschlagene Alternative ändert die genannte Auswahl und wird erst auf Ihre nächste Frage hin ausgewertet.') if answer['suggestions'] else None
         return answer
     if status=='out_of_scope':
         answer['title']='Das lässt sich mit diesen Daten nicht beantworten'
@@ -96,7 +114,10 @@ def present(result,datasets):
         rows=[]
         for f in facts:
             notes=[]
-            if f['value'] is None: notes.append('Hier liegt keine nutzbare Zahlenangabe vor.')
+            if f['value'] is None:
+                notes.append({'missing_row':'Kein veröffentlichter Eintrag für diese Auswahl.',
+                              'suppressed':'In der Quelle unterdrückter Wert.',
+                              'missing_value':'Quellwert unbekannt oder nicht veröffentlicht.'}.get(f.get('value_status'), 'Hier liegt keine nutzbare Zahlenangabe vor.'))
             if f.get('quality_status')=='restricted': notes.append('Laut Quelle eingeschränkt belastbar.')
             if f['value']==0: notes.append('Veröffentlichte Null; möglicherweise gerundet.')
             rows.append({'label':labels[f['fact_id']],'value':number(f['value']),

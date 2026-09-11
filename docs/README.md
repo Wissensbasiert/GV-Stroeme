@@ -20,6 +20,8 @@ Diese Seite ist der zentrale Einstieg in die Projektdokumentation. Sie trennt ve
 
 ## Status der Dokumenttypen
 
+Der begrenzte Dialogausbau ist in [`qualitaet/ANALYSEASSISTENT_BETA_20260911.md`](qualitaet/ANALYSEASSISTENT_BETA_20260911.md) mit echtem Vorher-/Nachhervergleich dokumentiert. Für den verbindlichen Freigabestand weiterhin den Qualitätssicherungsplan beachten.
+
 - **Betrieb:** beschreibt den aktuellen technischen Umgang mit Anwendung und Daten.
 - **Fachkonzept:** beschreibt Datenmodell, Begriffe und fachliche Logik.
 - **Qualitätssicherung:** enthält Prüfkriterien und den jeweils dokumentierten Freigabestand. Bei Aussagen zum aktuellen Stand ist der Qualitätssicherungsplan maßgeblich.

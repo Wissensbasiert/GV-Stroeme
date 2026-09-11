@@ -85,7 +85,7 @@ def make_result(function, parameters, raw, datasets, rules_version):
             add('Davon veröffentlichte OD-Aggregate mit eingeschränktem Aussagewert', raw.get('restricted_denominator_value'), quality='restricted')
             notices.append(str(raw.get('unknown_partner_count', 0))+' Partner mit unbekanntem Wert sind nicht rangfähig; bei unbekannten Werten bleiben Anteile gesperrt.')
     elif function in {'relation', 'node_statistics'}:
-        add('Veröffentlichter Wert', raw.get('value'))
+        add('Veröffentlichter Wert', raw.get('value'), value_status='missing_row' if raw.get('status') == 'missing_row' else None)
     elif function == 'compare_regions':
         for row in raw['rows']:
             add(row['name'], row.get('value'), row.get('status'), region=row['id'])

@@ -19,7 +19,7 @@ import time
 
 
 REMOTE = r'''
-import hashlib,json,sys,platform,importlib.metadata
+import hashlib,json,sys,platform,importlib.metadata,os
 from pathlib import Path
 root=Path(sys.argv[1]); status=Path(sys.argv[2]); expected=sys.argv[3]
 # Scheduled tasks can overlap on a slow provider response. Only the first
@@ -84,6 +84,16 @@ try:
         assert followup['facts'][-1]['value']==240297
         report['dialogue_verified']={'year_only_clarification':True,'latest_year':2025,'short_reply_uses_history':True,
             'published_rail_tonnes':240297,'model':'synthetic_plan_with_actual_data','external_model_calls':0}
+        if (private/'server/analyseassistent/conversation.py').exists():
+            latest,_=dialogue_service.analyze('Das aktuellste Jahr',conversation=first['conversation'],select_answer=False)
+            reverse,reverse_audit=dialogue_service.analyze('Und in Gegenrichtung?',conversation=latest['conversation'],select_answer=False)
+            assert reverse['parameters']['direction']=='inbound' and reverse['facts'][-1]['value']==585052
+            assert reverse_audit['attempted_model_calls']==0
+            gap,_=dialogue_service.analyze('Welche Güter gehen 2026 per Schiene von Berlin nach Hamburg?',select_answer=False)
+            assert gap['status']=='not_available' and gap['answer']['followups'][0]['parameters']['year']==2025
+            report['guided_dialogue_verified']={'signed_context':True,'reverse_2025_tonnes':585052,'gap_2026_alternative_2025':True}
+            report['configured_model']=os.environ.get('REQUESTY_MODEL')
+            assert report['configured_model']=='vertex/gemini-3.7-flash@eu'
     if sys.argv[4]=='requesty':
         report['stage']='requesty'
         from server.analyseassistent.requesty import Requesty

@@ -1,5 +1,7 @@
 # Roadmap: Analyseassistent, Premiumzugang und Portalbetrieb
 
+**Ausbau vom 11.09.2026:** Verfügbarkeitskatalog, signierter Gesprächsstand, geprüfte kurze Anschlussfragen und belegte Erläuterungen sind lokal implementiert; Beta-Kennzeichnung, kundenorientierter Hover und Entfernung der technischen Antwortdetails gehören dazu. 77 lokale Prüfungen und der begrenzte echte Sechs-Eingaben-Vergleich bestehen. Einzelheiten und aktueller Bereitstellungsabschluss: [Beta-Prüfbericht](../qualitaet/ANALYSEASSISTENT_BETA_20260911.md). Die früheren Abschnitte bleiben historische beziehungsweise geplante Stände; keine zusätzliche fachliche Gesamtfreigabe.
+
 **Stand:** 10.09.2026
 
 **Status:** Analyseassistent auf AlwaysData-Testsite 1067000 bereitgestellt; eigenes Administratorkonto mit Premium freigeschaltet. Erster angemeldeter Requesty-/Daten-/Kontingenttest bestanden. UI-Release ui10 ist einschließlich des zweistufigen Berlin–Hamburg-Dialogs bereitgestellt und live geprüft. Keine Produktionsfreigabe und keine fachliche Gesamtabnahme aller 45 Antworten.
