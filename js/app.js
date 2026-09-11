@@ -5446,7 +5446,8 @@
         fragment.append(replies);
       }
       for (const table of answer.tables) {
-        const wrapper = node('div', undefined, 'ki-answer-table');
+        const wrapper = node(table.collapsed ? 'details' : 'div', undefined, 'ki-answer-table');
+        if (table.collapsed) wrapper.append(node('summary', `Detaillierte Ergebnistabelle anzeigen (${table.row_count || table.rows.length} Werte)`));
         const element = node('table'); element.append(node('caption', table.title));
         const head = node('thead'), header = node('tr');
         table.columns.forEach(label => { const th = node('th', label); th.scope = 'col'; header.append(th); });

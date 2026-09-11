@@ -1,6 +1,6 @@
 # Fachlicher Vertrag der Datenfunktionen
 
-**Version 0.1.0 · 09.09.2026 · Spezifikation, keine ausführbare Implementierung.** Alle Funktionen sind zunächst deaktiviert. Freigabe und Verfügbarkeit gelten je Filterkombination, nicht pauschal je Funktionsname.
+**Version 0.2.1 · 11.09.2026 · Spezifikation und lokal implementierter Antwortvertrag; keine Produktfreigabe.** Freigabe und Verfügbarkeit gelten je Filterkombination, nicht pauschal je Funktionsname.
 
 ## Gemeinsame Eingaben
 
@@ -26,7 +26,7 @@ Die Funktionsnamen sind vorgeschlagene interne Namen. Datenquellen D01–D10 ent
 | F01 `get_region_profile` | D01/D03/D05/D04; Profil aus Menge, Modal-/Güterstruktur, Richtungen und getrenntem VP-Pfad zusammensetzen | Profilumfang und abweichende Modulfilter offenlegen; keine Standortbewertung ohne Vergleich | T01–T03 |
 | F02 `get_relations` | D02/D04; vollständige OD filtern, Partner aggregieren, dann Rangfolge und passende Anteile berechnen | Konkrete Verbindung auch außerhalb Top-Liste; Binnen und Qualitätsflags erhalten; kein Straßen-OD-Güterdetail | T04–T06 |
 | F03 `compare_regions` | D01/D02/D04/D10; mindestens zwei vergleichbare Gebiete, gleiche Filter und gemeinsames Jahr; absolute Unterschiede und Strukturvergleich | Ganze Regionsverbünde gesondert nach OD bilden; keine Flächenverteilung auf geschnittene Teilgebiete | T07–T09 |
-| F04 `get_time_series` | D01/D02/D04; gleiche Filter über bestätigte Zeitabdeckung, Lücken und Brüche mitführen | Vorhandene Jahreszeile allein belegt keine Vergleichbarkeit oder Ursache | T10–T12 |
+| F04 `get_time_series` | D01/D02/D04; gleiche Filter über bestätigte Zeitabdeckung, Lücken und Brüche mitführen; prozentuale Veränderung aus vorhandenem Anfangs- und Endwert berechnen | Rechnerische Veränderung als solche kennzeichnen; fehlende Werte nicht als null einsetzen; keine Ursache oder methodisch bereinigte Entwicklung behaupten | T10–T12 |
 | F05 `get_change_ranking` | Vergleichbare vollständige Auswahl, Änderungen vor Rundung sortieren; Basiswerte, absolute und relative Änderung ausgeben | Kleine Basis, Nullbasis und fehlende Basis getrennt; Anteilsanstieg ist kein Mengenanstieg | T13–T15 |
 | F06 `get_goods_structure` | D01/D04; regionale Güter je Richtung aggregieren; aktueller C-Crosswalk | Straße NUTS-3 sieben Gruppen; ALL im Regional-Parquet ist keine fein gegliederte Straßenquelle | T16–T18 |
 | F07 `get_relation_goods` | D02/D04; genaue OD und Richtung, C-Gruppen oder tatsächlich vorhandene Schienen-/IWW-Details | Straße konkrete OD nur ALL; fehlende Güterzeilen nicht nullsetzen | T19–T21 |
@@ -63,7 +63,7 @@ Eine veröffentlichte Teilmenge kann einen explizit so bezeichneten Bezugsrahmen
 
 **Antwortphase:** Eingabe sind das aktuelle Ergebnis, erlaubte Tabellen und serverseitig vorgeprüfte Aussagen. Jede Aussage besitzt eine ID, eine Aussageart, Faktenbelege, einen festen Satzbaustein und geprüfte Voraussetzungen. Ein Satz „A hat mehr als B“ wird nur angeboten, wenn beide Werte verfügbar, kompatibel und A > B sind. Gleichstände und methodisch nicht vergleichbare Werte erhalten eigene Bausteine.
 
-Modellausgabe: `result_id`, `data_snapshot_id`, geordnete `statement_ids` (höchstens vier), `table_ids` und `wording_variant` (`compact` oder `neutral`). Keine weiteren Felder, Zahlen, HTML oder freien Tatsachensätze. Der Server prüft Kennungen gegen genau dieses Ergebnis, entfernt nichts von den zwingenden Quellen-/Methodikhinweisen und setzt die freigegebenen Zahlen und Namen in die Satzbausteine ein. Die erforderlichen Tabellen legt der Server fest; eine Modellauswahl darf sie nicht unterdrücken.
+Modellausgabe: `result_id`, `data_snapshot_id`, ein bis drei Absätze mit `text` und jeweils verwendeten `statement_ids`, `table_ids` und `wording_variant` (`compact` oder `neutral`). Das Modell formuliert die Antwort selbst, darf aber nur bereitgestellte Einzelwerte und serverseitig geprüfte Vergleichsaussagen verwenden. Der Server prüft jede Kennung und jede Zahl gegen die Belege des Absatzes; neue Zahlen, HTML oder fremde Kennungen machen die Formulierung ungültig. Die erforderlichen Tabellen, Quellen und Hinweise bleiben unabhängig vom Modell erhalten.
 
 Die Syntax dieses Vertrags ist beim späteren Adapter als Schema umzusetzen. Diese Dokumentation ist selbst noch kein Validator. Modellunterstützung und konkrete Übertragungsform bei Requesty werden in der Integration geprüft. Eine fehlgeschlagene Auswahl führt zur festen Serverzusammenfassung, nicht zu einer automatischen Reparaturschleife.
 
@@ -71,4 +71,4 @@ Die Syntax dieses Vertrags ist beim späteren Adapter als Schema umzusetzen. Die
 
 Bei bestätigter Auswahl „Magdeburg und Hamburg, 2024, Tonnen, alle drei Landverkehrsträger, Versand plus Empfang“ löst der Server die Gebiete über seine Metadaten auf. `compare_regions` prüft das gemeinsame Jahr und die Zählweise, liest die vorbereiteten Regionalwerte und berechnet Unterschiede sowie Modal-/Güteranteile. Das Ergebnis enthält beide Regionen, sieben Gütergruppen soweit belegt, Quelle und Binnenhinweis.
 
-Danach können die Tabelle und eine feste Kurzfassung ausgegeben werden. Für die Auswahl weniger Kernaussagen ist optional ein Modellaufruf möglich. Ohne bestätigtes Jahr greift nur eine vorher definierte und sichtbar genannte Standardregel; andernfalls wird gezielt nachgefragt. Dieses Beispiel beschreibt den Vertrag und enthält bewusst keine ungeprüften Hamburg-Vergleichszahlen.
+Danach können die Tabelle und eine analytische feste Kurzfassung ausgegeben werden. Optional verbindet das Modell die belegten Kernaussagen zu einem kurzen Antworttext. Ohne bestätigtes Jahr greift nur eine vorher definierte und sichtbar genannte Standardregel; bei einem ausdrücklichen Mehrjahreswunsch wird dagegen ein begrenzter, sichtbarer Zeitraum verwendet. Dieses Beispiel beschreibt den Vertrag und enthält bewusst keine ungeprüften Hamburg-Vergleichszahlen.

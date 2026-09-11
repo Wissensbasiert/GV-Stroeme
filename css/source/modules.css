@@ -1400,6 +1400,7 @@
 
 /* Verified assistant responses inside the existing conversation. */
 .ki-answer-table { max-width:100%; overflow-x:auto; margin:12px 0; }
+.ki-answer-table > summary { cursor:pointer; color:#355b5e; font-weight:700; padding:6px 0; }
 .ki-answer-table table { width:100%; min-width:520px; border-collapse:collapse; font-size:.78rem; overflow-wrap:normal; }
 .ki-answer-table caption { text-align:left; font-weight:700; padding:5px 0; }
 .ki-answer-table th, .ki-answer-table td { padding:8px; border-bottom:1px solid #e2e8f0; text-align:left; vertical-align:top; }

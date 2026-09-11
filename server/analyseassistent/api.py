@@ -88,7 +88,8 @@ class Application:
             charge = result['status'] in {'ok', 'partial'} and any(f.get('value') is not None for f in result.get('facts', []))
             response = ('200 OK', {**result, 'request_id': request_id})
         except Exception:
-            response = ('500 Internal Server Error', {'error': 'Analyse konnte nicht abgeschlossen werden'})
+            response = ('500 Internal Server Error', {'error': 'Analyse konnte nicht abgeschlossen werden',
+                                                       'request_id':request_id,'diagnostic_code':'AA-X01'})
         try:
             self.quota.finish(identity, request_id, charge=charge)
         except Exception:

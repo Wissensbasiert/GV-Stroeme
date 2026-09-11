@@ -7,6 +7,7 @@ from .contracts import FUNCTIONS, directed_pairs, question_supports, token_prese
 
 LATEST = re.compile(r'\b(?:aktuell\w*|neuest\w*|letzt\w*\s+verfügbar\w*)\s*(?:verfügbar\w*\s*)?(?:jahr\w*|daten\w*|stand)\b', re.I)
 YEAR = re.compile(r'(?<!\w)(?:19|20)\d{2}(?!\w)')
+MULTI_YEAR = re.compile(r'\b(?:in\s+den\s+)?letzt\w*\s+jahr\w*|\bmehrere\s+jahr(?:e|gänge)|\bzeitreihe\w*|\bverlauf\w*|\bentwicklung\w*|\bseit\s+(?:19|20)\d{2}\b', re.I)
 
 
 def validate_history(history):
@@ -37,6 +38,8 @@ def conversation_question(question, history, names):
 
 def route_hint(question,names):
     pairs=directed_pairs(question,names,[])
+    if len(pairs)==1 and MULTI_YEAR.search(question):
+        return 'relation_history'
     if len(pairs)!=1 or not re.search(r'\b(güter|güterarten|gütergruppen)\b',question,re.I) or re.search(r'\b(vergleiche|verändert|entwicklung|prognose)\b',question,re.I):
         return None
     modes=[m for m in ['rail','road','iww'] if question_supports(question,m,{})]
@@ -58,9 +61,12 @@ def available_years(datasets,function,parameters):
         path=datasets.paths['b03']/'rail_monthly_details.parquet'
         with duckdb.connect(config={'threads':2,'memory_limit':'128MB'}) as con:
             return [r[0] for r in con.execute('SELECT year_ref FROM read_parquet(?) GROUP BY year_ref HAVING count(DISTINCT month)=12 ORDER BY year_ref',[str(path)]).fetchall()]
-    if function in {'relation','road_relation_goods_limit','partner_ranking','relation_matrix'}:
+    if function in {'relation','road_relation_goods_limit','partner_ranking','relation_matrix','relation_history'}:
         mode=parameters.get('mode','road' if function=='road_relation_goods_limit' else None)
         years=datasets.manifests['b01']['years_by_mode']
+        if function=='relation_history':
+            modes=parameters.get('modes') or ['road','rail','iww']
+            return sorted(set.intersection(*(set(int(y) for y in years.get(selected,[])) for selected in modes)))
         if mode:return sorted(int(y) for y in years.get(mode,[]))
         return sorted(set.intersection(*(set(int(y) for y in value) for value in years.values())))
     if function in {'region_profile','regional_modal_split','compare_regions','balance','goods_structure','intermodal_markets'}:
@@ -86,12 +92,22 @@ def defaults_for(function,question,datasets,parameters):
         if 'origin' in props and 'destination' in props:context.update(origin=origin,destination=destination)
         elif 'region' in props and 'partner' in props and 'direction' in props:
             context.update(region=origin,partner=destination,direction='outbound')
+        city_defaults=[]
+        for code in [origin,destination]:
+            full=next((label for label in datasets.names.get(code,[]) if label.endswith(', Kreisfreie Stadt') or label.endswith(', Stadtkreis')),None)
+            short=full.rsplit(',',1)[0] if full else None
+            if short and token_present(question,short) and not token_present(question,full):
+                city_defaults.append(short)
+        if city_defaults:
+            quoted=' und '.join('„'+place+'“' for place in city_defaults)
+            notes.append(quoted+' wird als kreisfreie Stadt verstanden.' if len(city_defaults)==1 else quoted+' werden als kreisfreie Städte verstanden.')
     choices={'metric':'tonnes','group':'ALL','nst':None,'top':10,'include_forecast':False,
              'granularity':'NST20' if re.search(r'\bNST\s*20\b',question,re.I) else 'C7'}
     mentioned_metrics=[m for m in ['tonnes','tkm','trips','load_units','teu','flights'] if question_supports(question,m,{})]
     if mentioned_metrics:
         choices['metric']=mentioned_metrics[0] if len(mentioned_metrics)==1 else None
     if 'metrics' in props:choices['metrics']=mentioned_metrics or ['tonnes']
+    if 'modes' in props and function=='relation_history':choices['modes']=modes or ['road','rail','iww']
     if 'directions' in props:
         choices['directions']=[d for d in ['outbound','inbound'] if question_supports(question,d,{})] or ['all']
     if re.search(r'\bC[1-7]\b',question,re.I): choices.pop('group',None)
@@ -118,12 +134,34 @@ def defaults_for(function,question,datasets,parameters):
     if 'partner' in props and 'partner' not in context and len(pair)==0:
         named={code for code in datasets.names if question_supports(question,code,datasets.names)}
         if len(named)<=1:context['partner']=None
-    years=available_years(datasets,function,{**parameters,**context}) if 'year' in props else []
+    years=available_years(datasets,function,{**parameters,**context}) if any(key in props for key in ['year','years','start','end','observed_years']) else []
     explicit_years={int(x) for x in YEAR.findall(question)}
     if 'year' in props and len(explicit_years)==1:context['year']=next(iter(explicit_years))
     elif 'year' in props and not explicit_years and LATEST.search(question) and years:
         context['year']=max(years);notes.append(f'Verwendet wird das neueste vollständig verfügbare Datenjahr {max(years)} dieses Datenprodukts.')
+    if function=='relation_history' and years:
+        ordered=sorted(explicit_years)
+        if len(ordered)>=2:
+            context.update(start=ordered[0],end=ordered[-1])
+        elif len(ordered)==1 and re.search(r'\bseit\b',question,re.I):
+            context.update(start=ordered[0],end=max(years))
+            notes.append(f'Die Zeitreihe reicht bis zum neuesten gemeinsam verfügbaren Jahr {max(years)}.')
+        elif MULTI_YEAR.search(question):
+            selected=years[-5:]
+            context.update(start=min(selected),end=max(selected))
+            notes.append(f'„Letzte Jahre“ wird als die fünf neuesten gemeinsam verfügbaren Jahre {min(selected)} bis {max(selected)} verstanden.')
     return context,notes,years
+
+
+def deterministic_plan(question,datasets):
+    """Häufige, eindeutig belegbare Zeitreihen ohne Modellumweg."""
+    if route_hint(question,datasets.names)!='relation_history':
+        return None
+    if len(directed_pairs(question,datasets.names,[]))!=1:
+        return None
+    required=FUNCTIONS['relation_history'][3]['required']
+    return {'phase':'plan','function_id':'relation_history','parameters':{},'parameter_origins':{},
+            'unresolved_fields':required,'status':'needs_clarification'}
 
 
 def complete_plan(plan,question,confirmed,datasets):

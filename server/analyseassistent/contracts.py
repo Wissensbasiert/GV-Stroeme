@@ -50,6 +50,10 @@ FUNCTIONS = {
         metric=enum('tonnes','tkm'),direction=enum('all','outbound','inbound'))),
     'relation_matrix': ('F02', 'Konkrete Verbindung in beiden Richtungen, drei Verkehrsträger getrennt', 'b01', fields(
         origin=CODE, destination=CODE, year=YEAR, metric=enum('tonnes', 'tkm'))),
+    'relation_history': ('F04', 'Gerichtete Verbindung über mehrere Jahre; verfügbare Verkehrsträger getrennt und ohne künstliche Gesamtsumme', 'b01', fields(
+        origin=CODE, destination=CODE, start=YEAR, end=YEAR,
+        modes={'type':'array','items':MODE,'minItems':1,'maxItems':3,'uniqueItems':True},
+        metric=enum('tonnes','tkm'))),
     'partner_ranking': ('F02', 'Alle veröffentlichten Partner vor Top-Begrenzung, Gleichstände und Quellenflags', 'b01', fields(
         region=CODE, year=YEAR, mode=MODE, metric=enum('tonnes','tkm'), direction=enum('all','outbound','inbound'),
         group=GROUP, top=TOP, external={'type':'boolean'})),
@@ -97,8 +101,11 @@ PLAN = fields(phase=enum('plan'), function_id={'anyOf': [enum(*FUNCTIONS), {'typ
               parameters={'type': 'object'}, parameter_origins={'type': 'object', 'additionalProperties': enum('context', 'question')},
               unresolved_fields={'type': 'array', 'items': {'type': 'string', 'maxLength': 60}, 'maxItems': 20},
               status=enum('ready', 'needs_clarification', 'not_available', 'out_of_scope'))
+ANSWER_PARAGRAPH = fields(
+    text={'type':'string','minLength':1,'maxLength':900},
+    statement_ids={'type':'array','items':{'type':'string'},'minItems':1,'maxItems':6,'uniqueItems':True})
 ANSWER = fields(result_id={'type': 'string'}, data_snapshot_id={'type': 'string'},
-                statement_ids={'type': 'array', 'items': {'type': 'string'}, 'maxItems': 4, 'uniqueItems': True},
+                paragraphs={'type':'array','items':ANSWER_PARAGRAPH,'minItems':1,'maxItems':3},
                 table_ids={'type': 'array', 'items': {'type': 'string'}, 'maxItems': 20, 'uniqueItems': True},
                 wording_variant=enum('compact', 'neutral'))
 

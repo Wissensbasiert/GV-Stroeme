@@ -5,9 +5,9 @@ import time
 import secrets
 import duckdb
 from pathlib import Path
-from .contracts import PLAN, ANSWER, verify_plan, model_functions, FUNCTIONS, ParameterEvidenceError, validate
-from .dialogue import conversation_question, complete_plan, route_hint, direct_route
-from .results import make_result, apply_selection, limited
+from .contracts import PLAN, verify_plan, model_functions, FUNCTIONS, ParameterEvidenceError, validate
+from .dialogue import conversation_question, complete_plan, route_hint, direct_route, deterministic_plan
+from .results import make_result, limited
 from .requesty import ModelError
 from .presentation import present
 from .alternatives import related_data
@@ -54,6 +54,12 @@ class Service:
                  'data_snapshot_id': self.datasets.snapshot_id, 'model_calls': [], 'attempted_model_calls': 0}
         assumptions, years = [], []
         plan = None
+        def failed(stage,kind,code,message):
+            audit['failure_stage']=stage
+            audit['error_kind']=kind
+            result=limited('error',message)
+            result['diagnostic_code']=code
+            return finish(result)
         def finish(result):
             if result['status']=='needs_clarification' and 'year' in result.get('missing_fields',[]) and years:
                 result['available_years']=years
@@ -100,6 +106,9 @@ class Service:
         elif function is not None:
             plan = {'phase': 'plan', 'function_id': function, 'parameters': confirmed,
                     'parameter_origins': {k: 'context' for k in confirmed}, 'unresolved_fields': [], 'status': 'ready'}
+        elif deterministic_plan(question,self.datasets) is not None:
+            plan=deterministic_plan(question,self.datasets)
+            audit['planning_mode']='deterministic_relation_history'
         elif direct_route(question, self.datasets.names):
             plan = {'phase': 'plan', 'function_id': direct_route(question,self.datasets.names), 'parameters': {},
                     'parameter_origins': {}, 'unresolved_fields': [], 'status': 'needs_clarification'}
@@ -119,7 +128,7 @@ class Service:
                 payload['availability']['selection'] = catalog(self.datasets, payload['suggested_function'], confirmed)['selection']
             payload['allowed_defaults']={'metric':'tonnes','group':'ALL','nst':None,'top':10,
                 'direction':'Bei von A nach B: Versand von A nach B; bei regionalem Profil ohne Richtung: beide Richtungen.',
-                'year':'Ein genanntes Jahr übernehmen. Bei aktuellstem Jahr prüft der Server den neuesten verfügbaren Jahrgang. Ohne Jahresangabe nur nach dem Jahr fragen.',
+                'year':'Ein genanntes Jahr übernehmen. Bei aktuellstem Jahr prüft der Server den neuesten verfügbaren Jahrgang. Bei Mehrjahreswunsch keinen Einzeljahrgang verlangen.',
                 'history':'Die Frage enthält gegebenenfalls die letzten Nutzereingaben einschließlich Ergänzungen. Keine erneute Nachfrage nach bereits genannten Angaben.'}
             try:
                 audit['attempted_model_calls'] += 1
@@ -127,9 +136,11 @@ class Service:
                 audit['model_calls'].append(call)
             except ModelError as exc:
                 audit['model_error']=str(exc)
+                audit['failure_stage']='plan_model'
+                audit['error_kind']='incomplete' if exc.diagnostics.get('finish_reason') else 'transport_or_format'
                 if exc.diagnostics:
                     audit['model_error_diagnostics'] = exc.diagnostics
-                return finish(limited('error', 'Die Frage konnte wegen eines Modellfehlers nicht zugeordnet werden.'))
+                return failed('plan_model',audit['error_kind'],'AA-P01','Die Frage konnte wegen eines Modellfehlers nicht zugeordnet werden.')
         audit['plan'] = plan
         try:
             validate(PLAN,plan)
@@ -155,13 +166,16 @@ class Service:
                 missing=list(dict.fromkeys(labels[k] for k in plan['unresolved_fields'] if k in labels))
                 if missing: notices['needs_clarification']='Bitte folgende Auswahl ergänzen: '+', '.join(missing)+'.'
             return finish(limited(plan['status'], notices[plan['status']],missing_fields=plan.get('unresolved_fields',[])))
+        lookup_started = time.monotonic()
         try:
-            lookup_started = time.monotonic()
             raw = self.datasets.query(plan['function_id'], plan['parameters'], timeout_seconds=max(0.001, deadline-time.monotonic()))
             audit['lookup_ms'] = round((time.monotonic()-lookup_started)*1000)
             if time.monotonic() > deadline:
-                return finish(limited('error', 'Die Datenabfrage hat die technische Testfrist überschritten.'))
+                return failed('data_lookup','timeout','AA-D01','Die Datenabfrage hat die technische Testfrist überschritten.')
+        except (ValueError, KeyError, OSError, duckdb.Error) as exc:
+            return failed('data_lookup',type(exc).__name__,'AA-D02','Die geprüfte Datenabfrage konnte nicht ausgeführt werden.')
+        try:
             result = make_result(plan['function_id'], plan['parameters'], raw, self.datasets, self.rules['version'])
-        except (ValueError, KeyError, OSError, duckdb.Error):
-            return finish(limited('error', 'Die geprüfte Datenabfrage konnte nicht ausgeführt werden.'))
+        except (ValueError, KeyError, TypeError, OverflowError, OSError, duckdb.Error) as exc:
+            return failed('result_build',type(exc).__name__,'AA-R01','Das geprüfte Ergebnis konnte nicht sicher aufbereitet werden.')
         return finish(result)

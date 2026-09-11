@@ -74,7 +74,7 @@ def regional_history(con,dataset,*,region,start,end,mode,metric,direction):
                              'direction':direction,'basis':'observed_profile'})
     return {**common(dataset,region,metric),'observations':observations,
             'status':'available' if all(o['value'] is not None for o in observations) else 'partial',
-            'note':'Veröffentlichte Jahresscheiben, keine harmonisierte Zeitreihe. SGV: Konflikt zwischen NUTS-Dateikopf und Beschreibung in älteren Quellen; keine belegte Ursache aus Sprüngen. Keine Änderungsrate ohne Vergleichbarkeitsfreigabe.'}
+            'note':'Die prozentuale Veränderung wird aus den veröffentlichten Anfangs- und Endwerten berechnet. Sie ist nicht um Gebiets-, Erfassungs- oder Revisionsbrüche bereinigt. SGV: Konflikt zwischen NUTS-Dateikopf und Beschreibung in älteren Quellen; aus Sprüngen folgt keine belegte Ursache.'}
 
 
 def modal_history(con,dataset,*,region,years,metric,direction):

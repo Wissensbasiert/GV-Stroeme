@@ -1,8 +1,8 @@
 # Regelpaket für den Analyseassistenten
 
-**Dialogausbau 11.09.2026:** Der neue Laufzeitmodus `grounded_narrative` verbindet einen datenbasierten Verfügbarkeitskatalog, signierten Gesprächsstand und belegte sprachliche Erläuterungen. Freie numerische Fakten bleiben gesperrt. Der unten beschriebene Auswahlmodus ist der dokumentierte Vorgänger. Maßgeblich für die begrenzte Abnahme ist [der Beta-Prüfbericht](../../docs/qualitaet/ANALYSEASSISTENT_BETA_20260911.md); der aktuelle Live-Freigabestand steht im Qualitätssicherungsplan. `runtime_enabled=false` bleibt die unveränderte allgemeine Spezifikationsfreigabe und schaltet das ausdrücklich beauftragte Testportal nicht ab.
+**Dialogausbau 11.09.2026:** Der Laufzeitmodus `grounded_narrative` verbindet einen datenbasierten Verfügbarkeitskatalog, signierten Gesprächsstand und belegte sprachliche Erläuterungen. Freie numerische Fakten bleiben gesperrt. Der unten beschriebene Auswahlmodus ist der dokumentierte Vorgänger. Maßgeblich für die begrenzte Abnahme ist [der Beta-Prüfbericht](../../docs/qualitaet/ANALYSEASSISTENT_BETA_20260911.md); der aktuelle Live-Freigabestand steht im Qualitätssicherungsplan. `runtime_enabled=false` bleibt die unveränderte allgemeine Spezifikationsfreigabe und schaltet das ausdrücklich beauftragte Testportal nicht ab.
 
-**Version des Regelentwurfs: 0.1.0 · Fortschreibung: 10.09.2026 · Status: im lokalen Pilot und AlwaysData-Testrelease eingebunden; Kontofreigabe und gemeinsame Liveabnahme offen.**
+**Version des Regelentwurfs: 0.2.1 · Fortschreibung: 11.09.2026 · Status: lokale Erweiterung des aktiven Beta-Stands; Mehrjahresrelation und rechnerische Veränderungen noch nicht neu bereitgestellt.**
 
 **Fortschreibung 10.09.2026:** `server/analyseassistent/` lädt diesen Systemprompt und implementiert einen begrenzten lokalen Ablauf. Der erste echte 45-Fälle-Modelllauf und gezielte Nachprüfungen sind erfolgt. Der Prompt präzisiert inzwischen konkrete Reproduktionsabfragen und Rückfragen bei fehlender Auswahl. Die folgenden Abschnitte beschreiben den ursprünglichen Vertragsentwurf; sie sind keine Freigabe aller Funktionen. Tatsächlich implementierter Umfang und offene Fachprüfungen: [Lokaler Pilot](../../docs/betrieb/ANALYSEASSISTENT_LOKALER_PILOT.md), Roadmap Abschnitt 24 und Qualitätssicherungsplan. Allgemeine Portalaktivierung und fachliche Gesamtabnahme bleiben offen.
 
@@ -25,10 +25,12 @@ Der [45-Fälle-Testkatalog](../../docs/roadmap/ANALYSEASSISTENT_ETAPPE1_TESTKATA
 1. Der Server prüft Zugang, erlaubten Funktionsumfang und vorhandene Filter. Eindeutige strukturierte Auswahlen benötigen keine KI zur Zuordnung.
 2. Bei freier Frage ordnet höchstens ein Modellaufruf die Frage einem erlaubten Fragetyp zu. Unklare Regionen, Zeiträume oder Abgrenzungen führen zu einer gezielten Rückfrage.
 3. Eine freigegebene Datenfunktion liefert Werte, Quellen, Datenzustände und passende, rechnerisch belegte Vergleichsaussagen. Daten werden vorab erschlossen; große Rohdateien werden nicht für jede Frage neu durchsucht.
-4. Die geprüfte Tabelle und eine feste Kurzfassung können direkt erscheinen. Optional wählt ein weiterer Modellaufruf aus belegten Aussagen eine kurze Zusammenfassung aus.
-5. Der Server prüft diese Auswahl gegen das aktuelle Ergebnis. Bei Fehler oder Zeitüberschreitung bleibt die feste Zusammenfassung verfügbar. Eine zweite KI zur Bewertung ist im Standardablauf nicht vorgesehen.
+4. Der Server bildet aus den geprüften Fakten zusätzliche Vergleichs- und Kernaussagen. Ein zweiter Modellaufruf formuliert daraus eine kurze, auf die Frage bezogene Antwort und benennt für jeden Absatz die verwendeten Aussagekennungen.
+5. Der Server prüft Kennungen und sämtliche Zahlen der Formulierung gegen das aktuelle Ergebnis. Bei Fehler oder Zeitüberschreitung bleibt eine bereits analytische feste Zusammenfassung verfügbar. Tabelle, Quellen und Einschränkungen bleiben unabhängig vom Modell vollständig erhalten. Eine zweite KI zur Bewertung ist im Standardablauf nicht vorgesehen.
 
-Für einfache Vergleiche besteht die Absicherung aus geprüften Aussagen und Zahlenplatzhaltern. Das Modell darf passende Aussagen auswählen und ordnen; der Server setzt Zahlen und Namen ein. Eine beliebige freie Erläuterung wäre auf diesem Weg nicht vollständig prüfbar und ist in dieser ersten Fassung nicht als automatisch freizugebende Ausgabe vorgesehen.
+Die Formulierung ist frei, aber nicht unbelegt: Das Modell darf ausschließlich bereitgestellte Fakten und serverseitig berechnete Vergleichsaussagen verwenden. Jede Passage verweist auf deren Kennungen; neue Zahlen, HTML und nicht belegte Kennungen werden verworfen. Ursachen, Standortbewertungen oder Empfehlungen bleiben ohne bereitgestellten Beleg unzulässig. Diese Leitplanke erlaubt einen verständlichen Antwortduktus, ohne die Datenprüfung an das Modell abzugeben.
+
+Rechnerische Veränderungen sind ausdrücklich zulässig, wenn Anfangs- und Endwert derselben fachlichen Reihe vorliegen. Der Server berechnet den Prozentwert und stellt ihn dem Modell als belegte Aussage bereit. Die Antwort bezeichnet ihn als Veränderung der veröffentlichten Werte; fehlende Zwischen- oder Vergleichswerte werden nicht als null eingesetzt und aus der Rate folgt keine Ursache.
 
 ## Bereitstellung und Betrieb
 

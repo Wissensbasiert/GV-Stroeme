@@ -21,7 +21,29 @@ def relation_matrix(con, dataset, *, origin, destination, year, metric):
             'unit':'t' if metric=='tonnes' else 'tkm','observations':observations,
             'scope':'Summe vorhandener veröffentlichter Zeilen je Verkehrsträger und gerichteter Relation.',
             'counting':'Jede Richtung separat; keine gemeinsame Summe über Verkehrsträger.',
-            'note':'Eine nicht veröffentlichte Relation ist kein Nullnachweis. Keine Aussage zu Route, Hafennutzung oder Terminalpotenzial.'}
+             'note':'Eine nicht veröffentlichte Relation ist kein Nullnachweis. Keine Aussage zu Route, Hafennutzung oder Terminalpotenzial.'}
+
+
+def relation_history(con, dataset, *, origin, destination, start, end, modes, metric):
+    """Mehrjährige gerichtete Relation, Verkehrsträger bewusst getrennt."""
+    if end-start>20:
+        raise ValueError('Höchstens 21 veröffentlichte Jahresscheiben auswählen')
+    observations=[]
+    for year in range(start,end+1):
+        for mode in modes:
+            result=query_relation(con,dataset,year=year,origin=origin,destination=destination,
+                                  mode=mode,metric=metric,group='ALL')
+            observations.append({'label':str(year)+' / '+mode,'value':result['value'],
+                                 'year':year,'mode':mode,'origin':origin,'destination':destination,
+                                 'source_status':result['status'],'quality':result.get('quality','unknown'),
+                                 'source_ids':result.get('source_ids',[]),
+                                 'missing_count':result.get('missing_count'),
+                                 'restricted_count':result.get('restricted_count')})
+    return {'status':'available' if observations and all(r['value'] is not None for r in observations) else 'partial',
+            'unit':'t' if metric=='tonnes' else 'tkm','observations':observations,
+            'scope':'Veröffentlichte Jahreswerte der gerichteten Relation, je Verkehrsträger getrennt.',
+            'counting':'Jahr und Verkehrsträger werden separat ausgewiesen; keine gemeinsame Summe über Verkehrsträger.',
+            'note':'Die prozentuale Veränderung wird transparent aus dem ersten und letzten vorhandenen veröffentlichten Wert berechnet. Sie ist nicht um methodische Brüche bereinigt und belegt keine Ursache. Fehlt eine Relation, ist in dieser Statistik kein nutzbarer Wert erfasst beziehungsweise veröffentlicht; das beweist nicht, dass tatsächlich kein Verkehr stattfand.'}
 
 
 def road_relation_goods_limit(con,dataset,*,origin,destination,year,metric):

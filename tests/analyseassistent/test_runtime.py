@@ -440,6 +440,58 @@ class RealData(unittest.TestCase):
         complete,_=service.analyze(initial+' Das Jahr 2024',select_answer=False)
         self.assertIn(complete['status'],['ok','partial'])
 
+    def test_recent_relation_is_answered_as_five_year_series_without_plan_model(self):
+        question='Wie viel Güter sind in den letzten Jahren von Rosenheim nach Augsburg transportiert worden?'
+        result,audit=self.service.analyze(question,select_answer=False)
+        self.assertIn(result['status'],['ok','partial'])
+        self.assertEqual(audit['attempted_model_calls'],0)
+        self.assertEqual(result['function_id'],'relation_history')
+        self.assertEqual(result['parameters'],{'origin':'DE213','destination':'DE271','start':2020,'end':2024,
+                                               'modes':['road','rail','iww'],'metric':'tonnes'})
+        self.assertEqual(len(result['facts']),15)
+        self.assertTrue(result['answer']['tables'][0]['collapsed'])
+        self.assertIn('kein vollständiger Verkehrsträgervergleich',result['answer']['paragraphs'][0])
+        self.assertIn('kein nutzbarer Güterverkehrswert erfasst beziehungsweise veröffentlicht',result['answer']['paragraphs'][0])
+        self.assertTrue(any('rechnerischen Rückgang um 50,99 %' in paragraph for paragraph in result['answer']['paragraphs']))
+        self.assertTrue(any('kreisfreie Städte' in note for note in result['answer']['notes']))
+        evidence=next(statement for statement in result['statements'] if 'rechnerischen Rückgang' in statement['text'])
+        inverted={'result_id':result['result_id'],'data_snapshot_id':result['data_snapshot_id'],
+                  'paragraphs':[{'text':evidence['text'].replace('Rückgang','Wachstum'),
+                                 'statement_ids':[evidence['id']]}],
+                  'table_ids':[],'wording_variant':'compact'}
+        with self.assertRaises(ValueError):
+            apply_selection(result,inverted)
+
+    def test_recent_relation_followup_keeps_multi_year_intent_without_model(self):
+        initial='Wie viel Güter sind in den letzten Jahren von Rosenheim nach Augsburg transportiert worden?'
+        result,audit=self.service.analyze('ich möchte mehrere Jahrgänge verwenden',history=[initial],select_answer=False)
+        self.assertEqual(result['function_id'],'relation_history')
+        self.assertEqual((result['parameters']['start'],result['parameters']['end']),(2020,2024))
+        self.assertEqual(audit['attempted_model_calls'],0)
+
+    def test_data_failure_has_safe_stage_and_diagnostic_code(self):
+        with patch.object(self.datasets,'query',side_effect=OSError('private path')):
+            result,audit=self.service.analyze('Duisburg',PARAMETERS,function='balance',select_answer=False)
+        self.assertEqual(result['status'],'error')
+        self.assertEqual(audit['failure_stage'],'data_lookup')
+        self.assertEqual(audit['error_kind'],'OSError')
+        self.assertIn('AA-D02',result['answer']['paragraphs'][0])
+        self.assertNotIn('private path',json.dumps(result,ensure_ascii=False))
+
+    def test_goods_structure_leads_with_relations_between_values(self):
+        params={'region':'DEA12','year':2024,'mode':'road','metric':'tonnes',
+                'directions':['outbound','inbound'],'granularity':'C7'}
+        result,_=self.service.analyze('Welche Güter prägen Duisburg?',params,function='goods_structure',select_answer=False)
+        self.assertIn('versandt und',result['answer']['paragraphs'][0])
+        self.assertTrue(any('größte Gütergruppe' in paragraph for paragraph in result['answer']['paragraphs']))
+        self.assertTrue(result['answer']['tables'][0]['collapsed'])
+
+    def test_region_profile_fallback_explains_modal_distribution(self):
+        params={'region':'DEA12','year':2024,'metric':'tonnes','include_forecast':False}
+        result,_=self.service.analyze('Wie ist Duisburgs Güterverkehrsprofil?',params,function='region_profile',select_answer=False)
+        self.assertTrue(any('Verteilung lautet' in paragraph and '44,82 %' in paragraph for paragraph in result['answer']['paragraphs']))
+        self.assertTrue(result['answer']['tables'][0]['collapsed'])
+
     def test_display_references_reproduce_original_sources(self):
         from scripts.analysis.build_assistant_references import build, TARGET
         self.assertEqual(json.loads((ROOT/TARGET).read_text(encoding='utf-8')), build(ROOT))
@@ -565,6 +617,8 @@ class RealData(unittest.TestCase):
         self.assertAlmostEqual(result['facts'][6]['value'],16738676.4,places=4)
         self.assertTrue(all(f['mode'] in ['rail','iww'] for f in result['facts']))
         self.assertTrue(any('nicht additiv' in n for n in result['notices']))
+        self.assertLessEqual(len(result['answer']['paragraphs']),3)
+        self.assertTrue(result['answer']['tables'][0]['collapsed'])
 
     def test_duisburg_intermodal_external_outbound(self):
         params={'region':'DEA12','year':2024,'modes':['rail'],'metrics':['tonnes'],'direction':'outbound'}
@@ -637,7 +691,7 @@ class RealData(unittest.TestCase):
         self.assertEqual(round(transit[1]['value'],3),10.784)
         self.assertEqual(transit[0]['label'],'Transitverkehr')
         self.assertTrue(any(transit[0]['fact_id'] in s['fact_ids'] for s in result['statements']))
-        self.assertLessEqual(len(result['summary']),4)
+        self.assertLessEqual(len(result['summary']),3)
 
     def test_rail_goods_groups_total_and_missing_positions_survive(self):
         params={'year':2024,'region':'DEA23','partner':'DE600','direction':'outbound','metric':'tonnes','group':'ALL','nst':None}
@@ -695,13 +749,15 @@ class RealData(unittest.TestCase):
         self.assertEqual(result['status'],'partial')
         self.assertTrue(all(f['value'] is None for f in result['facts'] if f['unit']=='%'))
 
-    def test_magdeburg_ten_years_preserved_without_unconfirmed_rates(self):
+    def test_magdeburg_ten_years_preserved_with_transparent_endpoint_change(self):
         params={'region':'DEE03','start':2016,'end':2025,'mode':'rail','metric':'tonnes','direction':'all'}
         result,_=self.service.analyze('Magdeburg',params,function='regional_history')
         self.assertEqual(result['status'],'ok')
         self.assertEqual([f['value'] for f in result['facts']],
                          [391082,376529,413339,3350578,3563715,3712362,3775110,4466662,4368137,1265439])
         self.assertFalse(any(f['unit']=='%' for f in result['facts']))
+        self.assertTrue(any('rechnerischen Wachstum von 223,57 %' in paragraph for paragraph in result['answer']['paragraphs']))
+        self.assertTrue(any('nicht um Gebiets-, Erfassungs- oder Revisionsbrüche bereinigt' in note for note in result['answer']['notes']))
 
     def test_duisburg_full_profile_separates_forecast(self):
         params={'region':'DEA12','year':2024,'metric':'tonnes','include_forecast':True}
@@ -788,13 +844,24 @@ class RealData(unittest.TestCase):
     def test_invalid_answer_cannot_replace_facts(self):
         result, _ = self.service.analyze('Duisburg', PARAMETERS, function='balance')
         selection={'result_id':result['result_id'],'data_snapshot_id':result['data_snapshot_id'],
-                   'statement_ids':['invented'],'table_ids':[],'wording_variant':'compact'}
+                   'paragraphs':[{'text':'Unbelegte Aussage.','statement_ids':['invented']}],
+                   'table_ids':[],'wording_variant':'compact'}
         with self.assertRaises(ValueError):
             apply_selection(result, selection)
-        selection['statement_ids']=['s1']
+        evidence=result['statements'][0]
+        selection['paragraphs']=[{'text':evidence['text'],'statement_ids':[evidence['id']]}]
         selected=apply_selection(result, selection)
         self.assertEqual(selected['tables'], result['tables'])
         self.assertEqual(selected['notices'], result['notices'])
+        selection['paragraphs']=[{'text':'Zusätzlich 999 Tonnen.','statement_ids':[evidence['id']]}]
+        with self.assertRaises(ValueError):
+            apply_selection(result, selection)
+        selection['paragraphs']=[{'text':evidence['text'].replace('Mio. Tonnen','Tonnen'),'statement_ids':[evidence['id']]}]
+        with self.assertRaises(ValueError):
+            apply_selection(result, selection)
+        selection['paragraphs']=[{'text':'Die Werte belegen eine hervorragende wirtschaftliche Anbindung.','statement_ids':[evidence['id']]}]
+        with self.assertRaises(ValueError):
+            apply_selection(result, selection)
 
     def test_model_two_phases_load_prompt_and_no_references(self):
         class Fake:

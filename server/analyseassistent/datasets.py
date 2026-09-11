@@ -109,6 +109,15 @@ class Datasets:
             if len(codes)==1:
                 code=next(iter(codes))
                 if alias not in self.names[code]: self.names[code].append(alias)
+            else:
+                # Ein bloßer Ortsname bezeichnet im üblichen Sprachgebrauch die
+                # Stadt. Bei einem gleichnamigen Landkreis wird die kreisfreie
+                # Stadt als sichtbarer Standard verwendet.
+                city_codes=[code for code in codes if any(
+                    name == alias+', Kreisfreie Stadt' or name == alias+', Stadtkreis'
+                    for name in self.names[code])]
+                if len(city_codes)==1 and alias not in self.names[city_codes[0]]:
+                    self.names[city_codes[0]].append(alias)
 
     def query(self, function, parameters, *, timeout_seconds=180):
         if function not in FUNCTIONS:
@@ -128,6 +137,7 @@ class Datasets:
                 return {'status': 'not_available', 'note': 'B07-Testabbild fehlt', 'unit': 'Mautfahrten'}
             return self.toll.query(**parameters)
         dispatch = {'relation_matrix': relations.relation_matrix,
+                    'relation_history': relations.relation_history,
                     'road_relation_goods_limit': relations.road_relation_goods_limit,
                     'rail_goods_history': relations.rail_goods_history,
                     'explain_scope': scope.explain_scope,

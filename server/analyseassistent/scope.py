@@ -21,7 +21,7 @@ def explain_scope(con,dataset,*,topic,regional_scope=None):
     elif topic=='source_flags':
         texts=[{'label':'Nullwerte','text':'Eine veröffentlichte Null kann durch Rundung entstehen. In den verwendeten KBA-Tabellen steht das Zeichen 0 für eine gerundete Null; es belegt deshalb nicht, dass tatsächlich kein Verkehr stattgefunden hat.'},
                {'label':'Quellenzeichen','text':'In den verwendeten KBA-Produkten liefern / und . keinen belastbaren Zahlenwert. Das Zeichen - bedeutet nichts vorhanden; Klammern kennzeichnen einen eingeschränkt belastbaren Wert. Die Bedeutung ist immer anhand der jeweiligen Quelle zu prüfen.'},
-               {'label':'Fehlende Angaben','text':'Wenn eine Verbindung oder Gütergruppe in der Veröffentlichung fehlt, ist ihr Verkehr unbekannt. Eine fehlende Angabe wird deshalb nicht als null behandelt.'}]
+               {'label':'Fehlende Angaben','text':'Wenn eine Verbindung oder Gütergruppe in der Veröffentlichung fehlt, ist in dieser Statistik kein nutzbarer Wert erfasst beziehungsweise veröffentlicht. Das wird nicht als numerische Null behandelt und beweist nicht, dass tatsächlich kein Verkehr stattfand.'}]
     elif topic=='regional_vs_national':
         texts=[{'label':'Regionen und Deutschland','text':'Der Regionalbestand enthält neben Kreisprofilen zusätzliche Gebietseinträge. Seine Summe entspricht daher nicht dem Deutschlandwert. Für Deutschland wird eine eigene nationale Statistik verwendet.'},
                {'label':'Unterschiedliche Zählweise','text':'Verkehr innerhalb einer Region wird sowohl beim Versand als auch beim Empfang gezählt. Nationale Statistiken und Prognosen verwenden eigene Zählweisen. Die Summen sind deshalb nicht unmittelbar vergleichbar.'},

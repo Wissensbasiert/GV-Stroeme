@@ -75,7 +75,8 @@ def present(result,datasets):
         return answer
     if status=='error':
         answer['title']='Die Auswertung hat gerade nicht geklappt'
-        answer['paragraphs']=['Ihre Frage konnte wegen eines technischen Problems nicht beantwortet werden. Bitte versuchen Sie es später noch einmal. Diese fehlgeschlagene Auswertung zählt nicht zu Ihrem Monatskontingent.']
+        code=result.get('diagnostic_code')
+        answer['paragraphs']=['Ihre Frage konnte wegen eines technischen Problems nicht beantwortet werden. Bitte versuchen Sie es später noch einmal. Diese fehlgeschlagene Auswertung zählt nicht zu Ihrem Monatskontingent.'+((' Fehlerkennung: '+code+'.') if code else '')]
         return answer
     if status=='not_available':
         answer['title']='Für diese Auswahl fehlt eine belastbare Zahlenangabe'
@@ -125,15 +126,16 @@ def present(result,datasets):
             if function=='rail_goods' and f.get('sum_scope'):
                 notes.append('Summe der bekannten veröffentlichten Einzelmengen; fehlende Werte sind nicht als null enthalten.')
             if f['value'] is None:
-                notes.append({'missing_row':'Kein veröffentlichter Eintrag für diese Auswahl.',
+                notes.append({'missing_row':'In dieser Statistik ist für diese Auswahl kein nutzbarer Wert erfasst beziehungsweise veröffentlicht.',
                               'suppressed':'In der Quelle unterdrückter Wert.',
-                              'missing_value':'Quellwert unbekannt oder nicht veröffentlicht.'}.get(f.get('value_status'), 'Hier liegt keine nutzbare Zahlenangabe vor.'))
+                              'missing_value':'Quellwert unbekannt oder nicht veröffentlicht.'}.get(f.get('value_status'), 'In dieser Statistik ist kein nutzbarer Wert erfasst beziehungsweise veröffentlicht.'))
             if f.get('quality_status')=='restricted': notes.append('Laut Quelle eingeschränkt belastbar.')
             if f['value']==0: notes.append('Veröffentlichte Null; möglicherweise gerundet.')
             rows.append({'label':labels[f['fact_id']],'value':number(f['value']),
                          'unit':UNITS.get(f.get('unit'),f.get('unit','')),
                          'note':' '.join(notes),'fact_ids':[f['fact_id']]})
-        answer['tables']=[{'title':'Ergebnisse im Überblick','columns':['Kennwert','Wert','Einheit','Hinweis'],'rows':rows}]
+        answer['tables']=[{'title':'Ergebnisse im Überblick','columns':['Kennwert','Wert','Einheit','Hinweis'],'rows':rows,
+                           'collapsed':len(rows)>8,'row_count':len(rows)}]
         if function=='rail_goods':
             answer['tables'][0].update(title='Güterpositionen im Überblick' if p.get('nst') else 'Güterarten im Überblick',
                                       columns=['Güterposition' if p.get('nst') else 'Güterart','Menge','Einheit','Hinweis'])
@@ -144,7 +146,7 @@ def present(result,datasets):
         ids=statement.get('fact_ids',[]) if statement else []
         if function=='rail_goods' and (not ids or any(fid not in by_id for fid in ids)):
             continue
-        if len(ids)==1 and ids[0] in by_id:
+        if statement and statement.get('role')=='fact' and len(ids)==1 and ids[0] in by_id:
             f=by_id[ids[0]]
             if f['value'] is not None:
                 answer['paragraphs'].append('Für '+labels[ids[0]]+' weist die Statistik '+number(f['value'])+' '+UNITS.get(f.get('unit'),f.get('unit',''))+' aus.')
@@ -160,10 +162,15 @@ def present(result,datasets):
     elif p.get('node'):
         node_name = datasets.airport_names.get(p['node'],p['node']) if p.get('kind')=='air' else name(p['node'],datasets)
         answer['title']='Ihre Auswertung für '+node_name+(f" ({p['year']})" if p.get('year') else '')
+    elif function in {'relation_matrix','relation_history'} and p.get('origin') and p.get('destination'):
+        origin,destination=name(p['origin'],datasets),name(p['destination'],datasets)
+        period=(f" ({p['start']}–{p['end']})" if function=='relation_history' else f" ({p['year']})")
+        answer['title']=f'Güterverkehr von {origin} nach {destination}'+period
     introductions={
         'region_profile':'Die folgenden Kennwerte beschreiben das Güterverkehrsprofil Ihrer Region.',
         'regional_modal_split':'Die Auswertung zeigt, wie sich der Verkehr auf Straße, Schiene und Binnenschiff verteilt.',
         'compare_regions':'Die Gegenüberstellung zeigt die Kennwerte der ausgewählten Regionen. Die vollständigen Ergebnisse finden Sie in der Tabelle.',
+        'relation_history':'Die Auswertung stellt die veröffentlichten Jahreswerte der Verbindung nach Verkehrsträgern getrennt gegenüber.',
         'rail_goods':'Für die gewählte Schienenverbindung sind die folgenden Güterangaben veröffentlicht.',
         'rail_goods_history':'Die Tabelle stellt die veröffentlichten Güterangaben der gewählten Jahre nebeneinander.',
         'regional_history':'Die Jahreswerte zeigen den veröffentlichten Verlauf. Bitte beachten Sie die Hinweise zur Vergleichbarkeit.',
@@ -176,8 +183,12 @@ def present(result,datasets):
         'intermodal_markets':'Die Ergebnisse zeigen die ausgewählten intermodalen Teilmärkte jeweils getrennt.',
         'balance':'Die Auswertung stellt Versand und Empfang gegenüber. Der Saldo ist die Differenz zwischen beiden Mengen.',
         'toll_month':'Die folgenden Angaben zeigen die veröffentlichten mautpflichtigen Fahrten für den gewählten Monat.'}
-    if function in introductions:
-        answer['paragraphs'].insert(0,introductions[function])
+    # Analytical statements already explain the result in a question-specific
+    # way. The generic introduction is only a last-resort bridge for functions
+    # that could not produce such a statement; otherwise it interrupts the
+    # answer between its main finding and its supporting interpretation.
+    if function in introductions and not answer['paragraphs']:
+        answer['paragraphs'].append(introductions[function])
     if function=='road_relation_goods_limit':
         origin,destination=name(p['origin'],datasets),name(p['destination'],datasets)
         answer['title']=f'Straßengüterverkehr von {origin} nach {destination}'
@@ -217,11 +228,11 @@ def present(result,datasets):
     elif function in {'region_profile','regional_modal_split','compare_regions','modal_history','regional_history'}:
         answer['notes'].append('Verkehr innerhalb einer Region zählt bei Versand und Empfang jeweils mit. Die Summe beider Richtungen ist deshalb nicht die Menge eindeutig verschiedener Transporte.')
         if function in {'regional_history','modal_history'}:
-            answer['notes'].append('Die Jahreswerte sind nicht durchgehend auf dieselben Gebiets- und Erfassungsregeln umgerechnet. Daraus sollte keine gesicherte Veränderungsrate abgeleitet werden.')
-    elif function in {'relation','relation_matrix','rail_goods','rail_goods_history','time_series'}:
-        answer['notes'].append('Die Angaben umfassen den veröffentlichten Verkehr der Auswahl. Wo Werte fehlen, ist damit kein fehlender Verkehr nachgewiesen.')
-        if function in {'rail_goods_history','time_series'}:
-            answer['notes'].append('Die Quellenjahre sind nicht vollständig vergleichbar gemacht. Eine gesicherte Wachstumsrate oder Ursache lässt sich daraus noch nicht angeben.')
+            answer['notes'].append('Eine ausgewiesene Veränderungsrate ist aus den veröffentlichten Werten berechnet. Sie ist nicht um Gebiets-, Erfassungs- oder Revisionsbrüche bereinigt und erklärt keine Ursache.')
+    elif function in {'relation','relation_matrix','relation_history','rail_goods','rail_goods_history','time_series'}:
+        answer['notes'].append('Wo kein Wert vorliegt, ist in der zugrunde liegenden Statistik kein nutzbarer Verkehrswert erfasst beziehungsweise veröffentlicht. Das beweist nicht, dass tatsächlich kein Verkehr stattfand.')
+        if function in {'relation_history','rail_goods_history','time_series'}:
+            answer['notes'].append('Eine ausgewiesene Veränderungsrate wird transparent aus vorhandenen veröffentlichten Werten berechnet. Sie ist nicht methodisch bereinigt und belegt keine Ursache.')
     elif function=='node_partners':
         if p['kind']=='air':
             answer['notes'].append('Die Anteile beziehen sich auf alle veröffentlichten Partnerverbindungen der Auswahl, nicht auf das gesamte Luftfrachtaufkommen des Flughafens. Kleinere Verbindungen können wegen Veröffentlichungsschwellen fehlen.')
