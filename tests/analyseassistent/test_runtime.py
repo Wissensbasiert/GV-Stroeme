@@ -647,6 +647,32 @@ class RealData(unittest.TestCase):
         self.assertTrue(all(f['value_status']=='missing_row' for f in groups[1:6]))
         self.assertEqual(result['facts'][-1]['value'],199851)
 
+    def test_rail_goods_answer_separates_groups_from_fine_positions(self):
+        from server.analyseassistent.presentation import present, number
+        from server.analyseassistent.narrative import evidence
+        params={'year':2025,'region':'DE300','partner':'DE600','direction':'outbound','metric':'tonnes','group':'ALL','nst':None}
+        result,_=self.service.analyze('Berlin → Hamburg',params,function='rail_goods')
+        answer=present(result,self.datasets)
+        rows=answer['tables'][0]['rows']
+        self.assertEqual(len(rows),8)
+        grouped=[f for f in result['facts'] if f.get('group') and not f.get('nst_raw')]
+        self.assertEqual([r['value'] for r in rows[:7]],[number(f['value']) for f in grouped])
+        self.assertEqual(rows[-1]['value'],'240.297')
+        self.assertTrue(any(f.get('nst_raw') for f in result['facts']))
+        self.assertNotIn('NST ',json.dumps({'rows':rows,'paragraphs':answer['paragraphs']},ensure_ascii=False))
+        self.assertNotIn('NST ',json.dumps(evidence(result,answer),ensure_ascii=False))
+        # An explicitly selected fine position keeps its own level and exact value.
+        params['nst']='121'
+        detail,_=self.service.analyze('NST 121',params,function='rail_goods')
+        detail_rows=present(detail,self.datasets)['tables'][0]['rows']
+        self.assertEqual(len(detail_rows),2)
+        self.assertEqual(detail_rows[0]['label'],'NST 121')
+        self.assertEqual(detail_rows[0]['value'],number(next(f['value'] for f in detail['facts'] if f.get('nst_raw')=='121')))
+        # A selected aggregate must not imply six other groups have missing data.
+        params.update(nst=None,group='5')
+        filtered,_=self.service.analyze('Güterart 5',params,function='rail_goods')
+        self.assertEqual(len(present(filtered,self.datasets)['tables'][0]['rows']),2)
+
     def test_compare_regions_retains_all_groups(self):
         params={'regions':['DEA12','DEE03'],'year':2024,'metric':'tonnes','direction':'all'}
         result,_=self.service.analyze('Duisburg und Magdeburg',params,function='compare_regions')

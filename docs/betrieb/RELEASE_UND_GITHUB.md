@@ -1,5 +1,7 @@
 # GitHub-Sicherung und AlwaysData-Testreleases
 
+**Aktueller Abschluss vom 11.09.2026:** Aktiv ist `portal-test-20260911-gueterstroeme-beta03`. Die Korrektur trennt die sieben Güterarten von ihren NST-Einzelpositionen in der sichtbaren Antwort. Gegenüber beta02 wurden drei geänderte Dateien plus Manifest (363.061 Bytes) übertragen und 1.703 Dateien serverseitig unabhängig kopiert; alle 1.706 Zieldateien geprüft. 78 lokale Prüfungen, Linux-Prüfung und angemeldeter Antwort-/Kontingenttest bestanden. Geprüfte Rückfallstände bleiben ui10 und ui09; sie enthalten noch die frühere Darstellungsgrenze. Produktion unverändert; temporäre Serverprüfmittel entfernt. [Prüfbericht einschließlich Aufbewahrungsnachweis](../qualitaet/ANALYSEASSISTENT_BETA_20260911.md). Die unten stehenden ui10-Angaben dokumentieren den vorherigen Abschluss am selben Tag.
+
 Verbindlicher Arbeitsablauf auf Nutzerauftrag vom 11.09.2026. Für fachliche Freigaben bleibt der Qualitätssicherungsplan maßgeblich.
 
 ## Zuständigkeit und GitHub
