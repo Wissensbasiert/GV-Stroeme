@@ -5,6 +5,7 @@ Interaktives Fach-Dashboard von Wissensbasierte Planung zur Analyse räumlicher 
 ## Orientierung
 
 - [`docs/README.md`](docs/README.md) ist das zentrale Inhaltsverzeichnis und ordnet Fachkonzept, Betrieb, Qualitätssicherung und Roadmaps ein.
+- [`docs/betrieb/RELEASE_UND_GITHUB.md`](docs/betrieb/RELEASE_UND_GITHUB.md) beschreibt die GitHub-Sicherung auf `main`, die Übertragung geänderter Dateien und die Aufbewahrung von zwei Rückfallständen auf AlwaysData.
 - [`scripts/README.md`](scripts/README.md) erklärt die aktiven Skripte und trennt sie von historischen Ständen.
 - [`AGENTS.md`](AGENTS.md) enthält die projektbezogene Lese- und Arbeitsreihenfolge für KI-Assistenten.
 
