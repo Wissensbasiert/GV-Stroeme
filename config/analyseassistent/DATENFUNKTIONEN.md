@@ -1,5 +1,13 @@
 # Fachlicher Vertrag der Datenfunktionen
 
+## Ergänzung 0.7.0: Knotenverbindungen und Vorschaufragen
+
+`node_connections(kind,node,year,direction,metric,partners,partner_group,partner_scope)` liest konkrete veröffentlichte Flughafen- oder Seehafenverbindungen, auch außerhalb einer Topliste. Höchstens zehn Partner; der Berichtsknoten muss im jeweiligen deutschen Katalog vorhanden sein. IATA-Codes werden quellgebunden auf ICAO normalisiert, z. B. LEJ → EDDP und LHR → EGLL. Ein einzelner Code bedeutet keine Stadtgruppe. `partner_group=london` umfasst EGGW, EGKK, EGLL, EGMC und EGSS, ausdrücklich nur die Londoner Flughäfen des vorhandenen Katalogs. Die Antwort nennt Mitglieder und Abdeckungsgrenze. Fehlende Zeilen und fehlende Werte bleiben getrennt; bei Lücken gibt es ausschließlich eine bekannte Teilsumme, keine vollständige Gesamtsumme.
+
+`node_statistics`, `node_profile` und `node_partners` unterstützen ebenfalls `partner_scope`. Unbekannte Länderzuordnungen werden nicht zu Ausland. Luft-Gesamtstatistik AVIA_GOOA und veröffentlichte Verbindungen AVIA_GOR_DE bleiben getrennte Zählräume. Die bisherige 2025-Flugsperre der GOOA-Gesamtstatistik wird nicht mit Relationssummen umgangen. Ein Datenupdate benötigt einen eigenen Quellennachweis und Freigabetest. Seehafen-TEU und Luftflüge bleiben unterschiedliche Kennzahlen.
+
+Gegenrichtung und Jahresfolgefrage erhalten die Partnerauswahl; explizites LEJ–LHR ersetzt die London-Gruppe. Ein Wechsel von einem Mehrkennwertprofil zu einer einzelnen Kennzahl darf die übrigen Kennwerte nicht still entfernen. Ein expliziter Wechsel auf alle Partner hebt einen zuvor gesetzten Auslandsfilter auf. Die fünf sichtbaren Vorschaufragen bilden verbindliche Regressionen: Vergleich, gerichtete Relation und Partner-Ranking fragen nur das fehlende Jahr; Zeitreihe und Prognose verwenden ihren eigenen Zeitraum. Eine absolute Prognoserangfolge wird nach absoluten, nicht relativen Änderungen erläutert.
+
 ## Ergänzung 0.6.0: Gegenräume und Gesamtverkehr
 
 `transport_history(region,start,end,modes,metric,direction,partner_scope)` liefert bis zu zehn Jahre. `all` nutzt die bestehende Regionalprofil-Zählweise; Versand plus Empfang zählt innerregional zweimal. `domestic` und `international` filtern vorhandene B01-Relationen nach Deutschland bzw. ausländischen Partnerkennungen; bei Richtung `all` zählt jede gerichtete Relation einmal. Diese unterschiedlichen Zählweisen werden ausdrücklich ausgewiesen. Unbekannte Partnercodes werden nicht als Ausland behandelt. Deshalb sind gefilterte und ungefilterte Werte bei beiden Richtungen nicht pauschal additiv vergleichbar.

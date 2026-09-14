@@ -23,6 +23,8 @@ def main():
     parser.add_argument('--access', action='store_true', help='Neue Prognose-/NST-/Hafen-/KV-Zugriffe ohne vorgegebene Funktion')
     parser.add_argument('--scope-totals', action='store_true', help='Originaldialoge Duisburg Ausland/Inland und Berlin Gesamtentwicklung')
     parser.add_argument('--scope-recheck', action='store_true', help='Drei gezielte Nachprüfungen der Belegpakete und benannten Inlandsrelation')
+    parser.add_argument('--nodes', action='store_true', help='Acht freigegebene Flughafen-, Hafen- und Bestandsregressionen')
+    parser.add_argument('--examples', action='store_true', help='Die fünf tatsächlich sichtbaren Vorschaufragen einmal, ohne erfundene Jahresauswahl')
     parser.add_argument('--sample', action='store_true', help='Freie Auswahl aus T02/T04/T05/T07/T16/T20/T22/T35; keine vorgegebene Funktion')
     parser.add_argument('--cases', help='Einbasierte Auswahl der unabhängigen sample-Fragen, durch Komma getrennt')
     args = parser.parse_args()
@@ -56,6 +58,22 @@ def main():
         ['Wie hoch waren 2024 die Emissionen von Dortmund nach Bielefeld?'],
     ]
     if args.payload_review: conversations = [conversations[1][:1]]
+    elif args.examples:
+        from html.parser import HTMLParser
+        class ExampleParser(HTMLParser):
+            def __init__(self):super().__init__();self.questions=[]
+            def handle_starttag(self,tag,attributes):
+                attrs=dict(attributes)
+                if tag=='button' and 'data-ai-question' in attrs:self.questions.append(attrs['data-ai-question'])
+        examples=ExampleParser();examples.feed((args.root/'html/shell-tail.html').read_text(encoding='utf-8'))
+        if len(examples.questions)!=5:raise ValueError('Genau fünf aktuelle Vorschaufragen erwartet')
+        conversations=[[question] for question in examples.questions]
+    elif args.nodes:
+        conversations=[['Wie viele Frachtflüge gab es 2024 von Leipzig nach London?', 'Und in Gegenrichtung?', 'Und nur von LEJ nach LHR?'],
+            ['Welche fünf internationalen Luftfrachtverbindungen waren 2024 ab Leipzig/Halle nach Tonnen am wichtigsten?', 'Und nur im Inland?'],
+            ['Wie viele Tonnen Metalle wurden 2024 aus dem Hamburger Seehafen nach China versandt?'],
+            ['Welche Güter flossen 2025 auf dem Binnenschiff von Duisburg ins Ausland?'],
+            ['Wie entwickelte sich der gesamte Güterverkehr in Berlin von 2020 bis 2024?']]
     elif args.scope_recheck:
         conversations=[['Welche Güter flossen 2025 auf dem Binnenschiff von Duisburg ins Ausland?'],
             ['Wie entwickelte sich der gesamte Güterverkehr in Berlin von 2020 bis 2024?'],

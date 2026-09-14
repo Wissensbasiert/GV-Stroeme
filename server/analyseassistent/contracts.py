@@ -66,7 +66,11 @@ FUNCTIONS = {
         region=CODE,year=YEAR,modes={'type':'array','items':enum('rail','iww'),'minItems':1,'maxItems':2,'uniqueItems':True},
         metrics={'type':'array','items':enum('tonnes','tkm'),'minItems':1,'maxItems':2,'uniqueItems':True},
         direction=enum('all','outbound','inbound','internal'))),
-    'node_profile': ('F12', 'Knotenprofil mit getrennten Kennzahlen und sichtbaren Jahrgangslücken', 'b0406', fields(
+    'node_connections': ('F12', 'Konkrete Flughafen- oder Seehafenverbindungen, ohne Top-Begrenzung. node ist der deutsche Meldeknoten; partners sind ICAO-/UNLOCODE-Knoten, keine Länder. London gemeinsam über partner_group=london. Fehlende Werte bleiben unbekannt; bekannte Teilsumme gesondert.', 'b0406', fields(
+        kind=enum('air','sea'),node=CODE,year=YEAR,direction=enum('all','outbound','inbound'),
+        metric=enum('tonnes','teu','flights'),
+        partners={'type':'array','items':CODE,'minItems':1,'maxItems':10,'uniqueItems':True})),
+    'node_profile': ('F12', 'Knotenprofil mit getrennten Kennzahlen und sichtbaren Jahrgangslücken; bei partner_scope Inland/Ausland veröffentlichte Verbindungen, nicht vollständige Flughafen-Randsumme', 'b0406', fields(
         kind=enum('air','sea'),node=CODE,year=YEAR,direction=enum('all','outbound','inbound'),
         metrics={'type':'array','items':enum('tonnes','teu','flights'),'minItems':1,'maxItems':2,'uniqueItems':True})),
     'regional_history': ('F04', 'Regionale Ist-Jahresscheiben mit Quellenjahresprüfung und Vergleichbarkeitsgrenzen', 'b0406', fields(
@@ -80,7 +84,7 @@ FUNCTIONS = {
         origin=CODE, destination=CODE, start=YEAR, end=YEAR,
         modes={'type':'array','items':MODE,'minItems':1,'maxItems':3,'uniqueItems':True},
         metric=enum('tonnes','tkm'))),
-    'partner_ranking': ('F02', 'Alle veröffentlichten Partner vor Top-Begrenzung, Gleichstände und Quellenflags', 'b01', fields(
+    'partner_ranking': ('F02', 'Wichtigste Partnerregionen einer Stadt im Straßen-, Schienen- oder Binnenschiffsgüterverkehr. Rangliste nach Tonnen oder tkm, Versand/Empfang/beide Richtungen. Fehlendes Jahr gezielt erfragen; alle veröffentlichten Partner vor Top-Begrenzung, Gleichstände und Quellenflags.', 'b01', fields(
         region=CODE, year=YEAR, mode=MODE, metric=enum('tonnes','tkm'), direction=enum('all','outbound','inbound'),
         group=GROUP, top=TOP, external={'type':'boolean'})),
     'region_profile': ('F01', 'Vollständiges D01-Regionalprofil, optional getrennte VP-Werte', 'b0406', fields(
@@ -130,8 +134,10 @@ FUNCTIONS = {
 
 # Optional for backwards compatibility with saved selections and old API callers.
 FUNCTIONS['forecast_regions'][3]['properties']['goods'] = FORECAST_GOODS
-for scoped_function in ['goods_structure','goods_history','partner_ranking']:
+for scoped_function in ['goods_structure','goods_history','partner_ranking','node_connections','node_partners','node_profile','node_statistics']:
     FUNCTIONS[scoped_function][3]['properties']['partner_scope'] = enum('all','domestic','international')
+FUNCTIONS['node_connections'][3]['properties']['partner_group'] = enum('london')
+FUNCTIONS['node_partners'][3]['required'].remove('international')
 
 PLAN = fields(phase=enum('plan'), function_id={'anyOf': [enum(*FUNCTIONS), {'type': 'null'}]},
               parameters={'type': 'object'}, parameter_origins={'type': 'object', 'additionalProperties': enum('context', 'question')},

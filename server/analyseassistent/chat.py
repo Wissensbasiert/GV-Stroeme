@@ -39,7 +39,7 @@ def packet(result, datasets):
     # of the requested years. They are never substituted for a missing endpoint.
     facts = {f['fact_id']: f for f in result.get('facts', [])}
     for table in answer['tables']:
-        for row in (table['rows'] if result.get('function_id') in {'transport_history','dashboard_detail','forecast_relation','compare_regions','forecast_regions','partner_ranking','node_partners'} else table['rows'][:30]):
+        for row in (table['rows'] if result.get('function_id') in {'forecast_ranking','transport_history','dashboard_detail','forecast_relation','compare_regions','forecast_regions','partner_ranking','node_partners'} else table['rows'][:30]):
             for key in row.get('fact_ids', []):
                 records[key] = row['label'] + ': ' + row['value'] + ' ' + row['unit'] + '. ' + row.get('note', '')
     if result.get('function_id') == 'relation_history':
@@ -64,7 +64,7 @@ def packet(result, datasets):
         if key in facts:
             item.update({k: facts[key][k] for k in ['value', 'unit', 'year', 'mode', 'origin', 'destination',
                         'region', 'region_name', 'metric', 'scenario', 'direction', 'basis',
-                        'source_status', 'quality_status', 'source','group','group_name'] if k in facts[key]})
+                        'source_status', 'quality_status', 'source','group','group_name','partner_id','aggregate_role','components','missing_partners'] if k in facts[key]})
             if facts[key].get('value') is not None:
                 item['text'] += ' Kurzform: '+compact_value(facts[key]['value'], facts[key]['unit'])+'.'
         structured[key] = item
@@ -89,6 +89,12 @@ def packet(result, datasets):
         ranked=[f for f in facts.values() if f.get('partner_id')]
         structured['partner_group']={'text':' '.join(structured[f['fact_id']]['text'] for f in ranked),
                                      'fact_ids':[f['fact_id'] for f in ranked]}
+    if result.get('function_id')=='node_connections':
+        structured['connection_group']={'text':' '.join(structured[f['fact_id']]['text'] for f in facts.values() if f['fact_id'] in structured),
+                                        'fact_ids':list(facts)}
+    if result.get('function_id')=='forecast_ranking':
+        structured['forecast_ranking_group']={'text':' '.join(structured[f['fact_id']]['text'] for f in facts.values()),
+                                              'fact_ids':list(facts)}
     params = result.get('parameters', {})
     scope = {k: params[k] for k in params}
     for key in ['origin', 'destination', 'region', 'partner']:
@@ -103,6 +109,7 @@ def packet(result, datasets):
             'ihrer Richtung und Einheit. Keine Platzhalter. Keine selbst berechneten Zahlen. '
             'Bei Prognosevergleichen nutze die forecast_group-Belege: Sie enthalten jeweils Basis, Ziel und beide Veränderungen einer Region, eines Verkehrsträgers und einer Kennzahl. '
             'Bei Partner-Ranglisten nutze partner_group für mehrere Mengen und Anteile im selben Absatz. '
+            'Bei Prognoseranglisten nutze forecast_ranking_group; dieser Beleg enthält Basis, Ziel und Veränderungen aller ausgewiesenen Rangplätze. '
             'Bei Verkehrs- und Güterauswertungen nutze mode_group_<Verkehrsträger> für mehrere Werte desselben Verkehrsträgers, mode_group_total für die Summe. Nenne höchstens drei führende Gütergruppen; die vollständige Liste steht in der Tabelle. '
             'Bei regionalen Güterzeitreihen beantworte beide Teile: führende Gütergruppen im Endjahr mit Mengen/Anteilen und die Entwicklung seit dem Startjahr. Behandle jeden ausgewählten Verkehrsträger, auch konkrete Datenlücken. '
             'Beginne mit einer kurzen direkten Kernaussage. Nutze für vergleichbare Ergebnisse einen eigenen Block mit Aufzählungszeilen (- Punkt), optional mit **Bezeichnung**. '
@@ -138,12 +145,32 @@ def check_prose(selection, payload, result, datasets):
         allowed_numbers |= {float(y) for y in YEAR.findall(json.dumps(params))}
         if not numbers(text) <= allowed_numbers:
             raise ValueError('Zahl fehlt in den zugeordneten Belegen')
-        quantity = re.compile(r'([-+]?\d+(?:\.\d{3})*(?:,\d+)?)\s*(Mio\.|Tsd\.)?\s*(Tonnenkilometer|Tonnen|tkm|TEU|%|t)(?!\w)', re.I)
-        unit_names = {'tonnen': 't', 'tonnenkilometer': 'tkm', 'teu': 'teu', 'tkm': 'tkm', 't': 't', '%': '%'}
+        quantity = re.compile(r'([-+]?\d+(?:\.\d{3})*(?:,\d+)?)\s*(Mio\.|Tsd\.)?\s*(Tonnenkilometer|Tonnen|Frachtflüge|Fracht- und Postflüge|Flüge|tkm|TEU|%|t)(?!\w)', re.I)
+        unit_names = {'tonnen': 't', 'tonnenkilometer': 'tkm', 'teu': 'teu', 'tkm': 'tkm', 't': 't', '%': '%',
+                      'flüge':'flights','frachtflüge':'flights','fracht- und postflüge':'flights'}
         def quantities(value):
             return {(round(next(iter(numbers(m.group(1)))) * (1000000 if m.group(2)=='Mio.' else 1000 if m.group(2)=='Tsd.' else 1),6), unit_names[m.group(3).lower()]) for m in quantity.finditer(value.replace('**', '').replace('*', ''))}
         if not quantities(text) <= quantities(allowed_text):
             raise ValueError('Zahl und Einheit sind nicht gemeinsam belegt')
+        if result.get('function_id')=='node_connections':
+            aliases={code:[label, label.removesuffix(' Airport')] for code,label in datasets.airport_names.items()}
+            aliases.setdefault(params['node'],[]).extend(['Leipzig'] if params['node']=='EDDP' else [])
+            for iata, code in datasets.airport_iata.items():
+                aliases.setdefault(code,[]).append(iata)
+            targets=list(params['partners'])
+            if params.get('partner_group'):
+                aliases['group:london']=['London'];targets.append('group:london')
+            pairs={(params['node'],partner) for partner in targets}
+            if params['direction']=='inbound':pairs={(b,a) for a,b in pairs}
+            elif params['direction']=='all':pairs |= {(b,a) for a,b in pairs}
+            mentioned=directed_pairs(text,aliases,list({c for pair in pairs for c in pair}))
+            if mentioned and not mentioned <= pairs:
+                raise ValueError('Flughafenverbindung widerspricht der abgefragten Richtung')
+            for fact in result['facts']:
+                if fact.get('aggregate_role')=='subtotal' and fact['value'] is not None:
+                    if quantities(text) & quantities(number(fact['value'])+' '+fact['unit']):
+                        if not re.search(r'Teilsumme|mindestens|bekannte[nr]? (?:Summe|Flüge|Frachtflüge)',text,re.I):
+                            raise ValueError('Bekannte Teilsumme darf nicht als vollständige Summe ausgegeben werden')
         for sentence in re.split(r'(?<=[!?])\s+|(?<!\d)(?<!Mio)(?<!Tsd)\.\s+(?=[A-ZÄÖÜ])', text):
             if result.get('function_id')=='road_relation_goods_limit' and quantities(sentence):
                 if any(question_supports(sentence,mode,{}) for mode in ['rail','iww']):

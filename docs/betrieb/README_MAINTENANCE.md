@@ -183,3 +183,11 @@ Der Header verweist mit einem normalen Link auf `https://wissensbasiert.de/`; da
 ### Verbindliche GitHub- und Testreleasepflege (11.09.2026)
 
 Nach geprüften Änderungen den zugehörigen Stand auf GitHub `main` sichern. Testuploads übertragen standardmäßig nur geänderte Dateien. Auf AlwaysData bleiben der aktive Testrelease und zwei geprüfte Rückfallstände. Zuständigkeit, ausführbare Werkzeuge, Ausnahmen, Wiederherstellung und Abschlussnachweise: [RELEASE_UND_GITHUB.md](RELEASE_UND_GITHUB.md).
+
+### KI-Beispielfragen (14.09.2026)
+
+„Was kann ich fragen?“ enthält fünf fachliche Beispiele. Die frühere Frage nach Befunden für eine Verwaltungsvorlage entfällt: Sie setzt eine ausgewählte Region und eine fachliche Bewertung voraus, die das Beispiel nicht benennt. Die bearbeitbare Sammlung liegt in `html/shell-tail.html`; der Frontend-Build übernimmt sie in die Auslieferung.
+
+Die verbleibenden Beispiele betreffen Regionsvergleich, gerichtete Schienengüterarten, Straßen-Partnerregionen, regionale Schienenentwicklung und Prognoserangfolge. Fehlende Bezugsjahre sind gezielt zu erfragen, nicht als unverständliche Fachfrage zu behandeln. Bei „am stärksten wachsen“ muss die Antwort absolute oder relative Veränderung klar unterscheiden. Die Kartenfilter werden weiterhin nicht als stillschweigende Chat-Auswahl übernommen.
+
+`tests/analyseassistent/test_preview_questions.py` prüft die fünf Quelltexte, ihre unveränderte Übernahme in den Fragetext und passende ausführbare Parameterverträge nach expliziter Vervollständigung. Das ist kein Nachweis freier Modellinterpretation; dafür sind gesonderte Dialogtests erforderlich. Die Browserprüfer `validate_frontend_exports.cjs` und `validate_frontend_feedback.cjs` erwarten fünf bedienbare Fragen; die letzte ist nun die Prognosefrage.

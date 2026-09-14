@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 import shutil
 import sys
+import subprocess
 
 
 def digest(path):
@@ -33,6 +34,11 @@ def assemble(base, expected, package, portal, output):
     sys.path.insert(0, str(portal/'scripts'))
     from gueterstroeme_release import integrate
     integrate(package, output)
+    package_metadata = json.loads((package/'release.json').read_text(encoding='utf-8'))
+    subprocess.run([sys.executable, '-B', '-c',
+        'import sys; sys.path.insert(0,sys.argv[1]); from server.analyseassistent.datasets import Datasets; '
+        'assert Datasets(sys.argv[1]).snapshot_id == sys.argv[2]',
+        str(output/'private/gueterstroeme'), package_metadata['data_snapshot_id']], check=True)
     additions = (package/'private/config/analyseassistent/requirements.txt').read_text(encoding='utf-8').splitlines()
     if not all(line.strip().encode() in requirements for line in additions if line.strip() and not line.startswith('#')):
         raise ValueError('Neue Portalabhängigkeit benötigt gesonderte Prüfung')

@@ -7,6 +7,7 @@ FIELD_LABELS={
     'regions':'Welche Regionen möchten Sie miteinander vergleichen?',
     'origin':'Wo beginnt die Verbindung?', 'destination':'Wo endet die Verbindung?',
     'partner':'Welche zweite Region gehört zu der Verbindung?',
+    'partners':'Welche konkreten Flughäfen oder Häfen gehören zu der Verbindung?',
     'year':'Auf welches Jahr bezieht sich Ihre Frage?',
     'years':'Welche Jahre möchten Sie vergleichen?', 'observed_years':'Welche beobachteten Jahre möchten Sie betrachten?',
     'start':'Mit welchem Jahr soll der Vergleich beginnen?', 'end':'Mit welchem Jahr soll der Vergleich enden?',
@@ -83,7 +84,7 @@ def present(result,datasets):
                   'Ihre Frage konnte wegen eines technischen Problems nicht beantwortet werden.')
         answer['paragraphs']=[reason+' Bitte versuchen Sie es später noch einmal. Diese fehlgeschlagene Auswertung zählt nicht zu Ihrem Monatskontingent.'+((' Fehlerkennung: '+code+'.') if code else '')]
         return answer
-    if status=='not_available' and not (function=='relation_history' and result.get('facts')):
+    if status=='not_available' and not (function in {'relation_history','node_connections'} and result.get('facts')):
         answer['title']='Für diese Auswahl fehlt eine belastbare Zahlenangabe'
         source_status = result.get('source_status')
         reason = {'missing_row':'Im vorhandenen Datenbestand gibt es für diese Verbindung oder Auswahl keinen veröffentlichten Eintrag.',
@@ -93,6 +94,8 @@ def present(result,datasets):
                   'Die gewünschte Auswertung kann ich mit dem derzeit vorbereiteten Datenangebot noch nicht liefern.')
         answer['paragraphs']=[reason+' Daraus lässt sich nicht schließen, dass kein Verkehr stattfindet.']
         if p.get('year'): answer['notes'].append('Angefragtes Bezugsjahr: '+str(p['year'])+'.')
+        if function in {'node_statistics','node_profile','node_partners'}:
+            answer['notes'].extend(n for n in result.get('notices',[]) if not n.startswith('Datenstand:'))
         answer['suggestions']=[]; answer['followups']=[]
         for check in result.get('related_data',{}).get('checks',{}).values():
             if not check.get('available'): continue
@@ -134,6 +137,7 @@ def present(result,datasets):
                 notes.append({'missing_row':'Kein eigener Eintrag für diese Verbindung.',
                               'not_available':'Jahrgang für diese Auswahl nicht verfügbar.',
                               'suppressed':'In der Quelle unterdrückter Wert.',
+                              'not_applicable':'Für diesen Verkehr ist die Kennzahl nicht anwendbar; keine veröffentlichte Null.',
                               'not_computable':'Prozentuale Veränderung bei Ausgangswert null nicht berechenbar.',
                               'missing_value':'Quellwert unbekannt oder nicht veröffentlicht.'}.get(f.get('value_status'), 'In dieser Statistik ist kein nutzbarer Wert erfasst beziehungsweise veröffentlicht.'))
             if f.get('quality_status')=='restricted': notes.append('Laut Quelle eingeschränkt belastbar.')
@@ -172,6 +176,11 @@ def present(result,datasets):
     elif p.get('node'):
         node_name = datasets.airport_names.get(p['node'],p['node']) if p.get('kind')=='air' else name(p['node'],datasets)
         answer['title']='Ihre Auswertung für '+node_name+(f" ({p['year']})" if p.get('year') else '')
+        if function=='node_connections':
+            partner_name=(datasets.airport_groups[p['partner_group']]['name'] if p.get('partner_group') else
+                          ', '.join(datasets.airport_names.get(c,c) if p['kind']=='air' else c for c in p['partners']))
+            endpoints=(partner_name,node_name) if p['direction']=='inbound' else (node_name,partner_name)
+            answer['title']=(' ↔ ' if p['direction']=='all' else ' → ').join(endpoints)+f" ({p['year']})"
     elif function in {'relation_matrix','relation_history','relation_overview'} and p.get('origin') and p.get('destination'):
         origin,destination=name(p['origin'],datasets),name(p['destination'],datasets)
         period=(f" ({p['start']}–{p['end']})" if function=='relation_history' else f" ({p['year']})")
@@ -432,6 +441,8 @@ def present(result,datasets):
                                'rows':main,'row_count':len(main),'collapsed':False,'compact_summary':True},
                               {'title':'Verkehrsträger und Veränderungen im Detail','columns':['Kennwert','Wert','Einheit','Hinweis'],
                                'rows':details,'row_count':len(details),'collapsed':True}]
+    if function in {'node_connections','node_profile','node_statistics','node_partners'}:
+        answer['notes'].extend(n for n in result.get('notices',[]) if not n.startswith('Datenstand:'))
     if p.get('partner_scope','all')!='all':
         from .transport import SCOPES
         answer['title']+=' · '+SCOPES[p['partner_scope']]

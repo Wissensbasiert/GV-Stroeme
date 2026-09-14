@@ -3,6 +3,7 @@ import copy
 import json
 from .contracts import FUNCTIONS, fields, validate, YEAR
 from .dialogue import available_years, previous_calendar_year
+from .nodes import NODE_FUNCTIONS
 
 TIME_KEYS = {'year', 'years', 'start', 'end', 'observed_years'}
 DIALOGUE = fields(
@@ -45,6 +46,23 @@ def validate_selection(name, args, datasets):
         validate({**FUNCTIONS[name][3], 'required': []}, args)
     except ValueError:
         raise SelectionError('invalid_parameters', 'Die Auswahl passt noch nicht zur möglichen Auswertung. Bitte präzisieren Sie Raum, Zeitraum oder Kennzahl.') from None
+    if name in NODE_FUNCTIONS and args.get('kind'):
+        kind = args['kind']
+        registry = datasets.node_registry[kind]
+        if args.get('node') and args['node'] not in registry['nodes']:
+            raise SelectionError('unknown_node', 'Welchen deutschen Meldeflughafen oder Seehafen meinen Sie? Bei einer Verbindung nach Deutschland bleibt dieser der Meldeknoten, mit Richtung Empfang.', ['node'])
+        partners = args.get('partners', [])
+        known = registry['partners'] | (set(datasets.airport_names) if kind == 'air' else set())
+        if any(p not in known for p in partners):
+            raise SelectionError('unknown_node_partner', 'Welchen konkreten Zielflughafen oder Zielhafen meinen Sie? Bitte nennen Sie den Namen oder Flughafencode.', ['partners'])
+        metrics = args.get('metrics', [args['metric']] if 'metric' in args else [])
+        if any(m not in ({'tonnes','flights'} if kind == 'air' else {'tonnes','teu'}) for m in metrics):
+            raise SelectionError('invalid_node_metric', 'Für Flughäfen sind Frachtgewicht und Fracht-/Postflüge verfügbar; für Seehäfen Gewicht und Container-TEU.', ['metric'])
+        scope = args.get('partner_scope', 'all')
+        for partner in partners:
+            countries = registry['countries'].get(partner, set())
+            if countries and ((scope == 'domestic' and countries != {'DE'}) or (scope == 'international' and 'DE' in countries)):
+                raise SelectionError('conflicting_node_scope', 'Der ausgewählte Hafen oder Flughafen passt nicht zum gewünschten Inland-/Auslandsfilter.', ['partner_scope'])
     for key in ['origin', 'destination', 'region', 'regions', 'partner']:
         value = args.get(key)
         for code in value if isinstance(value, list) else [value] if value else []:
@@ -121,6 +139,17 @@ def inherited_selection(name, state):
     return {k: v for k, v in old.items() if k in props}
 
 
+def airport_codes(args, datasets):
+    if args.get('kind') != 'air':
+        return args
+    aliases = getattr(datasets, 'airport_iata', {})
+    if args.get('node'):
+        args['node'] = aliases.get(args['node'].upper(), args['node'].upper())
+    if args.get('partners'):
+        args['partners'] = [aliases.get(code.upper(), code.upper()) for code in args['partners']]
+    return args
+
+
 def resolve(name, arguments, state, datasets, explicit=None):
     args = copy.deepcopy(arguments)
     dialogue = args.pop('_dialogue', None)
@@ -132,8 +161,22 @@ def resolve(name, arguments, state, datasets, explicit=None):
         if args or not dialogue['clarification'].strip():
             raise SelectionError('invalid_clarification', 'Was möchten Sie über die Güterverkehrsdaten wissen?')
         return None, {}, dialogue, []
+    airport_codes(args, datasets)
     validate_selection(name, args, datasets)
     inherited = inherited_selection(name, state) if dialogue['context'] == 'continue' else {}
+    if (dialogue['context']=='continue' and name in NODE_FUNCTIONS and 'metric' in FUNCTIONS[name][3]['properties']
+            and state.get('function_id') in NODE_FUNCTIONS
+            and args.get('kind',state.get('confirmed',{}).get('kind'))==state.get('confirmed',{}).get('kind')
+            and 'metric' not in args and len(state.get('confirmed',{}).get('metrics',[]))>1):
+        choices='das Frachtgewicht oder die Fracht-/Postflüge' if state['confirmed'].get('kind')=='air' else 'das Frachtgewicht oder Container-TEU'
+        raise SelectionError('multiple_node_metrics', 'Bisher waren mehrere Kennzahlen ausgewählt. Möchten Sie für diese Verbindung '+choices+' betrachten?', ['metric'])
+    if args.get('kind') and inherited.get('kind') and args['kind'] != inherited['kind']:
+        inherited = {k:v for k,v in inherited.items() if k not in {'node','partners','partner_group','metric','metrics','international'}}
+    if name == 'node_connections' and 'partners' in args and 'partner_group' not in args:
+        inherited.pop('partner_group', None)
+    if (dialogue['context'] == 'continue' and state.get('function_id') == 'node_connections'
+            and name in NODE_FUNCTIONS - {'node_connections'} and state.get('confirmed', {}).get('partners')):
+        raise SelectionError('connection_filter_would_disappear', 'Soll weiterhin die ausgewählte Verbindung oder jetzt der gesamte Flughafen beziehungsweise Hafen ausgewertet werden?', ['partners'])
     if dialogue['context'] == 'continue' and dialogue['time']['kind'] == 'unspecified' and not any(k in args for k in TIME_KEYS):
         if state.get('time_intent',{}).get('kind') == 'since_available':
             dialogue['time'] = copy.deepcopy(state['time_intent'])
@@ -141,25 +184,42 @@ def resolve(name, arguments, state, datasets, explicit=None):
     if kind != 'unspecified':
         inherited = {k: v for k, v in inherited.items() if k not in TIME_KEYS}
     args = {**inherited, **args}
+    airport_codes(args, datasets)
+    if name == 'node_connections' and args.get('partner_group'):
+        group = datasets.airport_groups.get(args['partner_group'])
+        if args.get('kind') != 'air' or not group or not group['partners']:
+            raise SelectionError('unknown_airport_group', 'Welche konkreten Flughäfen sollen zusammen betrachtet werden?', ['partners'])
+        if 'partners' in arguments and set(args['partners']) != set(group['partners']):
+            raise SelectionError('conflicting_airport_group', 'Die Flughafenliste stimmt nicht mit der gewählten Stadtgruppe überein. Soll die ganze Gruppe oder nur ein einzelner Flughafen ausgewertet werden?', ['partners'])
+        args['partners'] = list(group['partners'])
     notes = []
     props = FUNCTIONS[name][3]['properties']
     selected_scope = dialogue.get('geographic_scope', 'inherit')
     if selected_scope == 'inherit':
-        selected_scope = state.get('confirmed',{}).get('partner_scope','all') if dialogue['context']=='continue' else args.get('partner_scope','all')
+        selected_scope = arguments.get('partner_scope', ('international' if arguments['international'] else 'all') if 'international' in arguments else
+            args.get('partner_scope', 'international' if args.get('international') else
+                state.get('confirmed',{}).get('partner_scope','all') if dialogue['context']=='continue' else 'all'))
+    if arguments.get('international') and selected_scope != 'international':
+        raise SelectionError('conflicting_geographic_scope', 'Die Angaben zum Inland-/Auslandsbezug widersprechen sich.', ['partner_scope'])
     if selected_scope != 'all' and 'partner_scope' not in props:
         pair=[args.get('origin',''),args.get('destination','')]
         # A fully specified new relation already fixes both countries. It needs no
         # additional aggregate filter, but must agree with the model's scope.
-        fixed_pair=(dialogue['context']=='new' and all(pair) and
+        fixed_pair=(all(pair) and
             ((selected_scope=='domestic' and all(c.startswith('DE') for c in pair)) or
              (selected_scope=='international' and sum(c.startswith('DE') for c in pair)==1)))
-        if not fixed_pair:
-            raise SelectionError('unsupported_geographic_scope','Für diese Auswertung kann der gewünschte Inland-/Auslandsfilter nicht angewendet werden. Bitte wählen Sie eine regionale Verkehrs- oder Güterauswertung.', ['partner_scope'])
+        fixed_country=(name=='dashboard_detail' and args.get('product')=='sea_partners' and args.get('partner') and
+            ((selected_scope=='domestic' and args['partner']=='DE') or (selected_scope=='international' and args['partner']!='DE')))
+        if not fixed_pair and not fixed_country:
+            raise SelectionError('unsupported_geographic_scope','Dieses Datenprodukt unterstützt die gewünschte Kombination mit dem Inland-/Auslandsfilter nicht. Der Filter bleibt verbindlich; bitte präzisieren Sie die gewünschte Auswertung.', ['partner_scope'])
     if 'partner_scope' in props:
         if 'partner_scope' in arguments and dialogue.get('geographic_scope') not in {None,'inherit',arguments['partner_scope']}:
             raise SelectionError('conflicting_geographic_scope','Die Angaben zum Inland-/Auslandsbezug widersprechen sich.', ['partner_scope'])
         args['partner_scope'] = arguments.get('partner_scope',selected_scope)
-    for key, value in (explicit or {}).items():
+        if name == 'node_partners':
+            args['international'] = args['partner_scope'] == 'international'
+    explicit = airport_codes(copy.deepcopy(explicit or {}), datasets)
+    for key, value in explicit.items():
         if key not in props or (key in args and args[key] != value):
             raise SelectionError('explicit_filter_conflict', 'Die verstandene Auswahl widerspricht Ihrer ausdrücklich gewählten Einstellung. Bitte bestätigen Sie die gewünschte Auswahl.')
         args[key] = value
@@ -172,9 +232,18 @@ def resolve(name, arguments, state, datasets, explicit=None):
     if name == 'forecast_regions':
         defaults.update(modes=['road', 'rail', 'iww'], direction='all')
     if name == 'goods_history': defaults['modes'] = ['road','rail','iww']
+    if name == 'partner_ranking': defaults.update(direction='all', external=True, top=5)
+    if name == 'compare_regions': defaults.update(direction='all')
+    if name == 'forecast_ranking': defaults.update(direction='all',measure='absolute',descending=True,top=5)
     if name == 'transport_history': defaults.update(modes=['road','rail','iww'],direction='all',partner_scope='all')
     for key, value in defaults.items():
         if key in props and key not in args: args[key] = copy.deepcopy(value)
+    if name == 'partner_ranking' and args.get('direction') and 'external' in args:
+        notes.append('Rangliste: '+{'all':'Versand und Empfang gemeinsam','outbound':'Versand','inbound':'Empfang'}[args['direction']]
+                     +'; Top '+str(args['top'])+(' andere Regionen (ohne Binnenverkehr).' if args['external'] else ' einschließlich Binnenverkehr.'))
+    if name == 'forecast_ranking':
+        notes.append('Prognoserangliste nach '+('absoluter Mengenänderung' if args['measure']=='absolute' else 'prozentualer Änderung')
+                     +', '+('absteigend' if args['descending'] else 'aufsteigend')+'; '+{'all':'beide Richtungen','outbound':'Versand','inbound':'Empfang'}[args['direction']]+'.')
     if kind == 'since_available':
         start = dialogue['time'].get('start_year')
         if start is None or not {'start','end'} <= props.keys() or dialogue['time']['count'] != 0:

@@ -265,11 +265,37 @@ def analytical_statements(function,parameters,rows,datasets):
             add('Die nationale Verteilung wird von '+MODE_LABELS[shares[0]['label'].split(' / ')[0]]+' angeführt. Die Anteile lauten '+', '.join(MODE_LABELS[r['label'].split(' / ')[0]]+' '+compact_value(r['value'],'%') for r in shares)+'.',*shares)
         elif values:
             add('Veröffentlicht sind '+', '.join(MODE_LABELS[r['label']]+' '+compact_value(r['value'],r['unit']) for r in values)+'. Ein vollständiger Modalanteil lässt sich nur mit einem kompatiblen Wert für alle drei Verkehrsträger berechnen.',*values)
-    if function in {'forecast_ranking','forecast_comparison'}:
+    if function=='forecast_ranking':
+        suffix='Absolute Änderung' if parameters['measure']=='absolute' else 'Relative Änderung'
+        changes=[r for r in available if r['label'].endswith('/ '+suffix)]
+        if changes:
+            leading=min(r['rank'] for r in changes)
+            leaders=[r for r in changes if r['rank']==leading]
+            basis='absoluter Mengenänderung' if parameters['measure']=='absolute' else 'prozentualer Änderung'
+            order='absteigend' if parameters['descending'] else 'aufsteigend'
+            add('Szenario 2019–2040, nach '+basis+' '+order+' geordnet: Rang '+str(leading)+' belegt '
+                +'; '.join(r['label'].rsplit(' / ',1)[0]+' mit '+compact_value(r['value'],r['unit']) for r in leaders)
+                +'. Das ist eine Prognoseänderung, keine beobachtete Entwicklung.',*leaders)
+    if function=='forecast_comparison':
         changes=[r for r in available if 'Relative Änderung' in r['label']]
         if changes:
             selected=max(changes,key=lambda r:abs(r['value']))
             add('Die auffälligste bereitgestellte relative Szenarioänderung betrifft '+selected['label'].replace(' / Relative Änderung','')+' mit '+compact_value(selected['value'],'%')+'. Sie vergleicht den Prognosebasisfall 2019 mit dem Szenario 2040 und ist keine beobachtete Entwicklung.',selected)
+    if function=='node_connections':
+        aggregates=[r for r in available if r.get('aggregate_role') in {'total','subtotal'} and r.get('components')]
+        missing=[r for r in rows if r['value'] is None and r.get('partner_id')]
+        selected=aggregates[-1:] or [r for r in available if r.get('partner_id')][:1]
+        if selected:
+            row=selected[0]
+            text=(str(parameters['year'])+': '+row['label']+' beträgt '+compact_value(row['value'],row['unit'])+'.')
+            if missing:text+=' Für weitere ausgewählte Verbindungen fehlen Werte; die vollständige Summe ist nicht bekannt.'
+            add(text,row,*missing)
+        if parameters.get('partner_group'):
+            group=datasets.airport_groups[parameters['partner_group']]
+            add('Zusammengefasst ist '+group['name']+': '+', '.join(datasets.airport_names[p] for p in parameters['partners'])+'. '+group['note'],*rows)
+        detail=[r for r in available if r.get('partner_id') and not r.get('aggregate_role')]
+        if len(detail)>1:
+            add('\n'.join('- '+r['label']+': '+compact_value(r['value'],r['unit'])+'.' for r in detail[:3]),*detail[:3])
     if function=='node_profile':
         current=[r for r in available if r.get('year')==parameters.get('year') and r.get('unit')!='%'] or available
         if current:
@@ -306,6 +332,7 @@ def make_result(function, parameters, raw, datasets, rules_version):
         'goods_history': 'D01: modebezogene C1–C7-Regionalprofile je Jahr mit Quellenjahresprüfung',
         'intermodal_markets': 'Destatis: SGV/IWW-Rohquellen; getrennte Ladeeinheiten-/Containerteilmärkte',
         'node_profile': 'Eurostat AVIA_GOOA / Destatis Seeverkehr, je Knotentyp und Kennzahl',
+        'node_connections': 'Eurostat AVIA_GOR_DE / Destatis Seeverkehr: veröffentlichte Partnerverbindungen',
         'regional_history': 'D01: Regionalprofile mit B02-Quellenjahresprüfung',
         'modal_history': 'D01: Regionalprofile mit B02-Quellenjahresprüfung',
         'relation_matrix': 'B01: KBA VE7 / Destatis Schienen- und Binnenschiffsverkehr, je Verkehrsträger',
@@ -330,7 +357,14 @@ def make_result(function, parameters, raw, datasets, rules_version):
         'node_statistics': 'Eurostat AVIA_GOOA / Destatis Seeverkehr, entsprechend Knotentyp',
         'road_details': 'KBA: ' + str(parameters.get('product', 'VD2/VD3c')),
     }
-    if parameters.get('partner_scope','all')!='all':
+    from .nodes import NODE_FUNCTIONS
+    if function in NODE_FUNCTIONS:
+        relation_source = function in {'node_partners','node_connections'} or parameters.get('partner_scope','all')!='all'
+        source_labels[function] = ('Eurostat '+('AVIA_GOR_DE: veröffentlichte Flughafenverbindungen' if relation_source else 'AVIA_GOOA: veröffentlichte Flughafen-Randsumme')
+                                   if parameters.get('kind')=='air' else 'Destatis Seeverkehr: veröffentlichte Hafenverbindungen')
+        if function=='node_statistics' and parameters.get('kind')=='air' and parameters.get('metric')=='flights' and parameters.get('year')==2025:
+            source_labels[function]='Eurostat AVIA_GOOA: gesperrte Flughafen-Gesamtflugzahlen 2025'
+    if function not in NODE_FUNCTIONS and parameters.get('partner_scope','all')!='all':
         source_labels[function]='B01: gerichtete veröffentlichte Relationen; ausgewählter Inland-/Auslandsgegenraum'
     notices = [raw[key] for key in ['scope', 'counting', 'note', 'quality_note', 'territory_note',
                                    'population_note', 'vehicle_population', 'denominator_scope', 'sum_scope']
@@ -353,17 +387,17 @@ def make_result(function, parameters, raw, datasets, rules_version):
         if value == 0:
             notices.append('Eine veröffentlichte numerische Null ist kein zusätzlicher Nachweis exakter Verkehrsfreiheit.')
         missing_status=metadata.get('source_status',status)
-        value_status = metadata.pop('value_status', None) or ((missing_status if missing_status in {'missing_row','not_available','suppressed'} else 'missing_value') if value is None else 'reported_zero' if value == 0 else 'observed')
+        value_status = metadata.pop('value_status', None) or ((missing_status if missing_status in {'missing_row','not_available','suppressed','not_applicable'} else 'missing_value') if value is None else 'reported_zero' if value == 0 else 'observed')
         rows.append({'fact_id': 'f' + str(len(rows)+1), 'label': str(label), 'value': value,
                      'display_value': format_value(value), 'unit': row_unit or unit, 'scale': 1,
                      'value_status': value_status,
                      'quality_status': metadata.pop('quality', raw.get('quality', 'unknown')),
                      'source_status': status, 'source': source_labels[function], 'parameters': parameters,
                      'data_snapshot_id': datasets.snapshot_id, **metadata})
-    if function in {'transport_history','dashboard_detail','forecast_relation','goods_history','forecast_regions','relation_overview','region_profile', 'regional_modal_split', 'forecast_comparison', 'relation_matrix','relation_history', 'partner_ranking','regional_history','modal_history','node_profile','goods_structure','intermodal_markets','road_relation_goods_limit','rail_goods_history'}:
+    if function in {'node_connections','transport_history','dashboard_detail','forecast_relation','goods_history','forecast_regions','relation_overview','region_profile', 'regional_modal_split', 'forecast_comparison', 'relation_matrix','relation_history', 'partner_ranking','regional_history','modal_history','node_profile','goods_structure','intermodal_markets','road_relation_goods_limit','rail_goods_history'}:
         for observation in raw['observations']:
             metadata = {key: value for key, value in observation.items() if key not in {'label', 'value', 'unit'}}
-            if parameters.get('partner_scope','all')!='all':
+            if function not in NODE_FUNCTIONS and parameters.get('partner_scope','all')!='all':
                 metadata['source']='B01: gerichtete veröffentlichte Relationen; ausgewählter Inland-/Auslandsgegenraum'
             elif observation.get('basis'):
                 metadata['source'] = ('Verkehrsprognose 2040: 2019_BASE und 2040_P1'
@@ -379,7 +413,10 @@ def make_result(function, parameters, raw, datasets, rules_version):
             add('Davon veröffentlichte OD-Aggregate mit eingeschränktem Aussagewert', raw.get('restricted_denominator_value'), quality='restricted')
             notices.append(str(raw.get('unknown_partner_count', 0))+' Partner mit unbekanntem Wert sind nicht rangfähig; bei unbekannten Werten bleiben Anteile gesperrt.')
     elif function in {'relation', 'node_statistics'}:
-        add('Veröffentlichter Wert', raw.get('value'), value_status='missing_row' if raw.get('status') == 'missing_row' else None)
+        label = 'Summe veröffentlichter Verbindungen' if function=='node_statistics' and parameters.get('partner_scope','all')!='all' else 'Veröffentlichter Wert'
+        add(label, raw.get('value'), value_status='missing_row' if raw.get('status') == 'missing_row' else None)
+        if function=='node_statistics' and raw.get('value') is None and raw.get('known_sum') is not None:
+            add('Bekannte Teilsumme veröffentlichter Verbindungen',raw['known_sum'],aggregate_role='subtotal')
     elif function == 'compare_regions':
         for row in raw['rows']:
             add(row['name'], row.get('value'), row.get('status'), region=row['id'])

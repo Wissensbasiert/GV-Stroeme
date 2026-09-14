@@ -15,9 +15,9 @@ let browser;const results=[],errors=[];const pass=(name,detail='')=>{results.pus
  await page.goto(url,{waitUntil:'networkidle'});await settle('overview');
  assert.equal(await page.locator('#overviewLeafletMap').getAttribute('data-viewport-ready'),'true');
  const start=await page.evaluate(()=>{const m=qaMaps.overviewLeafletMap;return {zoom:m.getZoom(),center:m.getCenter(),bounds:m.getBounds()}});assert.ok(start.zoom>5);pass('Germany viewport ready on first display',JSON.stringify(start));
- await page.locator('#btnAiModal').click();assert.equal(await page.locator('[data-ai-question]').count(),6);
+ await page.locator('#btnAiModal').click();assert.equal(await page.locator('[data-ai-question]').count(),5);
  for(const example of await page.locator('[data-ai-question]').all()){const question=await example.getAttribute('data-ai-question');if(!await example.isVisible())await page.locator('#aiExamplesToggle').click();await example.click();assert.equal(await page.locator('#aiQuestionInput').inputValue(),question)}
- await page.locator('#aiExamplesToggle').click();await shot('01-sechs-ki-fragen');await page.keyboard.press('Escape');pass('All six example questions populate the input');
+ await page.locator('#aiExamplesToggle').click();await shot('01-fuenf-ki-fragen');await page.keyboard.press('Escape');pass('All five example questions populate the input');
  const order=await page.evaluate(()=>['btnLicensesModal','btnExportModal','btnAiModal'].map(id=>document.getElementById(id).getBoundingClientRect().left));assert.ok(order[0]<order[1]&&order[1]<order[2]);
  await page.locator('#btnExportModal').click();assert.equal(await page.locator('#exportGeo').isDisabled(),true);await download('#exportExcel','uebersicht.xlsx');await shot('02-export');await page.keyboard.press('Escape');pass('Header order, Excel download, national GeoPackage blocked');
  if(!await page.locator('#regionSearchInput').isVisible())await page.locator('#btnToggleAnalysisPanel').click();await page.locator('#regionSearchInput').fill('Duisburg');await page.locator('#regionAutocompleteList .autocomplete-item').filter({hasText:'Duisburg'}).first().click();await settle('overview');

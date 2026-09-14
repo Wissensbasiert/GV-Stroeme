@@ -89,9 +89,25 @@ class Datasets:
             if self.display_references['source_sha256'][source] != self.manifests['b0406']['input_sha256'][source]:
                 raise ValueError('Methodikreferenz passt nicht zum geprüften Datenbestand')
         self.airport_names = self.display_references['airport_names']
+        self.airport_iata = self.display_references.get('airport_iata', {})
+        if any(code not in self.airport_names or len(iata) != 3 for iata, code in self.airport_iata.items()):
+            raise ValueError('Ungültige IATA-Zuordnung')
         if not all(isinstance(code, str) and isinstance(name, str) and name.strip()
                    for code, name in self.airport_names.items()):
             raise ValueError('Ungültige Flughafennamen')
+        self.airport_groups = nodes.airport_groups(self.airport_names)
+        self.node_registry = {}
+        with duckdb.connect(config={'threads': 2, 'memory_limit': '128MB'}) as con:
+            for kind in ['air', 'sea']:
+                path = str(self.paths['b0406'] / (kind + '_partners.parquet'))
+                anchors = {r[0] for r in con.execute('SELECT DISTINCT node FROM read_parquet(?)', [path]).fetchall()}
+                countries = {}
+                for partner, country in con.execute('SELECT DISTINCT partner,partner_country FROM read_parquet(?)', [path]).fetchall():
+                    countries.setdefault(partner, set()).add(country)
+                if kind == 'air':
+                    anchors.update(r[0] for r in con.execute('SELECT DISTINCT node FROM read_parquet(?)',
+                        [str(self.paths['b0406'] / 'air_statistics.parquet')]).fetchall())
+                self.node_registry[kind] = {'nodes': anchors, 'partners': set(countries), 'countries': countries}
         self.snapshot_id = hashlib.sha256(json.dumps(
             {'datasets': self.pointers, 'display_references': self.display_reference_sha256},
             sort_keys=True).encode()).hexdigest()[:24]
@@ -157,6 +173,7 @@ class Datasets:
                     'goods_history': support.goods_history,
                     'intermodal_markets': support.intermodal_markets,
                     'node_profile': nodes.node_profile,
+                    'node_connections': nodes.node_connections,
                     'regional_history': profiles.regional_history,
                     'modal_history': profiles.modal_history,
                     'partner_ranking': relations.partner_ranking,
@@ -168,7 +185,7 @@ class Datasets:
                     'union': b0406.query_union, 'time_series': b02.query_series,
                     'rail_goods': b03.query_rail, 'national': b0406.national,
                     'balance': b0406.direction_balance, 'forecast_ranking': b0406.forecast_ranking,
-                    'node_partners': b0406.node_partners, 'node_statistics': b0406.node_statistics,
+                    'node_partners': nodes.node_partners, 'node_statistics': nodes.node_statistics,
                     'road_details': b03.query_road}
         with duckdb.connect(config={'threads': 2, 'memory_limit': '512MB'}) as con:
             # The fixed Python functions own every SQL statement and file path.
@@ -181,6 +198,8 @@ class Datasets:
                         return {'status':'not_available','observations':[],'note':'Prognosegüter sind im Dashboard vorhanden, aber der zusätzliche Chat-Zugriff ist noch nicht eingerichtet.'}
                     return access.forecast_regions(con,self.paths['dashboard_access'],**{'goods':['ALL'],**parameters})
                 extra = {'regional_scope': self.display_references['regional_scope']} if function == 'explain_scope' else {}
+                if function == 'node_connections':
+                    extra = {'airport_names': self.airport_names}
                 result = dispatch[function](con, self.paths[package], **parameters, **extra)
             finally:
                 timer.cancel()

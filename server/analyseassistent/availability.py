@@ -1,6 +1,7 @@
 """Kompakter Katalog aus gebundenen Metadaten, ohne Rohdaten im Modellkontext."""
 import json
 from .dialogue import available_years
+from .contracts import FUNCTIONS
 
 
 def catalog(datasets, function=None, parameters=None):
@@ -15,7 +16,11 @@ def catalog(datasets, function=None, parameters=None):
                      'max_regions': 5, 'metrics': ['tonnes', 'tkm'], 'modes': ['road', 'rail', 'iww'],
                      'observed_years_required': False},
         'transport_totals': {'tool':'transport_history','purpose':'Gesamtverkehr und Jahresentwicklung ohne Güterstruktur','modes':['road','rail','iww'],'partner_scope':['all','domestic','international'],'total_rule':'Tonnensumme nur für vollständige ausgewählte Modi; bekannte Teilsumme gesondert; keine KV-Summe'},
-        'geographic_scope': {'domestic':'Partner in Deutschland','international':'Partner außerhalb Deutschlands','all':'Alle Gegenräume','tools':['goods_structure','goods_history','partner_ranking','transport_history'],'goods_limit':'Ländergefilterte Güterstruktur nur Schiene/Binnenschiff C7; Straßen-OD nur Gesamtmenge'},
+        'geographic_scope': {'domestic':'Partner in Deutschland','international':'Partner außerhalb Deutschlands','all':'Alle Gegenräume','tools':[name for name, entry in FUNCTIONS.items() if 'partner_scope' in entry[3]['properties']],'goods_limit':'Ländergefilterte Güterstruktur nur Schiene/Binnenschiff C7; Straßen-OD nur Gesamtmenge'},
+        'nodes': {'connections_tool':'node_connections','ranking_tool':'node_partners',
+                  'airport_groups':datasets.airport_groups, 'airport_iata':datasets.airport_iata,
+                  'air_reporting_nodes': sorted(datasets.node_registry['air']['nodes']),
+                  'limits':'node ist der deutsche Meldeknoten. Empfang bedeutet aus dem Partnerflughafen nach Deutschland. ICAO oder eindeutige IATA-Codes; Städte mit mehreren Flughäfen als explizite Gruppe, einzelne IATA-Codes niemals als Stadtgruppe. Bei Gruppen alle Mitglieder ausweisen, fehlende Werte nicht null. Flüge: reine Fracht-/Postflüge (CAF_FRM). GOR-Verbindungen sind keine GOOA-Flughafenrandsummen.'},
         'relation_years_by_mode': datasets.manifests['b01']['years_by_mode'],
         'regional_years_by_mode': {mode: sorted({r['year'] for r in coverage if r['mode'] == mode}) for mode in ['road', 'rail', 'iww']},
         'goods_groups': classification['groups'],

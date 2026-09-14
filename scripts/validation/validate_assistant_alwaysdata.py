@@ -250,6 +250,31 @@ try:
             values[scope]=raw['observations'][-1]['value']
         assert abs(values['international']-5915781.2)<0.001 and abs(values['domestic']-2373211.2)<0.001
         report['scope_totals_verified']={'berlin_years':totals,'duisburg':values,'missing_2025_total':True,'short_visible_table':True,'external_model_calls':0}
+    if 'node_connections' in FUNCTIONS:
+        report['stage']='nodes_and_examples'
+        from server.analyseassistent.selection import resolve
+        selection=dict(kind='air',node='LEJ',year=2024,direction='outbound',metric='flights',partner_group='london',
+                       _dialogue={'context':'new','clarification':'','geographic_scope':'international','time':{'kind':'explicit','count':0}})
+        _,selected,_,_=resolve('node_connections',selection,{},datasets)
+        raw=datasets.query('node_connections',selected)
+        assert selected['node']=='EDDP' and len(selected['partners'])==5
+        assert next(r['value'] for r in raw['observations'] if r.get('aggregate_role')=='subtotal')==994
+        assert next(r['value'] for r in raw['observations'] if r.get('aggregate_role')=='total') is None
+        selection.pop('partner_group');selection['partners']=['LHR']
+        _,single,_,_=resolve('node_connections',selection,{},datasets)
+        assert single['partners']==['EGLL'] and datasets.query('node_connections',single)['observations'][0]['value']==66
+        selected['direction']='inbound'
+        assert next(r['value'] for r in datasets.query('node_connections',selected)['observations'] if r.get('aggregate_role')=='subtotal')==634
+        for scope in ['all','domestic','international']:
+            assert datasets.query('node_statistics',dict(kind='air',node='EDDP',year=2025,direction='all',metric='flights',partner_scope=scope))['value'] is None
+        rank_parameters=dict(mode='rail',metric='tonnes',direction='all',measure='absolute',top=5,descending=True)
+        ranking=make_result('forecast_ranking',rank_parameters,datasets.query('forecast_ranking',rank_parameters),datasets,'0.7.0')
+        assert 'Hamburg' in present(ranking,datasets)['paragraphs'][0]
+        assert 'absoluter Mengenänderung' in present(ranking,datasets)['paragraphs'][0]
+        index=root/'alwaysdata_portal/gueterstroeme_dashboard/index.html'
+        assert index.read_text(encoding='utf-8').count('data-ai-question=')==5
+        assert 'Verwaltungsvorlage' not in index.read_text(encoding='utf-8')
+        report['nodes_and_examples_verified']={'london_subtotal':994,'london_reverse_subtotal':634,'lej_lhr_flights':66,'london_total_missing':True,'2025_statistics_blocked':True,'preview_questions':5,'absolute_ranking_leader':'Hamburg','external_model_calls':0}
     if sys.argv[4]=='requesty':
         report['stage']='requesty'
         from server.analyseassistent.requesty import Requesty

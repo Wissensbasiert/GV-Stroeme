@@ -64,6 +64,17 @@ def direct_route(question, names):
 
 def available_years(datasets,function,parameters):
     """Jahrgänge des passenden Datenprodukts, ohne Ersatz für fehlende Werte."""
+    if function in {'node_connections','node_partners','node_statistics','node_profile'}:
+        kind=parameters.get('kind'); node=parameters.get('node')
+        if kind not in {'air','sea'} or not node:return []
+        metrics=parameters.get('metrics') or [parameters.get('metric','tonnes')]
+        product='air_statistics' if kind=='air' and function in {'node_statistics','node_profile'} and parameters.get('partner_scope','all')=='all' else kind+'_partners'
+        with duckdb.connect(config={'threads':2,'memory_limit':'128MB'}) as con:
+            sets=[{r[0] for r in con.execute('SELECT DISTINCT year FROM read_parquet(?) WHERE node=? AND metric=?',
+                  [str(datasets.paths['b0406']/(product+'.parquet')),node,metric]).fetchall()} for metric in metrics]
+        years=set.intersection(*sets)
+        if kind=='air' and function in {'node_statistics','node_profile'} and 'flights' in metrics:years.discard(2025)
+        return sorted(years)
     if function=='dashboard_detail' and 'dashboard_access' in datasets.paths:
         from .access import read
         p=datasets.paths['dashboard_access']; product=parameters.get('product');entity=parameters.get('entity')

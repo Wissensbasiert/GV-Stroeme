@@ -5,6 +5,7 @@ from pathlib import Path
 import shutil
 import re
 import sys
+import subprocess
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from server.analyseassistent.datasets import Datasets, digest, below
 
@@ -67,6 +68,12 @@ def build(output):
         private_files.add('data/analysis/'+package+'/current.json')
     for file in sorted(private_files):
         copy(below(ROOT,file), 'private/'+file)
+    # Reopen the COPIED runtime in a fresh process. Source validation at the
+    # start cannot detect a concurrent edit made while the files are copied.
+    subprocess.run([sys.executable, '-B', '-c',
+        'import sys; sys.path.insert(0,sys.argv[1]); from server.analyseassistent.datasets import Datasets; '
+        'assert Datasets(sys.argv[1]).snapshot_id == sys.argv[2]',
+        str(output/'private'), datasets.snapshot_id], check=True)
     required_browser_data=validate_public_data_files((output/'public/js/app.js').read_text(encoding='utf-8'),hashes)
     summary={'format_version':'0.3.0', 'data_snapshot_id':datasets.snapshot_id,
              'status':'local_handoff_not_deployed', 'portal_adapter_status':'local_integration_requires_release_validation',
