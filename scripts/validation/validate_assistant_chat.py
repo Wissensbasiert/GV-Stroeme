@@ -17,6 +17,7 @@ def main():
     parser.add_argument('--payload-review', action='store_true')
     parser.add_argument('--limit', type=int, default=8, choices=range(1, 10))
     parser.add_argument('--focus', action='store_true', help='Nur zwei Datenlücken und die konkrete Warum-Rückfrage')
+    parser.add_argument('--semantic', action='store_true', help='Offene Formulierungen, Zahlwörter, Gegenrichtung und Themenwechsel')
     args = parser.parse_args()
     if args.output.exists(): raise SystemExit('Neue Ergebnisdatei erforderlich; Wiederholung gesperrt.')
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -33,7 +34,8 @@ def main():
             if kwargs.get('tools'):
                 return {'role': 'assistant', 'tool_calls': [{'id': 'review', 'type': 'function', 'function': {
                     'name': 'relation_history', 'arguments': json.dumps({'origin': 'DEA52', 'destination': 'DEA41',
-                    'start': 2020, 'end': 2024, 'modes': ['road'], 'metric': 'tonnes'})}}]}, {}
+                    'start': 2020, 'end': 2024, 'modes': ['road'], 'metric': 'tonnes', '_dialogue': {
+                    'context': 'new', 'clarification': '', 'time': {'kind': 'explicit', 'count': 0}}})}}]}, {}
             return {'role': 'assistant', 'content': json.dumps({'paragraphs': [
                 {'text': 'Für 2024 fehlt der Eintrag.', 'evidence_ids': ['p1']}]})}, {}
     model = ReviewModel() if args.payload_review else load_local_requesty()
@@ -47,6 +49,15 @@ def main():
         ['Wie hoch waren 2024 die Emissionen von Dortmund nach Bielefeld?'],
     ]
     if args.payload_review: conversations = [conversations[1][:1]]
+    elif args.semantic:
+        conversations = [
+            ['Welche Güter fließen von meinem Schwarzwald-Baar-Kreis Richtung Hamburg?', 'die letzten fünf Jahre',
+             'Und was kommt von dort zu uns zurück?'],
+            ['Mich interessieren die Bahntransporte aus Berlin in die Hansestadt Hamburg.', 'Nimm bitte die neuesten verfügbaren fünf Jahre.',
+             'Jetzt eine andere Frage: Welche Güter gehen von Köln nach Düsseldorf?'],
+            ['Was wurde im letzten Kalenderjahr auf der Straße von Dortmund nach Bielefeld befördert?'],
+            ['Wie viele Tonnen gingen 2024 auf der Schiene von Berlin nach Hamburg?'],
+        ]
     elif args.focus: conversations = conversations[1:4]
     report = {'model': service.model.model, 'portal_bookings': 0, 'turns': [], 'full_acceptance': False}
     for questions in conversations:

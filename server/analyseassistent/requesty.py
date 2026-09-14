@@ -44,7 +44,7 @@ class Requesty:
             raise ModelError('Gesamtfrist erreicht')
         body = {'model': self.model, 'messages': messages, 'max_tokens': max(self.max_tokens, 2500), 'stream': False}
         if tools:
-            body.update(tools=tools, tool_choice='auto', parallel_tool_calls=False)
+            body.update(tools=tools, tool_choice='required', parallel_tool_calls=False)
         if schema:
             body['response_format'] = {'type': 'json_schema', 'json_schema': {
                 'name': 'grounded_chat', 'strict': True, 'schema': schema}}

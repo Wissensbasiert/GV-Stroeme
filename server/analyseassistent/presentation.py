@@ -76,7 +76,12 @@ def present(result,datasets):
     if status=='error':
         answer['title']='Die Auswertung hat gerade nicht geklappt'
         code=result.get('diagnostic_code')
-        answer['paragraphs']=['Ihre Frage konnte wegen eines technischen Problems nicht beantwortet werden. Bitte versuchen Sie es später noch einmal. Diese fehlgeschlagene Auswertung zählt nicht zu Ihrem Monatskontingent.'+((' Fehlerkennung: '+code+'.') if code else '')]
+        reason = {'AA-M01': 'Der KI-Dienst hat gerade keine vollständige Antwort geliefert.',
+                  'AA-D02': 'Die Datenabfrage konnte gerade nicht abgeschlossen werden.',
+                  'AA-R01': 'Die Datenantwort konnte gerade nicht aufbereitet werden.',
+                  'AA-F01': 'Die Antwort des KI-Dienstes konnte nicht verarbeitet werden.'}.get(code,
+                  'Ihre Frage konnte wegen eines technischen Problems nicht beantwortet werden.')
+        answer['paragraphs']=[reason+' Bitte versuchen Sie es später noch einmal. Diese fehlgeschlagene Auswertung zählt nicht zu Ihrem Monatskontingent.'+((' Fehlerkennung: '+code+'.') if code else '')]
         return answer
     if status=='not_available' and not (function=='relation_history' and result.get('facts')):
         answer['title']='Für diese Auswahl fehlt eine belastbare Zahlenangabe'

@@ -5538,7 +5538,6 @@
       busy = true; updateSend(); input.disabled = true; form.setAttribute('aria-busy', 'true');
       message('user', question);
       input.value = ''; input.style.height = ''; followup = null;
-      el('aiWorking').hidden = false;
       const waiting = message('assistant', 'Ich prüfe Ihre Frage und die verfügbaren Daten …');
       let rendered = null;
       try {
@@ -5551,7 +5550,7 @@
         uncertain = !error.status || !!error.requestId;
         rendered = message('assistant', uncertain ? 'Die Antwort ist nicht vollständig angekommen. Die Anfrage kann dennoch bearbeitet und gezählt worden sein. Bitte senden Sie sie nicht erneut. Laden Sie die Seite später neu und prüfen Sie Ihr Kontingent. Anfragekennung: ' + payload.request_id : error.message);
       } finally {
-        waiting.remove(); el('aiWorking').hidden = true; rendered?.scrollIntoView({ block: 'start' }); busy = false; input.disabled = false; form.setAttribute('aria-busy', 'false');
+        waiting.remove(); rendered?.scrollIntoView({ block: 'start' }); busy = false; input.disabled = false; form.setAttribute('aria-busy', 'false');
         await refreshQuota(); updateSend(); input.focus();
         if (uncertain) notice('Der Abschluss der letzten Anfrage ist unklar. Eine automatische Wiederholung erfolgt nicht.');
       }

@@ -55,11 +55,11 @@ class NativeGuards(unittest.TestCase):
         self.assertTrue(all(t['function']['parameters']['additionalProperties'] is False for t in tools))
         with self.assertRaises(ValueError): validate_arguments('run_sql', {}, 'test', {}, self.data)
 
-    def test_direction_and_year_must_be_supported(self):
+    def test_structured_selection_does_not_require_sentence_patterns(self):
         args = {'origin': 'DEA52', 'destination': 'DEA41', 'year': 2024}
         validate_arguments('relation_overview', args, 'Von Dortmund nach Bielefeld 2024', {}, self.data)
-        with self.assertRaises(ValueError): validate_arguments('relation_overview', args, 'Von Bielefeld nach Dortmund 2024', {}, self.data)
-        with self.assertRaises(ValueError): validate_arguments('relation_overview', args, 'Von Dortmund nach Bielefeld', {}, self.data)
+        validate_arguments('relation_overview', args, 'Was schicken wir Richtung Bielefeld?', {}, self.data)
+        with self.assertRaises(ValueError): validate_arguments('relation_overview', {**args, 'origin': 'UNKNOWN'}, 'Eine Frage', {}, self.data)
         validate_arguments('relation_overview', {**args, 'origin': 'DEA41', 'destination': 'DEA52'},
                            'Und umgekehrt?', {'confirmed': args}, self.data)
 
@@ -104,13 +104,18 @@ class NativeRealDialogue(unittest.TestCase):
             native_tools = True
             initial = True
             parameters = {}
+            time = {'kind': 'unspecified', 'count': 0}
             def chat(self, messages, **kwargs):
                 if kwargs.get('tools'):
                     if self.initial:
                         self.initial = False
-                        return {'role': 'assistant', 'content': 'Welches Jahr möchten Sie auswerten?'}, {}
+                        return {'role': 'assistant', 'tool_calls': [{'id': 'initial', 'type': 'function', 'function': {
+                            'name': 'relation_overview', 'arguments': json.dumps({'origin': 'DE300', 'destination': 'DE600',
+                            'modes': ['rail'], '_dialogue': {'context': 'new', 'clarification': 'Welches Jahr möchten Sie auswerten?',
+                            'time': {'kind': 'unspecified', 'count': 0}}})}}]}, {}
                     return {'role': 'assistant', 'tool_calls': [{'id': 'test', 'type': 'function', 'function': {
-                        'name': 'relation_overview', 'arguments': json.dumps(self.parameters)}}]}, {}
+                        'name': 'relation_overview', 'arguments': json.dumps({**self.parameters, '_dialogue': {
+                            'context': 'continue', 'clarification': '', 'time': self.time}})}}]}, {}
                 payload = json.loads(messages[-1]['content'])
                 key = next(k for k in payload['evidence'] if k.startswith('p'))
                 return {'role': 'assistant', 'content': json.dumps({'paragraphs': [{
@@ -120,10 +125,12 @@ class NativeRealDialogue(unittest.TestCase):
         result, _ = service.analyze('Welche Güter gehen per Schiene von Berlin nach Hamburg?')
         self.assertEqual(result['status'], 'needs_clarification')
         model.parameters = {'origin': 'DE300', 'destination': 'DE600', 'modes': ['rail'], 'include_goods': True}
+        model.time = {'kind': 'latest_available', 'count': 0}
         result, _ = service.analyze('Das aktuellste Jahr', conversation=result['conversation'])
         self.assertEqual(result['parameters']['year'], 2025)
         self.assertEqual(result['facts'][0]['value'], 240297)
         model.parameters = {'origin': 'DE600', 'destination': 'DE300'}
+        model.time = {'kind': 'unspecified', 'count': 0}
         result, _ = service.analyze('Und andersherum?', conversation=result['conversation'])
         self.assertEqual(result['parameters']['year'], 2025)
         self.assertEqual(result['parameters']['modes'], ['rail'])

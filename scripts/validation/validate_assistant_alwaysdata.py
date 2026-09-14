@@ -131,6 +131,32 @@ try:
                 assert checked_audit['attempted_model_calls']==0
                 turns.append({'parameters':p,'status':checked['status'],'transition':checked_audit['conversation_transition']})
             report['calendar_and_followups_verified']={'turns':turns,'external_model_calls':0}
+    if (private/'server/analyseassistent/selection.py').exists():
+        report['stage']='semantic_dialogue'
+        class NativeModel:
+            native_tools=True
+            first=True
+            def chat(self,messages,**options):
+                if options.get('tools'):
+                    parameters=({'origin':'DE136','destination':'DE600','_dialogue':{'context':'new',
+                        'clarification':'Welchen Zeitraum möchten Sie betrachten?','time':{'kind':'unspecified','count':0}}}
+                        if self.first else {'_dialogue':{'context':'continue','clarification':'',
+                        'time':{'kind':'last_calendar_years','count':5}}})
+                    name='relation_overview' if self.first else 'relation_history'
+                    self.first=False
+                    return {'role':'assistant','tool_calls':[{'id':'qa','type':'function','function':{
+                        'name':name,'arguments':json.dumps(parameters)}}]},{}
+                payload=json.loads(messages[-1]['content']); key=next(iter(payload['evidence']))
+                return {'role':'assistant','content':json.dumps({'paragraphs':[{
+                    'text':payload['evidence'][key]['text'],'evidence_ids':[key]}]})},{}
+        semantic=Service(datasets,NativeModel())
+        first,_=semantic.analyze('Welche Güter fließen vom Schwarzwald-Baar-Kreis Richtung Hamburg?')
+        assert first['status']=='needs_clarification' and first['conversation_state']['confirmed']['origin']=='DE136'
+        second,_=semantic.analyze('die letzten fünf Jahre',conversation=first['conversation'])
+        assert second['status']=='not_available' and second['parameters']['start']==2021 and second['parameters']['end']==2025
+        assert len(second['facts'])==15 and all(f['value'] is None for f in second['facts'])
+        report['semantic_dialogue_verified']={'partial_selection_saved':True,'start':2021,'end':2025,
+            'missing_values_remain_unknown':True,'external_model_calls':0}
     if sys.argv[4]=='requesty':
         report['stage']='requesty'
         from server.analyseassistent.requesty import Requesty

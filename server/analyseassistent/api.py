@@ -3,8 +3,35 @@ import json
 import io
 import queue
 import threading
+import logging
+import hashlib
 from .quota import fingerprint, QuotaError
 from .dialogue import validate_history
+
+
+def log_diagnostic(request_id, result, audit):
+    """Allowlisted operational metadata only: no questions, answers or parameters."""
+    if not (audit.get('failure_stage') or audit.get('narrative_error') or result.get('status') == 'error'):
+        return
+    reference = hashlib.sha256(str(request_id).encode()).hexdigest()[:12]
+    stages = {'understanding', 'selection', 'data_lookup', 'result_build', 'answer', 'conversation'}
+    stage = audit.get('failure_stage')
+    if stage not in stages: stage = 'answer' if audit.get('narrative_error') else 'unknown'
+    code = result.get('diagnostic_code', 'selection_clarification' if stage == 'selection' else 'verified_fallback')
+    if code not in {'AA-M01', 'AA-D02', 'AA-R01', 'AA-F01', 'selection_clarification', 'verified_fallback'}: code = 'other'
+    metadata = {'reference': reference, 'stage': stage, 'code': code,
+                'status': result['status'] if result.get('status') in {'ok', 'partial', 'error', 'needs_clarification', 'not_available'} else 'other'}
+    kinds = {'unknown_tool', 'invalid_parameters', 'unknown_region', 'invalid_period', 'invalid_intent',
+             'invalid_clarification', 'conflicting_time', 'invalid_count', 'unresolved_availability',
+             'insufficient_years', 'noncontiguous_years', 'wrong_time_product', 'explicit_filter_conflict',
+             'invalid_tool_count', 'expired_context', 'ModelError', 'ValueError', 'TypeError', 'KeyError', 'TimeoutError'}
+    if audit.get('error_kind') in kinds: metadata['kind'] = audit['error_kind']
+    for key in ['total_ms', 'lookup_ms', 'attempted_model_calls']:
+        value = audit.get(key)
+        if type(value) in {int, float} and 0 <= value < 10000000: metadata[key] = value
+    logging.getLogger('gueterstroeme.assistant').warning('assistant_diagnostic %s', json.dumps(metadata))
+    if result.get('status') == 'error' and result.get('answer', {}).get('paragraphs'):
+        result['answer']['paragraphs'].append('Vorgangskennung: ' + reference + '.')
 
 
 class Application:
@@ -122,6 +149,7 @@ class Application:
             if body.get('history'):options['history']=body['history']
             if body.get('conversation'):options['conversation']=body['conversation']
             result, _audit = self.service.analyze(question, body.get('confirmed'), **options)
+            log_diagnostic(request_id, result, _audit)
             charge = result['status'] in {'ok', 'partial'} and any(f.get('value') is not None for f in result.get('facts', []))
             response = ('200 OK', {**result, 'request_id': request_id})
         except Exception:

@@ -1,6 +1,6 @@
 # Dokumentationsübersicht
 
-Seit 14.09.2026 ist der natürliche Chat mit nativen Datenwerkzeugen, Gesprächsverlauf und geprüfter absatzweiser Ausgabe im Testportal aktiv. Umsetzung, echte Modelltests und Bereitstellungsnachweise stehen im [Chat-Prüfbericht](qualitaet/ANALYSEASSISTENT_CHAT_20260914.md). Die darin enthaltene Korrektur der Dortmund–Bielefeld-Antwort ist im [Prüfbericht zur Kundenantwort](qualitaet/ANALYSEASSISTENT_KUNDENANTWORT_20260911.md) fachlich hergeleitet. Produktion bleibt unverändert.
+Seit 14.09.2026 ist Version 0.4.0 mit semantischer Auswahl, strukturierten Rückfragen und Zeitwünschen im Testportal aktiv. Aktueller Stand: [Semantik-Prüfbericht](qualitaet/ANALYSEASSISTENT_SEMANTIK_20260914.md). Den vorausgehenden Chatumbau dokumentiert der [Chat-Prüfbericht](qualitaet/ANALYSEASSISTENT_CHAT_20260914.md); die Dortmund–Bielefeld-Korrektur ist im [Prüfbericht zur Kundenantwort](qualitaet/ANALYSEASSISTENT_KUNDENANTWORT_20260911.md) hergeleitet. Produktion bleibt unverändert.
 
 Diese Seite ist der zentrale Einstieg in die Projektdokumentation. Sie trennt verbindliche Betriebs- und Qualitätshinweise von fachlichen Konzepten und noch nicht umgesetzten Planungen.
 

@@ -3,14 +3,17 @@ import copy
 import json
 import re
 import time
+import duckdb
 
-from .contracts import FUNCTIONS, fields, validate, explicit_conflict, directed_pairs, question_supports
+from .contracts import FUNCTIONS, fields, validate, explicit_conflict, question_supports
 from .conversation import pack, unpack
-from .dialogue import previous_calendar_year, complete_plan, available_years, LATEST, PREVIOUS_YEAR
+from .dialogue import previous_calendar_year
 from .narrative import evidence
 from .presentation import present
 from .requesty import ModelError
-from .results import limited
+from .results import limited, make_result
+from .alternatives import related_data
+from .selection import tools, resolve, validate_selection, SelectionError
 
 RESPONSE = fields(paragraphs={'type': 'array', 'minItems': 1, 'maxItems': 4, 'items': fields(
     text={'type': 'string', 'minLength': 1, 'maxLength': 800},
@@ -25,10 +28,7 @@ def numbers(text):
 
 
 def tool_specs():
-    # Partial arguments are allowed by the transport; the server decides what is
-    # missing before any query. Dataset schemas themselves remain strict.
-    return [{'type': 'function', 'function': {'name': name, 'description': entry[1],
-            'parameters': {**entry[3], 'required': []}}} for name, entry in FUNCTIONS.items()]
+    return tools()
 
 
 def packet(result, datasets):
@@ -41,6 +41,16 @@ def packet(result, datasets):
         for row in table['rows'][:30]:
             for key in row.get('fact_ids', []):
                 records[key] = row['label'] + ': ' + row['value'] + ' ' + row['unit'] + '. ' + row.get('note', '')
+    if result.get('function_id') == 'relation_history':
+        labels = {'missing_row': 'kein eigener veröffentlichter Eintrag für diese Verbindung',
+                  'not_available': 'Jahrgang für diese Auswahl nicht verfügbar', 'suppressed': 'Wert unterdrückt'}
+        modes = {'road': 'Straße', 'rail': 'Schiene', 'iww': 'Binnenschiff'}
+        for mode, label in modes.items():
+            for status, description in labels.items():
+                years = sorted({f['year'] for f in facts.values() if f.get('mode') == mode
+                                and f.get('source_status') == status and f.get('year')})
+                if years:
+                    records['coverage_' + mode + '_' + status] = label + ', Jahre ' + ', '.join(map(str, years)) + ': ' + description + '.'
     structured = {}
     for key, text in records.items():
         item = {'text': text}
@@ -134,39 +144,8 @@ def check_prose(selection, payload, result, datasets):
 
 
 def validate_arguments(name, args, question, state, datasets):
-    if name not in FUNCTIONS or not isinstance(args, dict):
-        raise ValueError('Datenwerkzeug nicht zugelassen')
-    schema = FUNCTIONS[name][3]
-    validate({**schema, 'required': []}, args)
-    if explicit_conflict(question, args, datasets.names):
-        raise ValueError('Werkzeugauswahl widerspricht der Frage')
-    # Names and route endpoints must be grounded in current input or signed
-    # conversation. A new pair must not inherit an old endpoint.
-    current = directed_pairs(question, datasets.names, [])
-    old = state.get('confirmed', {}) if state else {}
-    if args.get('year') and not YEAR.search(question):
-        relative = re.search(r'aktuell|neueste|letzte[srn]? Jahr|Vorjahr', question, re.I)
-        if not relative and (args['year'] != old.get('year') or current):
-            raise ValueError('Bitte das gewünschte Jahr ergänzen')
-    if args.get('origin') and args.get('destination'):
-        pair = (args['origin'], args['destination'])
-        oldpair = (old.get('origin') or old.get('region'), old.get('destination') or old.get('partner'))
-        if old.get('direction') == 'inbound':
-            oldpair = oldpair[::-1]
-        if current and current != {pair}:
-            raise ValueError('Verkehrsrichtung widerspricht der Frage')
-        if not current and pair != oldpair:
-            reverse = re.search(r'gegenrichtung|umgekehrt|andersherum|zurück|rückrichtung', question, re.I)
-            if not (reverse and pair == oldpair[::-1]):
-                raise ValueError('Verbindung nicht im Gespräch belegt')
-    history_text = '\n'.join(m['content'] for m in (state or {}).get('messages', []) if m['role'] == 'user')
-    for key in ['region', 'regions', 'origin', 'destination', 'partner', 'node', 'ags']:
-        value = args.get(key)
-        for code in value if isinstance(value, list) else [value] if value else []:
-            if not question_supports(question + '\n' + history_text, code, datasets.names):
-                if code not in [old.get(k) for k in ['region', 'origin', 'destination', 'partner', 'node', 'ags']]:
-                    raise ValueError('Raumauswahl nicht im Gespräch belegt')
-    return args
+    # Compatibility entry point: language interpretation belongs to the model.
+    return validate_selection(name, args, datasets)
 
 
 def analyze_chat(service, question, confirmed=None, *, function=None, history=None, conversation=None, progress=None):
@@ -174,10 +153,15 @@ def analyze_chat(service, question, confirmed=None, *, function=None, history=No
         raise ValueError('Frage muss zwischen 1 und 4.000 Zeichen enthalten')
     if confirmed is not None and (not isinstance(confirmed, dict) or len(json.dumps(confirmed)) > 12000):
         raise ValueError('Ungültige Filter')
-    from .service import Service
     started = time.monotonic()
     deadline = started + service.timeout_seconds
-    state = unpack(conversation, service.conversation_key, service.datasets.snapshot_id) if conversation else {}
+    try:
+        state = unpack(conversation, service.conversation_key, service.datasets.snapshot_id) if conversation else {}
+    except ValueError:
+        result = limited('needs_clarification', 'Der bisherige Gesprächsstand ist abgelaufen. Bitte nennen Sie Ihre gewünschte Auswertung noch einmal.')
+        result['answer'] = present(result, service.datasets)
+        result['answer']['paragraphs'] = result['notices']
+        return result, {'failure_stage': 'conversation', 'error_kind': 'expired_context', 'model_calls': [], 'attempted_model_calls': 0}
     turns = state.get('messages', [])
     if not turns and history:
         turns = [{'role': 'user', 'content': q} for q in history[-6:]]
@@ -186,18 +170,21 @@ def analyze_chat(service, question, confirmed=None, *, function=None, history=No
              'attempted_model_calls': 0, 'planning_mode': 'native_tools', 'tool_calls': []}
     emit = progress or (lambda event: None)
     emit({'stage': 'understanding', 'text': 'Ich ordne Ihre Frage und den Gesprächsverlauf ein …'})
-    name_context = question + ' ' + ' '.join(m['content'] for m in turns if m['role'] == 'user') + ' ' + json.dumps(state.get('confirmed', {}), ensure_ascii=False)
-    names = {code: aliases for code, aliases in service.datasets.names.items()
-             if any(n.casefold() in name_context.casefold()
-                    for n in [code, *aliases])}
+    # The compact complete registry permits synonyms, spelling variants and
+    # indirect place references; no exact-name gate before model understanding.
+    names = service.datasets.names
     context = {'available_data': service.catalog, 'region_names': names,
-               'confirmed_selection': state.get('confirmed', {}), 'previous_calendar_year': previous_calendar_year(),
+               'confirmed_selection': state.get('confirmed', {}), 'previous_function': state.get('function_id'),
+               'previous_calendar_year': previous_calendar_year(),
                'explicit_filters': confirmed or {}}
     messages = [{'role': 'system', 'content': service.prompt},
                 {'role': 'system', 'content': 'Aktueller geprüfter Kontext: ' + json.dumps(context, ensure_ascii=False)},
                 *turns, {'role': 'user', 'content': question}]
     result = None
     selected = {}
+    stage = 'understanding'
+    selected_function = None
+    new_topic = False
 
     def call(**kwargs):
         audit['attempted_model_calls'] += 1
@@ -206,12 +193,12 @@ def analyze_chat(service, question, confirmed=None, *, function=None, history=No
         return message
 
     def finish():
-        result.setdefault('answer', present(result, service.datasets))
+        if 'answer' not in result: result['answer'] = present(result, service.datasets)
         short = '\n\n'.join(result['answer'].get('paragraphs', []) + result['answer'].get('questions', []))
         new_turns = [*turns, {'role': 'user', 'content': question}, {'role': 'assistant', 'content': short[:2200]}][-8:]
         while sum(len(m['content']) for m in new_turns) > 8000 and len(new_turns) > 2:
             new_turns = new_turns[2:]
-        next_state = {'version': 2, 'snapshot': service.datasets.snapshot_id, 'issued': time.time(),
+        next_state = {'version': 3, 'snapshot': service.datasets.snapshot_id, 'issued': time.time(),
                       'messages': new_turns, 'confirmed': selected, 'function_id': result.get('function_id'),
                       'initial_question': question[:1000], 'effective_question': question[:1000],
                       'missing_fields': result.get('missing_fields', []), 'open_question': result['answer'].get('questions', []),
@@ -224,83 +211,71 @@ def analyze_chat(service, question, confirmed=None, *, function=None, history=No
     try:
         if function:
             first = {'role': 'assistant', 'content': None, 'tool_calls': [{'id': 'explicit_selection', 'type': 'function',
-                     'function': {'name': function, 'arguments': json.dumps(confirmed or {})}}]}
+                     'function': {'name': function, 'arguments': json.dumps({**(confirmed or {}), '_dialogue': {
+                         'context': 'new', 'clarification': '', 'time': {'kind': 'explicit', 'count': 0}}})}}]}
         else:
             first = call(tools=tool_specs())
         calls = first.get('tool_calls', [])
-        if not calls:
-            text = (first.get('content') or '').strip()
-            # A no-tool turn can clarify, never publish unqueried traffic facts.
-            if not text or len(text) > 1000 or numbers(text) - {float(y) for y in YEAR.findall(json.dumps(context))}:
-                raise ValueError('Unbelegte Antwort ohne Datenabfrage')
-            if re.search(r'Tonnen|transportiert|beträgt|Prozent|\d\s*%', text, re.I):
-                raise ValueError('Ergebnisbehauptung ohne Datenabfrage')
-            result = limited('needs_clarification', text)
-            result['answer'] = present(result, service.datasets)
-            result['answer']['paragraphs'] = [text]
-            result['answer']['questions'] = []
-            selected = dict(state.get('confirmed', {}))
-            pairs = directed_pairs(question, service.datasets.names, [])
-            if len(pairs) == 1:
-                origin, destination = next(iter(pairs))
-                selected = {'origin': origin, 'destination': destination}
-                modes = [m for m in ['road', 'rail', 'iww'] if question_supports(question, m, {})]
-                if modes: selected['modes'] = modes
-            return finish()
         if len(calls) != 1:
-            raise ValueError('Bitte eine zusammengehörige Auswertung je Frage wählen')
+            raise SelectionError('invalid_tool_count', 'Welche zusammengehörige Auswertung möchten Sie zuerst betrachten?')
         messages.append(first)
         tool = calls[0]
         name = tool['function']['name']
         args = json.loads(tool['function']['arguments'])
-        if name not in FUNCTIONS or not isinstance(args, dict):
-            raise ValueError('Ungültiger Werkzeugaufruf')
+        stage = 'selection'
+        if not isinstance(args, dict):
+            raise SelectionError('invalid_parameters', 'Bitte beschreiben Sie die gewünschte Auswertung noch einmal kurz.')
         audit['proposed_tool'] = {'name': name, 'parameters': copy.deepcopy(args)}
-        old = state.get('confirmed', {})
-        pair = (args.get('origin') or args.get('region'), args.get('destination') or args.get('partner'))
-        oldpair = (old.get('origin') or old.get('region'), old.get('destination') or old.get('partner'))
-        if not function and all(pair) and pair in {oldpair, oldpair[::-1]}:
-            for key in ['year', 'modes', 'metrics', 'metric', 'include_goods', 'group']:
-                if key not in args and key in old and key in FUNCTIONS.get(name, (None, None, None, {'properties': {}}))[3]['properties']:
-                    if key == 'year' and (YEAR.search(question) or LATEST.search(question) or PREVIOUS_YEAR.search(question)):
-                        continue
-                    args[key] = copy.deepcopy(old[key])
-        if not function:
-            validate_arguments(name, args, question, state, service.datasets)
-        else:
-            validate({**FUNCTIONS[name][3], 'required': []}, args)
-        # Keep data defaults and availability resolution in the existing server.
-        plan = {'phase': 'plan', 'function_id': name, 'parameters': args,
-                'parameter_origins': {k: 'context' for k in args}, 'unresolved_fields': [], 'status': 'ready'}
-        plan, _, _, _ = complete_plan(plan, question, args.copy(), service.datasets)
-        args = plan['parameters']
-        if 'year' in FUNCTIONS[name][3]['properties']:
-            if LATEST.search(question):
-                years = available_years(service.datasets, name, args)
-                if years: args['year'] = max(years)
-            elif PREVIOUS_YEAR.search(question) and not YEAR.search(question):
-                args['year'] = previous_calendar_year()
-        selected = args
-        missing = [k for k in FUNCTIONS[name][3]['required'] if k not in args]
-        if missing:
+        new_topic = isinstance(args.get('_dialogue'), dict) and args['_dialogue'].get('context') == 'new'
+        name, args, dialogue, notes = resolve(name, args, state, service.datasets, explicit=confirmed)
+        selected, selected_function = args, name
+        audit['conversation_transition'] = dialogue['context']
+        if name is None and dialogue['context'] == 'continue':
+            selected, selected_function = state.get('confirmed', {}), state.get('function_id')
+        missing = [k for k in FUNCTIONS[name][3]['required'] if k not in args] if name else []
+        if missing or dialogue['clarification'] or name is None:
             result = limited('needs_clarification', 'Bitte ergänzen Sie die fehlende Auswahl.', missing_fields=missing)
-            result['function_id'] = name
+            result.update(function_id=selected_function, parameters=selected)
             result['answer'] = present(result, service.datasets)
-        else:
-            emit({'stage': 'data', 'text': 'Ich lese die passenden Güterverkehrsdaten …'})
-            data_service = Service(service.datasets, timeout_seconds=max(1, min(600, deadline-time.monotonic())))
-            result, data_audit = data_service.analyze(question, args, function=name, select_answer=False)
-            states = {f.get('source_status') for f in result.get('facts', [])}
-            if len(states) == 1 and states <= {'not_available', 'missing_row', 'suppressed'}:
-                result['status'], result['source_status'] = 'not_available', next(iter(states))
-                result['answer'] = present(result, service.datasets)
-            audit['lookup_ms'] = data_audit.get('lookup_ms', 0)
-            audit['tool_calls'].append({'name': name, 'parameters': args, 'status': result['status']})
+            if not dialogue['clarification'] and missing and set(missing) <= {'year', 'years', 'start', 'end'}:
+                route = ''
+                if selected.get('origin') and selected.get('destination'):
+                    labels = [min(service.datasets.names[c], key=len) for c in [selected['origin'], selected['destination']]]
+                    route = ' für die Verbindung von ' + labels[0] + ' nach ' + labels[1]
+                result['answer']['paragraphs'] = ['Welches Jahr oder welchen Zeitraum möchten Sie' + route + ' betrachten?']
+                result['answer']['questions'] = []
+            if dialogue['clarification']:
+                text = dialogue['clarification'].strip()
+                if re.search(r'[<>]|\d[\d.,]*\s*(?:Tonnen|tkm|%|TEU)\b', text, re.I):
+                    raise SelectionError('invalid_clarification', 'Bitte ergänzen Sie die noch fehlende Auswahl.', missing)
+                result['answer']['paragraphs'] = [text]
+                result['answer']['questions'] = []
+            result['answer_mode'] = 'native_grounded_chat'
+            return finish()
+        emit({'stage': 'data', 'text': 'Ich lese die passenden Güterverkehrsdaten …'})
+        stage = 'data_lookup'
+        lookup_started = time.monotonic()
+        raw = service.datasets.query(name, args, timeout_seconds=max(0.001, deadline-time.monotonic()))
+        audit['lookup_ms'] = round((time.monotonic()-lookup_started)*1000)
+        if time.monotonic() > deadline: raise TimeoutError('Datenfrist erreicht')
+        stage = 'result_build'
+        result = make_result(name, args, raw, service.datasets, service.rules['version'])
+        states = {f.get('source_status') for f in result.get('facts', [])}
+        if len(states) == 1 and states <= {'not_available', 'missing_row', 'suppressed'}:
+            result['status'], result['source_status'] = 'not_available', next(iter(states))
+        related = related_data(result, service.datasets, deadline=deadline)
+        if related is not None: result['related_data'] = related
+        result['answer'] = present(result, service.datasets)
+        result['answer']['notes'] = list(dict.fromkeys([*notes, *result['answer']['notes']]))
+        if name == 'relation_history':
+            result['answer']['notes'].append('Diese Zeitreihe enthält Gesamtmengen je Verkehrsträger; keine jährliche Güterartenaufteilung.')
+        audit['tool_calls'].append({'name': name, 'parameters': args, 'status': result['status']})
         payload = packet(result, service.datasets)
         if not payload['evidence']:
             payload['evidence'] = {'q1': {'text': ' '.join(result['answer'].get('questions', []) or result['answer']['paragraphs'])}}
         messages.append({'role': 'tool', 'tool_call_id': tool['id'], 'content': json.dumps(payload, ensure_ascii=False)})
         emit({'stage': 'answer', 'text': 'Die Daten liegen vor. Ich formuliere und prüfe die Antwort …'})
+        stage = 'answer'
         try:
             final = call(schema=RESPONSE)
             selection = json.loads(final.get('content') or '')
@@ -318,11 +293,22 @@ def analyze_chat(service, question, confirmed=None, *, function=None, history=No
         for table in result['answer']['tables']:
             table['collapsed'] = len(table['rows']) > 4
         return finish()
-    except (ModelError, ValueError, TypeError, KeyError) as exc:
+    except SelectionError as exc:
+        audit.update(failure_stage='selection', error_kind=exc.code)
+        result = limited('needs_clarification', str(exc), missing_fields=exc.fields)
+        result.update(function_id=selected_function or (None if new_topic else state.get('function_id')))
+        result['answer'] = present(result, service.datasets)
+        result['answer']['paragraphs'], result['answer']['questions'] = [str(exc)], []
+        selected = selected or ({} if new_topic else state.get('confirmed', {}))
+        return finish()
+    except (ModelError, ValueError, TypeError, KeyError, OSError, duckdb.Error) as exc:
         audit['chat_error'] = str(exc)
+        audit.update(failure_stage=stage, error_kind=type(exc).__name__)
         if isinstance(exc, ModelError):
             audit['model_error_diagnostics'] = exc.diagnostics
-        result = limited('error', 'Die Frage konnte noch nicht sicher ausgewertet werden. Bitte nennen Sie Verbindung, Jahr und Verkehrsträger möglichst konkret.')
-        result['diagnostic_code'] = 'AA-C01'
+        result = limited('error', 'Die Auswertung konnte technisch nicht abgeschlossen werden.')
+        result['diagnostic_code'] = 'AA-M01' if isinstance(exc, ModelError) else {
+            'data_lookup': 'AA-D02', 'result_build': 'AA-R01'}.get(stage, 'AA-F01')
+        result['function_id'] = state.get('function_id')
         selected = state.get('confirmed', {})
         return finish()

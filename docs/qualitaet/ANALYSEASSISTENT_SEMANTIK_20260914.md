@@ -1,0 +1,49 @@
+# Analyseassistent: semantische Auswahl und Gesprächsfortsetzung
+
+## Anlass und Umsetzung
+
+Der gemeldete Dialog „Welche Güter fließen von meinem Schwarzwald-Baar-Kreis Richtung Hamburg?“ → „die letzten fünf Jahre“ wurde mit dem Stand 0.3.0 exakt reproduziert. Das Modell wählte DE136 → DE600 korrekt; die nachgelagerte sprachliche Musterprüfung verwarf die Verbindung mit „Verbindung nicht im Gespräch belegt“ und gab AA-C01 aus. Der Fehler war kein Beleg eines ausgefallenen Modelldienstes.
+
+Version 0.4.0 überlässt die sprachliche Interpretation der KI. Der bestehende Metadatenkatalog wird mit dem vollständigen kompakten Ortsverzeichnis und nativen Datenwerkzeugen bereitgestellt. Jede Auswahl enthält den Gesprächsbezug `new` oder `continue`, eine gegebenenfalls notwendige Rückfrage und einen strukturierten Zeitwunsch. Auch Teilangaben werden mit Funktionsbezug signiert gespeichert. Vorhandene Version-2-Gespräche bleiben lesbar; neue Antworten speichern Version 3.
+
+Der native Ausführungspfad prüft Funktionsschema, Gebietscodes, Bereichsgrenzen und ausdrücklich gewählte Filter. `selection.py` übersetzt relative Zeitwünsche in konkrete Jahresparameter. Er ruft keine zweite sprachliche Planung auf. Neue Themen übernehmen keine alten Filter. Anschlussfragen können passende Kennzahlen und Verkehrsträger zwischen verwandten Datenfunktionen übernehmen. Die KI kann das Anliegen weiterhin missverstehen; die technische Parameterprüfung beweist keine vollständige semantische Richtigkeit.
+
+„Die letzten fünf Jahre“ bedeutet die letzten fünf abgeschlossenen Kalenderjahre, am Prüftag 2021–2025. „Die neuesten verfügbaren fünf Jahre“ bestimmt der Server anhand der ausgewählten Datenprodukte und Verkehrsträger. Nicht verfügbare angefragte Jahre werden nicht automatisch ersetzt. Der gewählte Zeitraum wird sichtbar erläutert. Die Mehrjahresrelation liefert Gesamtmengen je Verkehrsträger, keine jährliche Güterartenaufteilung; diese Grenze wird als Hinweis und Beleg bereitgestellt.
+
+Unvollständige oder nicht passende Auswahlen führen zu einer fachlichen Rückfrage. Fehler des Modelldienstes (AA-M01), der Datenabfrage (AA-D02), der Ergebnisaufbereitung (AA-R01) und des Antwortformats (AA-F01) werden unterschieden. Die API schreibt nur zugelassene Diagnosedaten über den bestehenden Python-Logger: Vorgangskennung aus Hash der Anfragekennung, Stufe, Fehlerkategorie und Laufzeiten. Keine Fragen, Antworten, Parameter, Benutzerkennungen oder Providertexte in diesen Meldungen. Die vorhandene Protokollaufbewahrung der Hostingumgebung wurde nicht verändert.
+
+Der zusätzliche Ladekreis einschließlich seiner alten Statuszeile wurde entfernt. Der Antwortbereich zeigt sofort die Bearbeitungsnachricht, anschließend Fortschritt und geprüfte Absätze. Echte Modelltoken werden weiterhin nicht ungeprüft veröffentlicht. Hervorhebungen bleiben innerhalb des Satzes. Kontingentabschluss, Schutz vor mehrfacher Ausführung und Verhalten bei unklarem Verbindungsabbruch bleiben erhalten.
+
+## Prüfung
+
+Die erste vollständige Offline-Prüfung bestand mit 115 Tests. Neue Regressionen prüfen unter anderem Teilkontext ohne Datenabfrage, Kalender- und verfügbare Jahre, neue Themen ohne Altfilter, ungültige Codes und Zeiträume, explizite Filterkonflikte und datensparsame Protokollierung. Ein Test sperrt den alten Sprachplaner ausdrücklich und führt die gemeldete Anschlussfrage mit echten lokalen Daten aus. Für diese Verbindung liegen in den 15 betrachteten Jahr-/Verkehrsträgerkombinationen keine nutzbaren Werte vor; Fehlwerte bleiben leer.
+
+`live01.json`: sechs echte Eingaben, neun Modellaufrufe, keine technischen Fehler. Richtungsumschreibung, Zahlwort, frei formulierte Gegenrichtung, neueste verfügbare Fünfjahresreihe für Berlin → Hamburg per Bahn sowie neuer Köln–Düsseldorf-Dialog wurden zugeordnet. Eine Datenlückenantwort fiel wegen unvollständiger Belegzuordnung auf den festen Text zurück. Daraufhin wurden kompakte Belege für die tatsächlich fehlenden Jahreszeilen ergänzt. `live02.json` wurde vor jedem Modellaufruf durch einen lokalen Syntaxfehler gestoppt; dieser wurde korrigiert. `live03.json` bestätigt den ursprünglichen Zweischritt-Dialog mit drei echten Modellaufrufen, natürlicher Rückfrage und freier belegter Datenlückenantwort, ohne technischen Fehler und ohne Rückfall. Keine Portalbuchung durch diese lokalen Tests. Ausführliche Nachweise: `outputs/analyseassistent_semantic_20260914/`.
+
+Gemini 3.8 Flash (High) wurde über den benannten Skill ausschließlich lesend im Plan-/Sandboxmodus eingesetzt. Die erste Prüfung bestätigte die redundante Sprachprüfung, den Verlust von Teilkontext und die verdeckte Zweitplanung; die Hinweise zu Themenwechseln und relativen Zeitangaben wurden selbst geprüft und in Umsetzung und Regressionen berücksichtigt. Pauschale Aussagen der Zweitprüfung über vollständige semantische Sicherheit werden ausdrücklich nicht übernommen. Der vollständige Gemini-Befund wird nicht als Datei gespeichert.
+
+Die zweite Gemini-Prüfung des implementierten Stands identifizierte zwei bestätigte Fehler: Richtungsfilter wurden bei der Fortführung von `rail_goods` unnötig normalisiert, einschließlich eines unzulässigen Wechsels von Gesamtverkehr zu Versand; ein einzelnes abgeschlossenes Kalenderjahr wurde als neuester verfügbarer Jahrgang beschriftet. Beide Fehler sind korrigiert und durch Regressionen geprüft. Zusätzlich haben ausdrücklich übergebene Kennzahlen Vorrang vor Standardwerten. Die vorgeschlagene automatische Ortsvererbung zwischen Regionalprofil und gerichteter Relation wird bei unklarem Start-/Zielbezug bewusst nicht ergänzt: Die KI muss die Rolle auswählen oder nachfragen. Inkompatible ausdrücklich gesetzte Filter werden ebenfalls nicht stillschweigend ignoriert. Gesprächszustände sind signiert, nicht verschlüsselt.
+
+Abschließender lokaler Lauf: **119 Tests bestanden**, null Fehler und null Fehlschläge (`offline_final.json`). Alle gebundenen Quellprüfsummen stimmen danach mit dem Arbeitsstand überein; die Laufzeitdateien des neuen Übergabepakets sind identisch. JavaScript- und Python-Syntax geprüft.
+
+## Testbereitstellung
+
+Aktiver Release auf Site 1067000: **`portal-test-20260914-gueterstroeme-semantic01`**. Manifest SHA-256: `0d198dd80e48123e029385c8e3e81d85bdc6b53e5187dfa5573d5dbdb2891fb1`; 1.708 Dateien, 668.201.589 Bytes. Gegenüber chat01 wurden 12 Nutzdateien plus Manifest mit 1.258.674 Bytes übertragen und 1.696 unveränderte Dateien unabhängig serverseitig kopiert. Alle Zieldateien geprüft. Das lokale Paket wurde aus dem vollständig geprüften beta06-Ausgangsbestand aufgebaut; unbeteiligte Portaldateien bleiben gegenüber beta06 und chat01 unverändert. Keine Übernahme anderer lokaler Portaländerungen.
+
+API und Datenbank sind bereit; die monatliche KitaNavigator-Testaufgabe zeigt auf den neuen Release. `linux_final.json` bestätigt zusätzlich unter Python 3.13.15 sämtliche Manifestdateien, den nativen Dialog mit gespeichertem Teilkontext und 2021–2025 sowie Migration, Kontingentpläne und bestehende Datenregressionen. Keine Modellaufrufe oder Datenbankschreibvorgänge dieser Serverprüfung. Temporäre Prüfaufgabe, FTPS-Zugang, Status- und Sperrdatei entfernt. Unauthentifizierte Zugriffe geprüft: Health 200, Kontingent 401, geschütztes JavaScript 403, privater Prompt 404 (`public_access.json`). Produktion unverändert.
+
+Die lokalen echten Modelltests dieses Umbaus umfassen acht Eingaben, zwölf Modellaufrufe, 166.429 gemeldete Tokens und 0,1401552075 USD gemeldete Kosten (`model_usage.json`). Spätere Portaltests sind darin nicht enthalten.
+
+## Prüfung im angemeldeten Testportal
+
+Der ursprüngliche Dialog wurde nach der Bereitstellung im Chrome-Testportal erneut eingegeben. Die erste Frage führte zur passenden Jahresrückfrage; „die letzten fünf Jahre“ wurde auf 2021–2025 bezogen und mit einer freien Antwort zu den tatsächlichen Datenlücken abgeschlossen. Kein AA-C01 und keine Kontingentbuchung: Der Zähler blieb bei 14 von 50. Bearbeitungsnachrichten erschienen im Antwortbereich; der zusätzliche Ladekreis war entfernt. Die Hervorhebung von Ortsnamen verursachte keine eigenen Zeilenumbrüche mehr.
+
+Anschließend wurde im selben Gespräch das neue Anliegen „Was schicken wir aktuell auf der Schiene von Berlin Richtung Hamburg?“ eingegeben. Das Ergebnis bezog sich korrekt auf 2025 und Berlin → Hamburg: 240.297 Tonnen, davon 238.287 Tonnen Sonstige Produkte und 2.010 Tonnen Maschinen und Ausrüstungen, langlebige Konsumgüter. Fehlende Gütergruppen wurden als fehlende Angaben ausgewiesen. Der Zähler stieg genau einmal auf 15 von 50. Diese Antwort erschien als feste, datenbasierte Ergebnisdarstellung; eine durchgehend freie Modellantwort wird daraus nicht abgeleitet.
+
+Die Prüfung umfasste den angemeldeten Desktopdialog und die sichtbare Darstellung. Eine vollständige erneute Mobilprüfung und der gesamte 45-Fälle-Katalog wurden in diesem Durchlauf nicht ausgeführt. Die gezielten echten Modelltests, 119 Offline-Tests und die Serverprüfung ersetzen keine Garantie für jede denkbare Frageformulierung.
+
+## Aufbewahrung und Abschluss
+
+Nach ausdrücklicher Freigabe wurde ausschließlich `portal-test-20260911-gueterstroeme-beta04` entfernt. Verbleibend sind der aktive semantic01 sowie chat01 und beta06. Vor der Bereinigung wurden alle 5.121 Dateien der drei erhaltenen Stände anhand ihrer Manifeste geprüft. `retention_result.json` bestätigt genau diese drei Releases, unveränderte aktive Site und Produktion, erfolgreichen Healthcheck und entfernten temporären FTPS-Zugang.
+
+Die beiden für diesen Auftrag erzeugten temporären Arbeitsordner unter `C:/tmp` wurden nach Sicherung der Nachweise entfernt. Der bereits vorhandene lokale beta06-Ausgangsbestand bleibt erhalten. Quellen, Tests und Dokumentation werden gemeinsam auf GitHub gesichert; die konkrete Commit-ID und der abschließende Remoteabgleich stehen im lokalen `completion.json` und in der Übergabe.

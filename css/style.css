@@ -3068,8 +3068,7 @@ a.btn-header svg { width: 16px; height: 16px; flex: 0 0 16px; }
   border-radius: 12px 4px 12px 12px;
 }
 .ki-message-content strong {
-  display: block;
-  margin-bottom: 3px;
+  display: inline;
   color: #1e293b;
 }
 .ki-message-user .ki-message-content strong {
@@ -3091,11 +3090,6 @@ a.btn-header svg { width: 16px; height: 16px; flex: 0 0 16px; }
   list-style-position: outside;
 }
 .ki-message-content li { padding-inline-start: 0.15em; }
-.ki-working { display:flex; align-items:center; justify-content:center; gap:9px; margin:0 0 10px; color:#334155; font-size:0.8rem; }
-.ki-working[hidden] { display:none; }
-.ki-spinner { width:17px; height:17px; flex:0 0 17px; border:2px solid #d4e9d9; border-top-color:#397d60; border-radius:50%; animation:ki-spin 0.9s linear infinite; }
-@keyframes ki-spin { to { transform:rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .ki-spinner { animation:none; } }
 .ki-message-meta {
   display: block;
   margin-top: 6px;
