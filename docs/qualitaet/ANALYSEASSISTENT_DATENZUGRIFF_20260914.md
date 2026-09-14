@@ -43,6 +43,8 @@ Der Nutzer hat ausschließlich das Testportal 1067000 einschließlich benötigte
 
 Die maschinenlesbaren Prüfprotokolle und privaten amtlichen Auszüge bleiben lokal beziehungsweise im geschützten Testrelease und außerhalb von Git. Die reproduzierbaren Quellen, Tests, Prompts und Betriebsunterlagen werden regulär auf GitHub `main` gesichert; dies ist keine Produktionsfreigabe. Keine neue unabhängige Gemini-Zweitprüfung in diesem Abschluss und keine pauschale fachliche Abnahme aller denkbaren Fragen.
 
+GitHub-Sicherung bestätigt: Implementierungscommit `7d26cecf0bec97ef8ccaacc3eb07c0e8e3d619db` regulär nach `main` übertragen; Remote-ID identisch. Die bereits verwaltete öffentliche Prognosedatei wurde unverändert über Git LFS behandelt, keine privaten Auszüge eingecheckt. Eigene lokale Testpakete (fünf Güterströme-Pakete, vier Portalassemblierungen und ein abgebrochener Matrix-Arbeitsordner) unter `C:/tmp` anschließend entfernt; Ausgangspaket, Quellbestände, Prüfprotokolle und Serverreleases erhalten.
+
 ## Quellen und Körnung
 
 Der Zugriff liest die sechs Original-VP-Matrizen für Straße, Schiene und Binnenschiff in 2019 BASE und 2040 P1, einschließlich gerichteter Quell-/Zielzelle und Original-VP-Gütergruppe. C7-Zuordnung und Namen stammen aus dem kanonischen VP-Crosswalk; NST20-Bezeichnungen aus der NST-Dimension werden nicht als Beobachtungsjahr verstanden. Regionale Ist-, Hafen- und KV-Werte stammen aus den tatsächlich veröffentlichten Dashboardauszügen. Quellenprüfsummen und fachliche Abgrenzungen stehen im Snapshot; die Zuordnung sämtlicher beobachteter semantischer Hauptfelder steht im Feldinventar. Unterfelder und beliebige zusätzliche Rohquellen sind damit nicht pauschal erschlossen.
