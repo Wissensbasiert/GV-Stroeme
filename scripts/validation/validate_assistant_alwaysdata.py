@@ -265,7 +265,11 @@ try:
         assert single['partners']==['EGLL'] and datasets.query('node_connections',single)['observations'][0]['value']==66
         selected['direction']='inbound'
         assert next(r['value'] for r in datasets.query('node_connections',selected)['observations'] if r.get('aggregate_role')=='subtotal')==634
-        for scope in ['all','domestic','international']:
+        for airport, expected_flights in [('EDDP',48657),('EDDF',24210),('EDDK',34193)]:
+            assert datasets.query('node_statistics',dict(kind='air',node=airport,year=2025,direction='all',metric='flights',partner_scope='all'))['value']==expected_flights
+        from server.analyseassistent.dialogue import available_years
+        assert 2025 in available_years(datasets,'node_statistics',dict(kind='air',node='EDDP',metric='flights'))
+        for scope in ['domestic','international']:
             assert datasets.query('node_statistics',dict(kind='air',node='EDDP',year=2025,direction='all',metric='flights',partner_scope=scope))['value'] is None
         rank_parameters=dict(mode='rail',metric='tonnes',direction='all',measure='absolute',top=5,descending=True)
         ranking=make_result('forecast_ranking',rank_parameters,datasets.query('forecast_ranking',rank_parameters),datasets,'0.7.0')
@@ -274,7 +278,7 @@ try:
         index=root/'alwaysdata_portal/gueterstroeme_dashboard/index.html'
         assert index.read_text(encoding='utf-8').count('data-ai-question=')==5
         assert 'Verwaltungsvorlage' not in index.read_text(encoding='utf-8')
-        report['nodes_and_examples_verified']={'london_subtotal':994,'london_reverse_subtotal':634,'lej_lhr_flights':66,'london_total_missing':True,'2025_statistics_blocked':True,'preview_questions':5,'absolute_ranking_leader':'Hamburg','external_model_calls':0}
+        report['nodes_and_examples_verified']={'london_subtotal':994,'london_reverse_subtotal':634,'lej_lhr_flights':66,'london_total_missing':True,'2025_corrected_flights':{'EDDP':48657,'EDDF':24210,'EDDK':34193},'2025_relations_missing':True,'preview_questions':5,'absolute_ranking_leader':'Hamburg','external_model_calls':0}
     if sys.argv[4]=='requesty':
         report['stage']='requesty'
         from server.analyseassistent.requesty import Requesty

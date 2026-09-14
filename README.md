@@ -2,6 +2,8 @@
 
 Interaktives Fach-Dashboard von Wissensbasierte Planung zur Analyse räumlicher Güterverkehrsströme in Deutschland.
 
+**Testportal, 14.09.2026:** Die korrigierten Eurostat-Luftverkehrsdaten einschließlich freigegebener Flughafen-Flugzahlen 2025 sind im Dashboard und im Datenzugriff des Analyseassistenten bereitgestellt. Relationsdaten reichen weiterhin bis 2024. [Prüfbericht](docs/qualitaet/LUFTVERKEHR_UPDATE_20260914.md).
+
 ## Orientierung
 
 - [`docs/README.md`](docs/README.md) ist das zentrale Inhaltsverzeichnis und ordnet Fachkonzept, Betrieb, Qualitätssicherung und Roadmaps ein.
