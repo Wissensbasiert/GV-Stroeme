@@ -21,9 +21,9 @@ FIELD_LABELS={
     'month':'Welchen Monat möchten Sie betrachten?', 'comparison_month':'Mit welchem Monat soll verglichen werden?',
     'minimum_base':'Ab welcher Ausgangsmenge sollen Verbindungen berücksichtigt werden?',
     'measure':'Interessiert Sie die Veränderung als Menge oder in Prozent?'}
-MODES={'road':'Straße','rail':'Schiene','iww':'Binnenschiff','total':'alle Verkehrsträger'}
+MODES={'road':'Straße','rail':'Schiene','iww':'Binnenschiff','sea':'Seeverkehr','total':'alle Verkehrsträger'}
 DIRECTIONS={'outbound':'Versand','inbound':'Empfang','all':'beide Richtungen','internal':'Binnenverkehr','total':'beide Richtungen'}
-UNITS={'t':'Tonnen','tonnes':'Tonnen','tkm':'Tonnenkilometer','trips':'Fahrten','flights':'Flüge','load_units':'Ladeeinheiten','%':'%','teu':'TEU'}
+UNITS={'t':'Tonnen','tonnes':'Tonnen','tkm':'Tonnenkilometer','trips':'Fahrten','flights':'Flüge','load_units':'Ladeeinheiten','Ladeeinheiten':'Ladeeinheiten','Fahrten':'Fahrten','%':'%','teu':'TEU','TEU':'TEU'}
 
 
 def number(value):
@@ -36,7 +36,7 @@ def name(code,datasets):
     names=datasets.names.get(str(code),[])
     if names:
         return min(names,key=len)
-    return {'11000000':'Berlin','DE':'Deutschland'}.get(str(code),str(code))
+    return getattr(datasets,'forecast_cell_names',{}).get(str(code),{'11000000':'Berlin','DE':'Deutschland'}.get(str(code),str(code)))
 
 
 def friendly_label(row,datasets,groups):
@@ -318,7 +318,7 @@ def present(result,datasets):
     elif function=='road_details':
         answer['notes'].append('Diese Auswertung bezieht sich auf deutsche Güterkraftfahrzeuge und die räumliche Abgrenzung der zugrunde liegenden Straßenverkehrsstatistik. Sie ist keine vollständige Aufteilung einzelner Straßenverbindungen.')
         answer['notes'].append('Ausgewählt sind '+('Fahrten innerhalb Deutschlands.' if p.get('population')=='I' else 'die Gesamtverkehre der genannten Fahrzeuggruppe.'))
-    if function == 'forecast_regions':
+    if function == 'forecast_regions' and not p.get('goods'):
         answer['title'] = 'Prognose 2040: ' + ', '.join(name(region, datasets) for region in p['regions'])
         original_rows = {row['fact_ids'][0]: row for table in answer['tables'] for row in table['rows']}
         answer['tables'], answer['paragraphs'] = [], []
@@ -348,7 +348,45 @@ def present(result,datasets):
                 answer['paragraphs'].append(name(region, datasets) + ', ' + MODES[mode] + ': Prognosebasis 2019 → Prognose 2040. ' + ' '.join(parts))
         answer['notes'].extend(['Szenariovergleich, keine beobachtete Entwicklung. Regionen und Kennzahlen werden getrennt ausgewiesen und nicht addiert.',
             'Gesamtverkehr in der VP: Versand und Empfang ohne Binnenverkehr plus Binnenverkehr einmal. Einzelne Versand-/Empfangswerte enthalten keinen Binnenverkehr.'])
-    if function in {'forecast_regions','forecast_comparison','forecast_ranking'} or p.get('include_forecast'):
+    if (function == 'forecast_regions' and p.get('goods')) or function == 'forecast_relation':
+        answer['title']='Prognose nach Gütergruppen: '+(', '.join(name(r,datasets) for r in p['regions']) if function=='forecast_regions' else name(p['origin'],datasets)+' → '+name(p['destination'],datasets))
+        original_rows={row['fact_ids'][0]:row for table in answer['tables'] for row in table['rows']}
+        answer['tables'],answer['paragraphs']=[],[]
+        selections={}
+        for f in facts:
+            selections.setdefault((f.get('region'),f.get('mode'),f.get('group')),[]).append(f)
+        for (region_code,mode,goods),selected in selections.items():
+            goods_name=selected[0].get('group_name',goods)
+            place=name(region_code,datasets) if region_code else name(p['origin'],datasets)+' → '+name(p['destination'],datasets)
+            title=place+' · '+MODES[mode]+' · '+goods_name
+            rows=[original_rows[f['fact_id']] for f in selected]
+            answer['tables'].append({'title':title,'columns':['Kennwert','Wert','Einheit','Hinweis'],'rows':rows,'collapsed':len(rows)>4,'row_count':len(rows)})
+            parts=[]
+            for metric in p['metrics']:
+                group_facts=[f for f in selected if f.get('metric')==metric]
+                base=next(f for f in group_facts if f.get('scenario')=='2019_BASE')
+                target=next(f for f in group_facts if f.get('scenario')=='2040_P1')
+                delta=next(f for f in group_facts if 'absolute Änderung' in f['label'])
+                pct=next(f for f in group_facts if f['unit']=='%')
+                if base['value'] is None or target['value'] is None:
+                    parts.append('Für diesen Szenariovergleich fehlt ein eigener nutzbarer Relationswert; fehlende Werte sind nicht null.')
+                    continue
+                text=('Gütermenge' if metric=='tonnes' else 'Verkehrsleistung')+': von '+number(base['value'])+' '+UNITS[base['unit']]+' in der Prognosebasis 2019 auf '+number(target['value'])+' '+UNITS[target['unit']]+' im Jahr 2040'
+                text+='; absolute Veränderung '+number(delta['value'])+' '+UNITS[delta['unit']]
+                text+=' und relative Veränderung '+number(pct['value'])+' %.' if pct['value'] is not None else '. Bei Ausgangswert null ist keine prozentuale Veränderung berechenbar.'
+                parts.append(text)
+            answer['paragraphs'].append(title+': '+ ' '.join(parts))
+        answer['notes'].extend(['Szenariovergleich, keine beobachtete Entwicklung oder sichere Vorhersage. Versand/Empfang ohne Binnenverkehr; Gesamtaufkommen zählt Binnen einmal.',
+                               'C7 und VP25 sind verschiedene überlappende Gliederungen, keine zusätzlichen Mengen.'])
+    if function=='dashboard_detail':
+        titles={'regional_goods':'Regionale NST-Güterstruktur','sea_goods':'Hafengüterstruktur','sea_partners':'Hafenpartner nach Güterauswahl','kv_structure':'Ladeeinheiten- und Containergrößenstruktur','kv_relations':'Vorhandene KV-Relationen','regional_trips':'Straßenfahrten im Regionalprofil','forecast_kv':'Prognostizierter KV','forecast_load_units':'Prognose-Ladeeinheiten'}
+        titles['forecast_container_types']='Prognose-Behältertypen'
+        answer['title']=titles[p['product']]+' ('+str(p['year'])+')'
+        if p['product'] in {'regional_goods','sea_goods','sea_partners'} and p['group']!='ALL':
+            designation=('NST-20 Abteilung ' if p['classification']=='NST20' else 'C7 Gruppe ')+p['group']
+            answer['paragraphs']=[designation+': '+text for text in answer['paragraphs']]
+        answer['notes'].extend(n for n in result.get('notices',[]) if not n.startswith('Datenstand:'))
+    if function in {'forecast_relation','forecast_regions','forecast_comparison','forecast_ranking'} or p.get('include_forecast'):
         answer['notes'].append('Die Prognose vergleicht das Basisszenario 2019 mit dem Szenario für 2040. Das sind Modellannahmen, keine beobachtete Entwicklung und keine sichere Vorhersage. Beobachtete Werte bleiben davon getrennt.')
     if function=='goods_history':
         answer['title']='Güterstruktur für '+region+f' ({p["start"]}–{p["end"]})'

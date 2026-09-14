@@ -64,6 +64,19 @@ def direct_route(question, names):
 
 def available_years(datasets,function,parameters):
     """Jahrgänge des passenden Datenprodukts, ohne Ersatz für fehlende Werte."""
+    if function=='dashboard_detail' and 'dashboard_access' in datasets.paths:
+        from .access import read
+        p=datasets.paths['dashboard_access']; product=parameters.get('product');entity=parameters.get('entity')
+        if product in {'regional_goods','regional_trips'}:
+            regional=read(p,'regional.json')
+            if entity=='DE' and product=='regional_goods':
+                return sorted({int(y) for code,ys in regional.items() if len(code)==5 for y in ys})
+            return sorted(int(y) for y in regional.get(entity,{}))
+        if product in {'sea_goods','sea_partners'}:
+            sea=read(p,'sea.json')
+            return sorted(int(y) for y,ports in sea['seaports'].items() if entity in ports) if entity!='DE' else sorted(int(y) for y in sea['national'])
+        if product in {'kv_structure','kv_relations'}: return read(p,'intermodal.json')['years']
+        if product in {'forecast_kv','forecast_load_units','forecast_container_types'}: return [2019,2040]
     if function=='rail_goods':
         path=datasets.paths['b03']/'rail_monthly_details.parquet'
         with duckdb.connect(config={'threads':2,'memory_limit':'128MB'}) as con:

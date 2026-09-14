@@ -290,6 +290,8 @@ def make_result(function, parameters, raw, datasets, rules_version):
         'regional_modal_split': 'D01: bestehende Dashboard-Regionalprofile',
         'forecast_comparison': 'D01: bestehende Dashboard-Regionalprofile; Verkehrsprognose 2040: 2019_BASE und 2040_P1',
         'forecast_regions': 'Verkehrsprognose 2040: 2019_BASE und 2040_P1',
+        'forecast_relation': 'Verkehrsprognose 2040: vollständige Originalmatrizen 2019 und 2040 P1',
+        'dashboard_detail': 'Veröffentlichte Dashboarddetails: Destatis / KBA beziehungsweise Verkehrsprognose 2040',
         'toll_month': 'BALM/Toll Collect: vorhandene Berliner Monatsauszüge',
         'relation': 'KBA VE7 / Destatis Schienen- und Binnenschiffsverkehr, verkehrsträgerspezifisch',
         'compare_regions': 'D01: bestehende Dashboard-Regionalprofile',
@@ -331,7 +333,7 @@ def make_result(function, parameters, raw, datasets, rules_version):
                      'quality_status': metadata.pop('quality', raw.get('quality', 'unknown')),
                      'source_status': status, 'source': source_labels[function], 'parameters': parameters,
                      'data_snapshot_id': datasets.snapshot_id, **metadata})
-    if function in {'goods_history','forecast_regions','relation_overview','region_profile', 'regional_modal_split', 'forecast_comparison', 'relation_matrix','relation_history', 'partner_ranking','regional_history','modal_history','node_profile','goods_structure','intermodal_markets','road_relation_goods_limit','rail_goods_history'}:
+    if function in {'dashboard_detail','forecast_relation','goods_history','forecast_regions','relation_overview','region_profile', 'regional_modal_split', 'forecast_comparison', 'relation_matrix','relation_history', 'partner_ranking','regional_history','modal_history','node_profile','goods_structure','intermodal_markets','road_relation_goods_limit','rail_goods_history'}:
         for observation in raw['observations']:
             metadata = {key: value for key, value in observation.items() if key not in {'label', 'value', 'unit'}}
             if observation.get('basis'):

@@ -45,12 +45,32 @@ def validate_selection(name, args, datasets):
     for key in ['origin', 'destination', 'region', 'regions', 'partner']:
         value = args.get(key)
         for code in value if isinstance(value, list) else [value] if value else []:
+            if name=='dashboard_detail' and key=='partner' and args.get('product')=='sea_partners':
+                from .access import read
+                sea=read(datasets.paths['dashboard_access'],'sea.json') if 'dashboard_access' in datasets.paths else {'seaports':{}}
+                countries={r['iso'] for ports in sea['seaports'].values() for p in ports.values() for r in p.get('partner_countries',[])}
+                if code not in countries:
+                    raise SelectionError('unknown_sea_country','Welches Partnerland des Hafens möchten Sie betrachten?', ['partner'])
+                continue
+            if name=='forecast_relation' and key in {'origin','destination'} and code in getattr(datasets,'forecast_cell_names',{}): continue
             if code not in datasets.names:
                 raise SelectionError('unknown_region', 'Welche Stadt oder welchen Kreis meinen Sie genau?', [key])
+    if name=='forecast_relation' and any(args.get(k)=='DE' for k in ['origin','destination']):
+        raise SelectionError('national_forecast_endpoint','Bitte wählen Sie konkrete Prognoseregionen statt Deutschland als Relationsendpunkt.', ['origin','destination'])
+    if name=='dashboard_detail' and args.get('partner') and args.get('product') not in {'sea_partners','kv_relations'}:
+        raise SelectionError('unsupported_partner_filter','Dieses Datenprodukt enthält kein Partnerdetail. Möchten Sie das gesamte Regional-/Hafengüterprofil oder eine Relation betrachten?', ['partner'])
     if name == 'forecast_regions' and args.get('regions'):
         registry = json.loads((datasets.paths['b0406'] / 'regions.json').read_text(encoding='utf-8'))['2024']
-        if any(code not in registry for code in args['regions']):
+        if any(code not in registry and code!='DE' for code in args['regions']):
             raise SelectionError('unsupported_forecast_region', 'Die regionale Prognose liegt für Kreise und kreisfreie Städte vor. Welche dieser Regionen möchten Sie betrachten?', ['regions'])
+        if 'DE' in args['regions'] and args.get('direction','all')!='all':
+            raise SelectionError('national_forecast_direction','Die nationale Prognose aus vollständigen Matrizen ist nur für Gesamtverkehr einschließlich Transit definiert. Möchten Sie direction=all betrachten?', ['direction'])
+    if name in {'forecast_regions','forecast_relation'} and args.get('goods'):
+        goods=args['goods']
+        if ('ALL' in goods and len(goods)>1) or (any(g.startswith('VP') for g in goods) and any(g in '1234567' for g in goods)):
+            raise SelectionError('overlapping_goods', 'Bitte wählen Sie entweder VP-Gütergruppen oder Hauptgruppen, ohne überlappende Gesamtwerte.', ['goods'])
+        if len(goods)*len(args.get('regions',[1]))*len(args.get('modes',[1]))*len(args.get('metrics',[1]))*4 > 600:
+            raise SelectionError('too_many_forecast_values','Bitte grenzen Sie Regionen, Gütergruppen oder Kennzahlen etwas ein.', ['goods'])
     if name == 'goods_history' and all(k in args for k in ['start','end','modes','directions']):
         if (15*(args['end']-args['start']+1)+16)*len(args['modes'])*len(args['directions']) > 600:
             raise SelectionError('too_many_goods_values', 'Bitte grenzen Sie Zeitraum oder Verkehrsrichtungen für die Güterauswertung etwas ein.', ['start','end','directions'])
@@ -93,6 +113,8 @@ def inherited_selection(name, state):
         old.update(start=old['year'],end=old['year'])
     if name == 'goods_structure' and old_function == 'goods_history' and old.get('end'):
         old['year'] = old['end']
+    if 'entity' in props and old.get('region'): old['entity']=old['region']
+    if 'region' in props and old.get('entity') and old.get('mode')!='sea': old['region']=old['entity']
     return {k: v for k, v in old.items() if k in props}
 
 
@@ -125,6 +147,8 @@ def resolve(name, arguments, state, datasets, explicit=None):
     # Data defaults have no dependency on wording; no implicit year or place.
     defaults = {'metric': 'tonnes', 'metrics': ['tonnes'], 'group': 'ALL', 'nst': None,
                 'top': 10, 'include_forecast': False, 'include_goods': True, 'granularity': 'C7'}
+    if name == 'forecast_relation': defaults.update(goods=['ALL'], modes=['road','rail','iww'])
+    if name == 'dashboard_detail': defaults.update(direction='all',classification='NST20' if args.get('product')=='regional_goods' else 'C7',partner=None)
     if name in {'relation_history', 'relation_overview'}: defaults['modes'] = ['road', 'rail', 'iww']
     if name == 'forecast_regions':
         defaults.update(modes=['road', 'rail', 'iww'], direction='all')

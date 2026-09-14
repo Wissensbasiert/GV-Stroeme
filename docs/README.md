@@ -1,5 +1,7 @@
 # Dokumentationsübersicht
 
+Aktueller Stand 14.09.2026: Version 0.5.0 erschließt vorhandene Prognose-Gütergruppen, gerichtete Prognoseverbindungen, regionale NST20 sowie Hafen- und KV-Details für den KI-Chat. 176 lokale Tests, 291.300 Quellenabgleiche und Linux-/Browserabnahme bestanden; Testrelease access04 aktiv. [Prüfbericht zum Datenzugriff](qualitaet/ANALYSEASSISTENT_DATENZUGRIFF_20260914.md). Produktion unverändert. Die folgenden datierten Abschnitte dokumentieren Vorgängerstände.
+
 Neueste Prüfung: Version 0.4.2 mit regionaler Güterzeitreihe, vollständigerem Antworttext und korrigierter Prognose-Datenladung. Der [Prüfbericht zur echten Antwortstichprobe](qualitaet/ANALYSEASSISTENT_GÜTER_UND_STICHPROBE_20260914.md) enthält die gelesenen Antworten aus acht dokumentierten Fragetypen und dem Leipzig-Dialog, Bewertung sowie aktuellen Bereitstellungsstand.
 
 Vorgängerstand: Version 0.4.1 mit gemeinsamem Prognosevergleich mehrerer Regionen und Kennwerte, ohne Pflicht-Istjahre. [Prognose-Prüfbericht](qualitaet/ANALYSEASSISTENT_PROGNOSE_20260914.md). Die folgenden Abschnitte dokumentieren Vorgängerstände.

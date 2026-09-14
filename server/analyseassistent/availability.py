@@ -32,4 +32,25 @@ def catalog(datasets, function=None, parameters=None):
     if function:
         result['selection'] = {'function_id': function, 'available_years': available_years(datasets, function, parameters or {}),
                                'scope': 'Datenprodukt und gegebenenfalls Region; konkrete Werte separat abfragen'}
+    if 'dashboard_access' in datasets.paths:
+        path=datasets.paths['dashboard_access']
+        result['dashboard_access']=json.loads((path/'coverage.json').read_text(encoding='utf-8'))
+        result['forecast']['goods']={'C7':classification['groups'],'VP25':json.loads((path/'forecast_core.json').read_text(encoding='utf-8'))['metadata']['vp2040_groups'],
+                                      'parameter':'goods, z.B. [4] oder [VP100]; ALL ist Gesamtverkehr, nicht Güterstruktur'}
+        sea=json.loads((path/'sea.json').read_text(encoding='utf-8'))
+        result['sea_port_names']={code:p['name'] for ports in sea['seaports'].values() for code,p in ports.items()}
+        result['sea_country_names']={r['iso']:r['name'] for ports in sea['seaports'].values() for p in ports.values() for r in p.get('partner_countries',[])}
+        result['NST20']=json.loads((path/'taxonomy.json').read_text(encoding='utf-8'))['divisions_20']
+        result['forecast_cell_names']=datasets.forecast_cell_names
+        result['sea_country_names']={r['iso']:r['name'] for ports in sea['seaports'].values() for p in ports.values() for r in p.get('partner_countries',[])}
+        result['NST20']=json.loads((path/'taxonomy.json').read_text(encoding='utf-8'))['divisions_20']
+        result['forecast_cell_names']=datasets.forecast_cell_names
+        regional=json.loads((path/'regional.json').read_text(encoding='utf-8'))
+        regional_years=sorted({int(y) for years in regional.values() for y in years})
+        result['dashboard_detail_years']={'regional_goods':regional_years,'regional_trips':regional_years,
+                                         'sea_goods':sorted(int(y) for y in sea['seaports']),'sea_partners':sorted(int(y) for y in sea['seaports']),
+                                         'forecast_kv':[2019,2040],'forecast_load_units':[2019,2040],
+                                         'forecast_container_types':[2019,2040],
+                                         'kv_structure':json.loads((path/'intermodal.json').read_text(encoding='utf-8'))['years'],
+                                         'kv_relations':json.loads((path/'intermodal.json').read_text(encoding='utf-8'))['years']}
     return result

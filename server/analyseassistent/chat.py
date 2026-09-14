@@ -38,7 +38,7 @@ def packet(result, datasets):
     # of the requested years. They are never substituted for a missing endpoint.
     facts = {f['fact_id']: f for f in result.get('facts', [])}
     for table in answer['tables']:
-        for row in (table['rows'] if result.get('function_id') in {'compare_regions','forecast_regions','partner_ranking','node_partners'} else table['rows'][:30]):
+        for row in (table['rows'] if result.get('function_id') in {'dashboard_detail','forecast_relation','compare_regions','forecast_regions','partner_ranking','node_partners'} else table['rows'][:30]):
             for key in row.get('fact_ids', []):
                 records[key] = row['label'] + ': ' + row['value'] + ' ' + row['unit'] + '. ' + row.get('note', '')
     if result.get('function_id') == 'relation_history':
@@ -53,6 +53,9 @@ def packet(result, datasets):
                     records['coverage_' + mode + '_' + status] = label + ', Jahre ' + ', '.join(map(str, years)) + ': ' + description + '.'
     structured = {}
     for key, text in records.items():
+        if key in facts and result.get('function_id')=='dashboard_detail' and facts[key].get('group') not in {None,'ALL'}:
+            classification=result['parameters']['classification']
+            text=('NST 2007, NST-20 Abteilung ' if classification=='NST20' else 'NST 2007, C7 Gruppe ')+facts[key]['group']+': '+text
         item = {'text': text}
         if key.startswith('p') and key[1:].isdigit():
             statement=next((s for s in result.get('statements',[]) if s['text']==text),None)
@@ -60,17 +63,17 @@ def packet(result, datasets):
         if key in facts:
             item.update({k: facts[key][k] for k in ['value', 'unit', 'year', 'mode', 'origin', 'destination',
                         'region', 'region_name', 'metric', 'scenario', 'direction', 'basis',
-                        'source_status', 'quality_status', 'source'] if k in facts[key]})
+                        'source_status', 'quality_status', 'source','group','group_name'] if k in facts[key]})
         structured[key] = item
     if result.get('function_id') in {'forecast_regions','compare_regions'}:
         groups = {}
         for fact in facts.values():
             if not fact.get('region'): continue
-            groups.setdefault((fact['region'], fact.get('mode'), fact.get('metric')), []).append(fact)
-        for i, ((region, mode, metric), group) in enumerate(groups.items(), 1):
+            groups.setdefault((fact['region'], fact.get('mode'), fact.get('metric'),fact.get('group')), []).append(fact)
+        for i, ((region, mode, metric, goods), group) in enumerate(groups.items(), 1):
             structured[('forecast_group_' if result['function_id']=='forecast_regions' else 'profile_group_') + str(i)] = {
                 'text': ' '.join(structured[f['fact_id']]['text'] for f in group),
-                'region': region, 'mode': mode, 'metric': metric,
+                'region': region, 'mode': mode, 'metric': metric, 'group':goods,
                 'basis': 'VP2019_BASE_to_2040_P1' if result['function_id']=='forecast_regions' else 'observed_profile',
                 'fact_ids': [f['fact_id'] for f in group]}
     if result.get('function_id') in {'partner_ranking','node_partners'}:
@@ -104,6 +107,9 @@ def check_prose(selection, payload, result, datasets):
     facts = payload['evidence']
     for paragraph in selection['paragraphs']:
         text, ids = paragraph['text'], paragraph['evidence_ids']
+        if (result.get('parameters',{}).get('goods') or result.get('function_id')=='dashboard_detail') and any(f.get('value') is not None for f in result.get('facts',[])):
+            if re.search(r'(?:keine|nicht)\s+(?:\w+\s+){0,5}(?:Aufteilung|Güteraufteilung|Gütergruppenwerte|Gütergliederung)|(?:Gütergruppen|Güterarten).{0,50}(?:nicht verfügbar|liegen nicht vor)',text,re.I):
+                raise ValueError('Vorhandene Güterdaten dürfen nicht pauschal als fehlend bezeichnet werden')
         if any(key not in facts for key in ids) or re.search(r'[<>]|\{\{|https?://', text):
             raise ValueError('Ungültiger Beleg oder Ausgabeformat')
         cited = [facts[key] for key in ids]
@@ -149,7 +155,7 @@ def check_prose(selection, payload, result, datasets):
                     matching=[f for f in result['facts'] if (f.get('origin'),f.get('destination'))==pair and f['value'] is not None]
                     allowed={q for f in matching for q in quantities(number(f['value'])+' '+f['unit']) | quantities(compact_value(f['value'],f['unit']))}
                     if not quantities(sentence)<=allowed: raise ValueError('Menge und Relationsrichtung widersprechen sich')
-            years = {int(y) for y in YEAR.findall(sentence)}
+            years = {int(y) for y in YEAR.findall(re.sub(r'\bNST[-\s]*2007\b','NST',sentence,flags=re.I))}
             numeric = numbers(sentence)
             cited_fact_ids=set(ids) | {fid for item in cited for fid in item.get('fact_ids',[])}
             year_facts=[f for f in result.get('facts',[]) if f.get('fact_id') in cited_fact_ids]
@@ -168,7 +174,9 @@ def check_prose(selection, payload, result, datasets):
             affirmative_zero = re.search(r'\b(?:ist|war|bleibt)\s+(?:vollständig\s+)?verkehrsfrei\b|\b(?:gab|gibt)\s+es\s+keinen?\s+Verkehr\b', sentence, re.I)
             if affirmative_zero and not re.search(r'\b(?:nicht|keineswegs|beweist|bedeutet|schließen)\b', sentence, re.I):
                 raise ValueError('Fehlwert darf keinen Nullverkehr begründen')
-        checked_text = text
+        # NST-2007 is the classification edition, not the observation year.
+        # Actual year statements (including 2007) retain the existing scope gate.
+        checked_text = re.sub(r'\bNST[-\s]*2007\b','NST',text,flags=re.I)
         if not any(f.get('value') is not None for f in result.get('facts', [])):
             # Describing a verified available year is not a substituted analysis.
             for year in YEAR.findall(allowed_text):

@@ -13,6 +13,9 @@ REGIONS = {'type': 'array', 'items': CODE, 'minItems': 1, 'maxItems': 20, 'uniqu
 MODE = enum('road', 'rail', 'iww')
 METRIC = enum('tonnes', 'tkm', 'trips', 'load_units', 'load_carriers', 'teu', 'flights')
 GROUP = enum('ALL', '1', '2', '3', '4', '5', '6', '7')
+from .access import VP_CODES
+FORECAST_GOODS = {'type':'array','items':enum('ALL', *list('1234567'), *['VP'+x for x in VP_CODES]),
+                  'minItems':1,'maxItems':25,'uniqueItems':True}
 DIRECTION = enum('outbound', 'inbound', 'all', 'total')
 TOP = {'type': 'integer', 'minimum': 1, 'maximum': 100}
 
@@ -25,6 +28,15 @@ def fields(**properties):
 # All parameters are explicit. Defaults in the underlying local functions cannot
 # silently replace a missing user selection.
 FUNCTIONS = {
+    'forecast_relation': ('F10', 'Gerichtete Prognoserelation aus vollständigen VP-Matrizen; Basis 2019 zu 2040 P1, Güterauswahl C7 oder VP25; fehlende Relationszeilen bleiben unbekannt', 'dashboard_access', fields(
+        origin=CODE,destination=CODE,
+        modes={'type':'array','items':MODE,'minItems':1,'maxItems':3,'uniqueItems':True},
+        metrics={'type':'array','items':enum('tonnes','tkm'),'minItems':1,'maxItems':2,'uniqueItems':True},goods=FORECAST_GOODS)),
+    'dashboard_detail': ('F06', 'Zusätzliche veröffentlichte Dashboarddetails: regionale NST20 für Schiene/Binnenschiff, Hafengüter und gütergefilterte Hafenpartner, nationale KV-Ladeeinheiten/Containergrößen, vorhandene KV-Relationen, Regionalprofil-Straßenfahrten, Prognose-KV und Prognose-Ladeeinheiten', 'dashboard_access', fields(
+        product=enum('regional_goods','sea_goods','sea_partners','kv_structure','kv_relations','regional_trips','forecast_kv','forecast_load_units','forecast_container_types'),
+        entity=CODE,year=YEAR,mode=enum('road','rail','iww','sea'),metric=enum('tonnes','tkm','teu','load_units','trips'),
+        direction=enum('all','outbound','inbound'),classification=enum('C7','NST20'),group={'type':'string','pattern':'^(ALL|[0-9]{1,2})$'},
+        partner={'anyOf':[CODE,{'type':'null'}]},top=TOP)),
     'relation_overview': ('F07', 'Gerichtete Jahresrelation: Menge und/oder Verkehrsleistung sowie verfügbare C1–C7-Güterarten je Verkehrsträger; Straße nur Gesamtwerte', 'b01', fields(
         origin=CODE,destination=CODE,year=YEAR,
         modes={'type':'array','items':MODE,'minItems':1,'maxItems':3,'uniqueItems':True},
@@ -111,6 +123,9 @@ FUNCTIONS = {
         product=enum('VD2', 'VD3c'), year=YEAR, region=CODE, direction=enum('outbound', 'inbound'),
         population=enum('I', 'G'), metric=enum('tonnes', 'tkm', 'trips'), partner={'type': 'null'})),
 }
+
+# Optional for backwards compatibility with saved selections and old API callers.
+FUNCTIONS['forecast_regions'][3]['properties']['goods'] = FORECAST_GOODS
 
 PLAN = fields(phase=enum('plan'), function_id={'anyOf': [enum(*FUNCTIONS), {'type': 'null'}]},
               parameters={'type': 'object'}, parameter_origins={'type': 'object', 'additionalProperties': enum('context', 'question')},

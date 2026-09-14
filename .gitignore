@@ -44,6 +44,8 @@ Thumbs.db
 # Reproduzierbare private Assistentenbestände und Browserpakete
 /data/analysis/assistant_support/releases/
 /data/analysis/assistant_support/current.json
+/data/analysis/dashboard_access/releases/
+/data/analysis/dashboard_access/current.json
 /data/processed/delivery/
 /data/processed/web_summary_core.json
 /data/processed/web_forecast_core.json

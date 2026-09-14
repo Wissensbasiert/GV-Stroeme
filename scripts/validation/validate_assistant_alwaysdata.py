@@ -177,6 +177,26 @@ try:
             assert all(r['mode']=='rail' for r in rows)
         report['forecast_regions_verified']={'regions':parameters['regions'],'metrics':parameters['metrics'],
             'facts':16,'external_model_calls':0,'no_observed_year_required':True}
+    if 'dashboard_detail' in FUNCTIONS:
+        report['stage']='dashboard_access'
+        from server.analyseassistent.access import read
+        parameters={'regions':['DE300'],'modes':['rail'],'metrics':['tonnes'],'direction':'outbound','goods':['VP100']}
+        raw=datasets.query('forecast_regions',parameters)
+        assert [r['value'] for r in raw['observations'][:3]]==[277,1531,1254]
+        assert abs(raw['observations'][3]['value']-452.7075812274369)<1e-9
+        assert 'Metalle' in raw['observations'][0]['group_name']
+        path=datasets.paths['dashboard_access']
+        validation=read(path,'validation.json')
+        assert validation['passed'] and validation['field_access_passed']
+        assert validation['checked_cells']>200000
+        detail={'product':'regional_goods','entity':'DE300','year':2024,'mode':'rail','metric':'tonnes','direction':'outbound','classification':'NST20','group':'10','partner':None,'top':10}
+        assert datasets.query('dashboard_detail',detail)['observations'][0]['value']==557
+        assert abs(datasets.query('dashboard_detail',{**detail,'product':'sea_goods','entity':'DEHAM','mode':'sea'})['observations'][0]['value']-2485916.2)<1e-7
+        assert datasets.query('dashboard_detail',{**detail,'product':'sea_partners','entity':'DEHAM','mode':'sea','classification':'C7','group':'4','partner':'CN'})['observations'][0]['value']==291435
+        assert datasets.query('dashboard_detail',{**detail,'product':'kv_structure','entity':'DE','classification':'C7','group':'ALL','direction':'all'})['observations'][0]['value']==68294220
+        relation=datasets.query('forecast_relation',{'origin':'DE300','destination':'DE600','modes':['rail'],'metrics':['tonnes'],'goods':['ALL']})
+        assert len(relation['observations'])==4 and relation['observations'][0]['value'] is not None
+        report['dashboard_access_verified']={'berlin_rail_metals':[277,1531],'regional_rail_nst20':557,'sea_metals':2485916.2,'sea_partner_metals':291435,'kv_structure':68294220,'checked_cells':validation['checked_cells'],'field_access_passed':True,'external_model_calls':0}
     if 'goods_history' in FUNCTIONS:
         report['stage']='goods_history'
         from server.analyseassistent.selection import resolve

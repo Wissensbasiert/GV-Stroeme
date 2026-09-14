@@ -12,6 +12,7 @@ from . import relations
 from . import nodes
 from . import support
 from . import scope
+from . import access
 
 
 def read(path):
@@ -38,6 +39,8 @@ class Datasets:
         packages=['b01','b02','b03','b0406']
         if include_support and (self.root/'data/analysis/assistant_support/current.json').exists():
             packages.append('assistant_support')
+        if (self.root/'data/analysis/dashboard_access/current.json').exists():
+            packages.append('dashboard_access')
         for package in packages:
             store = self.root / 'data/analysis' / package
             pointer = read(store / 'current.json')
@@ -92,7 +95,9 @@ class Datasets:
             {'datasets': self.pointers, 'display_references': self.display_reference_sha256},
             sort_keys=True).encode()).hexdigest()[:24]
         registry = read(self.paths['b0406'] / 'regions.json')
-        self.names = {}
+        self.names = {'DE':['Deutschland']}
+        self.forecast_cell_names=read(self.paths['dashboard_access']/'forecast_cells.json') if 'dashboard_access' in self.paths else {}
+        self.forecast_cell_names=read(self.paths['dashboard_access']/'forecast_cells.json') if 'dashboard_access' in self.paths else {}
         for entries in registry.values():
             for code, name in entries.items():
                 self.names.setdefault(code, [])
@@ -132,11 +137,15 @@ class Datasets:
         package = FUNCTIONS[function][2]
         if package=='assistant_support' and package not in self.paths:
             return {'status':'not_available','observations':[],'note':'Das zusätzliche geprüfte Güter-/KV-Abbild ist noch nicht eingerichtet.'}
+        if package=='dashboard_access' and package not in self.paths:
+            return {'status':'not_available','observations':[],'note':'Dieser zusätzliche Dashboardzugriff ist noch nicht eingerichtet. Das ist eine Zugriffsgrenze des KI-Chats, kein Nachweis fehlender Quelldaten.'}
         if function == 'toll_month':
             if self.toll is None:
                 return {'status': 'not_available', 'note': 'B07-Testabbild fehlt', 'unit': 'Mautfahrten'}
             return self.toll.query(**parameters)
         dispatch = {'relation_matrix': relations.relation_matrix,
+                    'forecast_relation': access.forecast_relation,
+                    'dashboard_detail': access.dashboard_detail,
                     'relation_overview': relations.relation_overview,
                     'relation_history': relations.relation_history,
                     'road_relation_goods_limit': relations.road_relation_goods_limit,
@@ -165,6 +174,10 @@ class Datasets:
             timer.daemon = True
             timer.start()
             try:
+                if function == 'forecast_regions' and ('goods' in parameters or 'DE' in parameters.get('regions',[])):
+                    if 'dashboard_access' not in self.paths:
+                        return {'status':'not_available','observations':[],'note':'Prognosegüter sind im Dashboard vorhanden, aber der zusätzliche Chat-Zugriff ist noch nicht eingerichtet.'}
+                    return access.forecast_regions(con,self.paths['dashboard_access'],**{'goods':['ALL'],**parameters})
                 extra = {'regional_scope': self.display_references['regional_scope']} if function == 'explain_scope' else {}
                 result = dispatch[function](con, self.paths[package], **parameters, **extra)
             finally:

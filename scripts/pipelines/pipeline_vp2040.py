@@ -420,6 +420,9 @@ def build_vp2040_scenario_bundle(scenario_id, gv_dir):
             vp_group = str(row.vp_group)
             regions[nuts_id]["vp2040_groups_tonnes"]["inbound"][vp_group] += float(row.Tonnen)
             regions[nuts_id]["vp2040_groups_tkm"]["inbound"][vp_group] += float(row.Tkm)
+            # "all" is outbound + inbound + internal once, matching C7 and modes.
+            regions[nuts_id]["vp2040_groups_tonnes"]["all"][vp_group] += float(row.Tonnen)
+            regions[nuts_id]["vp2040_groups_tkm"]["all"][vp_group] += float(row.Tkm)
 
     # 4. KV by NUTS-3 (Outbound & Inbound)
     print("  -> Aggregating KV by NUTS-3...")

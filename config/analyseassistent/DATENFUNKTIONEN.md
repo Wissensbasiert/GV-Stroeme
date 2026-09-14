@@ -1,5 +1,15 @@
 # Fachlicher Vertrag der Datenfunktionen
 
+## Ergänzung 0.5.0: bislang fehlende Datenzugriffe
+
+`forecast_regions` akzeptiert zusätzlich `goods`: `ALL`, C7 als Textcode 1–7 oder Originalgruppen `VP10` bis `VP200` gemäß Katalog (25 Codes). Keine Mischung überlappender Gliederungen; keine Addition von `ALL` und Einzelgruppen. Region, Modus, Richtung, Gruppe und Kennzahl bleiben als gemeinsamer Faktenbezug erhalten. Deutschland nur `direction=all`, einschließlich Transit. Regional Versand/Empfang ohne Binnen, all mit Binnen einmal. Nullbasis erzeugt keine Prozentveränderung.
+
+`forecast_relation` liest gerichtete Quelle/Ziel-Verbindungen aus vollständigen Originalmatrizen statt Dashboard-Toplisten, mit Modi, t/tkm und C7/VP25. Fehlende Relationszeilen bleiben unbekannt. Beide Funktionen vergleichen ausschließlich 2019_BASE und 2040_P1; keine Ist-Fortschreibung.
+
+`dashboard_detail` erschließt veröffentlichte Regional-NST20-Profile (Schiene/IWW t/tkm), Hafen-NST20/C7 (t/TEU), Hafenpartner mit C7-Filter (t), nationale getrennte KV-Strukturen, veröffentlichte KV-Relationen, Regionalprofil-Straßenfahrten und modellierte VP-KV-/Behälter-/Ladeeinheitenkennzahlen. NST20-Codes bleiben zweistelliger Text. Straße NUTS-3 erhält keine künstliche NST20-Aufteilung. Hafenpartner und KV-Relationen bleiben explizit begrenzte veröffentlichte Auswahlen. Nationale Regional-NST20-Dashboardaggregation ist keine vollständige amtliche Randsumme. VP-TEU/Ladeeinheiten umfassen alle Matrixverkehre, nicht nur KV.
+
+Privates Paket `dashboard_access`: Quellen-/Code-/Ausgabehashes, vollständiger regionaler C7/VP25-Abgleich, nationale t/tkm-Summen und Feldzugriffsinventar. Neue nicht zugeordnete semantische Dashboardfelder sperren den Build. Der Inventarabgleich prüft den veröffentlichten Bestand, nicht alle nicht veröffentlichten Rohfelder oder jede freie KI-Frage. Weitere Details und tatsächlicher Freigabestand im [Prüfbericht](../../docs/qualitaet/ANALYSEASSISTENT_DATENZUGRIFF_20260914.md).
+
 **Version 0.2.1 · 11.09.2026 · Spezifikation und lokal implementierter Antwortvertrag; keine Produktfreigabe.** Freigabe und Verfügbarkeit gelten je Filterkombination, nicht pauschal je Funktionsname.
 
 ## Gemeinsame Eingaben

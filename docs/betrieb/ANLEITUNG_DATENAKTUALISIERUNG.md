@@ -1,5 +1,13 @@
 # Datenaktualisierung und Reproduktion des Güterströme-Dashboards
 
+## Ergänzung 14.09.2026: privaten Dashboardzugriff für den KI-Chat erneuern
+
+Nach betroffenen kanonischen Daten und Browserpaketen zusätzlich `python -B scripts/analysis/build_dashboard_access.py` ausführen. Das unabhängige Paket liest die vollständigen sechs Landverkehrs-VP-Matrizen sowie Regional-, Hafen- und Intermodal-Dashboarddaten. Alle regionalen C7/VP25-Kombinationen in beiden Kennzahlen, Szenarien und Richtungen werden mit dem Prognosekern abgeglichen; nationale Summen und Berlin/Schiene/Metalle zusätzlich geprüft. Gesamtaufkommen der Original-VP-Gruppen muss Versand + Empfang + Binnen enthalten; der bis 0.4.2 fehlende Empfangsanteil wurde in der Pipeline korrigiert.
+
+`field_access.json` ordnet veröffentlichte semantische Dashboardfelder bestehenden/neuen Chatwerkzeugen oder Referenzmetadaten zu. Neue unzugeordnete Felder führen zum Abbruch statt stiller Datenlücke. Gruppennamen kommen aus der aktuellen kanonischen VP-Crosswalk-Klassifikation, nicht aus den abweichenden historischen C7-Namen in `dim_nst2007.json`. Zwischenstände unter `C:/tmp`, geprüfte unveränderliche Releases unter `data/analysis/dashboard_access/releases/`, Aktivierung erst nach bestandenen Abgleichen. Quellen-/Codeänderungen verlangen Neuaufbau, keine nachträgliche Manifestanpassung.
+
+Danach sämtliche Laufzeittests, die begrenzte echte Antwortstichprobe `--access`, öffentlichen Prognosepaket-Lader und nach Übertragung die Linux-/Browserprüfung ausführen. Private Analysebestände niemals öffentlich bereitstellen oder in Git aufnehmen. Aktueller Nachweis: [Datenzugriff-Prüfbericht](../qualitaet/ANALYSEASSISTENT_DATENZUGRIFF_20260914.md). Diese Ergänzung ersetzt nicht die unten stehenden Rohdaten-/Quellenprüfungen.
+
 Stand: 24.08.2026  
 Zweck dieses Dokuments: Es beschreibt verbindlich, welche Rohdaten in die aktive Anwendung eingehen, wie sie verarbeitet werden und welche Prüfungen vor einer Übernahme eines neuen Datenstands erforderlich sind. Es ist die Arbeitsanleitung für künftige Datenreleases; die Skripte und die Rohdaten bleiben dabei die technische Referenz.
 

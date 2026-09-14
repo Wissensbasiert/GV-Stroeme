@@ -20,6 +20,7 @@ def main():
     parser.add_argument('--semantic', action='store_true', help='Offene Formulierungen, Zahlwörter, Gegenrichtung und Themenwechsel')
     parser.add_argument('--forecast', action='store_true', help='Mehrregionenprognose, beide Kennwerte und Anschlussfragen')
     parser.add_argument('--goods', action='store_true', help='Originaldialog Leipzig: Gütergruppen, alle Verkehrsträger, seit 2020')
+    parser.add_argument('--access', action='store_true', help='Neue Prognose-/NST-/Hafen-/KV-Zugriffe ohne vorgegebene Funktion')
     parser.add_argument('--sample', action='store_true', help='Freie Auswahl aus T02/T04/T05/T07/T16/T20/T22/T35; keine vorgegebene Funktion')
     parser.add_argument('--cases', help='Einbasierte Auswahl der unabhängigen sample-Fragen, durch Komma getrennt')
     args = parser.parse_args()
@@ -64,6 +65,15 @@ def main():
             'Wie hoch war 2024 deutschlandweit der Modal Split der Güterverkehrsleistung auf Straße, Schiene und Binnenschiff in Tonnenkilometern?',
             'Welche fünf internationalen Luftfrachtverbindungen waren 2024 vom Flughafen Leipzig/Halle im Versand am bedeutendsten? Bitte nach Tonnen sortieren.',
         ]]
+    elif args.access:
+        conversations = [
+            ['Wie entwickeln sich in Berlin laut Prognose Metalle und Metallerzeugnisse, die per Schiene versandt werden?', 'Und im Empfang?'],
+            ['Wie viele Tonnen Metalle und Metallerzeugnisse wurden 2024 aus Berlin per Schiene versandt? Bitte die NST-Gütergruppe ausweisen.'],
+            ['Wie viele Tonnen Metalle und Metallerzeugnisse wurden 2024 im Hamburger Seehafen im Versand umgeschlagen? Bitte nach NST-Gütergruppe.'],
+            ['Wie viele Tonnen Metalle wurden 2024 aus dem Hamburger Seehafen nach China versandt?'],
+            ['Wie verteilen sich 2024 deutschlandweit die Tonnen im Schienen-KV auf Ladeeinheitentypen?'],
+            ['Wie entwickelt sich laut Prognose der Schienenverkehr von Berlin nach Hamburg in Tonnen zwischen 2019 und 2040?'],
+        ]
     elif args.goods:
         conversations = [
             ['Welche Güter werden in meinem Kreis (Leipzig) am meisten versandt? Wie hat sich das seit 2020 entwickelt?',
