@@ -1,0 +1,12 @@
+{
+  "review_date": "2026-09-14",
+  "airport_flights_2025": {
+    "source_sha256": {
+      "data/raw/Luftverkehr/estat_avia_gooa.tsv": "f4b188782619f9f453c58ab0d5ba162da2660cba8c5f7c7c5fd73dabce85d565",
+      "data/raw/Luftverkehr/estat_avia_gooc.tsv": "3d8a5b29108a948c4c9f3b9f542a42eb2ad5b0c2e65cbbb79e971f02bec9f5ab"
+    },
+    "airport_sum": 119237,
+    "national_total": 116671,
+    "note": "Korrigierter Eurostat-Stand: Flughafen- und nationale Zählung bleiben getrennt. Alte und ungeprüfte Quellenstände bleiben gesperrt. Relationsdaten weiterhin nur bis 2024."
+  }
+}

@@ -15,3 +15,13 @@ assert.equal(element('airfreightYoYValue').innerHTML,'--');assert.match(element(
 state.year='2025';c.renderAirfreightKpis([]);assert.equal(element('airfreightNationalValue').textContent,'--');assert.equal(element('airfreightAirportCount').textContent,'--');assert.equal(element('airfreightTop3Share').textContent,'--');c.ensureAirfreightAirportSelection([]);assert.equal(state.selectedAirport,'A');
 state.year='2024';c.airfreightData.airportValues['2023'].A.tonnes.all=null;c.renderAirfreightKpis(entries);assert.equal(element('airfreightYoYValue').innerHTML,'--');assert.match(element('airfreightYoYSub').textContent,/Kein Vergleichswert/);
 console.log('PASS: airport denominator, ties, zero baseline, incomplete balance, missing year and retained selection.');
+
+// The reviewed source revision also reaches the actual dashboard KPI functions.
+c.airfreightData=JSON.parse(fs.readFileSync(path.join(root,'data/processed/web_airfreight.json'),'utf8'));
+state.year='2025';state.airfreightMetric='flights';state.direction='all';state.selectedAirport='EDDP';
+assert.equal(c.isAirfreightAirportMetricYearAvailable(),true);
+c.renderAirfreightKpis(c.getAirfreightAirportEntries());
+assert.equal(element('airfreightNationalValue').textContent,'48.657 Flüge');
+assert.match(element('airfreightYoYValue').innerHTML,/-2,6/);
+assert.equal(c.getAirfreightRelations().length,0);
+console.log('PASS: corrected 2025 Leipzig flights, prior-year comparison and no fabricated 2025 relations.');

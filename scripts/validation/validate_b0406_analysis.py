@@ -165,7 +165,7 @@ def validate(dataset,activate=False):
     check('T35 OBBI Bahrain',any(r['id']=='OBBI' and r['partner_country']=='BH' for r in air['rows']))
     check('Top 5 verändert Nenner nicht',b.node_partners(con,dataset,kind='air',node='EDDP',year=2024,international=True,top=5)['denominator']==air['denominator'])
     check('Kein Hafen gewählt',b.node_statistics(con,dataset,kind='sea',node=None,year=2024)['status']=='needs_clarification')
-    check('Luftflugzahlen 2025 gesperrt',b.node_statistics(con,dataset,kind='air',node='EDDP',year=2025,metric='flights')['status']=='not_available')
+    check('Korrigierte Luftflugzahlen 2025 freigegeben',not b.airport_flights_blocked(dataset,2025) and b.node_statistics(con,dataset,kind='air',node='EDDP',year=2025,metric='flights')['value']==48657)
     # Independent streaming sea totals for each source, year, side and metric (including null-cell counts).
     sea_expected=defaultdict(lambda:[0.0,0,0,0])
     for path in sorted((ROOT/'data/raw/MRTM OpenData').glob('MRTM_OpenData_*.csv')):

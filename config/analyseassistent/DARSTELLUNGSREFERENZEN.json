@@ -587,7 +587,7 @@
   "schema_version": 1,
   "source_sha256": {
     "data/processed/nuts3_de_2024.geojson": "7ee20278f6a019cb2142810dff13c234196ebb7d5132554838dcbfbe1d88ccf8",
-    "data/processed/web_airfreight.json": "3a646626448860dd11aaf765710abfd19d363da8d9100673110cd2d9a8aa0999",
+    "data/processed/web_airfreight.json": "67c240afa977bf47bf8c7b9af215dfc78947882798bb927c94721ce76904875d",
     "data/processed/web_summary_by_region.json": "70947162eadf116609315f0cef849b89043c4ee2ca5604eb424de16a2fb1e774",
     "data/raw/Luftverkehr/Flughafenstandorte/ourairports_airports_2026-09-03.csv": "81eb4259ea42834dde3ee8eb407e6184a32c59aae9d8f33563bd4f804946ffb9"
   }

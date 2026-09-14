@@ -19,6 +19,7 @@ CODE=['scripts/pipelines/build_b0406_analysis.py','scripts/analysis/b0406.py',
       'scripts/validation/validate_b0406_analysis.py','scripts/analysis/query_b0406.py',
       'scripts/validation/validate_b0406_partner_mapping.py']
 CODE.append('scripts/validation/check_b0406_regressions.py')
+CODE.append('config/analyseassistent/LUFTVERKEHR_FREIGABE.json')
 
 
 def check_dependency_chain(dependencies):
@@ -88,7 +89,7 @@ def build():
     inputs=['data/processed/nuts3_de_'+v+'.geojson' for v in ['2016','2021','2024']]
     inputs+=['data/processed/web_summary_by_region.json','data/processed/web_forecast_core.json',
              'data/processed/national_benchmarks.json','data/raw/Luftverkehr/estat_avia_gor_de.tsv',
-             'data/raw/Luftverkehr/estat_avia_gooa.tsv',
+             'data/raw/Luftverkehr/estat_avia_gooa.tsv','data/raw/Luftverkehr/estat_avia_gooc.tsv',
              'data/raw/Straße/KBA/VE7_Verflechtung_NUTS3/ve7_2010_2024.csv']
     inputs += [p.relative_to(ROOT).as_posix() for p in sorted((ROOT/'data/raw/MRTM OpenData').glob('MRTM_OpenData_*.csv'))]
     inputs += [s['path'] for s in bm['sources'] if s['mode']!='road']

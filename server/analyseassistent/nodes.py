@@ -101,7 +101,7 @@ def node_partners(con, dataset, *, kind, node, year, direction, metric, top, int
 
 def node_statistics(con, dataset, *, kind, node, year, direction, metric, partner_scope='all'):
     check(kind, direction, metric, partner_scope)
-    if kind == 'air' and metric == 'flights' and year == 2025:
+    if kind == 'air' and metric == 'flights' and b0406.airport_flights_blocked(dataset, year):
         # No fallback from a blocked GOOA statistic to a different GOR population.
         return {'status':'not_available','value':None,'unit':UNITS[metric],
                 'scope':'Angefragter Gegenraum: '+SCOPES[partner_scope]+'.',
@@ -130,7 +130,7 @@ def node_profile(con, dataset, *, kind, node, year, direction, metrics, partner_
                 'source_status': raw['status'], 'source_ids': raw.get('source_ids', []),
                 'restricted_count': raw.get('restricted_count', 0),
                 'quality':'restricted' if raw.get('restricted_count',0) else 'unflagged'}
-        if kind=='air' and metric=='flights' and year==2025:
+        if kind=='air' and metric=='flights' and year==2025 and raw['status']=='not_available':
             meta['source']='Eurostat AVIA_GOOA: gesperrte Flughafen-Gesamtflugzahlen 2025'
         label = node + ' / ' + str(year) + ' / ' + {'tonnes': 'Frachtgewicht', 'flights': 'Fracht- und Postflüge', 'teu': 'TEU'}[metric]
         if partner_scope != 'all':

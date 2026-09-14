@@ -362,7 +362,7 @@ def make_result(function, parameters, raw, datasets, rules_version):
         relation_source = function in {'node_partners','node_connections'} or parameters.get('partner_scope','all')!='all'
         source_labels[function] = ('Eurostat '+('AVIA_GOR_DE: veröffentlichte Flughafenverbindungen' if relation_source else 'AVIA_GOOA: veröffentlichte Flughafen-Randsumme')
                                    if parameters.get('kind')=='air' else 'Destatis Seeverkehr: veröffentlichte Hafenverbindungen')
-        if function=='node_statistics' and parameters.get('kind')=='air' and parameters.get('metric')=='flights' and parameters.get('year')==2025:
+        if function=='node_statistics' and parameters.get('kind')=='air' and parameters.get('metric')=='flights' and parameters.get('year')==2025 and raw.get('status')=='not_available':
             source_labels[function]='Eurostat AVIA_GOOA: gesperrte Flughafen-Gesamtflugzahlen 2025'
     if function not in NODE_FUNCTIONS and parameters.get('partner_scope','all')!='all':
         source_labels[function]='B01: gerichtete veröffentlichte Relationen; ausgewählter Inland-/Auslandsgegenraum'

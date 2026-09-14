@@ -78,7 +78,7 @@ FLIGHT_MEASURES = {
     "CAF_FRM_ARR": "inbound",
 }
 TOP_RELATIONS_STORED = 25
-EXCLUDED_AIRPORT_FLIGHT_YEARS = {"2025"}
+EXCLUDED_AIRPORT_FLIGHT_YEARS: set[str] = set()
 NUMBER_RE = re.compile(r"^[+-]?(?:\d+(?:\.\d*)?|\.\d+)")
 
 
@@ -108,6 +108,12 @@ def read_eurostat_rows(path: Path):
             if not row:
                 continue
             dimensions = [part.strip() for part in row[0].split(",")]
+            # Bulk downloads also contain monthly/quarterly rows and other
+            # measures. Filter before parsing annual cells, never sum periods.
+            if dimensions[0] != "A" or dimensions[1] not in {"T", "FLIGHT"}:
+                continue
+            if dimensions[2] not in {*TONNAGE_MEASURES, *FLIGHT_MEASURES}:
+                continue
             values = {
                 year: parse_value(row[index]) if index < len(row) else None
                 for year, index in year_columns.items()
@@ -209,6 +215,10 @@ def collect_needed_codes() -> set[str]:
 
 
 def build_bundle() -> dict:
+    approval = json.loads((ROOT / "config/analyseassistent/LUFTVERKEHR_FREIGABE.json").read_text(encoding="utf-8"))
+    for source, expected in approval["airport_flights_2025"]["source_sha256"].items():
+        if sha256(ROOT / source) != expected:
+            raise ValueError("Luftverkehr-Quellenstand noch nicht geprüft: " + source)
     needed_codes = collect_needed_codes()
     locations = read_gisco_locations()
     supplement_ourairports(locations, needed_codes)
@@ -249,12 +259,7 @@ def build_bundle() -> dict:
         for year, value in values.items():
             if value is None:
                 continue
-            # The 2025 AVIA_GOOA CAF_FRM airport values are internally
-            # inconsistent with AVIA_GOOC: German airport values sum to
-            # 1,573,111 flights, while the national total is 116,671. Several
-            # airports also jump to values resembling all commercial aircraft
-            # movements. Keep the raw files unchanged, but do not publish this
-            # airport-level slice until Eurostat corrects or explains it.
+            # Only the source revision reviewed below may publish 2025 flights.
             if metric == "flights" and year in EXCLUDED_AIRPORT_FLIGHT_YEARS:
                 continue
             record = airports[year].setdefault(code, {"code": code})
@@ -371,7 +376,9 @@ def build_bundle() -> dict:
     bundle = {
         "metadata": {
             "generatedAt": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "sourceDownloadDate": "2026-09-03",
+            "sourceDownloadDate": "2026-09-14",
+            "sourceUpdateDates": {"AVIA_GOOA": "2026-09-14", "AVIA_GOOC": "2026-09-14", "AVIA_GOR_DE": "2026-09-03"},
+            "airportFlightQualityReview": approval["airport_flights_2025"],
             "yearStart": START_YEAR,
             "availableNationalYears": [int(year) for year in national_years],
             "availableAirportYears": [int(year) for year in airport_years],
@@ -422,7 +429,7 @@ def build_bundle() -> dict:
                 "Relationssummen entsprechen weder zwingend dem Flughafenaufkommen noch der nationalen Gesamtmenge.",
                 "Nationale Werte und Flughafenwerte werden wegen unterschiedlicher Zähllogiken nicht gegeneinander ausgetauscht.",
                 "CAF_FRM zählt reine Fracht- und Postflüge; Passagierflüge mit Beiladefracht sind nicht enthalten.",
-                "Flughafenbezogene Flugzahlen 2025 werden wegen eines Widerspruchs zwischen AVIA_GOOA und der nationalen AVIA_GOOC-Reihe nicht ausgeliefert; Tonnenwerte und nationale Flugzahlen 2025 bleiben erhalten.",
+                "Flughafenbezogene Flugzahlen 2025 sind nach Prüfung des korrigierten Eurostat-Quellenstands vom 14.09.2026 freigegeben; Flughafen- und nationale Zählung bleiben getrennt.",
             ],
         },
         "airports": airport_master,

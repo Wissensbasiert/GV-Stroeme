@@ -648,12 +648,12 @@ class RealData(unittest.TestCase):
         self.assertEqual(result['facts'],[])
         self.assertTrue(any('nicht bestimmen' in f['text'] for f in result['text_facts']))
 
-    def test_airport_2025_weight_available_flights_unavailable(self):
+    def test_airport_2025_weight_and_corrected_flights_available(self):
         params={'kind':'air','node':'EDDP','year':2025,'direction':'all','metrics':['tonnes','flights']}
         result,_=self.service.analyze('Leipzig/Halle 2025',params,function='node_profile')
-        self.assertEqual(result['status'],'partial')
-        self.assertEqual([(f['value'],f['unit']) for f in result['facts']],[(1390729.8,'t'),(None,'Flüge')])
-        self.assertTrue(any('Quellenwiderspruch' in n for n in result['notices']))
+        self.assertEqual(result['status'],'ok')
+        self.assertEqual([(f['value'],f['unit']) for f in result['facts']],[(1390729.8,'t'),(48657,'Flüge')])
+        self.assertFalse(any('Quellenwiderspruch' in n for n in result['notices']))
 
     def test_road_distance_units_and_population_are_visible(self):
         params={'product':'VD2','year':2024,'region':'DE254','direction':'outbound','population':'I','metric':'trips','partner':None}

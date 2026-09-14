@@ -1,5 +1,7 @@
 # Dokumentationsübersicht
 
+**Luftverkehr, 14.09.2026:** Die korrigierten Eurostat-Dateien sind lokal eingelesen und geprüft. Flughafen-Flugzahlen 2025 sind für den freigegebenen Quellenstand wieder verfügbar; Relationen weiterhin bis 2024. [Datenprüfung und Bereitstellungsgrenze](qualitaet/LUFTVERKEHR_UPDATE_20260914.md). Diese Datenaktualisierung ist noch nicht auf dem Testportal bereitgestellt.
+
 **Aktuell: Version 0.7.0 im Testportal (`nodes02`).** Konkrete Flughafenverbindungen, IATA-Auswahl, London-Gruppe mit Abdeckungshinweis und fünf geprüfte Vorschaufragen. 215 lokale Tests, 13 freigegebene Modellfragen, lesende Gemini-Zweitprüfung und abschließende Linux-/Browserprüfung dokumentiert. Ein erkannter Paketierungs-Mischstand wurde zurückgerollt und durch einen konsistenten, erneut geladenen Release ersetzt. [Prüfbericht](qualitaet/ANALYSEASSISTENT_KNOTEN_VORSCHAU_20260914.md). Nachfolgend Vorgängerstände.
 
 **Aktuell: Version 0.6.0 im Testportal.** Inland-/Auslandsfilter, passende Gesamtverkehrszeitreihe, serverseitige Modalgesamtsummen und lesbare Listen. 189 lokale Tests, zwei lesende Gemini-Prüfungen und Linux-/Browsernachprüfung dokumentiert. [Prüfbericht](qualitaet/ANALYSEASSISTENT_RAUM_SUMMEN_20260914.md). Produktion unverändert; nachfolgend Vorgängerstände.

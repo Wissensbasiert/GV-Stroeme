@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
+import csv
 import json
+from functools import lru_cache
 import sys
 from pathlib import Path
 
@@ -17,14 +19,32 @@ import build_airfreight_data as pipeline  # noqa: E402
 OUTPUT = ROOT / "data" / "processed" / "web_airfreight.json"
 
 
+@lru_cache(maxsize=3)
+def raw_rows(path):
+    """Independent TSV reader; retain relevant annual cells, including missing values."""
+    result = {}
+    with path.open(encoding='utf-8-sig', newline='') as handle:
+        reader = csv.reader(handle, delimiter='\t')
+        header = next(reader)
+        years = {h.strip(): i for i, h in enumerate(header) if h.strip().isdigit() and 2016 <= int(h.strip()) <= 2025}
+        for row in reader:
+            d = tuple(row[0].strip().split(','))
+            if d[0] != 'A' or d[1] not in {'T', 'FLIGHT'} or not (d[-1] == 'DE' or d[-1].startswith('DE_')):
+                continue
+            if len(d) == 6 and d[3:5] != ('TOTAL', 'TOTAL'):
+                continue
+            if d[2] not in {'FRM_LD_NLD','FRM_LD','FRM_NLD','CAF_FRM','CAF_FRM_DEP','CAF_FRM_ARR'}:
+                continue
+            assert len(row) == len(header), 'Unvollständige TSV-Zeile'
+            assert d not in result, 'Doppelter Dimensionsschlüssel'
+            result[d] = {y: None if row[i].strip().startswith(':') else float(row[i].strip().split()[0]) for y, i in years.items()}
+    return result
+
+
 def raw_value(path: Path, expected_dimensions: list[str], year: str) -> float:
-    for dimensions, values in pipeline.read_eurostat_rows(path):
-        if dimensions == expected_dimensions:
-            value = values.get(year)
-            if value is None:
-                raise AssertionError(f"Rohwert fehlt: {path.name} {expected_dimensions} {year}")
-            return value
-    raise AssertionError(f"Rohdatenzeile fehlt: {path.name} {expected_dimensions}")
+    value = raw_rows(path)[tuple(expected_dimensions)].get(year)
+    assert value is not None, f'Rohwert fehlt: {expected_dimensions} {year}'
+    return value
 
 
 def assert_equal(actual, expected, label: str) -> None:
@@ -49,13 +69,36 @@ def raw_relation_sum(reporting: str, measure: str, year: str) -> float:
     return total
 
 
+def validate_all_annual_cells(data):
+    checks = 0
+    for path, target, national in [(pipeline.GOOC, data['national'], True), (pipeline.GOOA, data['airportValues'], False)]:
+        source = raw_rows(path)
+        for year, entries in target.items():
+            records = {'DE': entries} if national else entries
+            for code, record in records.items():
+                for metric, unit, measures in [('tonnes','T',{'all':'FRM_LD_NLD','outbound':'FRM_LD','inbound':'FRM_NLD'}), ('flights','FLIGHT',{'all':'CAF_FRM','outbound':'CAF_FRM_DEP','inbound':'CAF_FRM_ARR'})]:
+                    for direction, value in record.get(metric, {}).items():
+                        key = ('A',unit,measures[direction],'TOTAL','TOTAL','DE' if national else 'DE_'+code)
+                        assert_equal(value, source[key][year], f'{code}/{year}/{metric}/{direction}')
+                        checks += 1
+                    values = record.get(metric, {})
+                    if not national and all(d in values for d in ('all','outbound','inbound')):
+                        # Airport movements: tonnage rounded to tenths, integer flights.
+                        # GOOC national totals are source-defined, not reconstructed from directions.
+                        assert_close(values['all'], values['outbound']+values['inbound'], f'Richtungen {code}/{year}/{metric}', .11 if metric=='tonnes' else 0)
+    total = sum(r.get('flights',{}).get('all',0) for r in data['airportValues']['2025'].values())
+    assert_equal(total, 119237, 'Korrigierte deutsche Flughafensumme 2025')
+    assert_equal(data['national']['2025']['flights']['all'], 116671, 'Nationale Flugzahl 2025')
+    print(f'{checks} veröffentlichte Jahres-/Richtungswerte direkt mit Originalzellen abgeglichen.')
+
+
 def main() -> None:
     data = json.loads(OUTPUT.read_text(encoding="utf-8"))
     metadata = data["metadata"]
 
     assert_equal(metadata["availableNationalYears"], list(range(2016, 2026)), "Nationale Jahre")
     assert_equal(metadata["availableAirportYears"], list(range(2016, 2026)), "Flughafenjahre")
-    assert_equal(metadata["availableAirportFlightYears"], list(range(2016, 2025)), "Belastbare Flughafen-Flugjahre")
+    assert_equal(metadata["availableAirportFlightYears"], list(range(2016, 2026)), "Belastbare Flughafen-Flugjahre")
     assert_equal(metadata["availableRelationYears"], list(range(2016, 2025)), "Relationsjahre")
     assert_equal(metadata["latestNationalYear"], 2025, "Letztes nationales Jahr")
     assert_equal(metadata["latestAirportYear"], 2025, "Letztes Flughafenjahr")
@@ -93,7 +136,8 @@ def main() -> None:
         pipeline.GOOA, ["A", "T", "FRM_LD_NLD", "TOTAL", "TOTAL", "DE_EDDF"], "2025"
     )
     assert_equal(data["airportValues"]["2025"]["EDDF"]["tonnes"]["all"], raw_eddf_tonnes, "EDDF Tonnen 2025")
-    assert "flights" not in data["airportValues"]["2025"]["EDDF"], "Unplausible EDDF-Flugzahl 2025 darf nicht ausgeliefert werden"
+    assert_equal(data["airportValues"]["2025"]["EDDF"]["flights"]["all"], 24210, "Korrigierte EDDF-Flugzahl 2025")
+    validate_all_annual_cells(data)
 
     raw_relation_tonnes = raw_value(
         pipeline.GOR, ["A", "T", "FRM_LD_NLD", "DE_EDDF_CN_ZSPD"], "2024"
@@ -134,7 +178,7 @@ def main() -> None:
 
     assert "Passagierflüge mit Beiladefracht sind nicht enthalten" in metadata["measures"]["flights"]["scope"]
     assert OUTPUT.stat().st_size < 2 * 1024 * 1024, "Web-Bündel überschreitet 2 MiB"
-    print("Luftfracht-Bündel geprüft: Rohwerte, Relationsanteile, 2025-Plausibilitätsgrenze, Jahre, Flugdefinition und 281/281 Koordinaten stimmen.")
+    print("Luftfracht-Bündel geprüft: Rohwerte, Relationsanteile, korrigierte Flugzahlen 2025, Jahre, Flugdefinition und 281/281 Koordinaten stimmen.")
 
 
 if __name__ == "__main__":

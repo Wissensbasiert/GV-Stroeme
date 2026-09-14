@@ -5,6 +5,7 @@ import re
 from datetime import datetime
 from zoneinfo import ZoneInfo
 import duckdb
+from scripts.analysis import b0406
 from .contracts import FUNCTIONS, directed_pairs, question_supports, token_present, validate
 
 LATEST = re.compile(r'\b(?:aktuell\w*|neuest\w*|letzt\w*\s+verfügbar\w*)\s*(?:verfügbar\w*\s*)?(?:jahr\w*|daten\w*|stand)\b', re.I)
@@ -73,7 +74,8 @@ def available_years(datasets,function,parameters):
             sets=[{r[0] for r in con.execute('SELECT DISTINCT year FROM read_parquet(?) WHERE node=? AND metric=?',
                   [str(datasets.paths['b0406']/(product+'.parquet')),node,metric]).fetchall()} for metric in metrics]
         years=set.intersection(*sets)
-        if kind=='air' and function in {'node_statistics','node_profile'} and 'flights' in metrics:years.discard(2025)
+        if kind=='air' and function in {'node_statistics','node_profile'} and 'flights' in metrics and b0406.airport_flights_blocked(datasets.paths['b0406'], 2025):
+            years.discard(2025)
         return sorted(years)
     if function=='dashboard_detail' and 'dashboard_access' in datasets.paths:
         from .access import read

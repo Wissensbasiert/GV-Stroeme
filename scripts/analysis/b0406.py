@@ -248,6 +248,16 @@ def node_partners(con,dataset,*,kind,node,year,direction='outbound',metric='tonn
             'note':'Veröffentlichungsschwellen bei Luftfracht: kein gesamtes Flughafenaufkommen. Seehäfen: all zählt Ein- und Ausladung; TEU nur bei Containertransporten. Nicht anwendbare TEU-Leerfelder sind separat gezählt, fehlende anwendbare Werte bleiben unbekannt.'}
 
 
+def airport_flights_blocked(dataset, year):
+    """Retain the 2025 safeguard for old or unreviewed immutable snapshots."""
+    if year != 2025:
+        return False
+    approval = read(ROOT/'config/analyseassistent/LUFTVERKEHR_FREIGABE.json')
+    actual = read(Path(dataset)/'manifest.json').get('input_sha256', {})
+    return any(actual.get(source) != expected for source, expected in
+               approval['airport_flights_2025']['source_sha256'].items())
+
+
 def node_statistics(con,dataset,*,kind,node,year,direction='all',metric='tonnes'):
     if kind not in {'air','sea'} or direction not in {'all','outbound','inbound'} or metric not in ({'tonnes','flights'} if kind=='air' else {'tonnes','teu'}):
         raise ValueError('Ungültige Knotenauswahl')
@@ -255,7 +265,7 @@ def node_statistics(con,dataset,*,kind,node,year,direction='all',metric='tonnes'
     if not node:
         return {**result,'status':'needs_clarification','value':None}
     if kind=='air':
-        if metric=='flights' and year==2025:
+        if metric=='flights' and airport_flights_blocked(dataset, year):
             return {**result,'status':'not_available','value':None,'note':'Flughafen-Flugzahlen 2025 wegen dokumentiertem Quellenwiderspruch gesperrt.'}
         data=rows(con.execute('SELECT * FROM read_parquet(?) WHERE node=? AND year=? AND direction=? AND metric=?',
             [str(Path(dataset)/'air_statistics.parquet'),node,year,direction,metric]))

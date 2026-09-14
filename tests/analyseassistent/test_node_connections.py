@@ -183,12 +183,18 @@ class NodeConnections(unittest.TestCase):
         p=dict(kind='sea',node='DEHAM',year=2024,direction='outbound',partner_scope='domestic',metric='teu')
         self.assertIn('Destatis Seeverkehr',self.result(p,'node_statistics')['sources'][0])
 
-    def test_2025_statistics_remain_blocked_all_scopes(self):
-        for scope in ['all','domestic','international']:
+    def test_2025_statistics_use_corrected_source_without_inventing_relations(self):
+        raw=self.data.query('node_statistics',dict(kind='air',node='EDDP',year=2025,direction='all',metric='flights',partner_scope='all'))
+        self.assertEqual(raw['value'],48657)
+        for scope in ['domestic','international']:
             raw=self.data.query('node_statistics',dict(kind='air',node='EDDP',year=2025,direction='all',metric='flights',partner_scope=scope))
-            self.assertIsNone(raw['value']);self.assertEqual(raw['status'],'not_available')
+            self.assertIsNone(raw['value']);self.assertEqual(raw['status'],'missing_row')
         years=available_years(self.data,'node_statistics',dict(kind='air',node='EDDP',metric='flights'))
-        self.assertIn(2024,years);self.assertNotIn(2025,years)
+        self.assertIn(2024,years);self.assertIn(2025,years)
+        filtered=available_years(self.data,'node_statistics',dict(kind='air',node='EDDP',metric='flights',partner_scope='international'))
+        self.assertNotIn(2025,filtered)
+        result=self.result(dict(kind='air',node='EDDP',year=2025,direction='all',metric='flights',partner_scope='all'),'node_statistics')
+        self.assertTrue(all('gesperrt' not in fact['source'] for fact in result['facts']))
 
     def test_partial_total_and_units_are_verified(self):
         result=self.result();payload=packet(result,self.data)
