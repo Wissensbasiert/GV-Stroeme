@@ -177,6 +177,36 @@ try:
             assert all(r['mode']=='rail' for r in rows)
         report['forecast_regions_verified']={'regions':parameters['regions'],'metrics':parameters['metrics'],
             'facts':16,'external_model_calls':0,'no_observed_year_required':True}
+    if 'goods_history' in FUNCTIONS:
+        report['stage']='goods_history'
+        from server.analyseassistent.selection import resolve
+        from server.analyseassistent.results import make_result
+        from server.analyseassistent.presentation import present
+        from server.analyseassistent.chat import packet,check_prose
+        temporal={'context':'new','clarification':'Welches Leipzig?',
+                  'time':{'kind':'since_available','count':0,'start_year':2020}}
+        _,partial,dialogue,_=resolve('goods_history',{'directions':['outbound'],'_dialogue':temporal},{},datasets)
+        assert partial['start']==2020 and 'end' not in partial
+        _,parameters,_,_=resolve('goods_history',{'region':'DED52','modes':['road','rail','iww'],
+            '_dialogue':{'context':'continue','clarification':'','time':{'kind':'unspecified','count':0}}},
+            {'function_id':'goods_history','confirmed':partial,'time_intent':dialogue['time']},datasets)
+        assert parameters['start']==2020 and parameters['end']==2024
+        raw=datasets.query('goods_history',parameters)
+        assert len(raw['observations'])==273 and raw['status']=='partial'
+        assert next(r['value'] for r in raw['observations'] if r['mode']=='road' and r.get('year')==2024 and r.get('group')=='1' and r['unit']=='t')==6144747
+        assert next(r['value'] for r in raw['observations'] if r['mode']=='rail' and r.get('year')==2024 and r.get('group')=='1' and r['unit']=='t')==772173
+        assert all(r['value'] is None for r in raw['observations'] if r['mode']=='iww' and r.get('group') and 'year' in r)
+        result=make_result('goods_history',parameters,raw,datasets,'0.4.2')
+        result['answer']=present(result,datasets)
+        paragraphs=result['answer']['paragraphs']
+        assert len(paragraphs)==3
+        check_prose({'paragraphs':[{'text':text,'evidence_ids':['p'+str(i+1)]} for i,text in enumerate(paragraphs)]},packet(result,datasets),result,datasets)
+        static=root/'alwaysdata_portal/static/gueterstroeme'
+        for file in ['crosswalk_spatial_vp2040.json','crosswalk_nst_vp2040.json']:
+            assert isinstance(json.loads((static/'data/crosswalks'/file).read_text(encoding='utf-8')),list)
+        assert (static/'data/processed/delivery/forecast/DEA1D.json').is_file()
+        report['goods_history_verified']={'facts':273,'start':2020,'end':2024,'all_modes':True,
+            'iww_groups_unknown':True,'complete_fallback':True,'crosswalk_files_present':True,'external_model_calls':0}
     if sys.argv[4]=='requesty':
         report['stage']='requesty'
         from server.analyseassistent.requesty import Requesty

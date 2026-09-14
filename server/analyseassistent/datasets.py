@@ -143,6 +143,7 @@ class Datasets:
                     'rail_goods_history': relations.rail_goods_history,
                     'explain_scope': scope.explain_scope,
                     'goods_structure': support.goods_structure,
+                    'goods_history': support.goods_history,
                     'intermodal_markets': support.intermodal_markets,
                     'node_profile': nodes.node_profile,
                     'regional_history': profiles.regional_history,

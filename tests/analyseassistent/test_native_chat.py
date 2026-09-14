@@ -28,6 +28,15 @@ class NativeGuards(unittest.TestCase):
     def test_existing_number_with_wrong_year_rejected(self):
         with self.assertRaises(ValueError): self.check('2024 waren es 110.050 Tonnen.', ['f1', 'n1'])
 
+    def test_million_abbreviation_does_not_split_a_year_comparison(self):
+        self.result['facts']=[{'fact_id':'f1','value':797506,'year':2020,'unit':'t'},
+                              {'fact_id':'f2','value':1490000,'year':2024,'unit':'t'}]
+        self.payload['evidence']['p1']={'text':'2020: 797.506 Tonnen. 2024: 1,49 Mio. Tonnen.',
+                                        'fact_ids':['f1','f2']}
+        self.check('Die Werte betrugen 797.506 Tonnen im Jahr 2020 und 1,49 Mio. Tonnen im Jahr 2024.', ['p1'])
+        self.check('Von 2020 bis 2024 sanken die Werte auf 1,49 Mio. Tonnen, ausgehend von 797.506 Tonnen.', ['p1'])
+        with self.assertRaises(ValueError): self.check('2024 betrug der Wert 797.506 Tonnen.', ['p1'])
+
     def test_wrong_unit_direction_and_invented_numbers_rejected(self):
         for text in ['2020 waren es 110.050 Tonnenkilometer.', 'Von Bielefeld nach Dortmund waren es 110.050 Tonnen.',
                      '2020 waren es 72.000 Tonnen.', 'Es waren 2020 Tonnen.', 'Die Region ist verkehrsfrei.', '<img src=x onerror=alert(1)>']:
@@ -35,6 +44,13 @@ class NativeGuards(unittest.TestCase):
 
     def test_foreign_evidence_rejected(self):
         with self.assertRaises(ValueError): self.check('Ein Wert.', ['f999'])
+
+    def test_checked_alternative_can_be_named_but_cannot_take_road_quantity(self):
+        self.result['function_id']='road_relation_goods_limit'
+        self.result['related_data']={'checks':{'rail':{'status':'partial','available':True,'parameters':{}}}}
+        self.payload['evidence']['n2']={'text':'Alternativ sind auf der Schiene veröffentlichte Güterangaben verfügbar.'}
+        self.check('Alternativ sind auf der Schiene veröffentlichte Güterangaben verfügbar.', ['n2'])
+        with self.assertRaises(ValueError): self.check('Auf der Schiene waren es 2020 110.050 Tonnen.', ['f1','n2'])
 
     def test_mode_percentage_and_swapped_quantity_units(self):
         self.result['parameters']['modes'] = ['road']

@@ -1,6 +1,8 @@
 # Dokumentationsübersicht
 
-Aktuell im Testportal: Version 0.4.1 mit gemeinsamem Prognosevergleich mehrerer Regionen und Kennwerte, ohne Pflicht-Istjahre. [Prognose-Prüfbericht](qualitaet/ANALYSEASSISTENT_PROGNOSE_20260914.md). Die folgenden Abschnitte dokumentieren Vorgängerstände.
+Neueste Prüfung: Version 0.4.2 mit regionaler Güterzeitreihe, vollständigerem Antworttext und korrigierter Prognose-Datenladung. Der [Prüfbericht zur echten Antwortstichprobe](qualitaet/ANALYSEASSISTENT_GÜTER_UND_STICHPROBE_20260914.md) enthält die gelesenen Antworten aus acht dokumentierten Fragetypen und dem Leipzig-Dialog, Bewertung sowie aktuellen Bereitstellungsstand.
+
+Vorgängerstand: Version 0.4.1 mit gemeinsamem Prognosevergleich mehrerer Regionen und Kennwerte, ohne Pflicht-Istjahre. [Prognose-Prüfbericht](qualitaet/ANALYSEASSISTENT_PROGNOSE_20260914.md). Die folgenden Abschnitte dokumentieren Vorgängerstände.
 
 Seit 14.09.2026 ist Version 0.4.0 mit semantischer Auswahl, strukturierten Rückfragen und Zeitwünschen im Testportal aktiv. Aktueller Stand: [Semantik-Prüfbericht](qualitaet/ANALYSEASSISTENT_SEMANTIK_20260914.md). Den vorausgehenden Chatumbau dokumentiert der [Chat-Prüfbericht](qualitaet/ANALYSEASSISTENT_CHAT_20260914.md); die Dortmund–Bielefeld-Korrektur ist im [Prüfbericht zur Kundenantwort](qualitaet/ANALYSEASSISTENT_KUNDENANTWORT_20260911.md) hergeleitet. Produktion bleibt unverändert.
 

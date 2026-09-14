@@ -19,6 +19,9 @@ def main():
     parser.add_argument('--focus', action='store_true', help='Nur zwei Datenlücken und die konkrete Warum-Rückfrage')
     parser.add_argument('--semantic', action='store_true', help='Offene Formulierungen, Zahlwörter, Gegenrichtung und Themenwechsel')
     parser.add_argument('--forecast', action='store_true', help='Mehrregionenprognose, beide Kennwerte und Anschlussfragen')
+    parser.add_argument('--goods', action='store_true', help='Originaldialog Leipzig: Gütergruppen, alle Verkehrsträger, seit 2020')
+    parser.add_argument('--sample', action='store_true', help='Freie Auswahl aus T02/T04/T05/T07/T16/T20/T22/T35; keine vorgegebene Funktion')
+    parser.add_argument('--cases', help='Einbasierte Auswahl der unabhängigen sample-Fragen, durch Komma getrennt')
     args = parser.parse_args()
     if args.output.exists(): raise SystemExit('Neue Ergebnisdatei erforderlich; Wiederholung gesperrt.')
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -50,6 +53,24 @@ def main():
         ['Wie hoch waren 2024 die Emissionen von Dortmund nach Bielefeld?'],
     ]
     if args.payload_review: conversations = [conversations[1][:1]]
+    elif args.sample:
+        conversations = [[question] for question in [
+            'Wie viel Güterverkehr erzeugt und empfängt unsere Stadt?',
+            'Welche fünf Regionen sind Hamburgs wichtigste Partner im Straßengüterverkehr 2024? Bitte Versand und Empfang zusammen in Tonnen, externe Partner ohne Binnenverkehr.',
+            'Wie viel Ladung wurde 2024 zwischen Duisburg und Magdeburg in jeder Richtung transportiert? Bitte Straße, Schiene und Binnenschiff getrennt in Tonnen.',
+            'Wie unterscheiden sich Duisburg und Magdeburg 2024 beim Güteraufkommen, Modal Split und bei der Güterstruktur? Alle drei Landverkehrsträger, Versand plus Empfang, in Tonnen.',
+            'Welche Gütergruppen wurden 2024 aus Duisburg auf der Straße am meisten versandt? Bitte mit Mengen in Tonnen und Anteilen.',
+            'Welche Güter wurden 2024 auf der Straße von Köln nach Hamburg transportiert? Bitte nach Güterarten in Tonnen aufschlüsseln.',
+            'Wie hoch war 2024 deutschlandweit der Modal Split der Güterverkehrsleistung auf Straße, Schiene und Binnenschiff in Tonnenkilometern?',
+            'Welche fünf internationalen Luftfrachtverbindungen waren 2024 vom Flughafen Leipzig/Halle im Versand am bedeutendsten? Bitte nach Tonnen sortieren.',
+        ]]
+    elif args.goods:
+        conversations = [
+            ['Welche Güter werden in meinem Kreis (Leipzig) am meisten versandt? Wie hat sich das seit 2020 entwickelt?',
+             'Landkreis Leipzig und alle Verkehrsträger'],
+            ['Welche Güter werden im Landkreis Leipzig über alle Verkehrsträger am meisten versandt? Wie hat sich das seit 2020 entwickelt?',
+             'Und nur die Schiene?', 'Jetzt nur 2022 auf der Straße.'],
+        ]
     elif args.forecast:
         conversations = [
             ['Wie entwickelt sich bis 2040 die Schienengüterverkehre in Magdeburg und Duisburg?',
@@ -68,6 +89,9 @@ def main():
             ['Wie viele Tonnen gingen 2024 auf der Schiene von Berlin nach Hamburg?'],
         ]
     elif args.focus: conversations = conversations[1:4]
+    if args.cases:
+        if not args.sample: raise SystemExit('--cases erfordert --sample')
+        conversations=[conversations[int(i)-1] for i in args.cases.split(',')]
     report = {'model': service.model.model, 'portal_bookings': 0, 'turns': [], 'full_acceptance': False}
     for questions in conversations:
         conversation = None

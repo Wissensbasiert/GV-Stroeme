@@ -5,13 +5,13 @@ import re
 import time
 import duckdb
 
-from .contracts import FUNCTIONS, fields, validate, explicit_conflict, question_supports
+from .contracts import FUNCTIONS, fields, validate, explicit_conflict, question_supports, qualified_region_mentions, directed_pairs
 from .conversation import pack, unpack
 from .dialogue import previous_calendar_year
 from .narrative import evidence
 from .presentation import present, number
 from .requesty import ModelError
-from .results import limited, make_result
+from .results import limited, make_result, compact_value
 from .alternatives import related_data
 from .selection import tools, resolve, validate_selection, SelectionError
 
@@ -38,7 +38,7 @@ def packet(result, datasets):
     # of the requested years. They are never substituted for a missing endpoint.
     facts = {f['fact_id']: f for f in result.get('facts', [])}
     for table in answer['tables']:
-        for row in table['rows'][:30]:
+        for row in (table['rows'] if result.get('function_id') in {'compare_regions','forecast_regions','partner_ranking','node_partners'} else table['rows'][:30]):
             for key in row.get('fact_ids', []):
                 records[key] = row['label'] + ': ' + row['value'] + ' ' + row['unit'] + '. ' + row.get('note', '')
     if result.get('function_id') == 'relation_history':
@@ -54,20 +54,29 @@ def packet(result, datasets):
     structured = {}
     for key, text in records.items():
         item = {'text': text}
+        if key.startswith('p') and key[1:].isdigit():
+            statement=next((s for s in result.get('statements',[]) if s['text']==text),None)
+            if statement: item['fact_ids']=statement['fact_ids']
         if key in facts:
             item.update({k: facts[key][k] for k in ['value', 'unit', 'year', 'mode', 'origin', 'destination',
                         'region', 'region_name', 'metric', 'scenario', 'direction', 'basis',
                         'source_status', 'quality_status', 'source'] if k in facts[key]})
         structured[key] = item
-    if result.get('function_id') == 'forecast_regions':
+    if result.get('function_id') in {'forecast_regions','compare_regions'}:
         groups = {}
         for fact in facts.values():
-            groups.setdefault((fact['region'], fact['mode'], fact['metric']), []).append(fact)
+            if not fact.get('region'): continue
+            groups.setdefault((fact['region'], fact.get('mode'), fact.get('metric')), []).append(fact)
         for i, ((region, mode, metric), group) in enumerate(groups.items(), 1):
-            structured['forecast_group_' + str(i)] = {
+            structured[('forecast_group_' if result['function_id']=='forecast_regions' else 'profile_group_') + str(i)] = {
                 'text': ' '.join(structured[f['fact_id']]['text'] for f in group),
-                'region': region, 'mode': mode, 'metric': metric, 'basis': 'VP2019_BASE_to_2040_P1',
+                'region': region, 'mode': mode, 'metric': metric,
+                'basis': 'VP2019_BASE_to_2040_P1' if result['function_id']=='forecast_regions' else 'observed_profile',
                 'fact_ids': [f['fact_id'] for f in group]}
+    if result.get('function_id') in {'partner_ranking','node_partners'}:
+        ranked=[f for f in facts.values() if f.get('partner_id')]
+        structured['partner_group']={'text':' '.join(structured[f['fact_id']]['text'] for f in ranked),
+                                     'fact_ids':[f['fact_id'] for f in ranked]}
     params = result.get('parameters', {})
     scope = {k: params[k] for k in params}
     for key in ['origin', 'destination', 'region', 'partner']:
@@ -81,6 +90,9 @@ def packet(result, datasets):
             'Jeder Absatz nennt nur seine verwendeten evidence_ids. Werte gehören zu ihrem Jahr, '
             'ihrer Richtung und Einheit. Keine Platzhalter. Keine selbst berechneten Zahlen. '
             'Bei Prognosevergleichen nutze die forecast_group-Belege: Sie enthalten jeweils Basis, Ziel und beide Veränderungen einer Region, eines Verkehrsträgers und einer Kennzahl. '
+            'Bei Partner-Ranglisten nutze partner_group für mehrere Mengen und Anteile im selben Absatz. '
+            'Bei regionalen Güterzeitreihen beantworte beide Teile: führende Gütergruppen im Endjahr mit Mengen/Anteilen und die Entwicklung seit dem Startjahr. Behandle jeden ausgewählten Verkehrsträger, auch konkrete Datenlücken. '
+            'Ordne die Ergebnisse in verständlichen Absätzen ein. Ein kurzer Satz genügt bei mehrteiligen Fragen nicht. '
             'Die Tabelle und nötigen Qualitätsgrenzen werden zusätzlich angezeigt; wiederhole sie nicht vollständig.'}
 
 
@@ -101,15 +113,18 @@ def check_prose(selection, payload, result, datasets):
         allowed_numbers |= {float(y) for y in YEAR.findall(json.dumps(params))}
         if not numbers(text) <= allowed_numbers:
             raise ValueError('Zahl fehlt in den zugeordneten Belegen')
-        quantity = re.compile(r'([-+]?\d+(?:\.\d{3})*(?:,\d+)?)\s*(Tonnenkilometer|Tonnen|tkm|TEU|%|t)(?!\w)', re.I)
+        quantity = re.compile(r'([-+]?\d+(?:\.\d{3})*(?:,\d+)?)\s*(Mio\.|Tsd\.)?\s*(Tonnenkilometer|Tonnen|tkm|TEU|%|t)(?!\w)', re.I)
         unit_names = {'tonnen': 't', 'tonnenkilometer': 'tkm', 'teu': 'teu', 'tkm': 'tkm', 't': 't', '%': '%'}
         def quantities(value):
-            return {(next(iter(numbers(m.group(1)))), unit_names[m.group(2).lower()]) for m in quantity.finditer(value.replace('**', '').replace('*', ''))}
+            return {(round(next(iter(numbers(m.group(1)))) * (1000000 if m.group(2)=='Mio.' else 1000 if m.group(2)=='Tsd.' else 1),6), unit_names[m.group(3).lower()]) for m in quantity.finditer(value.replace('**', '').replace('*', ''))}
         if not quantities(text) <= quantities(allowed_text):
             raise ValueError('Zahl und Einheit sind nicht gemeinsam belegt')
-        for sentence in re.split(r'(?<=[!?])\s+|(?<!\d)\.\s+(?=[A-ZÄÖÜ])', text):
-            if result.get('function_id') == 'forecast_regions':
-                mentioned = {code for code in datasets.names if question_supports(sentence, code, datasets.names)}
+        for sentence in re.split(r'(?<=[!?])\s+|(?<!\d)(?<!Mio)(?<!Tsd)\.\s+(?=[A-ZÄÖÜ])', text):
+            if result.get('function_id')=='road_relation_goods_limit' and quantities(sentence):
+                if any(question_supports(sentence,mode,{}) for mode in ['rail','iww']):
+                    raise ValueError('Alternative Verkehrsträger dürfen keine Straßenmenge übernehmen')
+            if result.get('function_id') in {'forecast_regions','compare_regions'}:
+                mentioned = qualified_region_mentions(sentence,datasets.names)
                 if not mentioned <= set(params['regions']):
                     raise ValueError('Region fehlt in der abgefragten Auswahl')
                 if len(mentioned) == 1:
@@ -119,16 +134,34 @@ def check_prose(selection, payload, result, datasets):
                     # Match the same rounding used by the customer presentation.
                     allowed_region_quantities |= {(next(iter(numbers(number(f['value'])))), unit_names.get(f['unit'].lower(), f['unit'].lower()))
                                                   for f in region_facts if f['value'] is not None}
+                    allowed_region_quantities |= {q for f in region_facts if f['value'] is not None for q in quantities(compact_value(f['value'],f['unit']))}
                     if not quantities(sentence) <= allowed_region_quantities:
                         raise ValueError('Zahl und Region sind nicht gemeinsam belegt')
+                elif len(mentioned)>1:
+                    regional_quantities={q for f in result['facts'] if f.get('region') in mentioned and f['value'] is not None for q in quantities(compact_value(f['value'],f['unit'])) | quantities(number(f['value'])+' '+f['unit'])}
+                    if quantities(sentence) & regional_quantities:
+                        raise ValueError('Mehrere Regionen mit Mengen bitte in getrennten Sätzen zuordnen')
+            if result.get('function_id')=='relation_matrix':
+                pairs=directed_pairs(sentence,datasets.names,[params['origin'],params['destination']])
+                if quantities(sentence):
+                    if len(pairs)!=1: raise ValueError('Relationsmenge ohne eindeutige Richtung')
+                    pair=next(iter(pairs))
+                    matching=[f for f in result['facts'] if (f.get('origin'),f.get('destination'))==pair and f['value'] is not None]
+                    allowed={q for f in matching for q in quantities(number(f['value'])+' '+f['unit']) | quantities(compact_value(f['value'],f['unit']))}
+                    if not quantities(sentence)<=allowed: raise ValueError('Menge und Relationsrichtung widersprechen sich')
             years = {int(y) for y in YEAR.findall(sentence)}
             numeric = numbers(sentence)
+            cited_fact_ids=set(ids) | {fid for item in cited for fid in item.get('fact_ids',[])}
+            year_facts=[f for f in result.get('facts',[]) if f.get('fact_id') in cited_fact_ids]
+            # Compatibility payloads without IDs still have structured row metadata.
+            year_facts += [f for f in cited if f.get('year') and 'value' in f]
             for f in result.get('facts', []):
                 if f.get('value') is None or not f.get('year'):
                     continue
                 values = {round(float(f['value']), 6)}
                 if numeric & values and years and f['year'] not in years:
-                    raise ValueError('Zahl und Bezugsjahr widersprechen sich')
+                    if not any(other.get('year') in years and other.get('value')==f['value'] and other.get('unit')==f['unit'] for other in year_facts):
+                        raise ValueError('Zahl und Bezugsjahr widersprechen sich')
             if re.search(r'\b(?:Tonnenkilometer|tkm)\b', sentence, re.I):
                 if not any(f.get('unit') == 'tkm' or re.search(r'Tonnenkilometer|tkm', f['text'], re.I) for f in cited):
                     raise ValueError('Einheit widerspricht den Belegen')
@@ -153,9 +186,25 @@ def check_prose(selection, payload, result, datasets):
         allowed_modes = set(params.get('modes', []) or ([params['mode']] if params.get('mode') else []))
         if result.get('function_id') in {'rail_goods', 'rail_goods_history'}: allowed_modes = {'rail'}
         if result.get('function_id') in {'road_relation_goods_limit', 'road_details'}: allowed_modes = {'road'}
+        if result.get('function_id') == 'road_relation_goods_limit':
+            allowed_modes |= {c.get('parameters',{}).get('mode',key) for key,c in result.get('related_data',{}).get('checks',{}).items()
+                              if key in {'rail','iww'} and c.get('status')!='not_checked'}
         mentioned_modes = {m for m in ['road', 'rail', 'iww'] if question_supports(checked_text, m, {})}
         if allowed_modes and not mentioned_modes <= allowed_modes:
             raise ValueError('Verkehrsträger widerspricht den Belegen')
+        # Mode restrictions above also account for verified alternative-data notices.
+        answer_scope.pop('mode',None)
+        if result.get('function_id') == 'partner_ranking':
+            allowed_regions={params['region']} | {f.get('partner_id') for f in result.get('facts',[]) if f.get('fact_id') in cited_fact_ids}
+            if not qualified_region_mentions(checked_text,datasets.names) <= allowed_regions:
+                raise ValueError('Partnername fehlt in den zugeordneten Belegen')
+            answer_scope.pop('region',None)
+        if result.get('function_id') == 'relation_matrix':
+            pair=(params['origin'],params['destination'])
+            if not directed_pairs(checked_text,datasets.names,list(pair)) <= {pair,pair[::-1]}:
+                raise ValueError('Richtung fehlt in der abgefragten Auswahl')
+            answer_scope.pop('origin',None)
+            answer_scope.pop('destination',None)
         if explicit_conflict(checked_text, answer_scope, datasets.names):
             raise ValueError('Antwort widerspricht der abgefragten Auswahl')
         if any(f.get('source_status') == 'missing_row' for f in result.get('facts', [])):
@@ -166,6 +215,50 @@ def check_prose(selection, payload, result, datasets):
         if re.search(unsupported, text, re.I) and not re.search(unsupported, allowed_text, re.I):
             raise ValueError('Unbelegte fachliche Zusatzbehauptung')
         rendered.append(text)
+    if result.get('function_id')=='goods_history':
+        text=' '.join(rendered)
+        used={key for paragraph in selection['paragraphs'] for key in paragraph['evidence_ids']}
+        covered=used | {fid for key in used for fid in facts[key].get('fact_ids',[])}
+        for mode in params['modes']:
+            if not question_supports(text,mode,{}):
+                raise ValueError('Güterantwort lässt einen ausgewählten Verkehrsträger aus')
+            for direction in params['directions']:
+                series=[f for f in result['facts'] if f.get('mode')==mode and f.get('direction')==direction]
+                required=[f for f in series if not f.get('group') and f.get('year') in {params['start'],params['end']} and f['unit']!='%']
+                latest=[f for f in series if f.get('year')==params['end'] and f.get('group') and f['unit']!='%']
+                known=[f for f in latest if f['value'] is not None]
+                required+= [max(known,key=lambda f:f['value'])] if known else latest
+                required+=[f for f in series if not f.get('group') and f.get('change')=='relative']
+                if any(f['fact_id'] not in covered for f in required):
+                    raise ValueError('Güterantwort belegt Rangfolge, Randjahre oder Vergleichsgrenze nicht vollständig')
+                for f in required:
+                    if f['value'] is not None:
+                        variants=[numbers(number(f['value'])),numbers(compact_value(f['value'],f['unit']))]
+                        if not any(value <= numbers(text) for value in variants):
+                            raise ValueError('Güterantwort lässt führende Menge oder Jahresentwicklung aus')
+        if not {params['start'],params['end']} <= {int(y) for y in YEAR.findall(text)}:
+            raise ValueError('Güterantwort lässt den Vergleichszeitraum aus')
+    if result.get('function_id')=='compare_regions':
+        text=' '.join(rendered)
+        used={key for paragraph in selection['paragraphs'] for key in paragraph['evidence_ids']}
+        covered=used | {fid for key in used for fid in facts[key].get('fact_ids',[])}
+        for region in params['regions']:
+            selected=[f for f in result['facts'] if f.get('region')==region]
+            required=[f for f in selected if not f.get('group') and f['unit']!='%']
+            groups=[f for f in selected if f.get('group') and f['unit']!='%' and f['value'] is not None]
+            if groups: required.append(max(groups,key=lambda f:f['value']))
+            if any(f['fact_id'] not in covered for f in required):
+                raise ValueError('Regionsvergleich belegt Güteraufkommen, Verkehrsträger oder führende Gütergruppe nicht vollständig')
+            for f in required:
+                options=[f]
+                if f.get('mode'): options += [s for s in selected if s.get('mode')==f['mode'] and s['unit']=='%']
+                if f['value'] is not None and not any(value <= numbers(text) for option in options if option['value'] is not None for value in [numbers(number(option['value'])),numbers(compact_value(option['value'],option['unit']))]):
+                    raise ValueError('Regionsvergleich lässt einen angefragten Ergebnisbereich aus')
+    if result.get('function_id')=='relation_matrix':
+        used={key for paragraph in selection['paragraphs'] for key in paragraph['evidence_ids']}
+        covered=used | {fid for key in used for fid in facts[key].get('fact_ids',[])}
+        if any(f['fact_id'] not in covered for f in result['facts']):
+            raise ValueError('Relationsantwort belegt beide Richtungen und Verkehrsträger nicht vollständig')
     return rendered
 
 
@@ -200,7 +293,9 @@ def analyze_chat(service, question, confirmed=None, *, function=None, history=No
     # indirect place references; no exact-name gate before model understanding.
     names = service.datasets.names
     context = {'available_data': service.catalog, 'region_names': names,
+               'airport_names': service.datasets.airport_names,
                'confirmed_selection': state.get('confirmed', {}), 'previous_function': state.get('function_id'),
+               'previous_time_intent': state.get('time_intent', {}),
                'previous_calendar_year': previous_calendar_year(),
                'explicit_filters': confirmed or {}}
     messages = [{'role': 'system', 'content': service.prompt},
@@ -211,6 +306,7 @@ def analyze_chat(service, question, confirmed=None, *, function=None, history=No
     stage = 'understanding'
     selected_function = None
     new_topic = False
+    time_intent = {}
 
     def call(**kwargs):
         audit['attempted_model_calls'] += 1
@@ -226,6 +322,7 @@ def analyze_chat(service, question, confirmed=None, *, function=None, history=No
             new_turns = new_turns[2:]
         next_state = {'version': 3, 'snapshot': service.datasets.snapshot_id, 'issued': time.time(),
                       'messages': new_turns, 'confirmed': selected, 'function_id': result.get('function_id'),
+                      'time_intent': time_intent,
                       'initial_question': question[:1000], 'effective_question': question[:1000],
                       'missing_fields': result.get('missing_fields', []), 'open_question': result['answer'].get('questions', []),
                       'last_result': {'status': result['status'], 'result_id': result.get('result_id')}}
@@ -254,10 +351,12 @@ def analyze_chat(service, question, confirmed=None, *, function=None, history=No
         audit['proposed_tool'] = {'name': name, 'parameters': copy.deepcopy(args)}
         new_topic = isinstance(args.get('_dialogue'), dict) and args['_dialogue'].get('context') == 'new'
         name, args, dialogue, notes = resolve(name, args, state, service.datasets, explicit=confirmed)
+        time_intent = copy.deepcopy(dialogue['time'])
         selected, selected_function = args, name
         audit['conversation_transition'] = dialogue['context']
         if name is None and dialogue['context'] == 'continue':
             selected, selected_function = state.get('confirmed', {}), state.get('function_id')
+            if time_intent.get('kind')=='unspecified': time_intent=state.get('time_intent',{})
         missing = [k for k in FUNCTIONS[name][3]['required'] if k not in args] if name else []
         if missing or dialogue['clarification'] or name is None:
             result = limited('needs_clarification', 'Bitte ergänzen Sie die fehlende Auswahl.', missing_fields=missing)

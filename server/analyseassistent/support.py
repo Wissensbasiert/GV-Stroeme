@@ -50,6 +50,62 @@ def goods_structure(con,dataset,*,region,year,mode,metric,directions,granularity
             'note':'Aktueller C1–C7-Crosswalk; fehlende Gruppen bleiben unbekannt. Ranggleichstände vor Rundung, keine Standort- oder Produktionsursache.'}
 
 
+def goods_history(con,dataset,*,region,start,end,modes,metric,directions):
+    """Published profiles by year/mode; unknown groups never become zero."""
+    if start > end or end-start > 9:
+        raise ValueError('Güterzeitraum muss ein bis zehn Jahre umfassen')
+    if (15*(end-start+1)+16)*len(modes)*len(directions) > 600:
+        raise ValueError('Güterauswertung überschreitet den Ergebnisumfang')
+    labels=read(dependency(dataset,'b03')/'classification.json')['groups']
+    unit='t' if metric=='tonnes' else 'tkm'
+    observations=[]
+    complete=True
+    for year in range(start,end+1):
+        for mode in modes:
+            raw=goods_structure(con,dataset,region=region,year=year,mode=mode,metric=metric,
+                                directions=directions,granularity='C7')
+            if raw['status']!='available': complete=False
+            rows=raw['observations']
+            if not rows:
+                rows=[]
+                for direction in directions:
+                    for group in '1234567':
+                        meta={'group':group,'direction':direction,'region':region,'mode':mode,'year':year}
+                        rows.extend([{**meta,'label':direction+' / C'+group+' '+labels[group],'value':None},
+                                     {**meta,'label':direction+' / C'+group+' '+labels[group]+' / Anteil','value':None,'unit':'%'}])
+                    rows.append({'label':direction+' / Gesamt','direction':direction,'value':None,'region':region,'mode':mode,'year':year})
+            for row in rows:
+                observations.append({**row,'label':str(year)+' / '+mode+' / '+row['label'],
+                                     'source_status':'not_available' if raw['status']=='missing_year' else raw['status'],
+                                     'region':region,'metric':metric,'unit':row.get('unit',unit)})
+    # Calculate differences only from the requested endpoints of the same series.
+    for mode in modes:
+        for direction in directions:
+            for group in [None,*'1234567']:
+                endpoints=[next(r for r in observations if r.get('year')==y and r['mode']==mode
+                                and r['direction']==direction and r.get('group')==group and r['unit']==unit)
+                           for y in [start,end]]
+                first,last=endpoints
+                valid=first['value'] is not None and last['value'] is not None
+                absolute=last['value']-first['value'] if valid else None
+                relative=absolute/first['value']*100 if valid and first['value']!=0 else None
+                meta={'mode':mode,'direction':direction,'region':region,'metric':metric,
+                      'group':group,'start_year':start,'end_year':end,'basis':'published_profile_change',
+                      'endpoint_values':[first['value'],last['value']]}
+                label=f'{start}–{end} / {mode} / {direction} / '+('C'+group+' '+labels[group] if group else 'Gesamt')
+                observations.extend([{**meta,'label':label+' / Veränderung','value':absolute,'unit':unit,
+                                      'change':'absolute','formula':'end_value - start_value',
+                                      'value_status':'calculated' if valid else 'missing_value'},
+                                     {**meta,'label':label+' / Veränderung in Prozent','value':relative,'unit':'%',
+                                      'change':'relative','formula':'(end_value - start_value) / start_value * 100',
+                                      'value_status':'calculated' if relative is not None else 'not_computable' if valid else 'missing_value'}])
+    return {'status':'available_with_comparability_limits' if complete else 'partial','unit':unit,'observations':observations,
+            'scope':'Regionale C1–C7-Güterprofile; die ausgewählten Verkehrsträger und Richtungen werden getrennt ausgewertet, nicht addiert.',
+            'counting':'Versand und Empfang separat; all summiert beide Richtungen und zählt Binnen doppelt. Keine eindeutige Zählung von Transportketten über mehrere Verkehrsträger.',
+            'quality_note':'Veränderungen der veröffentlichten D01-Profilwerte, keine harmonisierte Gebietszeitreihe. Straßen-Quellenkennzeichen der Güterrandsummen sind nicht nacherschlossen; aus den Veränderungen folgt keine belegte Ursache.',
+            'note':'Fehlende Gütergruppen bleiben unbekannt, auch bei einem veröffentlichten Verkehrsträger-Gesamtwert null. Fehlende Randjahre werden nicht durch andere Jahre ersetzt.'}
+
+
 def intermodal_markets(con,dataset,*,region,year,modes,metrics,direction):
     records=read(Path(dataset)/'intermodal.json')
     observations=[]

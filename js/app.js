@@ -5490,6 +5490,9 @@
       const fragment = document.createDocumentFragment();
       if (result.answer_mode !== 'native_grounded_chat') fragment.append(node('h4', answer.title));
       answer.paragraphs.forEach(text => fragment.append(formattedParagraph(text)));
+      if (answer.tables.length) fragment.append(node('p', 'Die vollständigen Ergebnisse finden Sie in '+
+        (answer.tables.length === 1 ? 'der folgenden Tabelle.' : 'den folgenden Tabellen.')+
+        (answer.tables.some(table => table.collapsed) ? ' Öffnen Sie dafür „Detaillierte Ergebnistabelle anzeigen“.' : '')));
       if (answer.questions?.length) {
         const list = node('ul'); answer.questions.forEach(text => list.append(node('li', text))); fragment.append(list);
         const hint = node('p', 'Antworten Sie einfach hier im Chat. Die bisherigen Angaben bleiben berücksichtigt.', 'ki-message-meta'); fragment.append(hint);

@@ -41,6 +41,11 @@ FUNCTIONS = {
         region=CODE,year=YEAR,mode=MODE,metric=enum('tonnes','tkm'),
         directions={'type':'array','items':enum('all','outbound','inbound'),'minItems':1,'maxItems':3,'uniqueItems':True},
         granularity=enum('C7','NST20'))),
+    'goods_history': ('F06', 'Regionale C1–C7-Güterstruktur und Entwicklung über bis zu zehn Jahre für mehrere Verkehrsträger, getrennte Mengen, Anteile und berechnete Randjahresveränderungen; keine Relationsgüter und keine harmonisierte Zeitreihe', 'assistant_support', fields(
+        region=CODE,start=YEAR,end=YEAR,
+        modes={'type':'array','items':MODE,'minItems':1,'maxItems':3,'uniqueItems':True},
+        metric=enum('tonnes','tkm'),
+        directions={'type':'array','items':enum('all','outbound','inbound'),'minItems':1,'maxItems':3,'uniqueItems':True})),
     'intermodal_markets': ('F11', 'Getrennte KV-Teilmärkte mit jeweils passendem Modalnenner, ohne Verlagerungspotenzial', 'assistant_support', fields(
         region=CODE,year=YEAR,modes={'type':'array','items':enum('rail','iww'),'minItems':1,'maxItems':2,'uniqueItems':True},
         metrics={'type':'array','items':enum('tonnes','tkm'),'minItems':1,'maxItems':2,'uniqueItems':True},
@@ -179,6 +184,22 @@ def directed_pairs(question, names, endpoints):
     return pairs
 
 
+def qualified_region_mentions(question, names):
+    """A shared short name alone cannot contradict a confirmed district."""
+    owners={}
+    for code,labels in names.items():
+        for label in labels: owners.setdefault(label.casefold(),set()).add(code)
+    unique={code:[label for label in labels if len(owners[label.casefold()])==1] for code,labels in names.items()}
+    for alias,codes in owners.items():
+        if len(codes)!=2: continue
+        city=[code for code in codes if any(label.casefold() in {alias+', kreisfreie stadt',alias+', stadtkreis'} for label in names[code])]
+        if len(city)==1:
+            unique[city[0]].extend(['Stadt '+alias,'kreisfreie Stadt '+alias])
+            district=next(code for code in codes if code!=city[0])
+            unique[district].extend(['Landkreis '+alias,'Kreis '+alias,alias+', Landkreis'])
+    return {code for code in names if question_supports(question,code,unique)}
+
+
 def explicit_conflict(question, parameters, names):
     # Named VP scenarios are not observed-year selections. They can accompany
     # a separately confirmed Ist year in a combined profile.
@@ -195,7 +216,7 @@ def explicit_conflict(question, parameters, names):
     if parameters.get('mode') and mentioned_modes and mentioned_modes != {parameters['mode']}:
         return True
     if 'region' in parameters:
-        mentioned = {code for code in names if question_supports(question, code, names)}
+        mentioned = qualified_region_mentions(question,names)
         allowed_regions = {parameters['region']}
         if parameters.get('partner'):
             allowed_regions.add(parameters['partner'])

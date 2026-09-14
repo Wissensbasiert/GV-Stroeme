@@ -17,6 +17,8 @@ def required_files():
             *sorted((ROOT/'tests/analyseassistent').glob('test_*.py')),
             ROOT/'scripts/validation/validate_assistant_runtime.py',
             ROOT/'scripts/validation/validate_assistant_chat.py',
+            ROOT/'scripts/validation/validate_forecast_package.cjs',
+            ROOT/'scripts/analysis/build_assistant_release.py',
             ROOT/'scripts/analysis/prepare_assistant_gate.py',
             ROOT/'scripts/analysis/prepare_assistant_cases.py',
             ROOT/'scripts/analysis/run_assistant_catalog.py',

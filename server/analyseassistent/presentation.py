@@ -350,7 +350,14 @@ def present(result,datasets):
             'Gesamtverkehr in der VP: Versand und Empfang ohne Binnenverkehr plus Binnenverkehr einmal. Einzelne Versand-/Empfangswerte enthalten keinen Binnenverkehr.'])
     if function in {'forecast_regions','forecast_comparison','forecast_ranking'} or p.get('include_forecast'):
         answer['notes'].append('Die Prognose vergleicht das Basisszenario 2019 mit dem Szenario für 2040. Das sind Modellannahmen, keine beobachtete Entwicklung und keine sichere Vorhersage. Beobachtete Werte bleiben davon getrennt.')
-    if function=='goods_structure':
+    if function=='goods_history':
+        answer['title']='Güterstruktur für '+region+f' ({p["start"]}–{p["end"]})'
+        if answer['tables']:
+            answer['tables'][0].update(title='Gütergruppen und Jahresentwicklung im Detail',columns=['Jahr · Verkehrsträger · Gütergruppe','Wert','Einheit','Hinweis'])
+        answer['notes'].extend(['Die Verkehrsträger werden getrennt betrachtet. Ihre Mengen werden nicht zu einer eindeutigen Transportmenge über alle Transportketten addiert.',
+            'Dargestellt sind Veränderungen der veröffentlichten Profilwerte; keine harmonisierte Gebietszeitreihe und kein Nachweis von Ursachen. Straßen-Quellenkennzeichen der Güterrandsummen sind nicht nacherschlossen.',
+            'Fehlende Gütergruppen bleiben unbekannt, auch wenn der Gesamtwert eines Verkehrsträgers null beträgt. Daraus folgt kein Nachweis von Nullverkehr.'])
+    if function in {'goods_structure','goods_history'}:
         answer['notes'].append('Die Gütergruppen beschreiben die ausgewählte Region. Ihre Anteile lassen sich nicht als Güterverteilung einer einzelnen Verbindung lesen.')
     if status=='partial' and function not in {'road_relation_goods_limit','relation_history'}:
         answer['notes'].append('Ein Teil der gewünschten Angaben fehlt oder ist nur eingeschränkt nutzbar. Fehlende Werte werden in der Tabelle ausdrücklich angezeigt und nicht durch null ersetzt.')

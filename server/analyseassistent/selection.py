@@ -1,7 +1,7 @@
 """Structured model intent -> bounded data selection; no natural-language parser."""
 import copy
 import json
-from .contracts import FUNCTIONS, fields, validate
+from .contracts import FUNCTIONS, fields, validate, YEAR
 from .dialogue import available_years, previous_calendar_year
 
 TIME_KEYS = {'year', 'years', 'start', 'end', 'observed_years'}
@@ -9,8 +9,9 @@ DIALOGUE = fields(
     context={'enum': ['new', 'continue']},
     clarification={'type': 'string', 'maxLength': 600},
     time=fields(kind={'enum': ['unspecified', 'explicit', 'latest_available', 'previous_calendar_year',
-                              'last_calendar_years', 'last_available_years']},
+                              'last_calendar_years', 'last_available_years', 'since_available']},
                 count={'type': 'integer', 'minimum': 0, 'maximum': 10}))
+DIALOGUE['properties']['time']['properties']['start_year'] = YEAR
 
 
 class SelectionError(ValueError):
@@ -50,6 +51,9 @@ def validate_selection(name, args, datasets):
         registry = json.loads((datasets.paths['b0406'] / 'regions.json').read_text(encoding='utf-8'))['2024']
         if any(code not in registry for code in args['regions']):
             raise SelectionError('unsupported_forecast_region', 'Die regionale Prognose liegt für Kreise und kreisfreie Städte vor. Welche dieser Regionen möchten Sie betrachten?', ['regions'])
+    if name == 'goods_history' and all(k in args for k in ['start','end','modes','directions']):
+        if (15*(args['end']-args['start']+1)+16)*len(args['modes'])*len(args['directions']) > 600:
+            raise SelectionError('too_many_goods_values', 'Bitte grenzen Sie Zeitraum oder Verkehrsrichtungen für die Güterauswertung etwas ein.', ['start','end','directions'])
     if 'start' in args and 'end' in args and (args['start'] > args['end'] or args['end'] - args['start'] > 9):
         raise SelectionError('invalid_period', 'Bitte wählen Sie einen zusammenhängenden Zeitraum von höchstens zehn Jahren.', ['start', 'end'])
     return args
@@ -81,6 +85,14 @@ def inherited_selection(name, state):
     if metrics:
         if 'metrics' in props: old['metrics'] = metrics
         if 'metric' in props and len(metrics) == 1: old['metric'] = metrics[0]
+    if 'directions' in props and old.get('direction') in {'outbound','inbound','all'}:
+        old['directions'] = [old['direction']]
+    if 'direction' in props and len(old.get('directions',[])) == 1:
+        old['direction'] = old['directions'][0]
+    if name == 'goods_history' and old_function == 'goods_structure' and old.get('year'):
+        old.update(start=old['year'],end=old['year'])
+    if name == 'goods_structure' and old_function == 'goods_history' and old.get('end'):
+        old['year'] = old['end']
     return {k: v for k, v in old.items() if k in props}
 
 
@@ -97,6 +109,9 @@ def resolve(name, arguments, state, datasets, explicit=None):
         return None, {}, dialogue, []
     validate_selection(name, args, datasets)
     inherited = inherited_selection(name, state) if dialogue['context'] == 'continue' else {}
+    if dialogue['context'] == 'continue' and dialogue['time']['kind'] == 'unspecified' and not any(k in args for k in TIME_KEYS):
+        if state.get('time_intent',{}).get('kind') == 'since_available':
+            dialogue['time'] = copy.deepcopy(state['time_intent'])
     kind = dialogue['time']['kind']
     if kind != 'unspecified':
         inherited = {k: v for k, v in inherited.items() if k not in TIME_KEYS}
@@ -113,9 +128,25 @@ def resolve(name, arguments, state, datasets, explicit=None):
     if name in {'relation_history', 'relation_overview'}: defaults['modes'] = ['road', 'rail', 'iww']
     if name == 'forecast_regions':
         defaults.update(modes=['road', 'rail', 'iww'], direction='all')
+    if name == 'goods_history': defaults['modes'] = ['road','rail','iww']
     for key, value in defaults.items():
         if key in props and key not in args: args[key] = copy.deepcopy(value)
-    if kind not in {'unspecified', 'explicit'}:
+    if kind == 'since_available':
+        start = dialogue['time'].get('start_year')
+        if start is None or not {'start','end'} <= props.keys() or dialogue['time']['count'] != 0:
+            raise SelectionError('invalid_since', 'Mit welchem Jahr soll die Zeitreihe beginnen?', ['start'])
+        if any(k in arguments for k in TIME_KEYS):
+            raise SelectionError('conflicting_time', 'Bitte geben Sie entweder einen festen Zeitraum oder ein Startjahr bis zum neuesten verfügbaren Jahr an.', ['start','end'])
+        args['start'] = start
+        # Resolve only after the region is known; preserve intent across clarification.
+        if args.get('region') or (args.get('origin') and args.get('destination')):
+            coverage_function = {'regional_history':'region_profile'}.get(name,name)
+            years = available_years(datasets,coverage_function,args)
+            if not years or max(years) < start:
+                raise SelectionError('unresolved_since', 'Ab dem gewünschten Startjahr ist kein gemeinsamer Jahrgang verfügbar. Welchen Zeitraum möchten Sie betrachten?', ['start','end'])
+            args['end'] = max(years)
+            notes.append(f'Zeitraum: {start}–{max(years)}; bis zum neuesten gemeinsamen Datenjahr der ausgewählten Verkehrsträger. Jahrgangsabdeckung garantiert keine vollständigen Einzelwerte.')
+    elif kind not in {'unspecified', 'explicit'}:
         if any(k in arguments for k in TIME_KEYS):
             raise SelectionError('conflicting_time', 'Meinen Sie bestimmte Kalenderjahre oder die neuesten verfügbaren Daten?', list(TIME_KEYS & props.keys()))
         count = dialogue['time']['count']

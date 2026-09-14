@@ -76,6 +76,14 @@ def available_years(datasets,function,parameters):
             return sorted(set.intersection(*(set(int(y) for y in years.get(selected,[])) for selected in modes)))
         if mode:return sorted(int(y) for y in years.get(mode,[]))
         return sorted(set.intersection(*(set(int(y) for y in value) for value in years.values())))
+    if function=='goods_history':
+        if 'assistant_support' not in datasets.paths or not parameters.get('region'):
+            return []
+        goods=json.loads((datasets.paths['assistant_support']/'goods.json').read_text(encoding='utf-8'))
+        profile_years={int(y) for y in goods.get(parameters['region'],{})}
+        coverage=json.loads((datasets.paths['b0406']/'source_coverage.json').read_text(encoding='utf-8'))
+        modes=parameters.get('modes') or ['road','rail','iww']
+        return sorted(set.intersection(profile_years,*({r['year'] for r in coverage if r['mode']==m} for m in modes)))
     if function in {'region_profile','regional_modal_split','compare_regions','balance','goods_structure','intermodal_markets'}:
         path=datasets.paths['b0406']/'regional_profiles.parquet'
         regions=parameters.get('regions') or ([parameters['region']] if parameters.get('region') else [])

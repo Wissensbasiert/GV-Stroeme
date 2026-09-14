@@ -89,6 +89,52 @@ def analytical_statements(function,parameters,rows,datasets):
                 parts.append(DIRECTION_LABELS[direction]+': '+label+' ('+detail+')')
                 facts.extend([leader,share])
             add('Die jeweils größte Gütergruppe prägt das Ergebnis besonders: '+'; '.join(parts)+'.',*facts)
+        for direction in parameters['directions']:
+            total=totals.get(direction)
+            ranked=sorted([r for r in available if r.get('direction')==direction and r.get('group') and r.get('unit')!='%'],key=lambda r:r['value'],reverse=True)
+            if total and ranked:
+                top=[r for r in ranked if r.get('rank',999)<=3]
+                parts=[re.sub(r'^.*?/ C\d+\s*','',r['label'])+' mit '+compact_value(r['value'],r['unit']) for r in top]
+                add(f'{parameters["year"]}: '+DIRECTION_LABELS[direction]+' auf '+MODE_LABELS[parameters['mode']]+': '+compact_value(total['value'],total['unit'])+'. Weitere Einordnung der führenden Gütergruppen: '+'; '.join(parts)+'.',total,*top)
+    if function=='goods_history':
+        for mode in parameters['modes']:
+            for direction in parameters['directions']:
+                latest=[r for r in rows if r.get('year')==parameters['end'] and r.get('mode')==mode and r.get('direction')==direction]
+                quantities=[r for r in latest if r.get('group') and r['unit']!='%']
+                ranked=sorted([r for r in quantities if r['value'] is not None],key=lambda r:r['value'],reverse=True)
+                total=next((r for r in latest if not r.get('group') and r['unit']!='%'),None)
+                text=f'{MODE_LABELS[mode]}, {DIRECTION_LABELS[direction]} {parameters["end"]}: '
+                refs=[*latest]
+                if ranked:
+                    top=[r for r in ranked if r.get('rank',999)<=3]
+                    parts=[]
+                    for r in top:
+                        label=re.sub(r'^.*?/ C\d+\s*','',r['label'])
+                        share=next((s for s in latest if s.get('group')==r['group'] and s['unit']=='%'),None)
+                        parts.append(label+' mit '+compact_value(r['value'],r['unit'])+(f' ({compact_value(share["value"],"%")})' if share and share['value'] is not None else ''))
+                    text+=('Die größten Gütergruppen sind ' if all(r['value'] is not None for r in quantities) else 'Unter den bekannten Güterangaben führen ')+ '; '.join(parts)+'. '
+                else:
+                    text+='Es liegen keine aufgeschlüsselten Gütergruppenwerte vor; eine Rangfolge ist nicht möglich. '
+                if total and total['value'] is not None:
+                    text+='Der veröffentlichte Gesamtwert beträgt '+compact_value(total['value'],total['unit'])+'. '
+                # Overall trend and the latest leader's trend, without inferring missing groups.
+                for group in ([None,ranked[0]['group']] if ranked else [None]):
+                    endpoints=[next((r for r in rows if r.get('year')==year and r.get('mode')==mode and r.get('direction')==direction
+                                     and r.get('group')==group and r['unit']!='%'),None) for year in [parameters['start'],parameters['end']]]
+                    changes=[r for r in rows if r.get('change') and r.get('mode')==mode and r.get('direction')==direction and r.get('group')==group]
+                    first,last=endpoints
+                    relative=next((r for r in changes if r.get('change')=='relative'),None)
+                    label='Gesamtwert' if group is None else 'Führende Gütergruppe'
+                    if first and last and first['value'] is not None and last['value'] is not None:
+                        text+=f'{label} {parameters["start"]} → {parameters["end"]}: '+compact_value(first['value'],first['unit'])+' → '+compact_value(last['value'],last['unit'])
+                        if relative and relative['value'] is not None:
+                            text+='; Veränderung der veröffentlichten Werte '+compact_value(relative['value'],'%')
+                        else: text+='; keine prozentuale Veränderung bei Ausgangswert null'
+                        text+='. '
+                    else:
+                        text+=f'{label}: Die Entwicklung {parameters["start"]}–{parameters["end"]} ist wegen fehlender Randjahreswerte nicht berechenbar. '
+                    refs.extend([first,last,*changes])
+                add(text.strip(),*refs)
     if function in {'relation_matrix','relation_history'}:
         origin=display_name(parameters.get('origin'),datasets); destination=display_name(parameters.get('destination'),datasets)
         if function=='relation_history':
@@ -142,21 +188,34 @@ def analytical_statements(function,parameters,rows,datasets):
                 add(' '.join(parts)+(' '+comparison if comparison else ''),*endpoints)
         else:
             for direction in [(parameters.get('origin'),parameters.get('destination')),(parameters.get('destination'),parameters.get('origin'))]:
-                direction_rows=sorted([r for r in available if (r.get('origin'),r.get('destination'))==direction],key=lambda r:r['value'],reverse=True)
+                direction_rows=[r for r in rows if (r.get('origin'),r.get('destination'))==direction]
                 if direction_rows:
-                    add('Von '+display_name(direction[0],datasets)+' nach '+display_name(direction[1],datasets)+' ist '+MODE_LABELS.get(direction_rows[0].get('mode'),str(direction_rows[0].get('mode')))+' der größte veröffentlichte Verkehrsträgerwert ('+compact_value(direction_rows[0]['value'],direction_rows[0]['unit'])+').',direction_rows[0])
+                    parts=[MODE_LABELS.get(r.get('mode'),str(r.get('mode')))+': '+(compact_value(r['value'],r['unit']) if r['value'] is not None else 'kein eigener veröffentlichter Zahlenwert; keine Aussage über Nullverkehr') for r in direction_rows]
+                    add('Von '+display_name(direction[0],datasets)+' nach '+display_name(direction[1],datasets)+' im Jahr '+str(parameters['year'])+': '+'; '.join(parts)+'.',*direction_rows)
     if function=='compare_regions':
         totals=[r for r in available if r.get('region') and not r.get('mode') and not r.get('group')]
-        if len(totals)>=2:
-            ordered=sorted(totals,key=lambda r:r['value'],reverse=True)
-            difference=ordered[0]['value']-ordered[-1]['value']
-            add(display_name(ordered[0]['region'],datasets)+' weist mit '+compact_value(ordered[0]['value'],ordered[0]['unit'])+' den höheren Gesamtwert auf; '+display_name(ordered[-1]['region'],datasets)+' kommt auf '+compact_value(ordered[-1]['value'],ordered[-1]['unit'])+'. Der Abstand beträgt '+compact_value(difference,ordered[0]['unit'])+'.',ordered[0],ordered[-1])
+        labels={'1':'Erzeugnisse der Land- und Forstwirtschaft, Rohstoffe','2':'Konsumgüter zum kurzfristigen Verbrauch, Holzwaren','3':'Mineralische, chemische und Mineralölerzeugnisse','4':'Metalle und Metallerzeugnisse','5':'Maschinen und Ausrüstungen, langlebige Konsumgüter','6':'Sekundärrohstoffe, Abfälle','7':'Sonstige Produkte'}
+        for region in parameters['regions']:
+            selected=[r for r in rows if r.get('region')==region]
+            total=next((r for r in selected if not r.get('mode') and not r.get('group')),None)
+            text=display_name(region,datasets)+' ('+str(parameters['year'])+', '+DIRECTION_LABELS[parameters['direction']]+'): '
+            text+='Veröffentlichtes Güteraufkommen '+compact_value(total['value'],total['unit'])+'. ' if total and total['value'] is not None else 'Kein vollständiges Güteraufkommen verfügbar. '
+            modes=[r for r in selected if r.get('mode') and r['unit']!='%']
+            parts=[]
+            for r in modes:
+                share=next((s for s in selected if s.get('mode')==r['mode'] and s['unit']=='%'),None)
+                parts.append(MODE_LABELS[r['mode']]+': '+(compact_value(r['value'],r['unit']) if r['value'] is not None else 'unbekannt')+((' ('+compact_value(share['value'],'%')+')') if share and share['value'] is not None else ''))
+            text+='Modal Split: '+'; '.join(parts)+'. '
+            groups=sorted([r for r in selected if r.get('group') and r['unit']!='%' and r['value'] is not None],key=lambda r:r['value'],reverse=True)[:3]
+            text+='Größte Gütergruppen: '+'; '.join(labels[r['group']]+' mit '+compact_value(r['value'],r['unit']) for r in groups)+'.' if groups else 'Keine Rangfolge der Gütergruppen verfügbar.'
+            add(text,*selected)
     if function in {'partner_ranking','node_partners'}:
         leader=next((r for r in available if r.get('rank')==1 and r.get('unit')!='%'),None)
         if leader:
             share=next((r for r in available if r.get('unit')=='%' and r.get('partner_id')==leader.get('partner_id')),None)
             label=display_name(leader.get('partner_id'),datasets) if leader.get('partner_id') else leader['label']
-            add(label+' steht mit '+compact_value(leader['value'],leader['unit'])+' an erster Stelle'+((' und erreicht '+compact_value(share['value'],'%')+' der veröffentlichten Auswahl') if share else '')+'.',leader,share)
+            ranked=[r for r in available if r.get('rank') and r.get('unit')!='%']
+            add('Die wichtigsten veröffentlichten Partner der Auswahl sind: '+'; '.join((display_name(r['partner_id'],datasets) if r.get('partner_id') else r['label'])+' mit '+compact_value(r['value'],r['unit']) for r in ranked)+'.',*ranked)
     if function=='intermodal_markets':
         for share in [r for r in available if r.get('unit')=='%']:
             add(MODE_LABELS.get(share.get('mode'),str(share.get('mode')))+': Der ausgewiesene intermodale Teilmarkt umfasst '+compact_value(share['value'],'%')+' der veröffentlichten Menge dieses Verkehrsträgers.',share)
@@ -219,6 +278,7 @@ def make_result(function, parameters, raw, datasets, rules_version):
         'rail_goods_history': 'Destatis SGV: veröffentlichte Original-Feinpositionen je Jahr',
         'explain_scope': 'Gebundener B03-Klassifikationsstand und feste Fachregeln des Analyseassistenten',
         'goods_structure': 'D01: modebezogene Regionalprofile; gebundener C1–C7-Crosswalk',
+        'goods_history': 'D01: modebezogene C1–C7-Regionalprofile je Jahr mit Quellenjahresprüfung',
         'intermodal_markets': 'Destatis: SGV/IWW-Rohquellen; getrennte Ladeeinheiten-/Containerteilmärkte',
         'node_profile': 'Eurostat AVIA_GOOA / Destatis Seeverkehr, je Knotentyp und Kennzahl',
         'regional_history': 'D01: Regionalprofile mit B02-Quellenjahresprüfung',
@@ -271,7 +331,7 @@ def make_result(function, parameters, raw, datasets, rules_version):
                      'quality_status': metadata.pop('quality', raw.get('quality', 'unknown')),
                      'source_status': status, 'source': source_labels[function], 'parameters': parameters,
                      'data_snapshot_id': datasets.snapshot_id, **metadata})
-    if function in {'forecast_regions','relation_overview','region_profile', 'regional_modal_split', 'forecast_comparison', 'relation_matrix','relation_history', 'partner_ranking','regional_history','modal_history','node_profile','goods_structure','intermodal_markets','road_relation_goods_limit','rail_goods_history'}:
+    if function in {'goods_history','forecast_regions','relation_overview','region_profile', 'regional_modal_split', 'forecast_comparison', 'relation_matrix','relation_history', 'partner_ranking','regional_history','modal_history','node_profile','goods_structure','intermodal_markets','road_relation_goods_limit','rail_goods_history'}:
         for observation in raw['observations']:
             metadata = {key: value for key, value in observation.items() if key not in {'label', 'value', 'unit'}}
             if observation.get('basis'):
@@ -403,7 +463,7 @@ def make_result(function, parameters, raw, datasets, rules_version):
             'status': status, 'source_status': raw.get('status'), 'facts': rows,
             'tables': [{'id': 'table1', 'rows': rows}] if rows else [], 'statements': statements,
             'notices': list(dict.fromkeys(notices)), 'sources': [source_labels[function]],
-            'summary': [s['text'] for s in (insights[:3] or statements[:3])], 'answer_mode': 'fixed_verified'}
+            'summary': [s['text'] for s in (insights if function in {'goods_history','compare_regions'} else insights[:3]) or statements[:3]], 'answer_mode': 'fixed_verified'}
 
 
 def limited(status, notice, *, missing_fields=None):

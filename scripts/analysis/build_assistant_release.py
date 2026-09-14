@@ -3,11 +3,20 @@ import argparse
 import json
 from pathlib import Path
 import shutil
+import re
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from server.analyseassistent.datasets import Datasets, digest, below
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def validate_public_data_files(app_source, files):
+    """Fail if a literal browser data dependency is omitted from the package."""
+    required=sorted({'public/'+match[1] for match in re.findall(r'\bfetchJson\s*\(\s*([\'"])(data/[^\'"?]+)',app_source)})
+    missing=[name for name in required if name not in files]
+    if missing: raise ValueError('Im Fachpaket fehlen Browserdaten: '+', '.join(missing))
+    return required
 
 
 def build(output):
@@ -37,6 +46,8 @@ def build(output):
                     'nuts1_de_boundaries.geojson', *[f'nuts3_de_{year}_display.geojson' for year in [2016,2021,2024]]]
     for file in browser_data:
         copy(ROOT/'data/processed'/file, 'public/data/processed/'+file)
+    for file in ['crosswalk_spatial_vp2040.json','crosswalk_nst_vp2040.json']:
+        copy(ROOT/'data/crosswalks'/file,'public/data/crosswalks/'+file)
     for directory in ['assets', 'data/processed/delivery', 'data/processed/relations', 'data/processed/toll_municipality_boundaries']:
         for source in sorted((ROOT/directory).rglob('*')):
             if source.is_file() and '__pycache__' not in source.parts:
@@ -56,9 +67,11 @@ def build(output):
         private_files.add('data/analysis/'+package+'/current.json')
     for file in sorted(private_files):
         copy(below(ROOT,file), 'private/'+file)
+    required_browser_data=validate_public_data_files((output/'public/js/app.js').read_text(encoding='utf-8'),hashes)
     summary={'format_version':'0.3.0', 'data_snapshot_id':datasets.snapshot_id,
              'status':'local_handoff_not_deployed', 'portal_adapter_status':'local_integration_requires_release_validation',
              'files_sha256':hashes, 'file_count':len(hashes),
+             'literal_browser_data_dependencies':required_browser_data,
              'bytes':sum(below(output,p).stat().st_size for p in hashes),
              'note':'Private Daten und Programme niemals unter dem öffentlichen Webpfad bereitstellen. Portaladapter und PostgreSQL-Verbrauch lokal geprüft; vollständiger Release und Liveabnahme bleiben gesondert erforderlich.'}
     (output/'release.json').write_text(json.dumps(summary,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
