@@ -9,7 +9,7 @@ from .contracts import FUNCTIONS, fields, validate, explicit_conflict, question_
 from .conversation import pack, unpack
 from .dialogue import previous_calendar_year
 from .narrative import evidence
-from .presentation import present
+from .presentation import present, number
 from .requesty import ModelError
 from .results import limited, make_result
 from .alternatives import related_data
@@ -56,18 +56,31 @@ def packet(result, datasets):
         item = {'text': text}
         if key in facts:
             item.update({k: facts[key][k] for k in ['value', 'unit', 'year', 'mode', 'origin', 'destination',
+                        'region', 'region_name', 'metric', 'scenario', 'direction', 'basis',
                         'source_status', 'quality_status', 'source'] if k in facts[key]})
         structured[key] = item
+    if result.get('function_id') == 'forecast_regions':
+        groups = {}
+        for fact in facts.values():
+            groups.setdefault((fact['region'], fact['mode'], fact['metric']), []).append(fact)
+        for i, ((region, mode, metric), group) in enumerate(groups.items(), 1):
+            structured['forecast_group_' + str(i)] = {
+                'text': ' '.join(structured[f['fact_id']]['text'] for f in group),
+                'region': region, 'mode': mode, 'metric': metric, 'basis': 'VP2019_BASE_to_2040_P1',
+                'fact_ids': [f['fact_id'] for f in group]}
     params = result.get('parameters', {})
     scope = {k: params[k] for k in params}
     for key in ['origin', 'destination', 'region', 'partner']:
         if scope.get(key) in datasets.names:
             scope[key] = {'code': scope[key], 'name': min(datasets.names[scope[key]], key=len)}
+    if params.get('regions'):
+        scope['regions'] = [{'code': code, 'name': min(datasets.names[code], key=len)} for code in params['regions']]
     return {'status': result['status'], 'scope': scope, 'evidence': structured,
             'questions': answer.get('questions', []),
             'instructions': 'Antworte frei mit eigenen Sätzen und exakten Zahlen aus den Belegen. '
             'Jeder Absatz nennt nur seine verwendeten evidence_ids. Werte gehören zu ihrem Jahr, '
             'ihrer Richtung und Einheit. Keine Platzhalter. Keine selbst berechneten Zahlen. '
+            'Bei Prognosevergleichen nutze die forecast_group-Belege: Sie enthalten jeweils Basis, Ziel und beide Veränderungen einer Region, eines Verkehrsträgers und einer Kennzahl. '
             'Die Tabelle und nötigen Qualitätsgrenzen werden zusätzlich angezeigt; wiederhole sie nicht vollständig.'}
 
 
@@ -95,6 +108,19 @@ def check_prose(selection, payload, result, datasets):
         if not quantities(text) <= quantities(allowed_text):
             raise ValueError('Zahl und Einheit sind nicht gemeinsam belegt')
         for sentence in re.split(r'(?<=[!?])\s+|(?<!\d)\.\s+(?=[A-ZÄÖÜ])', text):
+            if result.get('function_id') == 'forecast_regions':
+                mentioned = {code for code in datasets.names if question_supports(sentence, code, datasets.names)}
+                if not mentioned <= set(params['regions']):
+                    raise ValueError('Region fehlt in der abgefragten Auswahl')
+                if len(mentioned) == 1:
+                    region_facts = [f for f in result['facts'] if f.get('region') in mentioned]
+                    allowed_region_quantities = {(round(float(f['value']), 6), unit_names.get(f['unit'].lower(), f['unit'].lower()))
+                                                 for f in region_facts if f['value'] is not None}
+                    # Match the same rounding used by the customer presentation.
+                    allowed_region_quantities |= {(next(iter(numbers(number(f['value'])))), unit_names.get(f['unit'].lower(), f['unit'].lower()))
+                                                  for f in region_facts if f['value'] is not None}
+                    if not quantities(sentence) <= allowed_region_quantities:
+                        raise ValueError('Zahl und Region sind nicht gemeinsam belegt')
             years = {int(y) for y in YEAR.findall(sentence)}
             numeric = numbers(sentence)
             for f in result.get('facts', []):

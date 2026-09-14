@@ -1,5 +1,6 @@
 """Structured model intent -> bounded data selection; no natural-language parser."""
 import copy
+import json
 from .contracts import FUNCTIONS, fields, validate
 from .dialogue import available_years, previous_calendar_year
 
@@ -45,6 +46,10 @@ def validate_selection(name, args, datasets):
         for code in value if isinstance(value, list) else [value] if value else []:
             if code not in datasets.names:
                 raise SelectionError('unknown_region', 'Welche Stadt oder welchen Kreis meinen Sie genau?', [key])
+    if name == 'forecast_regions' and args.get('regions'):
+        registry = json.loads((datasets.paths['b0406'] / 'regions.json').read_text(encoding='utf-8'))['2024']
+        if any(code not in registry for code in args['regions']):
+            raise SelectionError('unsupported_forecast_region', 'Die regionale Prognose liegt für Kreise und kreisfreie Städte vor. Welche dieser Regionen möchten Sie betrachten?', ['regions'])
     if 'start' in args and 'end' in args and (args['start'] > args['end'] or args['end'] - args['start'] > 9):
         raise SelectionError('invalid_period', 'Bitte wählen Sie einen zusammenhängenden Zeitraum von höchstens zehn Jahren.', ['start', 'end'])
     return args
@@ -54,6 +59,10 @@ def inherited_selection(name, state):
     old = copy.deepcopy(state.get('confirmed', {}))
     props = FUNCTIONS[name][3]['properties']
     old_function = state.get('function_id') or ''
+    if name == 'forecast_regions' and old_function in {'forecast_comparison', 'region_profile', 'compare_regions'} and old.get('region'):
+        old['regions'] = [old['region']]
+    if old_function == 'forecast_regions' and 'region' in props and len(old.get('regions', [])) == 1:
+        old['region'] = old['regions'][0]
     # Translate equivalent parameter names when the model switches data products.
     if 'origin' in props and old.get('region') and old.get('partner'):
         # A total across both directions cannot become a directed pair.
@@ -102,6 +111,8 @@ def resolve(name, arguments, state, datasets, explicit=None):
     defaults = {'metric': 'tonnes', 'metrics': ['tonnes'], 'group': 'ALL', 'nst': None,
                 'top': 10, 'include_forecast': False, 'include_goods': True, 'granularity': 'C7'}
     if name in {'relation_history', 'relation_overview'}: defaults['modes'] = ['road', 'rail', 'iww']
+    if name == 'forecast_regions':
+        defaults.update(modes=['road', 'rail', 'iww'], direction='all')
     for key, value in defaults.items():
         if key in props and key not in args: args[key] = copy.deepcopy(value)
     if kind not in {'unspecified', 'explicit'}:

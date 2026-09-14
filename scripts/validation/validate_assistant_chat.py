@@ -18,6 +18,7 @@ def main():
     parser.add_argument('--limit', type=int, default=8, choices=range(1, 10))
     parser.add_argument('--focus', action='store_true', help='Nur zwei Datenlücken und die konkrete Warum-Rückfrage')
     parser.add_argument('--semantic', action='store_true', help='Offene Formulierungen, Zahlwörter, Gegenrichtung und Themenwechsel')
+    parser.add_argument('--forecast', action='store_true', help='Mehrregionenprognose, beide Kennwerte und Anschlussfragen')
     args = parser.parse_args()
     if args.output.exists(): raise SystemExit('Neue Ergebnisdatei erforderlich; Wiederholung gesperrt.')
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -49,6 +50,14 @@ def main():
         ['Wie hoch waren 2024 die Emissionen von Dortmund nach Bielefeld?'],
     ]
     if args.payload_review: conversations = [conversations[1][:1]]
+    elif args.forecast:
+        conversations = [
+            ['Wie entwickelt sich bis 2040 die Schienengüterverkehre in Magdeburg und Duisburg?',
+             'Bitte stelle beide Regionen und beide Kennwerte dar', 'na 2040'],
+            ['Vergleiche die Prognose 2040 für Duisburg und Magdeburg auf der Schiene in Tonnen und Tonnenkilometern.',
+             'Und nur den Empfang?', 'Jetzt die beobachtete Gütermenge 2024 in Berlin auf der Schiene.'],
+            ['Zeige die Prognose für Magdeburg für 2035.'],
+        ]
     elif args.semantic:
         conversations = [
             ['Welche Güter fließen von meinem Schwarzwald-Baar-Kreis Richtung Hamburg?', 'die letzten fünf Jahre',

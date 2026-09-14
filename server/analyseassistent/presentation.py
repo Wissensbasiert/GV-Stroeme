@@ -134,6 +134,7 @@ def present(result,datasets):
                 notes.append({'missing_row':'Kein eigener Eintrag für diese Verbindung.',
                               'not_available':'Jahrgang für diese Auswahl nicht verfügbar.',
                               'suppressed':'In der Quelle unterdrückter Wert.',
+                              'not_computable':'Prozentuale Veränderung bei Ausgangswert null nicht berechenbar.',
                               'missing_value':'Quellwert unbekannt oder nicht veröffentlicht.'}.get(f.get('value_status'), 'In dieser Statistik ist kein nutzbarer Wert erfasst beziehungsweise veröffentlicht.'))
             if f.get('quality_status')=='restricted': notes.append('Laut Quelle eingeschränkt belastbar.')
             if f['value']==0: notes.append('Veröffentlichte Null; möglicherweise gerundet.')
@@ -317,7 +318,37 @@ def present(result,datasets):
     elif function=='road_details':
         answer['notes'].append('Diese Auswertung bezieht sich auf deutsche Güterkraftfahrzeuge und die räumliche Abgrenzung der zugrunde liegenden Straßenverkehrsstatistik. Sie ist keine vollständige Aufteilung einzelner Straßenverbindungen.')
         answer['notes'].append('Ausgewählt sind '+('Fahrten innerhalb Deutschlands.' if p.get('population')=='I' else 'die Gesamtverkehre der genannten Fahrzeuggruppe.'))
-    if function in {'forecast_comparison','forecast_ranking'} or p.get('include_forecast'):
+    if function == 'forecast_regions':
+        answer['title'] = 'Prognose 2040: ' + ', '.join(name(region, datasets) for region in p['regions'])
+        original_rows = {row['fact_ids'][0]: row for table in answer['tables'] for row in table['rows']}
+        answer['tables'], answer['paragraphs'] = [], []
+        for region in p['regions']:
+            for mode in p['modes']:
+                selected = [f for f in facts if f.get('region') == region and f.get('mode') == mode]
+                rows = [original_rows[f['fact_id']] for f in selected]
+                answer['tables'].append({'title': name(region, datasets) + ' · ' + MODES[mode],
+                    'columns': ['Kennwert', 'Wert', 'Einheit', 'Hinweis'], 'rows': rows,
+                    'collapsed': len(rows) > 4, 'row_count': len(rows)})
+                parts = []
+                for metric in p['metrics']:
+                    group = [f for f in selected if f.get('metric') == metric]
+                    base = next(f for f in group if f.get('scenario') == '2019_BASE')
+                    target = next(f for f in group if f.get('scenario') == '2040_P1')
+                    change = next(f for f in group if f['unit'] == '%')
+                    label = 'Gütermenge' if metric == 'tonnes' else 'Verkehrsleistung'
+                    if base['value'] is None or target['value'] is None:
+                        parts.append(label + ': Für den Szenariovergleich fehlt ein nutzbarer Wert.')
+                    else:
+                        text = label + ': von ' + number(base['value']) + ' ' + UNITS[base['unit']] + ' auf ' + number(target['value']) + ' ' + UNITS[base['unit']]
+                        if change['value'] is not None:
+                            text += ' (Veränderung ' + number(change['value']) + ' %)'
+                        else:
+                            text += ' (keine prozentuale Veränderung bei Ausgangswert null)'
+                        parts.append(text + '.')
+                answer['paragraphs'].append(name(region, datasets) + ', ' + MODES[mode] + ': Prognosebasis 2019 → Prognose 2040. ' + ' '.join(parts))
+        answer['notes'].extend(['Szenariovergleich, keine beobachtete Entwicklung. Regionen und Kennzahlen werden getrennt ausgewiesen und nicht addiert.',
+            'Gesamtverkehr in der VP: Versand und Empfang ohne Binnenverkehr plus Binnenverkehr einmal. Einzelne Versand-/Empfangswerte enthalten keinen Binnenverkehr.'])
+    if function in {'forecast_regions','forecast_comparison','forecast_ranking'} or p.get('include_forecast'):
         answer['notes'].append('Die Prognose vergleicht das Basisszenario 2019 mit dem Szenario für 2040. Das sind Modellannahmen, keine beobachtete Entwicklung und keine sichere Vorhersage. Beobachtete Werte bleiben davon getrennt.')
     if function=='goods_structure':
         answer['notes'].append('Die Gütergruppen beschreiben die ausgewählte Region. Ihre Anteile lassen sich nicht als Güterverteilung einer einzelnen Verbindung lesen.')

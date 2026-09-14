@@ -66,7 +66,12 @@ FUNCTIONS = {
         region=CODE, year=YEAR, metric=enum('tonnes', 'tkm'), include_forecast={'type': 'boolean'})),
     'regional_modal_split': ('F08', 'Regionale Verkehrsanteile bei vollständigem passendem Nenner', 'b0406', fields(
         region=CODE, year=YEAR, metric=enum('tonnes', 'tkm'), direction=enum('all', 'outbound', 'inbound'))),
-    'forecast_comparison': ('F10', 'Ist-Jahre und VP2019_BASE/2040_P1 mit getrennter Zählweise', 'b0406', fields(
+    'forecast_regions': ('F10', 'Reine Prognoseentwicklung 2019_BASE zu 2040_P1 für eine bis fünf Regionen, mehrere Kennzahlen und Verkehrsträger; keine beobachteten Jahre erforderlich, keine Verbindung zwischen den Regionen', 'b0406', fields(
+        regions={**REGIONS, 'maxItems': 5},
+        modes={'type': 'array', 'items': MODE, 'minItems': 1, 'maxItems': 3, 'uniqueItems': True},
+        metrics={'type': 'array', 'items': enum('tonnes', 'tkm'), 'minItems': 1, 'maxItems': 2, 'uniqueItems': True},
+        direction=enum('all', 'outbound', 'inbound'))),
+    'forecast_comparison': ('F10', 'Zusätzlich ausdrücklich gewünschte beobachtete Ist-Jahre neben VP2019_BASE/2040_P1 für eine Region; reine Prognosefragen und mehrere Regionen über forecast_regions', 'b0406', fields(
         region=CODE, metric=enum('tonnes', 'tkm'), direction=enum('all', 'outbound', 'inbound'),
         observed_years={'type': 'array', 'items': YEAR, 'minItems': 1, 'maxItems': 3, 'uniqueItems': True})),
     'toll_month': ('F13', 'Gespeicherte Berliner Mautfahrten; fehlender Vorjahresmonat bleibt offen', 'b07', fields(

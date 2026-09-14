@@ -183,6 +183,28 @@ def region_profile(con,dataset,*,region,year,metric,include_forecast):
     return {**result,'status':status,'observations':observations}
 
 
+def forecast_regions(con, dataset, *, regions, modes, metrics, direction):
+    names = regions_checked(dataset, regions)
+    observations = []
+    for region in regions:
+        for metric in metrics:
+            forecast, _ = forecast_rows(con, dataset, region, metric, direction)
+            for row in forecast:
+                # No all-mode total and no sum across overlapping regional flows.
+                if row.get('mode') not in modes:
+                    continue
+                extra = {'year': 2019 if row['scenario'] == '2019_BASE' else 2040} if row.get('scenario') else {}
+                extra['value_status'] = ('forecast' if row.get('scenario') else 'calculated') if row['value'] is not None else (
+                    'not_computable' if row.get('unit') == '%' and row.get('denominator') == 0 else 'missing_value')
+                observations.append({**row, **extra, 'region': region, 'region_name': names[region], 'metric': metric,
+                    'unit': row.get('unit', 't' if metric == 'tonnes' else 'tkm'),
+                    'label': names[region] + ' / ' + ('Gütermenge' if metric == 'tonnes' else 'Verkehrsleistung') + ' / ' + row['label']})
+    return {'status': 'partial' if any(row['value'] is None and row['value_status'] != 'not_computable' for row in observations) else 'available',
+            'observations': observations,
+            'note': 'Szenariovergleich der VP: Prognosebasis 2019 zu Prognose 2040. Keine beobachtete Entwicklung und keine Zwischenprognosen. Regionen und Kennzahlen bleiben getrennt; keine regionsübergreifende Summe.',
+            'counting': 'VP all: Versand und Empfang ohne Binnenverkehr plus Binnenverkehr einmal; einzelne Versand-/Empfangswerte ohne Binnenverkehr.'}
+
+
 def forecast_comparison(con,dataset,*,region,metric,direction,observed_years):
     result=common(dataset,region,metric)
     observations=[]

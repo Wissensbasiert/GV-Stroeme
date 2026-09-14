@@ -29,7 +29,12 @@ try:
         marker.write('started\n')
 except FileExistsError:
     raise SystemExit(0)
-report={'passed':False,'external_model_calls':0,'database_writes':0}
+class ProgressReport(dict):
+    def __setitem__(self,key,value):
+        super().__setitem__(key,value)
+        if key=='stage':
+            status.with_suffix('.progress').write_text(json.dumps({'stage':value}),encoding='utf-8')
+report=ProgressReport(passed=False,external_model_calls=0,database_writes=0)
 try:
     report['stage']='manifest'
     manifest=root/'MANIFEST.sha256.json'
@@ -157,6 +162,21 @@ try:
         assert len(second['facts'])==15 and all(f['value'] is None for f in second['facts'])
         report['semantic_dialogue_verified']={'partial_selection_saved':True,'start':2021,'end':2025,
             'missing_values_remain_unknown':True,'external_model_calls':0}
+    from server.analyseassistent.contracts import FUNCTIONS
+    if 'forecast_regions' in FUNCTIONS:
+        report['stage']='forecast_regions'
+        parameters={'regions':['DEE03','DEA12'],'modes':['rail'],'metrics':['tonnes','tkm'],'direction':'all'}
+        raw=datasets.query('forecast_regions',parameters)
+        forecast_expected={('DEE03','tonnes'):(2037023,2751683),('DEE03','tkm'):(218995582,319228696),
+                  ('DEA12','tonnes'):(22506890,26407912),('DEA12','tkm'):(6410552330,9373443044)}
+        assert raw['status']=='available' and len(raw['observations'])==16
+        for (region,metric),(base,target) in forecast_expected.items():
+            rows=[r for r in raw['observations'] if r['region']==region and r['metric']==metric]
+            assert next(r['value'] for r in rows if r.get('scenario')=='2019_BASE')==base
+            assert next(r['value'] for r in rows if r.get('scenario')=='2040_P1')==target
+            assert all(r['mode']=='rail' for r in rows)
+        report['forecast_regions_verified']={'regions':parameters['regions'],'metrics':parameters['metrics'],
+            'facts':16,'external_model_calls':0,'no_observed_year_required':True}
     if sys.argv[4]=='requesty':
         report['stage']='requesty'
         from server.analyseassistent.requesty import Requesty
@@ -236,7 +256,7 @@ def main():
     ftp_id = job_id = None
     ftp = None
     result = None
-    cleanup = {'job_removed':False,'ftp_removed':False,'status_removed':False,'lock_removed':False}
+    cleanup = {'job_removed':False,'ftp_removed':False,'status_removed':False,'lock_removed':False,'progress_removed':False}
     try:
         created = api.request('POST','/ftp/',{'name':ftp_name,'password':ftp_password,'path':relative})
         ftp_id = resource_id(created,api.request('GET','/ftp/'),ftp_name)
@@ -251,7 +271,8 @@ def main():
         job_id = job_resource_id(created,api.request('GET','/job/'),annotation)
         if job_id is None: raise RuntimeError('Temporäre Prüfaufgabe nicht auflösbar')
         print('Temporäre Test-Laufzeitprüfung gestartet.',flush=True)
-        for attempt in range(60):
+        last_stage = None
+        for attempt in range(120):
             buffer=io.BytesIO()
             try:
                 ftp.retrbinary('RETR '+marker,buffer.write)
@@ -259,7 +280,16 @@ def main():
                 break
             except ftplib.error_perm as error:
                 if not str(error).startswith('550'): raise
-            if attempt<59: time.sleep(5)
+            try:
+                progress_buffer=io.BytesIO()
+                ftp.retrbinary('RETR '+str(Path(marker).with_suffix('.progress')).replace('\\','/'),progress_buffer.write)
+                stage=json.loads(progress_buffer.getvalue().decode('utf-8')).get('stage')
+                if stage != last_stage:
+                    print('Serverprüfstufe: '+str(stage),flush=True)
+                    last_stage=stage
+            except ftplib.error_perm as error:
+                if not str(error).startswith('550'): raise
+            if attempt<119: time.sleep(5)
         if result is None: raise RuntimeError('Prüfaufgabe hat noch keinen Abschlussstatus geliefert')
     except Exception as error:
         result={'passed':False,'error_type':type(error).__name__,'external_model_calls':0,
@@ -278,6 +308,8 @@ def main():
                     cleanup['status_removed']=True
                     ftp.delete(str(Path(marker).with_suffix('.started')).replace('\\','/'))
                     cleanup['lock_removed']=True
+                    ftp.delete(str(Path(marker).with_suffix('.progress')).replace('\\','/'))
+                    cleanup['progress_removed']=True
                 ftp.quit()
             except ftplib.all_errors: ftp.close()
         if ftp_id is not None:

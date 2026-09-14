@@ -9,6 +9,9 @@ def catalog(datasets, function=None, parameters=None):
     road = datasets.manifests['b03'].get('sources', [])
     result = {
         'data_snapshot_id': datasets.snapshot_id,
+        'forecast': {'tool': 'forecast_regions', 'base': '2019_BASE', 'target': '2040_P1',
+                     'max_regions': 5, 'metrics': ['tonnes', 'tkm'], 'modes': ['road', 'rail', 'iww'],
+                     'observed_years_required': False},
         'relation_years_by_mode': datasets.manifests['b01']['years_by_mode'],
         'regional_years_by_mode': {mode: sorted({r['year'] for r in coverage if r['mode'] == mode}) for mode in ['road', 'rail', 'iww']},
         'goods_groups': classification['groups'],

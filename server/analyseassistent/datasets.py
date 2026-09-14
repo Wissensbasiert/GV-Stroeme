@@ -151,6 +151,7 @@ class Datasets:
                     'region_profile': profiles.region_profile,
                     'regional_modal_split': profiles.regional_modal_split,
                     'forecast_comparison': profiles.forecast_comparison,
+                    'forecast_regions': profiles.forecast_regions,
                     'relation': b01.query_relation, 'compare_regions': profiles.compare_regions,
                     'union': b0406.query_union, 'time_series': b02.query_series,
                     'rail_goods': b03.query_rail, 'national': b0406.national,
