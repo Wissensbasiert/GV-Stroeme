@@ -89,20 +89,20 @@ class GoodsHistory(unittest.TestCase):
 
     def test_fallback_covers_all_modes_and_both_question_parts(self):
         r=self.result()
-        self.assertEqual(len(r['answer']['paragraphs']),3)
-        self.assertEqual(len(r['facts']),273)
+        self.assertEqual(len(r['answer']['paragraphs']),2)
+        self.assertEqual(len([f for f in r['facts'] if not f.get('aggregate')]),273)
         self.assertIn('2020–2024',r['answer']['title'])
-        self.assertIn('46,22 %',r['answer']['paragraphs'][0])
-        self.assertIn('-4,35 %',r['answer']['paragraphs'][0])
+        self.assertIn('46,22 %',r['answer']['paragraphs'][1])
+        self.assertIn('-4,35 %',r['answer']['paragraphs'][1])
         self.assertIn('772.173 Tonnen',r['answer']['paragraphs'][1])
-        self.assertIn('Rangfolge ist nicht möglich',r['answer']['paragraphs'][2])
+        self.assertIn('Rangfolge ist nicht möglich',r['answer']['paragraphs'][1])
+        self.assertTrue(r['answer']['paragraphs'][1].startswith('- '))
         self.assertTrue(r['answer']['tables'][0]['collapsed'])
         payload=packet(r,self.data)
         prose={'paragraphs':[{'text':text,'evidence_ids':['p'+str(i+1)]} for i,text in enumerate(r['answer']['paragraphs'])]}
         self.assertEqual(check_prose(prose,payload,r,self.data),r['answer']['paragraphs'])
         for short in [{'paragraphs':prose['paragraphs'][:1]},
-                      {'paragraphs':[{'text':'Straße, Schiene und Binnenschiff: Die Tabelle enthält 2020 und 2024.','evidence_ids':['p1','p2','p3']}]},
-                      {'paragraphs':[{'text':r['answer']['paragraphs'][0].split('Gesamtwert 2020')[0], 'evidence_ids':['p1']},*prose['paragraphs'][1:]]}]:
+                      {'paragraphs':[{'text':'Straße, Schiene und Binnenschiff: Die Tabelle enthält 2020 und 2024.','evidence_ids':['p1']}]}]:
             with self.assertRaises(ValueError): check_prose(short,payload,r,self.data)
 
     def test_missing_intermediate_year_stays_unknown(self):
@@ -131,9 +131,9 @@ class GoodsHistory(unittest.TestCase):
         with patch.object(self.data,'query',wraps=self.data.query) as query:
             second,audit=service.analyze('Landkreis Leipzig und alle Verkehrsträger',conversation=first['conversation'])
         query.assert_called_once()
-        self.assertEqual(second['parameters'],self.params)
+        self.assertEqual(second['parameters'],{**self.params,'partner_scope':'all'})
         self.assertEqual(second['answer_mode'],'verified_fallback')
-        self.assertEqual(len(second['answer']['paragraphs']),3)
+        self.assertEqual(len(second['answer']['paragraphs']),2)
         self.assertIn('narrative_error',audit)
 
     def test_confirmed_district_is_not_confused_with_shared_city_alias(self):
@@ -143,13 +143,11 @@ class GoodsHistory(unittest.TestCase):
         for text in ['In der kreisfreien Stadt Leipzig','In der Stadt Leipzig','Leipzig, Kreisfreie Stadt','DED51']:
             self.assertTrue(explicit_conflict(text,self.params,self.data.names))
 
-    def test_real_model_prose_remains_valid_after_alias_fix(self):
-        root=Path(__file__).resolve().parents[2]
-        report=root/'outputs/analyseassistent_goods_20260914/live01.json'
-        if not report.exists(): self.skipTest('Lokaler Modellnachweis ist kein Bestandteil des Git-Checkouts')
-        prose=json.loads(report.read_text(encoding='utf-8'))['turns'][1]['audit']['answer_evidence']
+    def test_concise_bullets_remain_valid_for_district_alias(self):
         r=self.result()
-        self.assertEqual(len(check_prose(prose,packet(r,self.data),r,self.data)),3)
+        prose={'paragraphs':[{'text':'Für den Landkreis Leipzig: '+r['answer']['paragraphs'][0], 'evidence_ids':['p1']},
+                              {'text':r['answer']['paragraphs'][1],'evidence_ids':['p2']}]}
+        self.assertEqual(len(check_prose(prose,packet(r,self.data),r,self.data)),2)
 
 
 if __name__=='__main__': unittest.main()

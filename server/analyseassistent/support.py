@@ -14,7 +14,42 @@ def dependency(dataset,package):
     return Path(dataset).parents[2]/package/'releases'/snapshot
 
 
-def goods_structure(con,dataset,*,region,year,mode,metric,directions,granularity):
+def scoped_goods(con,dataset,*,region,year,mode,metric,directions,granularity,partner_scope):
+    from .transport import scoped_rows, SCOPES
+    base={'observations':[],'unit':'t' if metric=='tonnes' else 'tkm',
+          'scope':'Gerichtete veröffentlichte Güterverkehre; Gegenraum: '+SCOPES[partner_scope]+'.',
+          'counting':'Bei beiden Richtungen wird innerregionaler Verkehr einmal gezählt.',
+          'note':'Anteile beziehen sich auf die bekannten veröffentlichten Güterangaben im ausgewählten Gegenraum. Fehlende Gütergruppen bleiben unbekannt.'}
+    if mode=='road' or granularity!='C7':
+        return {**base,'status':'not_available','note':'Die gewählte Gütergliederung mit Inland-/Auslandsfilter ist hier nur für Schiene und Binnenschiff auf C7 verfügbar. Straßen-OD enthält Gesamtmengen, keine Güteraufteilung.'}
+    labels=read(dependency(dataset,'b03')/'classification.json')['groups']
+    observations=[]; complete=True
+    for direction in directions:
+        rows=scoped_rows(con,dependency(dataset,'b01'),region=region,year=year,mode=mode,metric=metric,direction=direction,partner_scope=partner_scope)
+        by_group={r['goods']:r for r in rows}
+        total=math.fsum(r['value'] or 0 for r in rows) if rows and not any(r['missing_count'] for r in rows) else None
+        values={g:(by_group[g]['value'] if g in by_group and not by_group[g]['missing_count'] else None) for g in '1234567'}
+        ranks={r['id']:r['rank'] for r in rank([{'id':g,'value':v} for g,v in values.items()])}
+        if total is None or any(v is None for v in values.values()):complete=False
+        for g,value in sorted(values.items(),key=lambda r:(ranks.get(r[0],999),r[0])):
+            source=by_group.get(g,{})
+            meta={'group':g,'direction':direction,'mode':mode,'year':year,'region':region,'partner_scope':partner_scope,'rank':ranks.get(g),
+                  'restricted_count':source.get('restricted_count',0),
+                  'quality':'restricted' if source.get('restricted_count') else 'unknown' if source.get('unknown_quality_count') or not source else 'unflagged'}
+            label={'all':'Versand und Empfang','outbound':'Versand','inbound':'Empfang'}[direction]+' / C'+g+' '+labels[g]
+            observations.extend([{**meta,'label':label,'value':value},
+                {**meta,'label':label+' / Anteil','value':value/total*100 if value is not None and total else None,'unit':'%',
+                 'denominator':total,'denominator_scope':SCOPES[partner_scope]+', derselbe Verkehrsträger und dieselbe Richtung',
+                 'formula':'group_value / published_scope_total * 100'}])
+        observations.append({'label':direction+' / Gesamt','value':total,'direction':direction,'mode':mode,'year':year,'region':region,'partner_scope':partner_scope,
+            'restricted_count':sum(r['restricted_count'] for r in rows),
+            'quality':'restricted' if any(r['restricted_count'] for r in rows) else 'unknown' if not rows or any(r['unknown_quality_count'] for r in rows) else 'unflagged'})
+    return {**base,'observations':observations,'status':'available' if complete else 'partial'}
+
+
+def goods_structure(con,dataset,*,region,year,mode,metric,directions,granularity,partner_scope='all'):
+    if partner_scope!='all':
+        return scoped_goods(con,dataset,region=region,year=year,mode=mode,metric=metric,directions=directions,granularity=granularity,partner_scope=partner_scope)
     base={'unit':'t' if metric=='tonnes' else 'tkm','observations':[],
           'scope':'Bestehende D01-Güterstruktur einer NUTS-3-Region; keine Güteraufteilung auf einzelne Straßenrelationen.',
           'counting':'Versand und Empfang separat; all summiert beide Richtungen und zählt Binnen doppelt.',
@@ -50,7 +85,7 @@ def goods_structure(con,dataset,*,region,year,mode,metric,directions,granularity
             'note':'Aktueller C1–C7-Crosswalk; fehlende Gruppen bleiben unbekannt. Ranggleichstände vor Rundung, keine Standort- oder Produktionsursache.'}
 
 
-def goods_history(con,dataset,*,region,start,end,modes,metric,directions):
+def goods_history(con,dataset,*,region,start,end,modes,metric,directions,partner_scope='all'):
     """Published profiles by year/mode; unknown groups never become zero."""
     if start > end or end-start > 9:
         raise ValueError('Güterzeitraum muss ein bis zehn Jahre umfassen')
@@ -63,7 +98,7 @@ def goods_history(con,dataset,*,region,start,end,modes,metric,directions):
     for year in range(start,end+1):
         for mode in modes:
             raw=goods_structure(con,dataset,region=region,year=year,mode=mode,metric=metric,
-                                directions=directions,granularity='C7')
+                                directions=directions,granularity='C7',partner_scope=partner_scope)
             if raw['status']!='available': complete=False
             rows=raw['observations']
             if not rows:
@@ -90,7 +125,7 @@ def goods_history(con,dataset,*,region,start,end,modes,metric,directions):
                 absolute=last['value']-first['value'] if valid else None
                 relative=absolute/first['value']*100 if valid and first['value']!=0 else None
                 meta={'mode':mode,'direction':direction,'region':region,'metric':metric,
-                      'group':group,'start_year':start,'end_year':end,'basis':'published_profile_change',
+                      'group':group,'start_year':start,'end_year':end,'basis':'published_profile_change' if partner_scope=='all' else 'published_od_change',
                       'endpoint_values':[first['value'],last['value']]}
                 label=f'{start}–{end} / {mode} / {direction} / '+('C'+group+' '+labels[group] if group else 'Gesamt')
                 observations.extend([{**meta,'label':label+' / Veränderung','value':absolute,'unit':unit,
@@ -100,9 +135,9 @@ def goods_history(con,dataset,*,region,start,end,modes,metric,directions):
                                       'change':'relative','formula':'(end_value - start_value) / start_value * 100',
                                       'value_status':'calculated' if relative is not None else 'not_computable' if valid else 'missing_value'}])
     return {'status':'available_with_comparability_limits' if complete else 'partial','unit':unit,'observations':observations,
-            'scope':'Regionale C1–C7-Güterprofile; die ausgewählten Verkehrsträger und Richtungen werden getrennt ausgewertet, nicht addiert.',
-            'counting':'Versand und Empfang separat; all summiert beide Richtungen und zählt Binnen doppelt. Keine eindeutige Zählung von Transportketten über mehrere Verkehrsträger.',
-            'quality_note':'Veränderungen der veröffentlichten D01-Profilwerte, keine harmonisierte Gebietszeitreihe. Straßen-Quellenkennzeichen der Güterrandsummen sind nicht nacherschlossen; aus den Veränderungen folgt keine belegte Ursache.',
+            'scope':raw['scope'],
+            'counting':raw['counting'],
+            'quality_note':('Veränderungen der veröffentlichten D01-Profilwerte; Straßen-Quellenkennzeichen der Güterrandsummen sind nicht nacherschlossen. ' if partner_scope=='all' else 'Veränderungen veröffentlichter B01-Relationen im ausgewählten Gegenraum. ')+'Keine harmonisierte Gebietszeitreihe und kein Nachweis von Ursachen.',
             'note':'Fehlende Gütergruppen bleiben unbekannt, auch bei einem veröffentlichten Verkehrsträger-Gesamtwert null. Fehlende Randjahre werden nicht durch andere Jahre ersetzt.'}
 
 

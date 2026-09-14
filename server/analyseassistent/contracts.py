@@ -28,6 +28,10 @@ def fields(**properties):
 # All parameters are explicit. Defaults in the underlying local functions cannot
 # silently replace a missing user selection.
 FUNCTIONS = {
+    'transport_history': ('F04', 'Gesamter Güterverkehr einer Stadt oder eines Kreises im Jahresverlauf: kompakte Jahreswerte je Verkehrsträger, Modalgesamtsumme und Randjahresänderung; keine Güterstruktur. Inland/Ausland über partner_scope.', 'b0406', fields(
+        region=CODE,start=YEAR,end=YEAR,
+        modes={'type':'array','items':MODE,'minItems':1,'maxItems':3,'uniqueItems':True},
+        metric=enum('tonnes','tkm'),direction=enum('all','outbound','inbound'),partner_scope=enum('all','domestic','international'))),
     'forecast_relation': ('F10', 'Gerichtete Prognoserelation aus vollständigen VP-Matrizen; Basis 2019 zu 2040 P1, Güterauswahl C7 oder VP25; fehlende Relationszeilen bleiben unbekannt', 'dashboard_access', fields(
         origin=CODE,destination=CODE,
         modes={'type':'array','items':MODE,'minItems':1,'maxItems':3,'uniqueItems':True},
@@ -126,6 +130,8 @@ FUNCTIONS = {
 
 # Optional for backwards compatibility with saved selections and old API callers.
 FUNCTIONS['forecast_regions'][3]['properties']['goods'] = FORECAST_GOODS
+for scoped_function in ['goods_structure','goods_history','partner_ranking']:
+    FUNCTIONS[scoped_function][3]['properties']['partner_scope'] = enum('all','domestic','international')
 
 PLAN = fields(phase=enum('plan'), function_id={'anyOf': [enum(*FUNCTIONS), {'type': 'null'}]},
               parameters={'type': 'object'}, parameter_origins={'type': 'object', 'additionalProperties': enum('context', 'question')},

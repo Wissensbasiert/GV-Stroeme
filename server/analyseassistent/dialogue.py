@@ -97,7 +97,7 @@ def available_years(datasets,function,parameters):
         coverage=json.loads((datasets.paths['b0406']/'source_coverage.json').read_text(encoding='utf-8'))
         modes=parameters.get('modes') or ['road','rail','iww']
         return sorted(set.intersection(profile_years,*({r['year'] for r in coverage if r['mode']==m} for m in modes)))
-    if function in {'region_profile','regional_modal_split','compare_regions','balance','goods_structure','intermodal_markets'}:
+    if function in {'transport_history','region_profile','regional_modal_split','compare_regions','balance','goods_structure','intermodal_markets'}:
         path=datasets.paths['b0406']/'regional_profiles.parquet'
         regions=parameters.get('regions') or ([parameters['region']] if parameters.get('region') else [])
         if not regions:return []

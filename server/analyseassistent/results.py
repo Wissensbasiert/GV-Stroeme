@@ -14,7 +14,7 @@ def format_value(value):
     return f'{value:,.2f}'.replace(',', '\x00').replace('.', ',').replace('\x00', '.')
 
 
-MODE_LABELS={'road':'Straße','rail':'Schiene','iww':'Binnenschiff'}
+MODE_LABELS={'road':'Straße','rail':'Schiene','iww':'Binnenschiff','total':'Summe der ausgewählten Verkehrsträger','subtotal':'Bekannte Teilsumme'}
 DIRECTION_LABELS={'outbound':'Versand','inbound':'Empfang','all':'Versand und Empfang'}
 
 
@@ -44,6 +44,23 @@ def analytical_statements(function,parameters,rows,datasets):
             findings.append({'id':'a'+str(len(findings)+1),'text':text,'fact_ids':ids,'role':'analysis'})
     available=[row for row in rows if row.get('value') is not None]
     unit=next((row.get('unit') for row in available if row.get('unit')!='%'),None)
+    if function=='transport_history':
+        period=f'{parameters["start"]}–{parameters["end"]}'
+        for mode in (['total'] if len(parameters['modes'])>1 and parameters['metric']=='tonnes' else [])+parameters['modes']:
+            series=[r for r in rows if r.get('mode')==mode]
+            first=next((r for r in series if r.get('year')==parameters['start']),None)
+            last=next((r for r in series if r.get('year')==parameters['end']),None)
+            delta=next((r for r in series if r.get('change')=='relative'),None)
+            label=MODE_LABELS[mode]
+            if first and last and first['value'] is not None and last['value'] is not None:
+                text=f'{label} {period}: '+compact_value(first['value'],first['unit'])+' → '+compact_value(last['value'],last['unit'])
+                if delta and delta['value'] is not None:text+=' ('+compact_value(delta['value'],'%')+').'
+                else:text+='; eine prozentuale Veränderung ist bei Ausgangswert null nicht berechenbar.'
+                add(text,first,last,delta)
+            else:
+                missing=sorted({r['year'] for r in series if r.get('year') and r['value'] is None})
+                add(label+': Für '+', '.join(map(str,missing))+' fehlen vollständige Werte. Die Veränderung '+period+' ist nicht berechenbar.',first,last,delta)
+        return findings
     if function in {'region_profile','balance'}:
         outbound=next((r for r in available if 'Versand' in r['label'] and 'Anteil' not in r['label']),None)
         inbound=next((r for r in available if 'Empfang' in r['label'] and 'Anteil' not in r['label']),None)
@@ -106,7 +123,7 @@ def analytical_statements(function,parameters,rows,datasets):
                 text=f'{MODE_LABELS[mode]}, {DIRECTION_LABELS[direction]} {parameters["end"]}: '
                 refs=[*latest]
                 if ranked:
-                    top=[r for r in ranked if r.get('rank',999)<=3]
+                    top=[r for r in ranked if r.get('rank',999)<=1]
                     parts=[]
                     for r in top:
                         label=re.sub(r'^.*?/ C\d+\s*','',r['label'])
@@ -118,7 +135,7 @@ def analytical_statements(function,parameters,rows,datasets):
                 if total and total['value'] is not None:
                     text+='Der veröffentlichte Gesamtwert beträgt '+compact_value(total['value'],total['unit'])+'. '
                 # Overall trend and the latest leader's trend, without inferring missing groups.
-                for group in ([None,ranked[0]['group']] if ranked else [None]):
+                for group in [None]:
                     endpoints=[next((r for r in rows if r.get('year')==year and r.get('mode')==mode and r.get('direction')==direction
                                      and r.get('group')==group and r['unit']!='%'),None) for year in [parameters['start'],parameters['end']]]
                     changes=[r for r in rows if r.get('change') and r.get('mode')==mode and r.get('direction')==direction and r.get('group')==group]
@@ -272,7 +289,15 @@ def analytical_statements(function,parameters,rows,datasets):
 
 
 def make_result(function, parameters, raw, datasets, rules_version):
+    if function in {'relation_overview','relation_history','relation_matrix','goods_history'}:
+        from .transport import add_modal_sums, SUM_NOTE
+        raw={**raw,'observations':[dict(r) for r in raw.get('observations',[])]}
+        for r in raw['observations']:
+            r.setdefault('unit',raw.get('unit','t' if r.get('metric',parameters.get('metric'))=='tonnes' else 'tkm'))
+        add_modal_sums(raw['observations'],parameters.get('modes',['road','rail','iww']),['year','origin','destination','direction','metric','group'])
+        raw['counting']=' '.join([raw.get('counting',''),SUM_NOTE]).strip()
     source_labels = {
+        'transport_history':'D01: Regionalprofile; bei Inland-/Auslandsfilter B01: gerichtete veröffentlichte Relationen',
         'relation_overview': 'B01: KBA VE7 / Destatis Schienen- und Binnenschiffsverkehr, gerichtete Jahresrelation und C1–C7',
         'road_relation_goods_limit': 'KBA VE7: veröffentlichte Straßen-OD-Gesamtwerte mit Quellenkennzeichen',
         'rail_goods_history': 'Destatis SGV: veröffentlichte Original-Feinpositionen je Jahr',
@@ -305,6 +330,8 @@ def make_result(function, parameters, raw, datasets, rules_version):
         'node_statistics': 'Eurostat AVIA_GOOA / Destatis Seeverkehr, entsprechend Knotentyp',
         'road_details': 'KBA: ' + str(parameters.get('product', 'VD2/VD3c')),
     }
+    if parameters.get('partner_scope','all')!='all':
+        source_labels[function]='B01: gerichtete veröffentlichte Relationen; ausgewählter Inland-/Auslandsgegenraum'
     notices = [raw[key] for key in ['scope', 'counting', 'note', 'quality_note', 'territory_note',
                                    'population_note', 'vehicle_population', 'denominator_scope', 'sum_scope']
                if isinstance(raw.get(key), str)]
@@ -333,10 +360,12 @@ def make_result(function, parameters, raw, datasets, rules_version):
                      'quality_status': metadata.pop('quality', raw.get('quality', 'unknown')),
                      'source_status': status, 'source': source_labels[function], 'parameters': parameters,
                      'data_snapshot_id': datasets.snapshot_id, **metadata})
-    if function in {'dashboard_detail','forecast_relation','goods_history','forecast_regions','relation_overview','region_profile', 'regional_modal_split', 'forecast_comparison', 'relation_matrix','relation_history', 'partner_ranking','regional_history','modal_history','node_profile','goods_structure','intermodal_markets','road_relation_goods_limit','rail_goods_history'}:
+    if function in {'transport_history','dashboard_detail','forecast_relation','goods_history','forecast_regions','relation_overview','region_profile', 'regional_modal_split', 'forecast_comparison', 'relation_matrix','relation_history', 'partner_ranking','regional_history','modal_history','node_profile','goods_structure','intermodal_markets','road_relation_goods_limit','rail_goods_history'}:
         for observation in raw['observations']:
             metadata = {key: value for key, value in observation.items() if key not in {'label', 'value', 'unit'}}
-            if observation.get('basis'):
+            if parameters.get('partner_scope','all')!='all':
+                metadata['source']='B01: gerichtete veröffentlichte Relationen; ausgewählter Inland-/Auslandsgegenraum'
+            elif observation.get('basis'):
                 metadata['source'] = ('Verkehrsprognose 2040: 2019_BASE und 2040_P1'
                                       if observation.get('basis') == 'VP2019_BASE_to_2040_P1'
                                       else 'D01: bestehende Dashboard-Regionalprofile')

@@ -1,5 +1,13 @@
 # Fachlicher Vertrag der Datenfunktionen
 
+## Ergänzung 0.6.0: Gegenräume und Gesamtverkehr
+
+`transport_history(region,start,end,modes,metric,direction,partner_scope)` liefert bis zu zehn Jahre. `all` nutzt die bestehende Regionalprofil-Zählweise; Versand plus Empfang zählt innerregional zweimal. `domestic` und `international` filtern vorhandene B01-Relationen nach Deutschland bzw. ausländischen Partnerkennungen; bei Richtung `all` zählt jede gerichtete Relation einmal. Diese unterschiedlichen Zählweisen werden ausdrücklich ausgewiesen. Unbekannte Partnercodes werden nicht als Ausland behandelt. Deshalb sind gefilterte und ungefilterte Werte bei beiden Richtungen nicht pauschal additiv vergleichbar.
+
+`goods_structure`, `goods_history` und `partner_ranking` akzeptieren optional denselben Gegenraum. Gefilterte C7-Güteraufteilungen sind für Schiene/Binnenschiff verfügbar; Straßen-OD besitzt nur Gesamtwerte. Ein Filter darf bei einem Werkzeugwechsel nicht still verloren gehen. Bei einer neu ausdrücklich benannten Relation sind kompatible Ländereinschränkungen bereits durch beide Endpunkte erfüllt.
+
+Modalgesamtsummen entstehen nur aus disjunkten Tonnen-Gesamtwerten bei gleichem Jahr, Raum, Richtung und Kennzahl. Keine Addition mit Güteruntergruppen, Prozentwerten, Tonnenkilometern oder KV-Teilmärkten. Fehlt ein Verkehrsträger, bleibt die vollständige Summe unbekannt; eine bekannte Teilsumme trägt ihre Komponenten. Regionale Zeitreihen berechnen Veränderungen ausschließlich aus den gewünschten Randjahren. 2025 ohne Straßenwert darf nicht durch 2024 ersetzt werden. Die kurze Haupttabelle zeigt Jahreswerte, die Detailtabelle ist ausklappbar.
+
 ## Ergänzung 0.5.0: bislang fehlende Datenzugriffe
 
 `forecast_regions` akzeptiert zusätzlich `goods`: `ALL`, C7 als Textcode 1–7 oder Originalgruppen `VP10` bis `VP200` gemäß Katalog (25 Codes). Keine Mischung überlappender Gliederungen; keine Addition von `ALL` und Einzelgruppen. Region, Modus, Richtung, Gruppe und Kennzahl bleiben als gemeinsamer Faktenbezug erhalten. Deutschland nur `direction=all`, einschließlich Transit. Regional Versand/Empfang ohne Binnen, all mit Binnen einmal. Nullbasis erzeugt keine Prozentveränderung.

@@ -12,6 +12,7 @@ DIALOGUE = fields(
                               'last_calendar_years', 'last_available_years', 'since_available']},
                 count={'type': 'integer', 'minimum': 0, 'maximum': 10}))
 DIALOGUE['properties']['time']['properties']['start_year'] = YEAR
+DIALOGUE['properties']['geographic_scope'] = {'enum':['all','domestic','international','inherit']}
 
 
 class SelectionError(ValueError):
@@ -25,6 +26,8 @@ def tools():
     for name, entry in FUNCTIONS.items():
         schema = copy.deepcopy(entry[3])
         schema['properties']['_dialogue'] = DIALOGUE
+        schema['properties']['_dialogue'] = copy.deepcopy(DIALOGUE)
+        schema['properties']['_dialogue']['required'] = [*DIALOGUE['required'],'geographic_scope']
         schema['required'] = ['_dialogue']
         result.append({'type': 'function', 'function': {'name': name,
             'description': entry[1] + '. Auch unvollständig aufrufen: Auswahl wird gespeichert; _dialogue.clarification stellt die Rückfrage.',
@@ -140,6 +143,22 @@ def resolve(name, arguments, state, datasets, explicit=None):
     args = {**inherited, **args}
     notes = []
     props = FUNCTIONS[name][3]['properties']
+    selected_scope = dialogue.get('geographic_scope', 'inherit')
+    if selected_scope == 'inherit':
+        selected_scope = state.get('confirmed',{}).get('partner_scope','all') if dialogue['context']=='continue' else args.get('partner_scope','all')
+    if selected_scope != 'all' and 'partner_scope' not in props:
+        pair=[args.get('origin',''),args.get('destination','')]
+        # A fully specified new relation already fixes both countries. It needs no
+        # additional aggregate filter, but must agree with the model's scope.
+        fixed_pair=(dialogue['context']=='new' and all(pair) and
+            ((selected_scope=='domestic' and all(c.startswith('DE') for c in pair)) or
+             (selected_scope=='international' and sum(c.startswith('DE') for c in pair)==1)))
+        if not fixed_pair:
+            raise SelectionError('unsupported_geographic_scope','Für diese Auswertung kann der gewünschte Inland-/Auslandsfilter nicht angewendet werden. Bitte wählen Sie eine regionale Verkehrs- oder Güterauswertung.', ['partner_scope'])
+    if 'partner_scope' in props:
+        if 'partner_scope' in arguments and dialogue.get('geographic_scope') not in {None,'inherit',arguments['partner_scope']}:
+            raise SelectionError('conflicting_geographic_scope','Die Angaben zum Inland-/Auslandsbezug widersprechen sich.', ['partner_scope'])
+        args['partner_scope'] = arguments.get('partner_scope',selected_scope)
     for key, value in (explicit or {}).items():
         if key not in props or (key in args and args[key] != value):
             raise SelectionError('explicit_filter_conflict', 'Die verstandene Auswahl widerspricht Ihrer ausdrücklich gewählten Einstellung. Bitte bestätigen Sie die gewünschte Auswahl.')
@@ -153,6 +172,7 @@ def resolve(name, arguments, state, datasets, explicit=None):
     if name == 'forecast_regions':
         defaults.update(modes=['road', 'rail', 'iww'], direction='all')
     if name == 'goods_history': defaults['modes'] = ['road','rail','iww']
+    if name == 'transport_history': defaults.update(modes=['road','rail','iww'],direction='all',partner_scope='all')
     for key, value in defaults.items():
         if key in props and key not in args: args[key] = copy.deepcopy(value)
     if kind == 'since_available':

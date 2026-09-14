@@ -16,14 +16,15 @@ from .alternatives import related_data
 from .selection import tools, resolve, validate_selection, SelectionError
 
 RESPONSE = fields(paragraphs={'type': 'array', 'minItems': 1, 'maxItems': 4, 'items': fields(
-    text={'type': 'string', 'minLength': 1, 'maxLength': 800},
-    evidence_ids={'type': 'array', 'minItems': 1, 'maxItems': 6, 'uniqueItems': True,
+    text={'type': 'string', 'minLength': 1, 'maxLength': 1800},
+    evidence_ids={'type': 'array', 'minItems': 1, 'maxItems': 16, 'uniqueItems': True,
                   'items': {'type': 'string'}})})
 NUMBER = re.compile(r'(?<![\w])[-+]?\d+(?:\.\d{3})*(?:,\d+)?(?![\w])')
 YEAR = re.compile(r'\b(?:19|20)\d{2}\b')
 
 
 def numbers(text):
+    text = text.replace('−', '-')
     return {round(float(m.group().replace('.', '').replace(',', '.')), 6) for m in NUMBER.finditer(text)}
 
 
@@ -38,7 +39,7 @@ def packet(result, datasets):
     # of the requested years. They are never substituted for a missing endpoint.
     facts = {f['fact_id']: f for f in result.get('facts', [])}
     for table in answer['tables']:
-        for row in (table['rows'] if result.get('function_id') in {'dashboard_detail','forecast_relation','compare_regions','forecast_regions','partner_ranking','node_partners'} else table['rows'][:30]):
+        for row in (table['rows'] if result.get('function_id') in {'transport_history','dashboard_detail','forecast_relation','compare_regions','forecast_regions','partner_ranking','node_partners'} else table['rows'][:30]):
             for key in row.get('fact_ids', []):
                 records[key] = row['label'] + ': ' + row['value'] + ' ' + row['unit'] + '. ' + row.get('note', '')
     if result.get('function_id') == 'relation_history':
@@ -58,13 +59,21 @@ def packet(result, datasets):
             text=('NST 2007, NST-20 Abteilung ' if classification=='NST20' else 'NST 2007, C7 Gruppe ')+facts[key]['group']+': '+text
         item = {'text': text}
         if key.startswith('p') and key[1:].isdigit():
-            statement=next((s for s in result.get('statements',[]) if s['text']==text),None)
-            if statement: item['fact_ids']=statement['fact_ids']
+            statements=[s for s in result.get('statements',[]) if s['text']==text or ('- '+s['text']) in text]
+            if statements: item['fact_ids']=list(dict.fromkeys(fid for s in statements for fid in s['fact_ids']))
         if key in facts:
             item.update({k: facts[key][k] for k in ['value', 'unit', 'year', 'mode', 'origin', 'destination',
                         'region', 'region_name', 'metric', 'scenario', 'direction', 'basis',
                         'source_status', 'quality_status', 'source','group','group_name'] if k in facts[key]})
+            if facts[key].get('value') is not None:
+                item['text'] += ' Kurzform: '+compact_value(facts[key]['value'], facts[key]['unit'])+'.'
         structured[key] = item
+    if result.get('function_id') in {'transport_history','goods_structure','goods_history'}:
+        for mode in params_modes(result):
+            selected=[f for f in facts.values() if f.get('mode')==mode and f['fact_id'] in structured]
+            if selected:
+                structured['mode_group_'+mode]={'text':' '.join(structured[f['fact_id']]['text'] for f in selected),
+                    'fact_ids':[f['fact_id'] for f in selected]}
     if result.get('function_id') in {'forecast_regions','compare_regions'}:
         groups = {}
         for fact in facts.values():
@@ -94,9 +103,15 @@ def packet(result, datasets):
             'ihrer Richtung und Einheit. Keine Platzhalter. Keine selbst berechneten Zahlen. '
             'Bei Prognosevergleichen nutze die forecast_group-Belege: Sie enthalten jeweils Basis, Ziel und beide Veränderungen einer Region, eines Verkehrsträgers und einer Kennzahl. '
             'Bei Partner-Ranglisten nutze partner_group für mehrere Mengen und Anteile im selben Absatz. '
+            'Bei Verkehrs- und Güterauswertungen nutze mode_group_<Verkehrsträger> für mehrere Werte desselben Verkehrsträgers, mode_group_total für die Summe. Nenne höchstens drei führende Gütergruppen; die vollständige Liste steht in der Tabelle. '
             'Bei regionalen Güterzeitreihen beantworte beide Teile: führende Gütergruppen im Endjahr mit Mengen/Anteilen und die Entwicklung seit dem Startjahr. Behandle jeden ausgewählten Verkehrsträger, auch konkrete Datenlücken. '
-            'Ordne die Ergebnisse in verständlichen Absätzen ein. Ein kurzer Satz genügt bei mehrteiligen Fragen nicht. '
+            'Beginne mit einer kurzen direkten Kernaussage. Nutze für vergleichbare Ergebnisse einen eigenen Block mit Aufzählungszeilen (- Punkt), optional mit **Bezeichnung**. '
+            'Nenne nur die wichtigsten Ergebnisse und relevante Datenlücken; Details stehen in der Tabelle. '
             'Die Tabelle und nötigen Qualitätsgrenzen werden zusätzlich angezeigt; wiederhole sie nicht vollständig.'}
+
+
+def params_modes(result):
+    return list(dict.fromkeys(f.get('mode') for f in result.get('facts',[]) if f.get('mode')))
 
 
 def check_prose(selection, payload, result, datasets):
@@ -106,7 +121,11 @@ def check_prose(selection, payload, result, datasets):
     params = result.get('parameters', {})
     facts = payload['evidence']
     for paragraph in selection['paragraphs']:
-        text, ids = paragraph['text'], paragraph['evidence_ids']
+        text, ids = paragraph['text'].replace('−','-'), paragraph['evidence_ids']
+        if result.get('function_id')=='goods_structure' and len(re.findall(r'^\s*[-*] ',text,re.M))>3:
+            raise ValueError('Nur die drei wichtigsten Gütergruppen im Text; vollständige Aufteilung in der Tabelle')
+        if len(text)>800 and not all(re.match(r'^\s*[-*] ',line) for line in text.splitlines() if line.strip()):
+            raise ValueError('Lange Antworten bitte als kurze Aufzählung gliedern')
         if (result.get('parameters',{}).get('goods') or result.get('function_id')=='dashboard_detail') and any(f.get('value') is not None for f in result.get('facts',[])):
             if re.search(r'(?:keine|nicht)\s+(?:\w+\s+){0,5}(?:Aufteilung|Güteraufteilung|Gütergruppenwerte|Gütergliederung)|(?:Gütergruppen|Güterarten).{0,50}(?:nicht verfügbar|liegen nicht vor)',text,re.I):
                 raise ValueError('Vorhandene Güterdaten dürfen nicht pauschal als fehlend bezeichnet werden')
@@ -232,20 +251,23 @@ def check_prose(selection, payload, result, datasets):
                 raise ValueError('Güterantwort lässt einen ausgewählten Verkehrsträger aus')
             for direction in params['directions']:
                 series=[f for f in result['facts'] if f.get('mode')==mode and f.get('direction')==direction]
-                required=[f for f in series if not f.get('group') and f.get('year') in {params['start'],params['end']} and f['unit']!='%']
+                required=[f for f in series if not f.get('group') and f.get('year')==params['end'] and f['unit']!='%']
                 latest=[f for f in series if f.get('year')==params['end'] and f.get('group') and f['unit']!='%']
                 known=[f for f in latest if f['value'] is not None]
                 required+= [max(known,key=lambda f:f['value'])] if known else latest
                 required+=[f for f in series if not f.get('group') and f.get('change')=='relative']
                 if any(f['fact_id'] not in covered for f in required):
                     raise ValueError('Güterantwort belegt Rangfolge, Randjahre oder Vergleichsgrenze nicht vollständig')
-                for f in required:
-                    if f['value'] is not None:
-                        variants=[numbers(number(f['value'])),numbers(compact_value(f['value'],f['unit']))]
-                        if not any(value <= numbers(text) for value in variants):
-                            raise ValueError('Güterantwort lässt führende Menge oder Jahresentwicklung aus')
+                # Cited evidence must cover the requested result; not every table number belongs in prose.
         if not {params['start'],params['end']} <= {int(y) for y in YEAR.findall(text)}:
             raise ValueError('Güterantwort lässt den Vergleichszeitraum aus')
+    if result.get('function_id')=='transport_history':
+        used={key for paragraph in selection['paragraphs'] for key in paragraph['evidence_ids']}
+        covered=used | {fid for key in used for fid in facts[key].get('fact_ids',[])}
+        key_mode='total' if len(params['modes'])>1 and params['metric']=='tonnes' else params['modes'][0]
+        required=[f for f in result['facts'] if f.get('mode')==key_mode and (f.get('year') in {params['start'],params['end']} or f.get('change')=='relative')]
+        if any(f['fact_id'] not in covered for f in required):
+            raise ValueError('Die Antwort muss die Gesamtentwicklung oder deren Datenlücke belegen')
     if result.get('function_id')=='compare_regions':
         text=' '.join(rendered)
         used={key for paragraph in selection['paragraphs'] for key in paragraph['evidence_ids']}
@@ -424,7 +446,7 @@ def analyze_chat(service, question, confirmed=None, *, function=None, history=No
             result['answer_mode'] = 'verified_fallback'
         # Tables are rendered from the original facts, never from model Markdown.
         for table in result['answer']['tables']:
-            table['collapsed'] = len(table['rows']) > 4
+            table['collapsed'] = len(table['rows']) > 4 and not table.get('compact_summary')
         return finish()
     except SelectionError as exc:
         audit.update(failure_stage='selection', error_kind=exc.code)

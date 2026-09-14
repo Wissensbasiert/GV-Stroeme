@@ -21,6 +21,8 @@ def main():
     parser.add_argument('--forecast', action='store_true', help='Mehrregionenprognose, beide Kennwerte und Anschlussfragen')
     parser.add_argument('--goods', action='store_true', help='Originaldialog Leipzig: Gütergruppen, alle Verkehrsträger, seit 2020')
     parser.add_argument('--access', action='store_true', help='Neue Prognose-/NST-/Hafen-/KV-Zugriffe ohne vorgegebene Funktion')
+    parser.add_argument('--scope-totals', action='store_true', help='Originaldialoge Duisburg Ausland/Inland und Berlin Gesamtentwicklung')
+    parser.add_argument('--scope-recheck', action='store_true', help='Drei gezielte Nachprüfungen der Belegpakete und benannten Inlandsrelation')
     parser.add_argument('--sample', action='store_true', help='Freie Auswahl aus T02/T04/T05/T07/T16/T20/T22/T35; keine vorgegebene Funktion')
     parser.add_argument('--cases', help='Einbasierte Auswahl der unabhängigen sample-Fragen, durch Komma getrennt')
     args = parser.parse_args()
@@ -54,6 +56,14 @@ def main():
         ['Wie hoch waren 2024 die Emissionen von Dortmund nach Bielefeld?'],
     ]
     if args.payload_review: conversations = [conversations[1][:1]]
+    elif args.scope_recheck:
+        conversations=[['Welche Güter flossen 2025 auf dem Binnenschiff von Duisburg ins Ausland?'],
+            ['Wie entwickelte sich der gesamte Güterverkehr in Berlin von 2020 bis 2024?'],
+            ['Wie viel Güterverkehr gab es 2024 von Duisburg nach Magdeburg insgesamt über Straße, Schiene und Binnenschiff?']]
+    elif args.scope_totals:
+        conversations=[['Welche Güter flossen auf dem Binnenschiff von Duisburg ins Ausland?', '2025', 'Und ins Inland?'],
+            ['Wie entwickelte sich der gesamte Güterverkehr in Berlin in den letzten fünf Jahren?', 'Und was ist mit einem Vergleich 2020-2024?'],
+            ['Wie viel Güterverkehr gab es 2024 von Duisburg nach Magdeburg insgesamt über Straße, Schiene und Binnenschiff?']]
     elif args.sample:
         conversations = [[question] for question in [
             'Wie viel Güterverkehr erzeugt und empfängt unsere Stadt?',

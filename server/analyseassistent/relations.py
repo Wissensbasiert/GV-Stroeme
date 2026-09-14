@@ -106,7 +106,7 @@ def rail_goods_history(con,dataset,*,region,partner,years,direction,metric):
             'note':'Fehlende Feinpositionen sind kein Nullnachweis; kein Rückgang um −100 % aus einer fehlenden Zeile. Quellenjahre nicht harmonisiert, keine bestätigte Änderungsrate und keine Ursache. Zeilensummen sind keine Garantie vollständigen realen Verkehrs.'}
 
 
-def partner_ranking(con,dataset,*,region,year,mode,metric,direction,group,top,external):
+def partner_ranking(con,dataset,*,region,year,mode,metric,direction,group,top,external,partner_scope='all'):
     if mode=='road' and group!='ALL':
         return {'status':'not_available','observations':[],
                 'note':'Straßenrelationen liegen nur für alle Güter vor; keine Güteraufteilung aus regionalen Randsummen.'}
@@ -114,6 +114,10 @@ def partner_ranking(con,dataset,*,region,year,mode,metric,direction,group,top,ex
     # enters once; external=True excludes it before aggregation and denominator.
     where={'outbound':'origin_id=?','inbound':'dest_id=?','all':'(origin_id=? OR dest_id=?)'}[direction]
     args=[region,region] if direction=='all' else [region]
+    if partner_scope!='all':
+        from .transport import scope_filter
+        where,args=scope_filter(direction,partner_scope,region)
+        where='('+where+')'
     if external:
         where+=' AND origin_id<>dest_id'
     if group!='ALL':

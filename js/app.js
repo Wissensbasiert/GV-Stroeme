@@ -5427,7 +5427,20 @@
     }
     // A small safe Markdown subset: no HTML, remote media or executable links.
     function formattedParagraph(text) {
-      if (String(text).includes('\n') && String(text).split('\n').every(line => !line.trim() || /^\s*[-*] /.test(line))) {
+      const lines = String(text).split('\n');
+      if (lines.some(line => /^\s*[-*] /.test(line)) && lines.some(line => line.trim() && !/^\s*[-*] /.test(line))) {
+        const block = node('div');
+        let buffered = [], list = false;
+        const flush = () => { if (buffered.length) block.append(formattedParagraph(buffered.join('\n'))); buffered = []; };
+        for (const line of lines) {
+          if (!line.trim()) { flush(); continue; }
+          const next = /^\s*[-*] /.test(line);
+          if (buffered.length && next !== list) flush();
+          list = next; buffered.push(line);
+        }
+        flush(); return block;
+      }
+      if (String(text).split('\n').some(line => /^\s*[-*] /.test(line)) && String(text).split('\n').every(line => !line.trim() || /^\s*[-*] /.test(line))) {
         const list = node('ul');
         String(text).split('\n').filter(line => line.trim()).forEach(line => {
           const item = node('li'), paragraph = formattedParagraph(line.replace(/^\s*[-*] /, ''));

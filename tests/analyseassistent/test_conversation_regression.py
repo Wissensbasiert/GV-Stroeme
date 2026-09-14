@@ -60,7 +60,7 @@ class ConversationRegression(unittest.TestCase):
                     self.assertEqual(audit['attempted_model_calls'],0)
                     self.assertEqual(current['function_id'],'relation_overview')
                     raw=self.datasets.query('relation_overview',current['parameters'])
-                    self.assertEqual([r['value'] for r in current['facts']],[r['value'] for r in raw['observations']])
+                    self.assertEqual([r['value'] for r in current['facts'] if not r.get('aggregate')],[r['value'] for r in raw['observations']])
                     self.assertEqual(current['parameters']['include_goods'],True)
                     if 'Transportleistung' in followup:self.assertEqual(current['parameters']['metrics'],['tkm'])
                     if 'Gegenrichtung' in followup:

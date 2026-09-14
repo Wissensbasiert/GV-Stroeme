@@ -13,6 +13,7 @@ from . import nodes
 from . import support
 from . import scope
 from . import access
+from . import transport
 
 
 def read(path):
@@ -144,6 +145,7 @@ class Datasets:
                 return {'status': 'not_available', 'note': 'B07-Testabbild fehlt', 'unit': 'Mautfahrten'}
             return self.toll.query(**parameters)
         dispatch = {'relation_matrix': relations.relation_matrix,
+                    'transport_history': transport.transport_history,
                     'forecast_relation': access.forecast_relation,
                     'dashboard_detail': access.dashboard_detail,
                     'relation_overview': relations.relation_overview,

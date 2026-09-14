@@ -14,6 +14,8 @@ def catalog(datasets, function=None, parameters=None):
         'forecast': {'tool': 'forecast_regions', 'base': '2019_BASE', 'target': '2040_P1',
                      'max_regions': 5, 'metrics': ['tonnes', 'tkm'], 'modes': ['road', 'rail', 'iww'],
                      'observed_years_required': False},
+        'transport_totals': {'tool':'transport_history','purpose':'Gesamtverkehr und Jahresentwicklung ohne Güterstruktur','modes':['road','rail','iww'],'partner_scope':['all','domestic','international'],'total_rule':'Tonnensumme nur für vollständige ausgewählte Modi; bekannte Teilsumme gesondert; keine KV-Summe'},
+        'geographic_scope': {'domestic':'Partner in Deutschland','international':'Partner außerhalb Deutschlands','all':'Alle Gegenräume','tools':['goods_structure','goods_history','partner_ranking','transport_history'],'goods_limit':'Ländergefilterte Güterstruktur nur Schiene/Binnenschiff C7; Straßen-OD nur Gesamtmenge'},
         'relation_years_by_mode': datasets.manifests['b01']['years_by_mode'],
         'regional_years_by_mode': {mode: sorted({r['year'] for r in coverage if r['mode'] == mode}) for mode in ['road', 'rail', 'iww']},
         'goods_groups': classification['groups'],

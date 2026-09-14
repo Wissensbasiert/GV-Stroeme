@@ -159,7 +159,9 @@ try:
         assert first['status']=='needs_clarification' and first['conversation_state']['confirmed']['origin']=='DE136'
         second,_=semantic.analyze('die letzten fünf Jahre',conversation=first['conversation'])
         assert second['status']=='not_available' and second['parameters']['start']==2021 and second['parameters']['end']==2025
-        assert len(second['facts'])==15 and all(f['value'] is None for f in second['facts'])
+        assert len([f for f in second['facts'] if not f.get('aggregate')])==15
+        assert len([f for f in second['facts'] if f.get('aggregate')=='modal_sum'])==5
+        assert all(f['value'] is None for f in second['facts'])
         report['semantic_dialogue_verified']={'partial_selection_saved':True,'start':2021,'end':2025,
             'missing_values_remain_unknown':True,'external_model_calls':0}
     from server.analyseassistent.contracts import FUNCTIONS
@@ -219,7 +221,7 @@ try:
         result=make_result('goods_history',parameters,raw,datasets,'0.4.2')
         result['answer']=present(result,datasets)
         paragraphs=result['answer']['paragraphs']
-        assert len(paragraphs)==3
+        assert len(paragraphs)==2 and paragraphs[1].startswith('- ')
         check_prose({'paragraphs':[{'text':text,'evidence_ids':['p'+str(i+1)]} for i,text in enumerate(paragraphs)]},packet(result,datasets),result,datasets)
         static=root/'alwaysdata_portal/static/gueterstroeme'
         for file in ['crosswalk_spatial_vp2040.json','crosswalk_nst_vp2040.json']:
@@ -227,6 +229,27 @@ try:
         assert (static/'data/processed/delivery/forecast/DEA1D.json').is_file()
         report['goods_history_verified']={'facts':273,'start':2020,'end':2024,'all_modes':True,
             'iww_groups_unknown':True,'complete_fallback':True,'crosswalk_files_present':True,'external_model_calls':0}
+    if 'transport_history' in FUNCTIONS:
+        report['stage']='scope_totals'
+        from server.analyseassistent.results import make_result
+        from server.analyseassistent.presentation import present
+        parameters=dict(region='DE300',start=2020,end=2024,modes=['road','rail','iww'],metric='tonnes',direction='all',partner_scope='all')
+        raw=datasets.query('transport_history',parameters)
+        totals=[r['value'] for r in raw['observations'] if r.get('mode')=='total' and r.get('year')]
+        assert totals==[83255517.4,81891720.,80390334.,73057305.,71741627.]
+        result=make_result('transport_history',parameters,raw,datasets,'0.6.0')
+        answer=present(result,datasets)
+        assert len(answer['tables'][0]['rows'])==5 and not answer['tables'][0]['collapsed']
+        assert answer['paragraphs'][1].startswith('- ')
+        parameters.update(start=2021,end=2025)
+        raw=datasets.query('transport_history',parameters)
+        assert next(r['value'] for r in raw['observations'] if r.get('mode')=='total' and r.get('year')==2025) is None
+        values={}
+        for scope in ['domestic','international']:
+            raw=datasets.query('goods_structure',dict(region='DEA12',year=2025,mode='iww',metric='tonnes',directions=['outbound'],granularity='C7',partner_scope=scope))
+            values[scope]=raw['observations'][-1]['value']
+        assert abs(values['international']-5915781.2)<0.001 and abs(values['domestic']-2373211.2)<0.001
+        report['scope_totals_verified']={'berlin_years':totals,'duisburg':values,'missing_2025_total':True,'short_visible_table':True,'external_model_calls':0}
     if sys.argv[4]=='requesty':
         report['stage']='requesty'
         from server.analyseassistent.requesty import Requesty

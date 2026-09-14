@@ -448,7 +448,7 @@ class RealData(unittest.TestCase):
         self.assertEqual(result['function_id'],'relation_history')
         self.assertEqual(result['parameters'],{'origin':'DE213','destination':'DE271','start':2020,'end':2024,
                                                'modes':['road','rail','iww'],'metric':'tonnes'})
-        self.assertEqual(len(result['facts']),15)
+        self.assertEqual(len([f for f in result['facts'] if not f.get('aggregate')]),15)
         self.assertTrue(result['answer']['tables'][0]['collapsed'])
         self.assertIn('kein vollständiger Verkehrsträgervergleich',result['answer']['paragraphs'][0])
         self.assertIn('kein nutzbarer Güterverkehrswert erfasst beziehungsweise veröffentlicht',result['answer']['paragraphs'][0])
@@ -678,7 +678,8 @@ class RealData(unittest.TestCase):
         params={'origin':'DEA12','destination':'DEE03','year':2024,'metric':'tonnes'}
         result,_=self.service.analyze('DEA12 → DEE03',params,function='relation_matrix')
         self.assertEqual(result['status'],'partial')
-        self.assertEqual([r['value'] for r in result['facts']],[None,None,None,None,1947,1189])
+        self.assertEqual([r['value'] for r in result['facts'] if not r.get('aggregate')],[None,None,None,None,1947,1189])
+        self.assertTrue(all(r['value'] is None for r in result['facts'] if r.get('aggregate')=='modal_sum'))
         self.assertTrue(all(r['source_status']=='missing_row' for r in result['facts'][:4]))
         self.assertTrue(any('1.947' in s for s in result['summary']))
 

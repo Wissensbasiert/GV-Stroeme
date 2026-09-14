@@ -21,7 +21,7 @@ FIELD_LABELS={
     'month':'Welchen Monat möchten Sie betrachten?', 'comparison_month':'Mit welchem Monat soll verglichen werden?',
     'minimum_base':'Ab welcher Ausgangsmenge sollen Verbindungen berücksichtigt werden?',
     'measure':'Interessiert Sie die Veränderung als Menge oder in Prozent?'}
-MODES={'road':'Straße','rail':'Schiene','iww':'Binnenschiff','sea':'Seeverkehr','total':'alle Verkehrsträger'}
+MODES={'road':'Straße','rail':'Schiene','iww':'Binnenschiff','sea':'Seeverkehr','total':'Summe der ausgewählten Verkehrsträger','subtotal':'Bekannte Teilsumme'}
 DIRECTIONS={'outbound':'Versand','inbound':'Empfang','all':'beide Richtungen','internal':'Binnenverkehr','total':'beide Richtungen'}
 UNITS={'t':'Tonnen','tonnes':'Tonnen','tkm':'Tonnenkilometer','trips':'Fahrten','flights':'Flüge','load_units':'Ladeeinheiten','Ladeeinheiten':'Ladeeinheiten','Fahrten':'Fahrten','%':'%','teu':'TEU','TEU':'TEU'}
 
@@ -388,18 +388,57 @@ def present(result,datasets):
         answer['notes'].extend(n for n in result.get('notices',[]) if not n.startswith('Datenstand:'))
     if function in {'forecast_relation','forecast_regions','forecast_comparison','forecast_ranking'} or p.get('include_forecast'):
         answer['notes'].append('Die Prognose vergleicht das Basisszenario 2019 mit dem Szenario für 2040. Das sind Modellannahmen, keine beobachtete Entwicklung und keine sichere Vorhersage. Beobachtete Werte bleiben davon getrennt.')
+    if function=='goods_structure' and len(p['directions'])==1:
+        from .results import compact_value
+        totals=[f for f in facts if not f.get('group') and f['value'] is not None]
+        ranked=sorted([f for f in facts if f.get('group') and f['unit']!='%' and f['value'] is not None],key=lambda f:f['value'],reverse=True)
+        if totals and ranked:
+            answer['paragraphs']=['; '.join(DIRECTIONS[f['direction']]+': '+compact_value(f['value'],f['unit']) for f in totals)+' erfasste Gütermenge ('+str(p['year'])+').',
+                '\n'.join('- '+re.sub(r'^.*?/ C\d+\s*','',f['label'])+': '+compact_value(f['value'],f['unit']) for f in ranked[:3])]
     if function=='goods_history':
         answer['title']='Güterstruktur für '+region+f' ({p["start"]}–{p["end"]})'
+        answer['paragraphs']=['Die wichtigsten Güter und ihre Entwicklung im gewählten Zeitraum:', '\n'.join('- '+s['text'] for s in result['statements'] if s.get('role')=='analysis')]
         if answer['tables']:
             answer['tables'][0].update(title='Gütergruppen und Jahresentwicklung im Detail',columns=['Jahr · Verkehrsträger · Gütergruppe','Wert','Einheit','Hinweis'])
-        answer['notes'].extend(['Die Verkehrsträger werden getrennt betrachtet. Ihre Mengen werden nicht zu einer eindeutigen Transportmenge über alle Transportketten addiert.',
-            'Dargestellt sind Veränderungen der veröffentlichten Profilwerte; keine harmonisierte Gebietszeitreihe und kein Nachweis von Ursachen. Straßen-Quellenkennzeichen der Güterrandsummen sind nicht nacherschlossen.',
+        from .transport import SUM_NOTE
+        answer['notes'].extend([SUM_NOTE,
+            ('Dargestellt sind Veränderungen der veröffentlichten Profilwerte; Straßen-Quellenkennzeichen der Güterrandsummen sind nicht nacherschlossen. ' if p.get('partner_scope','all')=='all' else 'Dargestellt sind veröffentlichte Relationen im ausgewählten Gegenraum. ')+'Keine harmonisierte Gebietszeitreihe und kein Nachweis von Ursachen.',
             'Fehlende Gütergruppen bleiben unbekannt, auch wenn der Gesamtwert eines Verkehrsträgers null beträgt. Daraus folgt kein Nachweis von Nullverkehr.'])
-    if function in {'goods_structure','goods_history'}:
+    if function in {'goods_structure','goods_history'} and p.get('partner_scope','all')=='all':
         answer['notes'].append('Die Gütergruppen beschreiben die ausgewählte Region. Ihre Anteile lassen sich nicht als Güterverteilung einer einzelnen Verbindung lesen.')
     if status=='partial' and function not in {'road_relation_goods_limit','relation_history'}:
         answer['notes'].append('Ein Teil der gewünschten Angaben fehlt oder ist nur eingeschränkt nutzbar. Fehlende Werte werden in der Tabelle ausdrücklich angezeigt und nicht durch null ersetzt.')
     if any(f.get('quality_status')=='restricted' for f in facts) and function not in {'road_relation_goods_limit','relation_history'}:
         answer['notes'].append('Die Quelle kennzeichnet einzelne Werte als eingeschränkt belastbar. Bitte beachten Sie die Hinweise in der Tabelle.')
-    answer['notes']=list(dict.fromkeys(answer['notes']))
+    if function=='transport_history':
+        from .transport import SCOPES, SUM_NOTE
+        answer['title']='Güterverkehr in '+region+f' ({p["start"]}–{p["end"]})'
+        insights=[s['text'] for s in result['statements'] if s.get('role')=='analysis']
+        answer['paragraphs']=[insights[0], '\n'.join('- '+s for s in insights[1:])] if len(insights)>1 else insights
+        answer['notes']=[SCOPES[p['partner_scope']]+'. '+('Versand und Empfang.' if p['direction']=='all' else DIRECTIONS[p['direction']]+'.'),
+                         next((n for n in result['notices'] if n.startswith('Versand plus Empfang') or n.startswith('Gerichtete veröffentlichte Relationen;')),''),
+                         SUM_NOTE if p['metric']=='tonnes' else 'Verkehrsleistungen bleiben wegen unterschiedlicher Erfassungsräume nach Verkehrsträger getrennt.']
+        if answer['tables']:
+            all_rows=answer['tables'][0]['rows']; by_fact={f['fact_id']:f for f in facts}
+            primary='total' if len(p['modes'])>1 and p['metric']=='tonnes' else p['modes'][0]
+            main=[]; details=[]
+            for row in all_rows:
+                f=by_fact[row['fact_ids'][0]]
+                if f.get('mode')==primary and f.get('year'):
+                    missing=f.get('missing_modes',[])
+                    main.append({**row,'label':str(f['year']),'note':'Fehlt: '+', '.join(MODES[m] for m in missing) if missing else row['note']})
+                else:details.append(row)
+            answer['tables']=[{'title':'Jahreswerte · '+MODES[primary],'columns':['Jahr','Wert','Einheit','Hinweis'],
+                               'rows':main,'row_count':len(main),'collapsed':False,'compact_summary':True},
+                              {'title':'Verkehrsträger und Veränderungen im Detail','columns':['Kennwert','Wert','Einheit','Hinweis'],
+                               'rows':details,'row_count':len(details),'collapsed':True}]
+    if p.get('partner_scope','all')!='all':
+        from .transport import SCOPES
+        answer['title']+=' · '+SCOPES[p['partner_scope']]
+        answer['notes']=[n for n in answer['notes'] if not n.startswith('Die Gütergruppen beschreiben')]
+        answer['notes'].insert(0,'Ausgewählter Gegenraum: '+SCOPES[p['partner_scope']]+'.')
+    if function in {'relation_overview','relation_history','relation_matrix'} and any(f.get('aggregate') for f in facts):
+        from .transport import SUM_NOTE
+        answer['notes'].append(SUM_NOTE)
+    answer['notes']=list(dict.fromkeys(n for n in answer['notes'] if n))
     return answer

@@ -131,7 +131,7 @@ class SemanticConversation(unittest.TestCase):
             self.assertEqual(second['status'], 'not_available')
             self.assertEqual((second['parameters']['start'], second['parameters']['end']), (2021, 2025))
             self.assertEqual(second['parameters']['destination'], 'DE600')
-            self.assertEqual(len(second['facts']), 15)
+            self.assertEqual(len([f for f in second['facts'] if not f.get('aggregate')]), 15)
             self.assertTrue(all(f.get('value') is None for f in second['facts']))
             self.assertTrue(any(f.get('source_status') == 'missing_row' for f in second['facts']))
 
