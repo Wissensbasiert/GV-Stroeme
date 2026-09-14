@@ -1,5 +1,7 @@
 # Dokumentationsübersicht
 
+**Testportal, 14.09.2026 – `loading01`:** Relationsanfragen für 2025 nennen den verfügbaren Jahrgang 2024; Flughafenhinweise aktualisiert und Ladeanzeige ohne Layoutverschiebung über der Karte. 218 lokale Tests, vollständige Linux-Prüfung und Browserstichprobe bestanden. [Bereitstellung und Nachweis](qualitaet/LADEANZEIGE_UND_RELATIONSJAHRE_20260914.md). Nachfolgend frühere Prüfstände.
+
 **Luftverkehr, 14.09.2026:** Die korrigierten Eurostat-Dateien sind im Testrelease `air01` bereitgestellt und auf dem Server sowie im Browser geprüft. Flughafen-Flugzahlen 2025 sind für den freigegebenen Quellenstand wieder verfügbar; Relationen weiterhin bis 2024. Die Funktionen aus `nodes02` sind enthalten. [Datenprüfung und Bereitstellung](qualitaet/LUFTVERKEHR_UPDATE_20260914.md). Nachfolgend Vorgängerstände.
 
 **Aktuell: Version 0.7.0 im Testportal (`nodes02`).** Konkrete Flughafenverbindungen, IATA-Auswahl, London-Gruppe mit Abdeckungshinweis und fünf geprüfte Vorschaufragen. 215 lokale Tests, 13 freigegebene Modellfragen, lesende Gemini-Zweitprüfung und abschließende Linux-/Browserprüfung dokumentiert. Ein erkannter Paketierungs-Mischstand wurde zurückgerollt und durch einen konsistenten, erneut geladenen Release ersetzt. [Prüfbericht](qualitaet/ANALYSEASSISTENT_KNOTEN_VORSCHAU_20260914.md). Nachfolgend Vorgängerstände.

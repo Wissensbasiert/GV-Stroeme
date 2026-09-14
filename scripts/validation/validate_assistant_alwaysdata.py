@@ -271,6 +271,14 @@ try:
         assert 2025 in available_years(datasets,'node_statistics',dict(kind='air',node='EDDP',metric='flights'))
         for scope in ['domestic','international']:
             assert datasets.query('node_statistics',dict(kind='air',node='EDDP',year=2025,direction='all',metric='flights',partner_scope=scope))['value'] is None
+        for metric in ['tonnes', 'flights']:
+            gap_parameters = dict(selected, year=2025, metric=metric)
+            gap_raw = datasets.query('node_connections', gap_parameters)
+            assert gap_raw['status'] == 'not_available' and gap_raw['observations'] == []
+            gap_result = make_result('node_connections', gap_parameters, gap_raw, datasets, '0.7.0')
+            gap_text = ' '.join(present(gap_result, datasets)['paragraphs'])
+            assert '2025' in gap_text and '2024' in gap_text and 'keine Relationsdaten' in gap_text
+        report['relation_year_notice_verified'] = True
         rank_parameters=dict(mode='rail',metric='tonnes',direction='all',measure='absolute',top=5,descending=True)
         ranking=make_result('forecast_ranking',rank_parameters,datasets.query('forecast_ranking',rank_parameters),datasets,'0.7.0')
         assert 'Hamburg' in present(ranking,datasets)['paragraphs'][0]
