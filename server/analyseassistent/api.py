@@ -1,6 +1,8 @@
 """WSGI-Endpunkt mit injizierter serverseitiger Identität und Kontingentprüfung."""
 import json
 import io
+import queue
+import threading
 from .quota import fingerprint, QuotaError
 from .dialogue import validate_history
 
@@ -24,6 +26,9 @@ class Application:
             if 1 <= size <= 60000:
                 environ = dict(environ)
                 environ['wsgi.input'] = io.BytesIO(environ['wsgi.input'].read(size))
+        if (environ.get('REQUEST_METHOD') == 'POST' and environ.get('PATH_INFO') == '/api/analyseassistent'
+                and 'text/event-stream' in environ.get('HTTP_ACCEPT', '')):
+            return self.stream(environ, start_response)
         status, result = self.handle(environ)
         data = json.dumps(result, ensure_ascii=False, allow_nan=False).encode('utf-8')
         start_response(status, [('Content-Type', 'application/json; charset=utf-8'),
@@ -31,7 +36,38 @@ class Application:
                                 ('X-Content-Type-Options', 'nosniff')])
         return [data]
 
-    def handle(self, environ):
+    def stream(self, environ, start_response):
+        """Only progress is provisional. The result follows validation and booking."""
+        events = queue.Queue(maxsize=32)
+        def work():
+            try:
+                status, result = self.handle(environ, progress=lambda event: events.put(('status', event)))
+                events.put(('result' if status.startswith('200') else 'error', {'status': int(status[:3]), 'body': result}))
+            except Exception:
+                events.put(('error', {'status': 500, 'body': {'error': 'Die Anfrage konnte nicht abgeschlossen werden.'}}))
+            finally:
+                events.put(None)
+        start_response('200 OK', [('Content-Type', 'text/event-stream; charset=utf-8'),
+                                 ('Cache-Control', 'no-store'), ('X-Accel-Buffering', 'no'),
+                                 ('X-Content-Type-Options', 'nosniff')])
+        threading.Thread(target=work, daemon=True, name='gueterstroeme-analysis').start()
+        def generate():
+            # If the browser disconnects, the bounded worker still finalizes the
+            # reservation exactly once. A retry uses the same request identity.
+            yield b': connected\n\n'
+            while True:
+                try:
+                    item = events.get(timeout=10)
+                except queue.Empty:
+                    yield b': working\n\n'
+                    continue
+                if item is None:
+                    break
+                event, payload = item
+                yield ('event: ' + event + '\ndata: ' + json.dumps(payload, ensure_ascii=False, allow_nan=False) + '\n\n').encode('utf-8')
+        return generate()
+
+    def handle(self, environ, progress=None):
         if environ.get('PATH_INFO') not in {'/api/analyseassistent', '/api/analyseassistent/quota'}:
             return '404 Not Found', {'error': 'Unbekannte Schnittstelle'}
         try:
@@ -82,6 +118,7 @@ class Application:
         charge = False
         try:
             options={'function':body.get('function')}
+            if progress is not None: options['progress'] = progress
             if body.get('history'):options['history']=body['history']
             if body.get('conversation'):options['conversation']=body['conversation']
             result, _audit = self.service.analyze(question, body.get('confirmed'), **options)

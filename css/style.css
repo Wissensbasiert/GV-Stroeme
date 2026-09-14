@@ -3078,6 +3078,13 @@ a.btn-header svg { width: 16px; height: 16px; flex: 0 0 16px; }
 .ki-message-content p {
   margin: 0;
 }
+.ki-message-assistant .ki-message-content > h4 {
+  margin: 0 0 10px;
+  line-height: 1.45;
+}
+.ki-message-assistant .ki-message-content > p + p {
+  margin-top: 12px;
+}
 .ki-message-content ul, .ki-message-content ol {
   margin: 6px 0;
   padding-inline-start: 1.4em;

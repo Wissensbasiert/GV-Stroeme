@@ -20,6 +20,11 @@ def evidence(result, answer):
     # A compact evidence packet, never the full result table or source data.
     ids = list(records)
     selected = ids[:20] + [k for k in ids if k.startswith(('n', 'p')) or 'Summe' in records[k]]
+    # The history introduction already carries the requested endpoints and
+    # comparison limit. Individual table cells would reintroduce a substitute
+    # comparison or a row-by-row reading of intermediate years.
+    if result.get('function_id')=='relation_history':
+        selected=[k for k in selected if k.startswith(('p','n'))]
     return {k: records[k] for k in dict.fromkeys(selected)}
 
 
@@ -28,10 +33,12 @@ def apply_narrative(result, answer, selection, records):
     if selection['result_id'] != result['result_id'] or selection['data_snapshot_id'] != result['data_snapshot_id']:
         raise ValueError('Fremder Ergebnisbezug')
     rendered = []
+    used_tokens=[]
     for paragraph in selection['paragraphs']:
         text = paragraph['text']
         refs = paragraph['evidence_ids']
         tokens = re.findall(r'\{\{([a-z]+\d+)\}\}', text)
+        used_tokens.extend(tokens)
         remainder = re.sub(r'\{\{[a-z]+\d+\}\}', '', text)
         if not set(refs) <= records.keys() or not set(tokens) <= set(refs):
             raise ValueError('Unbelegte Erläuterung')
@@ -42,9 +49,13 @@ def apply_narrative(result, answer, selection, records):
             raise ValueError('Kein sichtbarer aktueller Beleg')
         for token in tokens: text = text.replace('{{' + token + '}}', records[token])
         rendered.append(text)
+    if result.get('function_id')=='relation_history':
+        required=[k for k in records if k.startswith('p')]
+        if [k for k in used_tokens if k.startswith('p')] != required:
+            raise ValueError('Angefragter Zeitraum oder Vergleichsgrenze fehlt oder ist umgestellt')
     if rendered:
         # Table, factual introduction, scope and mandatory notes cannot be removed.
-        first = answer['paragraphs'][:1]
-        answer['paragraphs'] = [*rendered, *[p for p in first if not any(p in text for text in rendered)]]
+        required = answer['paragraphs'] if result.get('function_id') in {'relation_overview','relation_history'} else answer['paragraphs'][:1]
+        answer['paragraphs'] = [*rendered, *[p for p in required if not any(p in text for text in rendered)]]
         result['answer_mode'] = 'grounded_narrative'
     return answer

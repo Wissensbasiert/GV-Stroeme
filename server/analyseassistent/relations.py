@@ -1,5 +1,6 @@
 """Begrenzte Relationsauswertungen auf dem unveränderten geprüften B01-Abbild."""
 from pathlib import Path
+import json
 from scripts.analysis.b01 import query_relation
 from scripts.analysis.b0406 import rank, rows
 from scripts.analysis.b03 import query_rail
@@ -24,6 +25,39 @@ def relation_matrix(con, dataset, *, origin, destination, year, metric):
              'note':'Eine nicht veröffentlichte Relation ist kein Nullnachweis. Keine Aussage zu Route, Hafennutzung oder Terminalpotenzial.'}
 
 
+def relation_overview(con,dataset,*,origin,destination,year,modes,metrics,include_goods):
+    # One scan for the selected route; totals and disjoint groups share the
+    # same source-flag rules as B01.query_relation.
+    records=rows(con.execute('''SELECT mode,metric,group_7_id,sum(source_rows) AS source_rows,
+        sum(known_sum) AS known_sum,sum(missing_count) AS missing_count,
+        sum(restricted_count) AS restricted_count,sum(unknown_quality_count) AS unknown_quality_count,
+        list(DISTINCT source_id) AS source_ids FROM read_parquet(?)
+        WHERE origin_id=? AND dest_id=? AND year_ref=? GROUP BY mode,metric,group_7_id''',
+        [str(Path(dataset)/'annual_od.parquet'),origin,destination,year]))
+    coverage=json.loads((Path(dataset)/'manifest.json').read_text(encoding='utf-8'))['years_by_mode']
+    observations=[]
+    for mode in modes:
+        for metric in metrics:
+            for group in (['ALL',*[str(n) for n in range(1,8)]] if include_goods and mode!='road' else ['ALL']):
+                selected=[r for r in records if r['mode']==mode and r['metric']==metric and (group=='ALL' or r['group_7_id']==group)]
+                missing=sum(r['missing_count'] or 0 for r in selected)
+                restricted=sum(r['restricted_count'] or 0 for r in selected)
+                raw={'value':sum(r['known_sum'] or 0 for r in selected) if selected and not missing else None,
+                    'unit':'t' if metric=='tonnes' else 'tkm',
+                    'status':('not_available' if year not in coverage[mode] else 'missing_row') if not selected else 'partial' if missing else 'available',
+                    'quality':'unknown' if not selected or any(r['unknown_quality_count'] for r in selected) else 'restricted' if restricted else 'unflagged',
+                    'missing_count':missing,'restricted_count':restricted,
+                    'source_ids':sorted({s for r in selected for s in r['source_ids']})}
+                observations.append({'label':mode+' / '+('Alle veröffentlichten Güterangaben' if group=='ALL' else 'C'+group),
+                    'value':raw['value'],'unit':raw['unit'],'mode':mode,'metric':metric,'group':group,'year':year,
+                    'source_status':raw['status'],'quality':raw.get('quality','unknown'),
+                    'missing_count':raw.get('missing_count'),'restricted_count':raw.get('restricted_count'),
+                    'source_ids':raw.get('source_ids',[])})
+    return {'status':'partial' if (include_goods and 'road' in modes) or any(r['value'] is None for r in observations) else 'available',
+        'observations':observations,'scope':'Gerichtete Jahresrelation; Verkehrsträger und Kennzahlen getrennt.',
+        'note':'Straßenrelationen enthalten keine Güteraufteilung. Gruppen und Gesamtwerte überlappen und dürfen nicht addiert werden. Fehlende Angaben bleiben unbekannt.'}
+
+
 def relation_history(con, dataset, *, origin, destination, start, end, modes, metric):
     """Mehrjährige gerichtete Relation, Verkehrsträger bewusst getrennt."""
     if end-start>20:
@@ -43,7 +77,7 @@ def relation_history(con, dataset, *, origin, destination, start, end, modes, me
             'unit':'t' if metric=='tonnes' else 'tkm','observations':observations,
             'scope':'Veröffentlichte Jahreswerte der gerichteten Relation, je Verkehrsträger getrennt.',
             'counting':'Jahr und Verkehrsträger werden separat ausgewiesen; keine gemeinsame Summe über Verkehrsträger.',
-            'note':'Die prozentuale Veränderung wird transparent aus dem ersten und letzten vorhandenen veröffentlichten Wert berechnet. Sie ist nicht um methodische Brüche bereinigt und belegt keine Ursache. Fehlt eine Relation, ist in dieser Statistik kein nutzbarer Wert erfasst beziehungsweise veröffentlicht; das beweist nicht, dass tatsächlich kein Verkehr stattfand.'}
+            'note':'Eine prozentuale Veränderung setzt Zahlen für das angefragte Anfangs- und Endjahr voraus. Fehlende Randjahre werden nicht durch Zwischenjahre ersetzt. Die Rate ist nicht um methodische Brüche bereinigt und belegt keine Ursache. Eine fehlende Relation ist kein Nachweis, dass tatsächlich kein Verkehr stattfand.'}
 
 
 def road_relation_goods_limit(con,dataset,*,origin,destination,year,metric):

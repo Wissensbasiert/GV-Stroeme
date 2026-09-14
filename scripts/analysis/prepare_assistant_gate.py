@@ -14,8 +14,9 @@ ROOT=Path(__file__).resolve().parents[2]
 def required_files():
     return [*sorted((ROOT/'server/analyseassistent').glob('*.py')),
             *sorted((ROOT/'integration/analyseassistent').glob('*.py')),
-            ROOT/'tests/analyseassistent/test_runtime.py',
+            *sorted((ROOT/'tests/analyseassistent').glob('test_*.py')),
             ROOT/'scripts/validation/validate_assistant_runtime.py',
+            ROOT/'scripts/validation/validate_assistant_chat.py',
             ROOT/'scripts/analysis/prepare_assistant_gate.py',
             ROOT/'scripts/analysis/prepare_assistant_cases.py',
             ROOT/'scripts/analysis/run_assistant_catalog.py',

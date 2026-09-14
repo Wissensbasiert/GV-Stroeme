@@ -7,7 +7,7 @@ import json
 import re
 import time
 from .contracts import FUNCTIONS, question_supports, directed_pairs
-from .dialogue import YEAR, LATEST
+from .dialogue import YEAR, LATEST, PREVIOUS_YEAR, MULTI_YEAR
 
 
 def pack(state, key):
@@ -39,15 +39,70 @@ def resume(question, state, datasets):
     if function not in FUNCTIONS:
         return question, {}, None, 'new_topic'
     text = question.strip()
+    # Subject-preserving refinements can be full sentences, not just canned replies.
+    pairs=directed_pairs(text,datasets.names,[])
+    route_origin=old.get('origin') or old.get('region')
+    route_destination=old.get('destination') or old.get('partner')
+    if old.get('direction')=='inbound':route_origin,route_destination=route_destination,route_origin
+    named={code for code in datasets.names if question_supports(text,code,datasets.names)}
+    same_route=pairs=={(route_origin,route_destination)}
+    refers_back=bool(re.search(r'\b(?:auch|weiterhin|dazu|dabei|dieselbe|dieser|diese|noch|stattdessen|zusätzlich)\b|^\s*(?:und|was ist mit)\b',text,re.I))
+    requested_metrics=[m for m in ['tonnes','tkm'] if question_supports(text,m,{})]
+    requested_modes=[m for m in ['road','rail','iww'] if question_supports(text,m,{})]
+    goods=bool(re.search(r'\bgüter(?:art\w*|grupp\w*)\b',text,re.I))
+    # A metric-only question without another place is itself a contextual
+    # refinement, even if the user omits words such as "auch" or "dazu".
+    refers_back=refers_back or bool((requested_metrics or goods) and not named)
+    relation_functions={'relation','relation_matrix','relation_history','relation_overview','road_relation_goods_limit','rail_goods','rail_goods_history'}
+    refinement=(refers_back and (requested_metrics or requested_modes or goods or same_route or YEAR.search(text))
+        and (not named or named<={route_origin,route_destination}) and (not pairs or same_route)
+        and not re.search(r'\b(?:national\w*|luftfracht|prognose|kosten|emission\w*|NST|C[1-7])\b',text,re.I))
+    if refinement and (requested_metrics or requested_modes or goods or same_route) and function in relation_functions and route_origin and route_destination:
+        modes=old.get('modes') or ([old['mode']] if old.get('mode') else ['rail'] if function.startswith('rail_goods') else ['road'] if function=='road_relation_goods_limit' else ['road','rail','iww'])
+        metrics=old.get('metrics') or [old.get('metric','tonnes')]
+        metrics=list(dict.fromkeys([*metrics,*requested_metrics])) if re.search(r'\b(?:auch|zusätzlich)\b',text,re.I) else requested_metrics or metrics
+        parameters={'origin':route_origin,'destination':route_destination,'modes':requested_modes or modes,'metrics':metrics,
+            'include_goods':old.get('include_goods',function in {'rail_goods','rail_goods_history','road_relation_goods_limit'}) or goods}
+        if old.get('year'):parameters['year']=old['year']
+        # Old time wording must not override an explicit correction.
+        effective=state['effective_question']
+        if YEAR.search(text) or PREVIOUS_YEAR.search(text) or LATEST.search(text):
+            parameters.pop('year',None)
+            effective=PREVIOUS_YEAR.sub('',LATEST.sub('',YEAR.sub('',effective)))
+        if function=='relation_history':effective=MULTI_YEAR.sub('',effective)
+        return effective+'\n'+text,parameters,'relation_overview','refinement'
+    if refinement and function not in relation_functions and not named and not goods:
+        properties=FUNCTIONS[function][3]['properties']
+        parameters=copy.deepcopy(old)
+        if len(requested_metrics)==1 and 'metric' in properties:parameters['metric']=requested_metrics[0]
+        elif requested_metrics:return question,{},None,'new_topic'
+        if len(requested_modes)==1 and 'mode' in properties:parameters['mode']=requested_modes[0]
+        elif requested_modes:return question,{},None,'new_topic'
+        effective=state['effective_question']
+        if YEAR.search(text) or PREVIOUS_YEAR.search(text) or LATEST.search(text):
+            parameters.pop('year',None)
+            effective=PREVIOUS_YEAR.sub('',LATEST.sub('',YEAR.sub('',effective)))
+        # Remove the previous selected mode/metric wording before replacing it.
+        from .contracts import ALIASES
+        for key,values in [('mode',requested_modes),('metric',requested_metrics)]:
+            if values and old.get(key)!=parameters.get(key):
+                for word in [old.get(key,''),*ALIASES.get(old.get(key),[])]:
+                    if word:effective=re.sub(r'(?<!\w)'+re.escape(word)+r'(?!\w)','',effective,flags=re.I)
+        return effective+'\n'+text,parameters,function,'refinement'
     reverse = bool(re.fullmatch(r'(?:und\s+)?(?:in\s+)?(?:der\s+)?(?:gegenrichtung|umgekehrt)[?!. ]*', text, re.I))
     year_reply = bool(re.fullmatch(r'(?:und\s+|für\s+|im\s+)?(?:19|20)\d{2}[?!. ]*', text, re.I) or
-                      (LATEST.search(text) and len(text) < 70 and not directed_pairs(text, datasets.names, [])))
+                      ((LATEST.search(text) or PREVIOUS_YEAR.search(text)) and len(text) < 70 and not pairs))
     if reverse or year_reply:
         parameters = copy.deepcopy(old)
         effective = state['effective_question']
         if year_reply:
             parameters.pop('year', None)
-            effective = LATEST.sub('', YEAR.sub('', effective)) + '\n' + text
+            effective = PREVIOUS_YEAR.sub('', LATEST.sub('', YEAR.sub('', effective))) + '\n' + text
+            if function=='relation_history':
+                function='relation_overview'
+                parameters={'origin':route_origin,'destination':route_destination,'modes':old['modes'],
+                    'metrics':[old['metric']],'include_goods':bool(re.search(r'\bgüter\w*',effective,re.I))}
+                effective=MULTI_YEAR.sub('',effective)
         else:
             if parameters.get('origin') and parameters.get('destination'):
                 parameters['origin'], parameters['destination'] = parameters['destination'], parameters['origin']
@@ -66,7 +121,7 @@ def resume(question, state, datasets):
     # An answer to an actual open field may be short; a named new route always resets.
     missing = state.get('missing_fields', [])
     if missing and len(text) < 100 and not re.search(r'\b(welche|wie|zeige|vergleiche|warum)\b', text, re.I) and not directed_pairs(text, datasets.names, []):
-        return state['effective_question'] + '\n' + text, copy.deepcopy(old), None, 'clarification_reply'
+        return state['effective_question'] + '\n' + text, copy.deepcopy(old), function, 'clarification_reply'
     return question, {}, None, 'new_topic'
 
 

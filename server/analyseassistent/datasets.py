@@ -137,6 +137,7 @@ class Datasets:
                 return {'status': 'not_available', 'note': 'B07-Testabbild fehlt', 'unit': 'Mautfahrten'}
             return self.toll.query(**parameters)
         dispatch = {'relation_matrix': relations.relation_matrix,
+                    'relation_overview': relations.relation_overview,
                     'relation_history': relations.relation_history,
                     'road_relation_goods_limit': relations.road_relation_goods_limit,
                     'rail_goods_history': relations.rail_goods_history,

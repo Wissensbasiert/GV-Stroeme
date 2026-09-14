@@ -92,14 +92,14 @@ def analytical_statements(function,parameters,rows,datasets):
     if function in {'relation_matrix','relation_history'}:
         origin=display_name(parameters.get('origin'),datasets); destination=display_name(parameters.get('destination'),datasets)
         if function=='relation_history':
-            latest=max((r.get('year') for r in available if r.get('year') is not None),default=None)
+            latest=parameters['end']
             year_rows=[r for r in rows if r.get('year')==latest]
             latest_rows=sorted([r for r in year_rows if r.get('value') is not None],key=lambda r:r['value'],reverse=True)
             missing_rows=[r for r in year_rows if r.get('value') is None]
-            if latest_rows and not missing_rows:
+            if len(parameters.get('modes',[]))>1 and latest_rows and not missing_rows:
                 parts=[MODE_LABELS.get(r.get('mode'),str(r.get('mode')))+' '+compact_value(r['value'],r['unit']) for r in latest_rows]
-                add(f'Im jüngsten gemeinsamen Jahr {latest} weist {MODE_LABELS.get(latest_rows[0].get("mode"),latest_rows[0].get("mode"))} den größten veröffentlichten Wert von {origin} nach {destination} auf. Im Einzelnen: '+', '.join(parts)+'.',*latest_rows)
-            elif latest_rows:
+                add(f'Im angefragten Endjahr {latest} weist {MODE_LABELS.get(latest_rows[0].get("mode"),latest_rows[0].get("mode"))} den größten veröffentlichten Wert von {origin} nach {destination} auf. Im Einzelnen: '+', '.join(parts)+'.',*latest_rows)
+            elif len(parameters.get('modes',[]))>1 and latest_rows:
                 parts=[MODE_LABELS.get(r.get('mode'),str(r.get('mode')))+' '+compact_value(r['value'],r['unit']) for r in latest_rows]
                 missing=', '.join(MODE_LABELS.get(r.get('mode'),str(r.get('mode'))) for r in missing_rows)
                 available_text=('die '+MODE_LABELS.get(latest_rows[0].get('mode'),str(latest_rows[0].get('mode')))
@@ -108,9 +108,25 @@ def analytical_statements(function,parameters,rows,datasets):
                 missing_text=' und '.join(missing.rsplit(', ',1))
                 add(f'Für {latest} ist von {origin} nach {destination} nur für {available_text} veröffentlicht. Für {missing_text} ist in der zugrunde liegenden Statistik kein nutzbarer Güterverkehrswert erfasst beziehungsweise veröffentlicht; deshalb ist kein vollständiger Verkehrsträgervergleich möglich.',*latest_rows,*missing_rows)
             for mode in parameters.get('modes',[]):
-                series=sorted([r for r in available if r.get('mode')==mode],key=lambda r:r.get('year',0))
-                if len(series)>=2:
-                    first,last=series[0],series[-1]
+                endpoints=[next(r for r in rows if r.get('mode')==mode and r.get('year')==year)
+                           for year in dict.fromkeys([parameters['start'],parameters['end']])]
+                parts=[]
+                for row in endpoints:
+                    if row['value'] is not None:
+                        parts.append('Für '+str(row['year'])+' weist die Statistik '+compact_value(row['value'],row['unit'])+' aus.')
+                    else:
+                        reason={'missing_row':'fehlt ein eigener Eintrag für diese Verbindung',
+                                'not_available':'ist der Jahrgang für diese Auswahl nicht verfügbar',
+                                'suppressed':'ist der Zahlenwert in der Quelle unterdrückt'}.get(row.get('source_status'),
+                                'liegt keine vollständige Zahlenangabe vor')
+                        parts.append('Für '+str(row['year'])+' '+reason+'.')
+                route=f'von {origin} nach {destination} '+('auf der '+MODE_LABELS[mode] if mode!='iww' else 'mit dem Binnenschiff')
+                parts[0]=parts[0].replace('Für ',f'Für den Güterverkehr {route} ',1)
+                # Keep the year in a natural sentence after the route.
+                parts[0]=parts[0].replace(route+' '+str(endpoints[0]['year']),route+' im Jahr '+str(endpoints[0]['year']),1)
+                comparison=''
+                if len(endpoints)==2 and all(r['value'] is not None for r in endpoints):
+                    first,last=endpoints
                     if first['value']>0:
                         change=(last['value']-first['value'])/first['value']*100
                         development=('einem rechnerischen Wachstum von '+compact_value(change,'%') if change>0 else
@@ -119,7 +135,11 @@ def analytical_statements(function,parameters,rows,datasets):
                         comparison='Auf Basis dieser veröffentlichten Werte entspricht das '+development+'.'
                     else:
                         comparison='Da der Ausgangswert null beträgt, wird keine prozentuale Veränderung berechnet.'
-                    add(MODE_LABELS[mode]+': '+str(first['year'])+' wurden '+compact_value(first['value'],first['unit'])+', '+str(last['year'])+' '+compact_value(last['value'],last['unit'])+' veröffentlicht. '+comparison,first,last)
+                    if any(r.get('quality_status')=='restricted' for r in endpoints):
+                        comparison+=' Mindestens einer der beiden Werte ist eingeschränkt belastbar; die Rate beschreibt deshalb keine gesicherte Verkehrsentwicklung.'
+                elif len(endpoints)==2:
+                    comparison=f'Die Veränderung von {parameters["start"]} bis {parameters["end"]} lässt sich damit nicht beziffern.'
+                add(' '.join(parts)+(' '+comparison if comparison else ''),*endpoints)
         else:
             for direction in [(parameters.get('origin'),parameters.get('destination')),(parameters.get('destination'),parameters.get('origin'))]:
                 direction_rows=sorted([r for r in available if (r.get('origin'),r.get('destination'))==direction],key=lambda r:r['value'],reverse=True)
@@ -194,6 +214,7 @@ def analytical_statements(function,parameters,rows,datasets):
 
 def make_result(function, parameters, raw, datasets, rules_version):
     source_labels = {
+        'relation_overview': 'B01: KBA VE7 / Destatis Schienen- und Binnenschiffsverkehr, gerichtete Jahresrelation und C1–C7',
         'road_relation_goods_limit': 'KBA VE7: veröffentlichte Straßen-OD-Gesamtwerte mit Quellenkennzeichen',
         'rail_goods_history': 'Destatis SGV: veröffentlichte Original-Feinpositionen je Jahr',
         'explain_scope': 'Gebundener B03-Klassifikationsstand und feste Fachregeln des Analyseassistenten',
@@ -241,14 +262,15 @@ def make_result(function, parameters, raw, datasets, rules_version):
         status = state or raw.get('status', 'unknown')
         if value == 0:
             notices.append('Eine veröffentlichte numerische Null ist kein zusätzlicher Nachweis exakter Verkehrsfreiheit.')
-        value_status = metadata.pop('value_status', None) or ('missing_value' if value is None else 'reported_zero' if value == 0 else 'observed')
+        missing_status=metadata.get('source_status',status)
+        value_status = metadata.pop('value_status', None) or ((missing_status if missing_status in {'missing_row','not_available','suppressed'} else 'missing_value') if value is None else 'reported_zero' if value == 0 else 'observed')
         rows.append({'fact_id': 'f' + str(len(rows)+1), 'label': str(label), 'value': value,
                      'display_value': format_value(value), 'unit': row_unit or unit, 'scale': 1,
                      'value_status': value_status,
                      'quality_status': metadata.pop('quality', raw.get('quality', 'unknown')),
                      'source_status': status, 'source': source_labels[function], 'parameters': parameters,
                      'data_snapshot_id': datasets.snapshot_id, **metadata})
-    if function in {'region_profile', 'regional_modal_split', 'forecast_comparison', 'relation_matrix','relation_history', 'partner_ranking','regional_history','modal_history','node_profile','goods_structure','intermodal_markets','road_relation_goods_limit','rail_goods_history'}:
+    if function in {'relation_overview','region_profile', 'regional_modal_split', 'forecast_comparison', 'relation_matrix','relation_history', 'partner_ranking','regional_history','modal_history','node_profile','goods_structure','intermodal_markets','road_relation_goods_limit','rail_goods_history'}:
         for observation in raw['observations']:
             metadata = {key: value for key, value in observation.items() if key not in {'label', 'value', 'unit'}}
             if observation.get('basis'):

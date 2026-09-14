@@ -1,8 +1,14 @@
 # Skriptübersicht
 
+`validation/validate_assistant_chat.py --root <isolierter Bestand> --output <neuer Bericht> --requesty --limit <1 bis 9>` prüft den nativen Chat mit echten, begrenzten Modellaufrufen. `--focus` wählt die gezielten Datenlückenfälle, `--payload-review` erzeugt stattdessen ausschließlich lokal eine Prüfung der vorgesehenen Modellinhalte. Keine Portalbuchung oder automatische Wiederholung. `analysis/assemble_assistant_test_release.py` setzt mit `--base`, `--expected-base-sha`, `--package`, `--portal`, `--output` und `--report` einen neuen Testrelease unter `C:/tmp` aus dem vollständig geprüften Ausgangsrelease und Übergabepaket zusammen; unbeteiligte Portaldateien müssen identisch bleiben. Es schaltet keinen Server um. [Chat-Prüfbericht](../docs/qualitaet/ANALYSEASSISTENT_CHAT_20260914.md).
+
+`validation/validate_assistant_customer.cjs <lokaler Portalrelease> <gespeicherte Antwort.json> <Ausgabeordner>` prüft die korrigierte Dortmund–Bielefeld-Antwort im tatsächlichen Chatclient mit dem aktuellen CSS. Es verwendet eine gespeicherte Antwort und führt keine Modellanfrage oder Kundenbuchung aus. Die Regressionen in `tests/analyseassistent/test_customer_history.py` prüfen zusätzlich Originalzeilen, Randjahre und Fehlwertzustände. Nachweis: [Kundenantwort-Prüfbericht](../docs/qualitaet/ANALYSEASSISTENT_KUNDENANTWORT_20260911.md).
+
 `validation/validate_assistant_dialogue.py` führt den begrenzten Sechs-Eingaben-Vergleich aus: `--root` wählt den isolierten Bestand unter `C:/tmp`, `--baseline` den alten Verlauf, `--requesty` erlaubt ausdrücklich echte Modellaufrufe. `--output` muss neu sein; keine automatischen Wiederholungen. Vorher-/Nachherstand in getrennten Prozessen prüfen. Der Bericht enthält Antworten, Audit und Verbrauch einschließlich verfügbarer Fehlerdiagnostik; kein fachlicher Gesamtfreigabenachweis und keine Portalbuchung.
 
 Alle Befehle werden aus dem Projektstamm ausgeführt. Die Unterordner zeigen Zweck und Status der Skripte.
+
+`validation/validate_assistant_followups.py --output <neuer Bericht>` reproduziert den gemeldeten Vier-Schritte-Dialog mit aktuellen Daten. `--requesty` führt vier echte Antwortaufrufe ohne Portalbuchung aus. Der gespeicherte Bericht kann als viertes Argument an `validate_assistant_browser.cjs` übergeben werden; dieser prüft dann zusätzlich den übertragenen signierten Gesprächsstand und befüllte Güter-/Leistungstabellen. `validate_assistant_runtime.py` umfasst sämtliche `test_*.py` unter `tests/analyseassistent/`.
 
 | Ordner | Zweck | Status |
 |---|---|---|

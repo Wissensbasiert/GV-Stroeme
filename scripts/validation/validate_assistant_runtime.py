@@ -17,7 +17,7 @@ if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output',type=Path,required=True)
     args=parser.parse_args()
-    suite=unittest.defaultTestLoader.discover(str(ROOT/'tests/analyseassistent'),pattern='test_runtime.py')
+    suite=unittest.defaultTestLoader.discover(str(ROOT/'tests/analyseassistent'),pattern='test_*.py')
     stream=io.StringIO()
     result=unittest.TextTestRunner(stream=stream,verbosity=2).run(suite)
     files=required_files()

@@ -5425,6 +5425,60 @@
       }
       updateSend();
     }
+    // A small safe Markdown subset: no HTML, remote media or executable links.
+    function formattedParagraph(text) {
+      if (String(text).includes('\n') && String(text).split('\n').every(line => !line.trim() || /^\s*[-*] /.test(line))) {
+        const list = node('ul');
+        String(text).split('\n').filter(line => line.trim()).forEach(line => {
+          const item = node('li'), paragraph = formattedParagraph(line.replace(/^\s*[-*] /, ''));
+          item.append(...paragraph.childNodes); list.append(item);
+        });
+        return list;
+      }
+      const p = node('p');
+      String(text).split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*)/g).forEach(part => {
+        p.append(part.startsWith('**') && part.endsWith('**') ? node('strong', part.slice(2, -2)) :
+          part.startsWith('*') && part.endsWith('*') && part.length > 2 ? node('em', part.slice(1, -1)) : document.createTextNode(part));
+      });
+      return p;
+    }
+    async function analysisRequest(payload, waiting) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 210000);
+      try {
+        const response = await fetch(base + '/analysis', { method: 'POST', credentials: 'same-origin', cache: 'no-store',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream', 'X-WBP-CSRF-Token': csrf },
+          body: JSON.stringify(payload), signal: controller.signal });
+        const fail = (status, body) => { const error = new Error(body.error || 'Die Anfrage konnte nicht abgeschlossen werden.'); error.status = status; error.requestId = body.request_id; throw error; };
+        if (!response.headers.get('content-type')?.includes('text/event-stream')) {
+          const body = await response.json(); if (!response.ok) fail(response.status, body); return body;
+        }
+        const reader = response.body.getReader(), decoder = new TextDecoder('utf-8');
+        let buffer = '', result = null, verified = false;
+        while (true) {
+          const { value, done } = await reader.read();
+          buffer += decoder.decode(value, { stream: !done });
+          if (buffer.length > 2000000) throw new Error('Antwort überschreitet den erlaubten Umfang.');
+          let boundary;
+          while ((boundary = buffer.indexOf('\n\n')) >= 0) {
+            const frame = buffer.slice(0, boundary); buffer = buffer.slice(boundary + 2);
+            const kind = frame.match(/^event: (.+)$/m)?.[1], data = frame.match(/^data: (.+)$/m)?.[1];
+            if (!data) continue;
+            const event = JSON.parse(data);
+            if (kind === 'status' && event.stage === 'paragraph') {
+              const body = waiting.querySelector('.ki-message-content');
+              if (!verified) { body.replaceChildren(); verified = true; }
+              body.append(formattedParagraph(event.text));
+            } else if (kind === 'status' && !verified) waiting.querySelector('p').textContent = event.text;
+            if (kind === 'error') fail(event.status, event.body);
+            if (kind === 'result') result = event.body;
+          }
+          if (done) break;
+        }
+        if (!result) throw new Error('Der Abschluss der Antwort fehlt.');
+        return result;
+      } finally { clearTimeout(timer); }
+    }
     function prepare(text, action = null) {
       if (busy) return;
       input.value = text; followup = action;
@@ -5434,8 +5488,8 @@
       const answer = result.answer;
       if (!answer || !Array.isArray(answer.paragraphs) || !Array.isArray(answer.tables)) throw new Error('Die Antwort konnte nicht dargestellt werden.');
       const fragment = document.createDocumentFragment();
-      fragment.append(node('h4', answer.title));
-      answer.paragraphs.forEach(text => fragment.append(node('p', text)));
+      if (result.answer_mode !== 'native_grounded_chat') fragment.append(node('h4', answer.title));
+      answer.paragraphs.forEach(text => fragment.append(formattedParagraph(text)));
       if (answer.questions?.length) {
         const list = node('ul'); answer.questions.forEach(text => list.append(node('li', text))); fragment.append(list);
         const hint = node('p', 'Antworten Sie einfach hier im Chat. Die bisherigen Angaben bleiben berücksichtigt.', 'ki-message-meta'); fragment.append(hint);
@@ -5488,7 +5542,7 @@
       const waiting = message('assistant', 'Ich prüfe Ihre Frage und die verfügbaren Daten …');
       let rendered = null;
       try {
-        const result = await jsonRequest(base + '/analysis', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-WBP-CSRF-Token': csrf }, body: JSON.stringify(payload) }, 210000);
+        const result = await analysisRequest(payload, waiting);
         rendered = render(result);
         conversation = typeof result.conversation === 'string' ? result.conversation : null;
         history = [...(action ? [] : history), question].slice(-6);

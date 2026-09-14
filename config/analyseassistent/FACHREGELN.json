@@ -1,6 +1,6 @@
 {
   "package_id": "wbp_gueterstroeme_analyseassistent",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "status": "draft_not_integrated",
   "created_on": "2026-09-09",
   "runtime_enabled": false,
@@ -10,8 +10,8 @@
     "external_environment_cost_capacity_chain_products": false,
     "test_cases_sent_to_model": false
   },
-  "response_mode": "grounded_narrative",
-  "free_factual_prose_enabled": false,
+  "response_mode": "native_grounded_chat",
+  "free_factual_prose_enabled": true,
   "result_statuses": [
     "ok",
     "partial",

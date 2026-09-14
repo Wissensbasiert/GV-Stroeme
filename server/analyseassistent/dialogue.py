@@ -2,12 +2,19 @@
 import copy
 import json
 import re
+from datetime import datetime
+from zoneinfo import ZoneInfo
 import duckdb
 from .contracts import FUNCTIONS, directed_pairs, question_supports, token_present, validate
 
 LATEST = re.compile(r'\b(?:aktuell\w*|neuest\w*|letzt\w*\s+verfügbar\w*)\s*(?:verfügbar\w*\s*)?(?:jahr\w*|daten\w*|stand)\b', re.I)
 YEAR = re.compile(r'(?<!\w)(?:19|20)\d{2}(?!\w)')
-MULTI_YEAR = re.compile(r'\b(?:in\s+den\s+)?letzt\w*\s+jahr\w*|\bmehrere\s+jahr(?:e|gänge)|\bzeitreihe\w*|\bverlauf\w*|\bentwicklung\w*|\bseit\s+(?:19|20)\d{2}\b', re.I)
+PREVIOUS_YEAR = re.compile(r'\b(?:letztes|letzten|vergangenes|vergangenen|voriges|vorigen)\s+Jahr(?:es)?\b|\bvorjahr\b', re.I)
+MULTI_YEAR = re.compile(r'\b(?:in\s+den\s+)?letzten?\s+(?:\d+\s+)?Jahre[n]?\b|\bmehrere\s+jahr(?:e|gänge)\b|\bzeitreihe\w*|\bverlauf\w*|\bentwicklung\w*|\bseit\s+(?:19|20)\d{2}\b', re.I)
+
+
+def previous_calendar_year():
+    return datetime.now(ZoneInfo('Europe/Berlin')).year-1
 
 
 def validate_history(history):
@@ -61,10 +68,10 @@ def available_years(datasets,function,parameters):
         path=datasets.paths['b03']/'rail_monthly_details.parquet'
         with duckdb.connect(config={'threads':2,'memory_limit':'128MB'}) as con:
             return [r[0] for r in con.execute('SELECT year_ref FROM read_parquet(?) GROUP BY year_ref HAVING count(DISTINCT month)=12 ORDER BY year_ref',[str(path)]).fetchall()]
-    if function in {'relation','road_relation_goods_limit','partner_ranking','relation_matrix','relation_history'}:
+    if function in {'relation','road_relation_goods_limit','partner_ranking','relation_matrix','relation_history','relation_overview'}:
         mode=parameters.get('mode','road' if function=='road_relation_goods_limit' else None)
         years=datasets.manifests['b01']['years_by_mode']
-        if function=='relation_history':
+        if function in {'relation_history','relation_overview'}:
             modes=parameters.get('modes') or ['road','rail','iww']
             return sorted(set.intersection(*(set(int(y) for y in years.get(selected,[])) for selected in modes)))
         if mode:return sorted(int(y) for y in years.get(mode,[]))
@@ -107,7 +114,8 @@ def defaults_for(function,question,datasets,parameters):
     if mentioned_metrics:
         choices['metric']=mentioned_metrics[0] if len(mentioned_metrics)==1 else None
     if 'metrics' in props:choices['metrics']=mentioned_metrics or ['tonnes']
-    if 'modes' in props and function=='relation_history':choices['modes']=modes or ['road','rail','iww']
+    if 'modes' in props and function in {'relation_history','relation_overview'}:choices['modes']=modes or ['road','rail','iww']
+    if function=='relation_overview':choices['include_goods']=bool(re.search(r'\b(?:güter|güterart\w*|gütergrupp\w*)\b',question,re.I))
     if 'directions' in props:
         choices['directions']=[d for d in ['outbound','inbound'] if question_supports(question,d,{})] or ['all']
     if re.search(r'\bC[1-7]\b',question,re.I): choices.pop('group',None)
@@ -137,6 +145,9 @@ def defaults_for(function,question,datasets,parameters):
     years=available_years(datasets,function,{**parameters,**context}) if any(key in props for key in ['year','years','start','end','observed_years']) else []
     explicit_years={int(x) for x in YEAR.findall(question)}
     if 'year' in props and len(explicit_years)==1:context['year']=next(iter(explicit_years))
+    elif 'year' in props and not explicit_years and PREVIOUS_YEAR.search(question):
+        context['year']=previous_calendar_year()
+        notes.append(f'„Letztes Jahr“ bezeichnet das Kalenderjahr {context["year"]}.')
     elif 'year' in props and not explicit_years and LATEST.search(question) and years:
         context['year']=max(years);notes.append(f'Verwendet wird das neueste vollständig verfügbare Datenjahr {max(years)} dieses Datenprodukts.')
     if function=='relation_history' and years:
@@ -155,12 +166,21 @@ def defaults_for(function,question,datasets,parameters):
 
 def deterministic_plan(question,datasets):
     """Häufige, eindeutig belegbare Zeitreihen ohne Modellumweg."""
-    if route_hint(question,datasets.names)!='relation_history':
-        return None
     if len(directed_pairs(question,datasets.names,[]))!=1:
         return None
-    required=FUNCTIONS['relation_history'][3]['required']
-    return {'phase':'plan','function_id':'relation_history','parameters':{},'parameter_origins':{},
+    function=route_hint(question,datasets.names)
+    if function!='relation_history':
+        # Keep specialist questions (NST positions, costs, forecasts, rankings)
+        # in model planning; this overview owns ordinary directed goods questions.
+        if (not re.search(r'\b(?:güter|güterart\w*|gütergrupp\w*|verkehrsleistung|tonnen|tkm)\b',question,re.I)
+                or re.search(r'\b(?:NST|C[1-7]|kosten|emission\w*|warum|prognose|vergleiche|top)\b',question,re.I)
+                or len(YEAR.findall(question))>1 or MULTI_YEAR.search(question)):
+            return None
+        if direct_route(question,datasets.names):return None
+        if any(question_supports(question,m,{}) for m in ['road','rail','iww']):return None
+        function='relation_overview'
+    required=FUNCTIONS[function][3]['required']
+    return {'phase':'plan','function_id':function,'parameters':{},'parameter_origins':{},
             'unresolved_fields':required,'status':'needs_clarification'}
 
 

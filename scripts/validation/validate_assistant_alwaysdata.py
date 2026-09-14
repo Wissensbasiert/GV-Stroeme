@@ -95,6 +95,7 @@ try:
             report['configured_model']=os.environ.get('REQUESTY_MODEL')
             assert report['configured_model']=='vertex/gemini-3.7-flash@eu'
             relation_question='Wie viel Güter sind in den letzten Jahren von Rosenheim nach Augsburg transportiert worden?'
+            report['stage']='published_growth'
             relation,relation_audit=Service(datasets).analyze(relation_question,select_answer=False)
             assert relation['function_id']=='relation_history'
             assert relation['parameters']=={'origin':'DE213','destination':'DE271','metric':'tonnes',
@@ -103,10 +104,33 @@ try:
             assert any('rechnerischen Rückgang um 50,99 %' in paragraph for paragraph in relation['answer']['paragraphs'])
             assert any('kein nutzbarer Güterverkehrswert erfasst beziehungsweise veröffentlicht' in paragraph
                 for paragraph in relation['answer']['paragraphs'])
-            assert any('beweist nicht, dass tatsächlich kein Verkehr stattfand' in note for note in relation['answer']['notes'])
+            # The customer correction removed a duplicated generic note. Verify
+            # the underlying missing values and endpoint calculation directly.
+            assert all(f['value'] is None for f in relation['facts'] if f.get('mode') in {'road','iww'})
+            rail_values={f['year']:f['value'] for f in relation['facts'] if f.get('mode')=='rail'}
+            assert rail_values[2020]==2175 and rail_values[2024]==1066
+            assert round((rail_values[2020]-rail_values[2024])/rail_values[2020]*100,2)==50.99
             report['published_growth_verified']={'question':relation_question,'start_year':2020,'end_year':2024,
                 'rail_start_tonnes':2175,'rail_end_tonnes':1066,'calculated_decline_percent':50.99,
                 'missing_values_not_treated_as_zero':True,'external_model_calls':0}
+            from server.analyseassistent.dialogue import previous_calendar_year
+            followup_service=Service(datasets)
+            token=None
+            turns=[]
+            questions=['Was für Güter wurden letztes Jahr von Köln nach Düsseldorf transportiert und wie viele?',
+                'Kannst du mir auch die Verkehrsleistung nennen? Und was ist mit der Güterart?',
+                'Ich meine weiterhin Köln nach Düsseldorf im letzten Jahr','2024']
+            for index,question in enumerate(questions):
+                checked,checked_audit=followup_service.analyze(question,conversation=token,select_answer=False)
+                token=checked['conversation']
+                p=checked['parameters']
+                assert checked['status'] in {'ok','partial'} and checked['function_id']=='relation_overview'
+                assert (p['origin'],p['destination'])==('DEA23','DEA11')
+                assert p['year']==(2024 if index==3 else previous_calendar_year())
+                assert p['metrics']==(['tonnes'] if index==0 else ['tonnes','tkm']) and p['include_goods']
+                assert checked_audit['attempted_model_calls']==0
+                turns.append({'parameters':p,'status':checked['status'],'transition':checked_audit['conversation_transition']})
+            report['calendar_and_followups_verified']={'turns':turns,'external_model_calls':0}
     if sys.argv[4]=='requesty':
         report['stage']='requesty'
         from server.analyseassistent.requesty import Requesty

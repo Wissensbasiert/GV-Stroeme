@@ -78,7 +78,7 @@ def present(result,datasets):
         code=result.get('diagnostic_code')
         answer['paragraphs']=['Ihre Frage konnte wegen eines technischen Problems nicht beantwortet werden. Bitte versuchen Sie es später noch einmal. Diese fehlgeschlagene Auswertung zählt nicht zu Ihrem Monatskontingent.'+((' Fehlerkennung: '+code+'.') if code else '')]
         return answer
-    if status=='not_available':
+    if status=='not_available' and not (function=='relation_history' and result.get('facts')):
         answer['title']='Für diese Auswahl fehlt eine belastbare Zahlenangabe'
         source_status = result.get('source_status')
         reason = {'missing_row':'Im vorhandenen Datenbestand gibt es für diese Verbindung oder Auswahl keinen veröffentlichten Eintrag.',
@@ -91,7 +91,7 @@ def present(result,datasets):
         answer['suggestions']=[]; answer['followups']=[]
         for check in result.get('related_data',{}).get('checks',{}).values():
             if not check.get('available'): continue
-            alt=check['parameters']; mode=MODES.get(alt.get('mode'),'Schiene')
+            alt=check['parameters']; mode=MODES.get(alt.get('mode'),'die gewählten Verkehrsträger' if check['function_id']=='relation_overview' else 'Schiene')
             origin=alt.get('origin') or alt.get('region'); destination=alt.get('destination') or alt.get('partner')
             text=f"Für {mode} im Jahr {alt['year']} ist eine Zahlenangabe für diese Auswahl vorhanden."
             answer['paragraphs'].append(text)
@@ -126,7 +126,8 @@ def present(result,datasets):
             if function=='rail_goods' and f.get('sum_scope'):
                 notes.append('Summe der bekannten veröffentlichten Einzelmengen; fehlende Werte sind nicht als null enthalten.')
             if f['value'] is None:
-                notes.append({'missing_row':'In dieser Statistik ist für diese Auswahl kein nutzbarer Wert erfasst beziehungsweise veröffentlicht.',
+                notes.append({'missing_row':'Kein eigener Eintrag für diese Verbindung.',
+                              'not_available':'Jahrgang für diese Auswahl nicht verfügbar.',
                               'suppressed':'In der Quelle unterdrückter Wert.',
                               'missing_value':'Quellwert unbekannt oder nicht veröffentlicht.'}.get(f.get('value_status'), 'In dieser Statistik ist kein nutzbarer Wert erfasst beziehungsweise veröffentlicht.'))
             if f.get('quality_status')=='restricted': notes.append('Laut Quelle eingeschränkt belastbar.')
@@ -136,6 +137,9 @@ def present(result,datasets):
                          'note':' '.join(notes),'fact_ids':[f['fact_id']]})
         answer['tables']=[{'title':'Ergebnisse im Überblick','columns':['Kennwert','Wert','Einheit','Hinweis'],'rows':rows,
                            'collapsed':len(rows)>8,'row_count':len(rows)}]
+        if function=='relation_history':
+            answer['tables'][0].update(title='Jahreswerte im Detail',collapsed=len(rows)>2,
+                                      columns=['Jahr · Verkehrsträger','Wert','Einheit','Einordnung'])
         if function=='rail_goods':
             answer['tables'][0].update(title='Güterpositionen im Überblick' if p.get('nst') else 'Güterarten im Überblick',
                                       columns=['Güterposition' if p.get('nst') else 'Güterart','Menge','Einheit','Hinweis'])
@@ -162,7 +166,7 @@ def present(result,datasets):
     elif p.get('node'):
         node_name = datasets.airport_names.get(p['node'],p['node']) if p.get('kind')=='air' else name(p['node'],datasets)
         answer['title']='Ihre Auswertung für '+node_name+(f" ({p['year']})" if p.get('year') else '')
-    elif function in {'relation_matrix','relation_history'} and p.get('origin') and p.get('destination'):
+    elif function in {'relation_matrix','relation_history','relation_overview'} and p.get('origin') and p.get('destination'):
         origin,destination=name(p['origin'],datasets),name(p['destination'],datasets)
         period=(f" ({p['start']}–{p['end']})" if function=='relation_history' else f" ({p['year']})")
         answer['title']=f'Güterverkehr von {origin} nach {destination}'+period
@@ -189,7 +193,49 @@ def present(result,datasets):
     # answer between its main finding and its supporting interpretation.
     if function in introductions and not answer['paragraphs']:
         answer['paragraphs'].append(introductions[function])
-    if function=='road_relation_goods_limit':
+    if function=='relation_overview':
+        totals=[f for f in facts if f.get('group')=='ALL']
+        answer['paragraphs']=[]
+        for metric in p['metrics']:
+            selected=[f for f in totals if f.get('metric')==metric and f['value'] is not None]
+            missing=[f for f in totals if f.get('metric')==metric and f['value'] is None]
+            label='Gütermenge' if metric=='tonnes' else 'Verkehrsleistung'
+            if selected:
+                answer['paragraphs'].append(f'{label} {p["year"]} von {name(p["origin"],datasets)} nach {name(p["destination"],datasets)}: '+
+                    '; '.join(MODES[f['mode']]+' '+number(f['value'])+' '+UNITS[f['unit']] for f in selected)+'.')
+            if missing:
+                answer['paragraphs'].append('Für '+', '.join(MODES[f['mode']] for f in missing)+f' ist für {p["year"]} keine nutzbare {label} dieser Verbindung verfügbar.')
+        if p['include_goods']:
+            for mode in p['modes']:
+                if mode=='road':
+                    answer['paragraphs'].append('Die Güterarten der Straßenverbindung lassen sich mit dieser Statistik nicht aufschlüsseln; sie enthält hier ausschließlich Gesamtwerte.')
+                    continue
+                metric='tonnes' if 'tonnes' in p['metrics'] else p['metrics'][0]
+                known=[f for f in facts if f.get('mode')==mode and f.get('metric')==metric and f.get('group')!='ALL' and f['value'] is not None]
+                ranked=sorted(known,key=lambda f:f['value'],reverse=True)
+                if ranked:
+                    answer['paragraphs'].append('Bei '+MODES[mode]+' sind folgende Gütergruppen mit den größten veröffentlichten Werten erfasst: '+
+                        '; '.join(groups.get(f['group'],'C'+f['group'])+' ('+number(f['value'])+' '+UNITS[f['unit']]+')' for f in ranked[:3])+'.')
+                else:answer['paragraphs'].append('Für '+MODES[mode]+' liegen für diese Auswahl keine nutzbaren Gütergruppenwerte vor.')
+        # Totals stay visible; breakdowns use separate tables to avoid double counting.
+        all_rows=answer['tables'][0]['rows'] if answer['tables'] else []
+        by_fact={f['fact_id']:f for f in facts}
+        answer['tables']=[]
+        for mode in [None,*p['modes']]:
+            selected=[row for row in all_rows if (by_fact[row['fact_ids'][0]]['group']=='ALL' if mode is None else
+                by_fact[row['fact_ids'][0]]['mode']==mode and by_fact[row['fact_ids'][0]]['group']!='ALL')]
+            if selected:answer['tables'].append({'title':'Gesamtwerte der Verbindung' if mode is None else 'Güterarten · '+MODES[mode],
+                'columns':['Kennwert','Wert','Einheit','Hinweis'],'rows':selected,'collapsed':mode is not None,'row_count':len(selected)})
+        answer['notes'].append('Gesamtwerte und Gütergruppen beschreiben dieselben Transporte und werden nicht addiert. Fehlende Angaben sind keine Nullwerte.')
+        for check in result.get('related_data',{}).get('checks',{}).values():
+            if not check.get('available'):continue
+            alt=check['parameters']
+            prompt=f'Zeige dieselbe Verbindung und Auswahl für {alt["year"]}.'
+            answer['suggestions']=[prompt]
+            answer['followups']=[{'question':prompt,'function_id':'relation_overview','parameters':alt}]
+            answer['notes'].append(f'Für den gemeinsamen Datenjahrgang {alt["year"]} wurden verfügbare Werte dieser Verbindung geprüft. Er kann als alternative Auswertung gewählt werden.')
+        if 'tkm' in p['metrics']:answer['notes'].append('Verkehrsleistung wird in Tonnenkilometern angegeben: transportierte Tonnen × Transportentfernung im jeweiligen Quellenumfang.')
+    elif function=='road_relation_goods_limit':
         origin,destination=name(p['origin'],datasets),name(p['destination'],datasets)
         answer['title']=f'Straßengüterverkehr von {origin} nach {destination}'
         value=facts[0]['value'] if facts else None
@@ -229,7 +275,23 @@ def present(result,datasets):
         answer['notes'].append('Verkehr innerhalb einer Region zählt bei Versand und Empfang jeweils mit. Die Summe beider Richtungen ist deshalb nicht die Menge eindeutig verschiedener Transporte.')
         if function in {'regional_history','modal_history'}:
             answer['notes'].append('Eine ausgewiesene Veränderungsrate ist aus den veröffentlichten Werten berechnet. Sie ist nicht um Gebiets-, Erfassungs- oder Revisionsbrüche bereinigt und erklärt keine Ursache.')
-    elif function in {'relation','relation_matrix','relation_history','rail_goods','rail_goods_history','time_series'}:
+    elif function=='relation_history':
+        road=[f for f in facts if f.get('mode')=='road']
+        missing_road=any(f.get('source_status')=='missing_row' for f in road)
+        restricted_road=any(f.get('quality_status')=='restricted' for f in road)
+        if missing_road:
+            answer['paragraphs'].append('Die fehlende Angabe bedeutet nicht, dass auf dieser Verbindung keine Lkw unterwegs waren. Die KBA-Statistik beruht auf hochgerechneten Stichproben. Bei zu wenigen Fällen werden Verbindungen zu größeren Gebieten zusammengefasst. Warum diese Verbindung im betreffenden Jahr keinen eigenen Eintrag hat, lässt sich aus der Datei allein nicht feststellen.')
+        elif any(f['value'] is None for f in facts):
+            answer['notes'].append('Fehlende Angaben sind kein Nachweis, dass kein Verkehr stattfand. Die Tabelle unterscheidet fehlende Einträge von nicht verfügbaren Jahrgängen und unvollständigen Zahlenangaben.')
+        if restricted_road:
+            answer['notes'].append('Die gekennzeichneten KBA-Werte beruhen auf kleinen Stichproben. Laut KBA sind daraus berechnete Veränderungsraten kaum hinreichend genau.')
+        elif any(f.get('quality_status')=='restricted' for f in facts):
+            answer['notes'].append('Die gekennzeichneten Werte sind laut Quelle eingeschränkt belastbar.')
+        if any('rechnerischen' in text for text in result.get('summary',[])):
+            answer['notes'].append('Die Rate vergleicht veröffentlichte Werte; methodische Änderungen und Ursachen sind damit nicht geklärt.')
+        if missing_road or restricted_road:
+            answer['sources'].append('KBA: Referenzhandbuch VE 7, Stand Dezember 2025, Abschnitt 2.1–2.2, Seiten 6–7 (Stichprobe und statistische Genauigkeit).')
+    elif function in {'relation','relation_matrix','rail_goods','rail_goods_history','time_series'}:
         answer['notes'].append('Wo kein Wert vorliegt, ist in der zugrunde liegenden Statistik kein nutzbarer Verkehrswert erfasst beziehungsweise veröffentlicht. Das beweist nicht, dass tatsächlich kein Verkehr stattfand.')
         if function in {'relation_history','rail_goods_history','time_series'}:
             answer['notes'].append('Eine ausgewiesene Veränderungsrate wird transparent aus vorhandenen veröffentlichten Werten berechnet. Sie ist nicht methodisch bereinigt und belegt keine Ursache.')
@@ -254,9 +316,9 @@ def present(result,datasets):
         answer['notes'].append('Die Prognose vergleicht das Basisszenario 2019 mit dem Szenario für 2040. Das sind Modellannahmen, keine beobachtete Entwicklung und keine sichere Vorhersage. Beobachtete Werte bleiben davon getrennt.')
     if function=='goods_structure':
         answer['notes'].append('Die Gütergruppen beschreiben die ausgewählte Region. Ihre Anteile lassen sich nicht als Güterverteilung einer einzelnen Verbindung lesen.')
-    if status=='partial' and function!='road_relation_goods_limit':
+    if status=='partial' and function not in {'road_relation_goods_limit','relation_history'}:
         answer['notes'].append('Ein Teil der gewünschten Angaben fehlt oder ist nur eingeschränkt nutzbar. Fehlende Werte werden in der Tabelle ausdrücklich angezeigt und nicht durch null ersetzt.')
-    if any(f.get('quality_status')=='restricted' for f in facts) and function!='road_relation_goods_limit':
+    if any(f.get('quality_status')=='restricted' for f in facts) and function not in {'road_relation_goods_limit','relation_history'}:
         answer['notes'].append('Die Quelle kennzeichnet einzelne Werte als eingeschränkt belastbar. Bitte beachten Sie die Hinweise in der Tabelle.')
     answer['notes']=list(dict.fromkeys(answer['notes']))
     return answer

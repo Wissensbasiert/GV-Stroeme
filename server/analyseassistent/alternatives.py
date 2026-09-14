@@ -8,7 +8,7 @@ from .dialogue import available_years
 def missing_alternatives(result, datasets, deadline):
     function = result.get('function_id')
     p = result.get('parameters', {})
-    if function not in {'relation', 'rail_goods'} or result['status'] != 'not_available':
+    if function not in {'relation', 'rail_goods','relation_overview'} or (result['status'] != 'not_available' and function!='relation_overview'):
         return None
     candidates = []
     years = available_years(datasets, function, p)
@@ -28,7 +28,7 @@ def missing_alternatives(result, datasets, deadline):
             raw = datasets.query(fn, parameters, timeout_seconds=until-time.monotonic())
         except (ValueError, KeyError, OSError, duckdb.Error):
             continue
-        record.update(status=raw['status'], available=(raw.get('value') is not None if fn == 'relation' else any(r.get('value') is not None for r in raw.get('details', []))))
+        record.update(status=raw['status'], available=(raw.get('value') is not None if fn == 'relation' else any(r.get('value') is not None for r in raw.get('observations' if fn=='relation_overview' else 'details', []))))
     return {'data_snapshot_id': datasets.snapshot_id, 'checks': checks}
 
 

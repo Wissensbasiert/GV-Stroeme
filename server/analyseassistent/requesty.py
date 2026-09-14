@@ -35,6 +35,43 @@ class NoRedirect(HTTPRedirectHandler):
 
 
 class Requesty:
+    native_tools = True
+
+    def chat(self, messages, *, deadline, tools=None, schema=None):
+        """Native tool messages, including provider signatures, stay in one dialogue."""
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            raise ModelError('Gesamtfrist erreicht')
+        body = {'model': self.model, 'messages': messages, 'max_tokens': max(self.max_tokens, 2500), 'stream': False}
+        if tools:
+            body.update(tools=tools, tool_choice='auto', parallel_tool_calls=False)
+        if schema:
+            body['response_format'] = {'type': 'json_schema', 'json_schema': {
+                'name': 'grounded_chat', 'strict': True, 'schema': schema}}
+        request = Request(self.base_url + '/chat/completions',
+                          data=json.dumps(body, ensure_ascii=False, allow_nan=False).encode('utf-8'),
+                          headers={'Authorization': 'Bearer ' + self.api_key, 'Content-Type': 'application/json'})
+        started = time.monotonic()
+        try:
+            with self.opener.open(request, timeout=min(remaining, self.timeout_seconds)) as response:
+                raw = response.read(1_000_001)
+            if len(raw) > 1_000_000 or time.monotonic() > deadline:
+                raise ModelError('Modellantwort überschreitet Umfang oder Gesamtfrist')
+            record = json.loads(raw)
+            choice = record['choices'][0]
+            if choice.get('finish_reason') not in {'stop', 'tool_calls'}:
+                raise ModelError('Modellantwort nicht vollständig', diagnostics=incomplete_diagnostics(
+                    record, choice, round((time.monotonic()-started)*1000)))
+            message = choice['message']
+            if message.get('role') != 'assistant':
+                raise ValueError()
+        except HTTPError as exc:
+            raise ModelError('Modellschnittstelle meldet HTTP ' + str(exc.code)) from None
+        except (URLError, TimeoutError, OSError, KeyError, IndexError, TypeError, ValueError):
+            raise ModelError('Modellschnittstelle nicht erreichbar oder Antwortformat ungültig') from None
+        return message, {'model': record.get('model', self.model), 'requested_model': self.model,
+                         'elapsed_ms': round((time.monotonic()-started)*1000), 'usage': record.get('usage')}
+
     def __init__(self, *, model, base_url, api_key, timeout_seconds, max_tokens=1500):
         parsed = urlparse(base_url)
         if (parsed.scheme != 'https' or parsed.hostname != 'router.eu.requesty.ai'

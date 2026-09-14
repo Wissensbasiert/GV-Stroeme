@@ -1,5 +1,7 @@
 # Dokumentationsübersicht
 
+Seit 14.09.2026 ist der natürliche Chat mit nativen Datenwerkzeugen, Gesprächsverlauf und geprüfter absatzweiser Ausgabe im Testportal aktiv. Umsetzung, echte Modelltests und Bereitstellungsnachweise stehen im [Chat-Prüfbericht](qualitaet/ANALYSEASSISTENT_CHAT_20260914.md). Die darin enthaltene Korrektur der Dortmund–Bielefeld-Antwort ist im [Prüfbericht zur Kundenantwort](qualitaet/ANALYSEASSISTENT_KUNDENANTWORT_20260911.md) fachlich hergeleitet. Produktion bleibt unverändert.
+
 Diese Seite ist der zentrale Einstieg in die Projektdokumentation. Sie trennt verbindliche Betriebs- und Qualitätshinweise von fachlichen Konzepten und noch nicht umgesetzten Planungen.
 
 ## Welche Datei ist wofür maßgeblich?
@@ -21,6 +23,8 @@ Diese Seite ist der zentrale Einstieg in die Projektdokumentation. Sie trennt ve
 ## Status der Dokumenttypen
 
 Der begrenzte Dialogausbau ist in [`qualitaet/ANALYSEASSISTENT_BETA_20260911.md`](qualitaet/ANALYSEASSISTENT_BETA_20260911.md) mit echtem Vorher-/Nachhervergleich dokumentiert. Für den verbindlichen Freigabestand weiterhin den Qualitätssicherungsplan beachten.
+
+Die allgemeinen Kalenderjahr- und Anschlussregeln ab Version 0.2.2 sowie ihre Regressionen stehen in [`qualitaet/ANALYSEASSISTENT_DIALOGREGELN_20260911.md`](qualitaet/ANALYSEASSISTENT_DIALOGREGELN_20260911.md).
 
 - **Betrieb:** beschreibt den aktuellen technischen Umgang mit Anwendung und Daten.
 - **Fachkonzept:** beschreibt Datenmodell, Begriffe und fachliche Logik.

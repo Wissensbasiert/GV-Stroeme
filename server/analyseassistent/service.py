@@ -25,15 +25,21 @@ class Service:
         config = Path(datasets.root) / 'config/analyseassistent'
         self.prompt = (config / 'SYSTEM_PROMPT.md').read_text(encoding='utf-8')
         self.rules = json.loads((config / 'FACHREGELN.json').read_text(encoding='utf-8'))
-        if self.rules['response_mode'] not in {'verified_statement_selection', 'grounded_narrative'} or self.rules['free_factual_prose_enabled']:
+        if self.rules['response_mode'] not in {'verified_statement_selection', 'grounded_narrative', 'native_grounded_chat'}:
             raise ValueError('Nicht unterstützter Regelmodus')
+        if self.rules['free_factual_prose_enabled'] and self.rules['response_mode'] != 'native_grounded_chat':
+            raise ValueError('Freitext benötigt den geprüften Chatablauf')
         self.prompt_sha256 = hashlib.sha256(self.prompt.encode()).hexdigest()
         self.rules_sha256 = hashlib.sha256((config / 'FACHREGELN.json').read_bytes()).hexdigest()
         secret = getattr(model, 'api_key', None)
         self.conversation_key = hashlib.sha256(('conversation-v1:' + secret).encode()).digest() if isinstance(secret, str) and secret else secrets.token_bytes(32)
         self.catalog = catalog(datasets)
 
-    def analyze(self, question, confirmed=None, *, function=None, select_answer=True, history=None, conversation=None):
+    def analyze(self, question, confirmed=None, *, function=None, select_answer=True, history=None, conversation=None, progress=None):
+        if getattr(self.model, 'native_tools', False) is True and select_answer:
+            from .chat import analyze_chat
+            return analyze_chat(self, question, confirmed, function=function, history=history,
+                                conversation=conversation, progress=progress)
         if not isinstance(question, str) or not question.strip() or len(question) > 4000:
             raise ValueError('Frage muss zwischen 1 und 4.000 Zeichen enthalten')
         user_question = question
@@ -68,14 +74,15 @@ class Service:
                 result['related_data'] = related
             result['answer']=present(result,self.datasets)
             if result['status'] in {'ok','partial'}:
-                result['answer']['notes']=list(dict.fromkeys([*result['answer']['notes'],*assumptions]))
+                visible_assumptions=[note for note in assumptions if not (result.get('function_id')=='relation_history' and note=='Die Gütermengen werden in Tonnen dargestellt.')]
+                result['answer']['notes']=list(dict.fromkeys([*result['answer']['notes'],*visible_assumptions]))
             if result.get('result_id') and self.model and select_answer and result['status'] in {'ok','partial','not_available'}:
                 records = evidence(result, result['answer'])
                 if records:
                     payload = {'phase': 'answer', 'question': user_question,
                                'result_id': result['result_id'], 'data_snapshot_id': self.datasets.snapshot_id,
                                'evidence': records, 'title': result['answer']['title'],
-                               'instructions': 'Erläutere die Antwort in höchstens zwei kurzen Absätzen. Nur aktuelle Belege. Verwende {{f1}}, {{p1}} oder {{n1}} als unveränderte Platzhalter für vollständige belegte Aussagen. Keine eigenen Zahlen, Rangfolgen, Ursachen oder unbelegten Alternativen. evidence_ids nennt alle verwendeten Belege. Tabellen und Pflichtgrenzen zeigt der Server separat.'}
+                               'instructions': 'Beantworte zuerst die konkrete Frage, danach erläutere nur die nötige Einordnung. Höchstens drei kurze Absätze, keine Floskeln wie „Die Auswertung zeigt“ oder zeilenweise Tabellenwiederholung. Nur aktuelle Belege: {{f1}}, {{p1}} oder {{n1}} als unveränderte Platzhalter. Keine eigenen Zahlen, Rangfolgen, Ursachen oder unbelegten Alternativen. evidence_ids nennt alle verwendeten Belege. Bei einem Jahresvergleich alle p-Belege einmal und in ihrer Reihenfolge verwenden: gewünschte Jahre und Vergleichsgrenze müssen sichtbar bleiben. Notizen nicht zusätzlich in den Fließtext kopieren; Tabelle und Hinweise erscheinen separat.'}
                     try:
                         audit['attempted_model_calls'] += 1
                         selection, call = self.model.complete(self.prompt, payload, NARRATIVE, deadline=deadline)
@@ -108,7 +115,7 @@ class Service:
                     'parameter_origins': {k: 'context' for k in confirmed}, 'unresolved_fields': [], 'status': 'ready'}
         elif deterministic_plan(question,self.datasets) is not None:
             plan=deterministic_plan(question,self.datasets)
-            audit['planning_mode']='deterministic_relation_history'
+            audit['planning_mode']='deterministic_'+plan['function_id']
         elif direct_route(question, self.datasets.names):
             plan = {'phase': 'plan', 'function_id': direct_route(question,self.datasets.names), 'parameters': {},
                     'parameter_origins': {}, 'unresolved_fields': [], 'status': 'needs_clarification'}
@@ -130,6 +137,8 @@ class Service:
                 'direction':'Bei von A nach B: Versand von A nach B; bei regionalem Profil ohne Richtung: beide Richtungen.',
                 'year':'Ein genanntes Jahr übernehmen. Bei aktuellstem Jahr prüft der Server den neuesten verfügbaren Jahrgang. Bei Mehrjahreswunsch keinen Einzeljahrgang verlangen.',
                 'history':'Die Frage enthält gegebenenfalls die letzten Nutzereingaben einschließlich Ergänzungen. Keine erneute Nachfrage nach bereits genannten Angaben.'}
+            from .dialogue import previous_calendar_year
+            payload['calendar_context']={'previous_year':previous_calendar_year(),'timezone':'Europe/Berlin'}
             try:
                 audit['attempted_model_calls'] += 1
                 plan, call = self.model.complete(self.prompt, payload, PLAN, deadline=deadline)

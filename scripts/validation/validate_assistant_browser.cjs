@@ -10,10 +10,12 @@ const release = path.resolve(process.argv[2]);
 const output = path.resolve(process.argv[3]);
 const requests = [], tests = [], errors = [];
 let browser, server, used = 0, remaining = 5, quotaReads = 0, scenario = 'answer';
+let conversationTurn=0;
 const record = name => { tests.push(name); console.log('PASS', name); };
 (async () => {
   await fs.mkdir(output, {recursive:true});
   const fixture = JSON.parse(await fs.readFile(path.join(root,'outputs/analyseassistent_runtime_20260910/customer_ui_fixture01.json'),'utf8'));
+  const conversationFixture=process.argv[4] ? JSON.parse(await fs.readFile(process.argv[4],'utf8')) : null;
   server = http.createServer(async (req,res) => {
     try {
       const route = new URL(req.url,'http://localhost').pathname;
@@ -28,6 +30,11 @@ const record = name => { tests.push(name); console.log('PASS', name); };
         if (scenario === 'disconnect') return req.socket.destroy();
         await new Promise(resolve => setTimeout(resolve,800));
         res.setHeader('Content-Type','application/json');
+        if (scenario==='conversation') {
+          const answer=structuredClone(conversationFixture.turns[conversationTurn++].result);
+          used+=1;remaining=5-used;
+          return res.end(JSON.stringify(answer));
+        }
         if (scenario === 'clarification') return res.end(JSON.stringify({status:'needs_clarification',answer:{title:'Noch eine kurze Rückfrage',paragraphs:['Für eine passende Antwort fehlen mir noch wichtige Angaben. Bitte ergänzen Sie:'],questions:['Auf welches Jahr bezieht sich Ihre Frage?'],tables:[],notes:[],sources:[],technical_details:{}}}));
         const answer = structuredClone(fixture.result); answer.request_id=requests.at(-1).body.request_id;
         if (scenario === 'xss') answer.answer.paragraphs.push('<img src=x onerror="window.injected=true">');
@@ -106,8 +113,9 @@ const record = name => { tests.push(name); console.log('PASS', name); };
   assert.match(await page.locator('#aiConversation').innerText(),/67\.757/);
   assert.equal(await page.locator('.ki-answer-sources').count(),0);
   assert.equal(await page.locator('.header-ai-badge').textContent(),'Beta');
-  assert.match(await page.locator('#aiSecurityTooltip').textContent(),/Gemini 3\.7 Flash/);
-  record('Beta badge and model information present; technical source disclosure removed');
+  assert.doesNotMatch(await page.locator('#aiSecurityTooltip').textContent(),/Gemini|Requesty|Zahlen werden aus den geprüften Datenfunktionen/);
+  assert.match(await page.locator('#aiSecurityTooltip').textContent(),/Verkehrsstatistiken/);
+  record('Beta badge and statistical basis present; requested technical hover sentences removed');
   assert.equal(await page.locator('#aiConversation h4').first().evaluate(el => { const r=el.getBoundingClientRect(),c=document.getElementById('aiConversation').getBoundingClientRect(); return r.top>=c.top && r.bottom<=c.bottom; }),true);
   record('Friendly T20 with table, hidden technical details and duplicate-submit protection');
   await page.screenshot({path:path.join(output,'antwort-desktop.png')});
@@ -171,6 +179,35 @@ const record = name => { tests.push(name); console.log('PASS', name); };
   assert.equal(await page.locator('#aiQuestionForm button').isDisabled(),true);
   assert.equal(quotaReads,previousQuotaReads);
   record('Standalone dashboard neither contacts the API nor simulates a quota');
+  if (conversationFixture) {
+    assert.equal(conversationFixture.passed,true);
+    scenario='conversation';used=0;remaining=5;
+    await page.setViewportSize({width:1440,height:1000});
+    await page.reload();await page.locator('#btnAiModal').click();
+    await page.getByText('0 von 5 Fragen · 5 verfügbar',{exact:true}).waitFor();
+    for (let i=0;i<conversationFixture.turns.length;i++) {
+      const turn=conversationFixture.turns[i];
+      await page.locator('#aiQuestionInput').fill(turn.question);
+      await page.locator('#aiQuestionForm button').click();
+      await page.getByText(`${i+1} von 5 Fragen · ${4-i} verfügbar`,{exact:true}).waitFor();
+      assert.equal(requests.at(-1).body.conversation,i ? conversationFixture.turns[i-1].result.conversation : undefined);
+    }
+    const last=page.locator('.ki-message-assistant').last();
+    assert.match(await last.innerText(),/2024/);
+    assert.match(await last.innerText(),/Tonnenkilometer/);
+    assert.match(await last.innerText(),/Güterarten/);
+    for (const details of await last.locator('details').all()) await details.locator('summary').click();
+    assert(await last.locator('tbody tr').count()>6);
+    for (const row of await last.locator('tbody tr').all()) {
+      for (const cell of (await row.locator('td').all()).slice(0,3)) assert((await cell.innerText()).trim());
+    }
+    await page.screenshot({path:path.join(output,'gespraech-desktop.png')});
+    await page.setViewportSize({width:390,height:844});
+    await last.scrollIntoViewIfNeeded();
+    assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+    await page.screenshot({path:path.join(output,'gespraech-mobil.png')});
+    record('Four-turn reported conversation retains signed state and renders populated goods and tkm tables on desktop and mobile');
+  }
   assert.deepEqual(errors,[]);
   const digest = async file => crypto.createHash('sha256').update(await fs.readFile(file)).digest('hex');
   await fs.writeFile(path.join(output,'report.json'),JSON.stringify({passed:true,tests,external_model_calls:0,api:'synthetic responses from verified local result',page_errors:errors,release_manifest_sha256:await digest(path.join(release,'MANIFEST.sha256.json')),script_sha256:await digest(__filename),fixture_sha256:await digest(path.join(root,'outputs/analyseassistent_runtime_20260910/customer_ui_fixture01.json'))},null,2));

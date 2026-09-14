@@ -25,6 +25,11 @@ def fields(**properties):
 # All parameters are explicit. Defaults in the underlying local functions cannot
 # silently replace a missing user selection.
 FUNCTIONS = {
+    'relation_overview': ('F07', 'Gerichtete Jahresrelation: Menge und/oder Verkehrsleistung sowie verfügbare C1–C7-Güterarten je Verkehrsträger; Straße nur Gesamtwerte', 'b01', fields(
+        origin=CODE,destination=CODE,year=YEAR,
+        modes={'type':'array','items':MODE,'minItems':1,'maxItems':3,'uniqueItems':True},
+        metrics={'type':'array','items':enum('tonnes','tkm'),'minItems':1,'maxItems':2,'uniqueItems':True},
+        include_goods={'type':'boolean'})),
     'road_relation_goods_limit': ('F07', 'Verfügbare Straßen-OD-Gesamtmenge mit ausdrücklicher Grenze fehlender Güterstruktur', 'b01', fields(
         origin=CODE,destination=CODE,year=YEAR,metric=enum('tonnes','tkm'))),
     'rail_goods_history': ('F07', 'Schienen-Feinpositionen derselben Relation in zwei bestätigten Jahren, keine ungeprüften Raten', 'b03', fields(
@@ -116,7 +121,7 @@ ALIASES = {
     'outside_scope': ['CO₂','CO₂e','Kosten','Auslastung','Verlagerungspotenzial'],
     'road': ['straße', 'straßenverkehr'], 'rail': ['schiene', 'schienenverkehr'],
     'iww': ['binnenschiff', 'binnenschifffahrt'], 'tonnes': ['tonnen', 't'],
-    'tkm': ['tonnenkilometer', 'tkm'], 'outbound': ['versand'], 'inbound': ['empfang'],
+    'tkm': ['tonnenkilometer', 'tkm', 'verkehrsleistung', 'transportleistung'], 'outbound': ['versand'], 'inbound': ['empfang'],
     'teu': ['teu'], 'flights': ['flüge'], 'VD2': ['vd2'], 'VD3c': ['vd3c'],
 }
 
@@ -159,6 +164,7 @@ def directed_pairs(question, names, endpoints):
         return set()
     alternatives = '|'.join(re.escape(label) for label in sorted(aliases, key=len, reverse=True))
     patterns = [rf'(?<!\w)(?P<source>{alternatives})\s*→\s*(?P<target>{alternatives})(?!\w)',
+                rf'(?<!\w)(?P<source>{alternatives})\s+nach\s+(?P<target>{alternatives})(?!\w)',
                 rf'\bvon\s+(?P<source>{alternatives})\s+nach\s+(?P<target>{alternatives})(?!\w)']
     pairs = set()
     for pattern in patterns:
