@@ -124,6 +124,8 @@ def params_modes(result):
 def check_prose(selection, payload, result, datasets):
     """Bounded checks, explicitly not a complete semantic proof of free language."""
     validate(RESPONSE, selection)
+    if any(n.startswith('Für das angefragte Jahr ') for n in result.get('notices', [])):
+        return present(result, datasets)['paragraphs']
     rendered = []
     params = result.get('parameters', {})
     facts = payload['evidence']

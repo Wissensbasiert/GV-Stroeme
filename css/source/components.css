@@ -14,6 +14,36 @@
   display: none;
 }
 
+.module-loading-host { position: relative; }
+.module-loading-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  margin: 0;
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 2px 12px #0002;
+  text-align: center;
+  pointer-events: none;
+}
+.module-loading-overlay::before {
+  content: '';
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  border: 2px solid #cbd5e1;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: module-loading-spin 0.8s linear infinite;
+}
+@keyframes module-loading-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .module-loading-overlay::before { animation: none; }
+}
+
 .relation-location-note {
   display: inline-block;
   margin-left: 5px;

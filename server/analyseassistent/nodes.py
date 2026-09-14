@@ -150,6 +150,16 @@ def node_profile(con, dataset, *, kind, node, year, direction, metrics, partner_
 def node_connections(con, dataset, *, kind, node, year, direction, metric, partners,
                      partner_scope='all', partner_group=None, airport_names=None):
     names = airport_names or {}
+    check(kind, direction, metric, partner_scope)
+    years = [r[0] for r in con.execute(
+        'SELECT DISTINCT year FROM read_parquet(?) WHERE metric=? ORDER BY year',
+        [str(Path(dataset) / (kind + '_partners.parquet')), metric]).fetchall()]
+    if years and year not in years:
+        return {'status': 'not_available', 'observations': [],
+                'note': f'Für das angefragte Jahr {year} liegen im vorhandenen Datenbestand keine Relationsdaten vor. '
+                        f'Der neueste verfügbare Relationsjahrgang für diese Kennzahl ist {max(years)}. '
+                        'Das ist eine Lücke des Jahrgangs und kein Nachweis von Nullverkehr. '
+                        'Flughafen-Gesamtwerte und einzelne Verbindungen haben unterschiedliche Datenstände.'}
     if partner_group:
         group = airport_groups(names).get(partner_group)
         if kind != 'air' or not group or set(partners) != set(group['partners']):

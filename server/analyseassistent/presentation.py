@@ -93,6 +93,9 @@ def present(result,datasets):
                   'partial':'Die vorhandenen Quellzeilen enthalten unbekannte Werte; eine vollständige Menge lässt sich deshalb nicht angeben.'}.get(source_status,
                   'Die gewünschte Auswertung kann ich mit dem derzeit vorbereiteten Datenangebot noch nicht liefern.')
         answer['paragraphs']=[reason+' Daraus lässt sich nicht schließen, dass kein Verkehr stattfindet.']
+        coverage = next((n for n in result.get('notices', []) if n.startswith('Für das angefragte Jahr ')), None)
+        if coverage:
+            answer['paragraphs'] = [coverage]
         if p.get('year'): answer['notes'].append('Angefragtes Bezugsjahr: '+str(p['year'])+'.')
         if function in {'node_statistics','node_profile','node_partners'}:
             answer['notes'].extend(n for n in result.get('notices',[]) if not n.startswith('Datenstand:'))

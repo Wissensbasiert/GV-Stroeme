@@ -191,3 +191,8 @@ Nach geprüften Änderungen den zugehörigen Stand auf GitHub `main` sichern. Te
 Die verbleibenden Beispiele betreffen Regionsvergleich, gerichtete Schienengüterarten, Straßen-Partnerregionen, regionale Schienenentwicklung und Prognoserangfolge. Fehlende Bezugsjahre sind gezielt zu erfragen, nicht als unverständliche Fachfrage zu behandeln. Bei „am stärksten wachsen“ muss die Antwort absolute oder relative Veränderung klar unterscheiden. Die Kartenfilter werden weiterhin nicht als stillschweigende Chat-Auswahl übernommen.
 
 `tests/analyseassistent/test_preview_questions.py` prüft die fünf Quelltexte, ihre unveränderte Übernahme in den Fragetext und passende ausführbare Parameterverträge nach expliziter Vervollständigung. Das ist kein Nachweis freier Modellinterpretation; dafür sind gesonderte Dialogtests erforderlich. Die Browserprüfer `validate_frontend_exports.cjs` und `validate_frontend_feedback.cjs` erwarten fünf bedienbare Fragen; die letzte ist nun die Prognosefrage.
+
+
+### Ladeanzeige und Flughafenhinweise (14.09.2026, lokal)
+
+Die gemeinsame Ladeanzeige in `js/shared/data-access.js` liegt mittig als halbtransparente Einblendung über der Karte. Sie verändert die Höhe des Moduls nicht; Fehler mit Wiederholungsmöglichkeit bleiben eigenständige Meldungen. Die Bewegung berücksichtigt die Systemeinstellung für reduzierte Animationen. Flughafen-Infobox und Quellenfenster nennen den freigegebenen Gesamtstand bis 2025 und den Relationsstand bis 2024.

@@ -419,3 +419,8 @@ Die Ebene zeigt nur Infrastrukturstandorte und verändert keine KV-Mengen, Antei
 ### Deutschland-Beschränkung nach Nutzerfeedback (10.09.2026)
 
 Aktueller Terminal-Ausgabestand ersetzt die europaweite Ebene des vorherigen Abschnitts. Vor der Kategorieprüfung wird ausschließlich `iso2 == DE` ausgewählt. Von 1.623 Quellzeilen werden 1.360 außerhalb Deutschlands ausgeschlossen; von den 263 deutschen Zeilen entfallen 49 Containerdepots und eine stillgelegte Anlage. Ergebnis: 213 Terminals, davon 109 Schiene/Straße, 13 Wasserstraße/Straße und 91 trimodal. Die Zuordnung erfolgt nach dem Länderfeld der Quelle, nicht durch geschätzte Grenzrechtecke. Metadaten dokumentieren den Länderfilter; der Prüfer gleicht sämtliche deutschen Ausgabepunkte erneut gegen Name, Kategorie und Geometrie der Quelle ab. Die Rohdatei bleibt unverändert. Sicherung der bisherigen Europa-Ausgabe: `backups/before-terminals-de-20260910/web_intermodal_terminals.geojson`.
+
+
+### Unterschiedliche Luftverkehrsjahrgänge in Antworten (14.09.2026, lokal)
+
+Konkrete Knotenverbindungen prüfen vor der Ergebnisausgabe die im Partnerbestand vorhandenen Jahrgänge der angefragten Kennzahl. Ein komplett fehlender Jahrgang erzeugt einen ausdrücklichen Hinweis auf den neuesten vorhandenen Relationsjahrgang, keine scheinbaren Einzelverbindungslücken und keine Nullwerte. Der angefragte Jahrgang wird nicht ersetzt. Fehlende Partner innerhalb eines vorhandenen Jahrgangs bleiben mit bekannter Teilsumme und Abdeckungsgrenze ausgewiesen. Die Quellenwerte wurden hierfür nicht verändert.

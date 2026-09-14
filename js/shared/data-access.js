@@ -18,6 +18,7 @@
     if (!container) return;
     container.setAttribute('aria-busy', 'false');
     container.dataset.loadError = 'true';
+    container.querySelector('.module-loading-overlay')?.remove();
     let notice = container.querySelector('.module-loading-status');
     if (!notice) {
       notice = document.createElement('div');
@@ -41,14 +42,18 @@
     if (!pane) return;
     delete pane.dataset.loadError;
     pane.setAttribute('aria-busy', String(isLoading));
-    let notice = pane.querySelector('.module-loading-status');
+    const errorNotice = pane.querySelector('.module-loading-status:not(.module-loading-overlay)');
+    if (errorNotice) errorNotice.hidden = true;
+    let notice = pane.querySelector('.module-loading-overlay');
     if (!notice) {
       notice = document.createElement('div');
-      notice.className = 'module-loading-status';
-      pane.insertAdjacentElement('afterbegin', notice);
+      notice.className = 'module-loading-status module-loading-overlay';
+      const host = pane.querySelector('.map-container-leaflet') || pane;
+      host.classList.add('module-loading-host');
+      host.append(notice);
     }
     notice.setAttribute('role', 'status');
-    notice.textContent = 'Fachdaten werden geladen …';
+    notice.textContent = 'Bitte einen Augenblick Geduld, Daten werden geladen …';
     notice.hidden = !isLoading;
   }
 
@@ -184,4 +189,3 @@
       return false;
     }
   }
-

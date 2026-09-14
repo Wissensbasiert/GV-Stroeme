@@ -38,6 +38,19 @@ class NodeConnections(unittest.TestCase):
         result['answer']=present(result,self.data)
         return result
 
+    def test_unavailable_relation_year_explains_latest_without_zero_rows(self):
+        for metric in ['tonnes', 'flights']:
+            result = self.result(self.selection(year=2025, metric=metric))
+            self.assertEqual(result['status'], 'not_available')
+            self.assertEqual(result['facts'], [])
+            text = ' '.join(result['answer']['paragraphs'])
+            self.assertIn('2025', text)
+            self.assertIn('2024', text)
+            self.assertIn('keine Relationsdaten', text)
+            payload = packet(result, self.data)
+            checked = check_prose({'paragraphs': [{'text': 'Keine Angaben.', 'evidence_ids': ['q1']}]}, payload, result, self.data)
+            self.assertEqual(checked, result['answer']['paragraphs'])
+
     def test_iata_aliases_are_from_original_reference(self):
         from scripts.analysis.build_assistant_references import build
         built=build(ROOT)
