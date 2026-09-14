@@ -38,6 +38,8 @@ Die Änderung gilt für die Testsite 1067000. Die Produktionsbereitstellung blei
 
 ## Aufbewahrung auf AlwaysData
 
+**Abgeschlossen am 14.09.2026 nach ausdrücklicher Löschfreigabe:** Aktiv `air01`, Rückfallstände `nodes02` und `scope01`; alle 5.212 Manifestdateien der drei Bestände geprüft. Acht ältere Testreleases entfernt, danach genau drei vorhanden. Testportal gesund, aktiver Release und Produktion unverändert. [Nachweis](../qualitaet/LUFTVERKEHR_UPDATE_20260914.md).
+
 Nach erfolgreicher Releaseabnahme: **aktiver Testrelease plus zwei geprüfte Rückfallstände**. Ältere vollständige und unvollständige Testreleases werden anhand eines gespeicherten Bereinigungsplans entfernt. Vorher aktive Site und alle geplanten Aufgaben auf Pfadverweise prüfen; die drei erhaltenen Releasebestände vollständig anhand ihrer Manifeste prüfen. Bei anderen Verweisen, beschädigtem Rückfallstand oder zwischenzeitlicher Änderung abbrechen und klären. Datenbank, `portal_test/private_data`, gemeinsame virtuelle Umgebung und Produktion bleiben unangetastet.
 
 Werkzeug im Portalprojekt: `deployment/automation/release_maintenance.py`. Ohne `--apply` inventarisieren; mit `--keep <Rückfall1> <Rückfall2> --output <Plan.json>` einen Plan schreiben. Anschließend `--plan <Plan.json> --apply --output <Ergebnis.json>`. Aufruf über den DPAPI-Wrapper `run_release_maintenance.ps1`; keine Schlüssel in Befehle, Dateien oder Chat eintragen. Temporäre Prüfaufgaben und FTPS-Zugänge werden entfernt. Keine dauerhaft laufende neue Automation.
