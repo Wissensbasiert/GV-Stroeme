@@ -97,6 +97,25 @@ try:
             gap,_=dialogue_service.analyze('Welche Güter gehen 2026 per Schiene von Berlin nach Hamburg?',select_answer=False)
             assert gap['status']=='not_available' and gap['answer']['followups'][0]['parameters']['year']==2025
             report['guided_dialogue_verified']={'signed_context':True,'reverse_2025_tonnes':585052,'gap_2026_alternative_2025':True}
+            report['stage']='rail_goods_groups'
+            goods_service=Service(datasets)
+            period,_=goods_service.analyze('Ausgang',{'origin':'DE300','destination':'DE600','start':2021,'end':2025,
+                'modes':['rail'],'metric':'tonnes'},function='relation_history',select_answer=False)
+            c7,c7_audit=goods_service.analyze('Gab es Gütergruppen, die auf dieser Verbindung besonders verloren?',
+                conversation=period['conversation'],select_answer=False)
+            assert c7['parameters']['classification']=='C7' and c7['parameters']['years']==[2021,2025]
+            decline=next(f for f in c7['facts'] if f.get('change')=='absolute' and f.get('group')=='7')
+            assert decline['group_name']=='Sonstige Produkte' and decline['value']==-159621
+            assert not any('nst_raw' in f for f in c7['facts']) and c7_audit['attempted_model_calls']==0
+            nst20,nst20_audit=goods_service.analyze('Und wie haben sich die NST-Gütergruppen entwickelt?',
+                conversation=c7['conversation'],select_answer=False)
+            nst_decline=next(f for f in nst20['facts'] if f.get('change')=='absolute' and f.get('group')=='19')
+            assert nst20['parameters']['classification']=='NST20'
+            assert nst_decline['group_name']=='Nicht identifizierbare Güter' and nst_decline['value']==-164679
+            assert 'NST 191' not in json.dumps(nst20,ensure_ascii=False) and nst20_audit['attempted_model_calls']==0
+            report['rail_goods_groups_verified']={'route':'DE300-DE600','years':[2021,2025],
+                'c7_decline_tonnes':-159621,'nst20_decline_tonnes':-164679,'three_digit_codes_exposed':False,
+                'external_model_calls':0}
             report['configured_model']=os.environ.get('REQUESTY_MODEL')
             assert report['configured_model']=='vertex/gemini-3.7-flash@eu'
             relation_question='Wie viel Güter sind in den letzten Jahren von Rosenheim nach Augsburg transportiert worden?'

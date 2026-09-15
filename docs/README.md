@@ -1,6 +1,6 @@
 # Dokumentationsübersicht
 
-**Lokal geprüft, 15.09.2026 – Analyseassistent 0.8.1:** Schienen-Gütergruppen erscheinen standardmäßig als sieben benannte C7-Gruppen, bei ausdrücklicher NST-Frage als 20 benannte NST-2007-Abteilungen. Dreistellige Feinpositionen bleiben intern; Entwicklungsfragen übernehmen die bestätigten Randjahre. [Prüfbericht](qualitaet/ANALYSEASSISTENT_SCHIENENGÜTERGRUPPEN_20260915.md). Noch nicht im Testportal bereitgestellt.
+**Testportal, 15.09.2026 – Analyseassistent 0.8.1 (`groups01`):** Schienen-Gütergruppen erscheinen standardmäßig als sieben benannte C7-Gruppen, bei ausdrücklicher NST-Frage als 20 benannte NST-2007-Abteilungen. Dreistellige Feinpositionen bleiben intern; Entwicklungsfragen übernehmen die bestätigten Randjahre. Vollständige Release-/Linux-Prüfung und angemeldete Browser-Sichtprüfung bestanden, ohne externen Modellaufruf. [Prüfbericht](qualitaet/ANALYSEASSISTENT_SCHIENENGÜTERGRUPPEN_20260915.md).
 
 **Testportal, 15.09.2026 – Analyseassistent 0.8.0 (`total01`):** Prognoseranglisten bilden den ausdrücklich oder standardmäßig gewünschten Gesamtzuwachs aus Straße, Schiene und Binnenschiff je Region; bei echter Unklarheit erfolgt eine Rückfrage. Ein dezenter Ladekreis ergänzt den unveränderten Livestream. 221 lokale Laufzeittests und die vollständige Release-/Linux-/Browserprüfung ohne externen Modellaufruf bestanden. [Prüfbericht](qualitaet/ANALYSEASSISTENT_GESAMTRANKING_UND_LADEANZEIGE_20260915.md).
 
