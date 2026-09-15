@@ -9,7 +9,7 @@ from server.analyseassistent.datasets import Datasets
 from server.analyseassistent.selection import resolve, SelectionError
 from server.analyseassistent.results import make_result
 from server.analyseassistent.presentation import present
-from server.analyseassistent.chat import packet, check_prose
+from server.analyseassistent.chat import packet, check_prose, enforce_forecast_ranking_scope
 from server.analyseassistent.availability import catalog
 from server.analyseassistent.contracts import FUNCTIONS
 from server.analyseassistent.dialogue import available_years
@@ -135,12 +135,38 @@ class NodeConnections(unittest.TestCase):
         self.assertEqual(p['direction'],'all');self.assertTrue(p['external']);self.assertEqual(p['top'],5)
 
     def test_preview_forecast_summary_respects_absolute_ranking(self):
-        p=dict(mode='rail',metric='tonnes',direction='all',measure='absolute',top=5,descending=True)
+        p=dict(modes=['rail'],metric='tonnes',direction='all',measure='absolute',top=5,descending=True)
         result=self.result(p,'forecast_ranking')
         first=min((f for f in result['facts'] if f['label'].endswith('/ Absolute Änderung')),key=lambda f:f['rank'])
         self.assertIn(first['fact_id'],result['statements'][0]['fact_ids'])
         self.assertIn('absoluter Mengenänderung',result['answer']['paragraphs'][0])
         self.assertEqual(len(packet(result,self.data)['evidence']['forecast_ranking_group']['fact_ids']),20)
+
+    def test_forecast_total_ranking_aggregates_modes_before_sorting(self):
+        p=dict(modes=['road','rail','iww'],metric='tonnes',direction='all',measure='absolute',top=5,descending=True)
+        result=self.result(p,'forecast_ranking')
+        changes=[f for f in result['facts'] if f['label'].endswith('/ Absolute Änderung')]
+        self.assertEqual([(f['region'],f['value']) for f in changes],[
+            ('DE600',38795800),('DE254',21224660),('DEA23',17235536),('DE212',16527231),('DE115',13963228)])
+        self.assertTrue(all(f['aggregate_role']=='modal_total' for f in changes))
+        self.assertTrue(all(f['modes']==['road','rail','iww'] for f in changes))
+        self.assertTrue(any('alle drei Landverkehrsträger' in note for note in result['answer']['notes']))
+
+    def test_forecast_ranking_defaults_and_followup_can_replace_single_mode(self):
+        base={'function_id':'forecast_ranking','confirmed':dict(modes=['road'],metric='tonnes',direction='all',measure='absolute',top=5,descending=True)}
+        p=resolve('forecast_ranking',{'modes':['road','rail','iww'],'_dialogue':intent(context='continue',kind='unspecified')},base,self.data)[1]
+        self.assertEqual(p['modes'],['road','rail','iww'])
+        fresh=resolve('forecast_ranking',{'_dialogue':intent(kind='explicit')},{},self.data)[1]
+        self.assertEqual(fresh['modes'],['road','rail','iww'])
+
+    def test_forecast_scope_guard_corrects_total_and_clarifies_unsupported_guess(self):
+        corrected=enforce_forecast_ranking_scope('forecast_ranking',{'modes':['road']},
+            intent(context='continue',kind='unspecified'),
+            'Warum nur Straße? Ich bin am Gesamtzuwachs interessiert.')
+        self.assertEqual(corrected['modes'],['road','rail','iww'])
+        with self.assertRaisesRegex(SelectionError,'Gesamtzuwachs'):
+            enforce_forecast_ranking_scope('forecast_ranking',{'modes':['road']},intent(),
+                'Welche Region gewinnt absolut gesehen am meisten an Güterverkehr bis 2040 zu?')
 
     def test_air_rankings_preserve_legacy_values(self):
         p=dict(kind='air',node='EDDP',year=2024,metric='tonnes',direction='outbound',international=True,top=100)

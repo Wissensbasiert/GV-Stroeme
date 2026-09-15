@@ -1,5 +1,9 @@
 # Skriptübersicht
 
+## Analyseassistent 0.8.0 vom 15.09.2026
+
+`analysis/b0406.py` summiert für Prognoseranglisten die ausdrücklich ausgewählten Verkehrsträger je Region vor der Rangbildung. Nach Änderungen an dieser Logik sind B04–B06, Assistenten-Unterstützungsbestand und Dashboard-Zugriffsbestand in dieser Reihenfolge neu aufzubauen und vollständig zu prüfen. Die Chat-Browserprüfung kontrolliert zusätzlich den Ladekreis während der gesamten laufenden Anfrage. [Prüfbericht](../docs/qualitaet/ANALYSEASSISTENT_GESAMTRANKING_UND_LADEANZEIGE_20260915.md).
+
 ## Diagramm- und KV-Prüfung vom 15.09.2026
 
 `python -B scripts/validation/validate_intermodal_structure.py` kontrolliert neue regionale KV-Kategorien gegen Original-CSV und nationale Reihen. `node scripts/validation/validate_chart_context.cjs http://127.0.0.1:8015/ <Ausgabeordner>` prüft Kopfzeilen, regionale KV-Auswahl und die verzögerte Ladeanzeige. Playwright wie bisher ausschließlich aus einem externen Ordner unter `C:/tmp` laden. [Nachweis](../docs/qualitaet/DIAGRAMMKONTEXT_UND_KV_20260915.md).

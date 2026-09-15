@@ -121,9 +121,9 @@
             const event = JSON.parse(data);
             if (kind === 'status' && event.stage === 'paragraph') {
               const body = waiting.querySelector('.ki-message-content');
-              if (!verified) { body.replaceChildren(); verified = true; }
+              if (!verified) { waiting.querySelector('.ki-working-text')?.remove(); verified = true; }
               body.append(formattedParagraph(event.text));
-            } else if (kind === 'status' && !verified) waiting.querySelector('p').textContent = event.text;
+            } else if (kind === 'status' && !verified) waiting.querySelector('.ki-working-text').textContent = event.text;
             if (kind === 'error') fail(event.status, event.body);
             if (kind === 'result') result = event.body;
           }
@@ -195,7 +195,11 @@
       busy = true; updateSend(); input.disabled = true; form.setAttribute('aria-busy', 'true');
       message('user', question);
       input.value = ''; input.style.height = ''; followup = null;
-      const waiting = message('assistant', 'Ich prüfe Ihre Frage und die verfügbaren Daten …');
+      const working = node('div', undefined, 'ki-working-state');
+      working.append(node('span', undefined, 'ki-working-spinner'), node('p', 'Ich prüfe Ihre Frage und die verfügbaren Daten …', 'ki-working-text'));
+      const waiting = message('assistant', working);
+      waiting.classList.add('ki-message-working');
+      waiting.setAttribute('aria-busy', 'true');
       let rendered = null;
       try {
         const result = await analysisRequest(payload, waiting);

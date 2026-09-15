@@ -23,6 +23,21 @@ NUMBER = re.compile(r'(?<![\w])[-+]?\d+(?:\.\d{3})*(?:,\d+)?(?![\w])')
 YEAR = re.compile(r'\b(?:19|20)\d{2}\b')
 
 
+def enforce_forecast_ranking_scope(name, args, dialogue, question):
+    """Protect the modal scope after model selection without replacing semantic routing."""
+    if name != 'forecast_ranking':
+        return args
+    all_modes = ['road', 'rail', 'iww']
+    asks_total = bool(re.search(r'\b(?:gesamtzuwachs|gesamtverkehr|gesamtmenge|gesamter\s+güterverkehr|insgesamt|alle(?:\s+drei)?\s+(?:land)?verkehrsträger)\b', question, re.I))
+    mentioned = {mode for mode in all_modes if question_supports(question, mode, {})}
+    if asks_total:
+        args['modes'] = all_modes
+    elif dialogue['context'] == 'new' and not mentioned and set(args.get('modes', [])) != set(all_modes):
+        raise SelectionError('unconfirmed_forecast_modes',
+            'Meinen Sie den Gesamtzuwachs aus Straße, Schiene und Binnenschiff oder einen einzelnen Verkehrsträger?', ['modes'])
+    return args
+
+
 def numbers(text):
     text = text.replace('−', '-')
     return {round(float(m.group().replace('.', '').replace(',', '.')), 6) for m in NUMBER.finditer(text)}
@@ -410,6 +425,7 @@ def analyze_chat(service, question, confirmed=None, *, function=None, history=No
         audit['proposed_tool'] = {'name': name, 'parameters': copy.deepcopy(args)}
         new_topic = isinstance(args.get('_dialogue'), dict) and args['_dialogue'].get('context') == 'new'
         name, args, dialogue, notes = resolve(name, args, state, service.datasets, explicit=confirmed)
+        args = enforce_forecast_ranking_scope(name, args, dialogue, question)
         time_intent = copy.deepcopy(dialogue['time'])
         selected, selected_function = args, name
         audit['conversation_transition'] = dialogue['context']

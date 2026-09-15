@@ -119,8 +119,9 @@ FUNCTIONS = {
         year=YEAR, metric=enum('tonnes', 'tkm'), mode={'anyOf': [MODE, {'type': 'null'}]})),
     'balance': ('F09', 'Versand, Empfang und Saldo eines Kreises', 'b0406', fields(
         region=CODE, year=YEAR, mode=MODE, metric=enum('tonnes', 'tkm'))),
-    'forecast_ranking': ('F10', 'Ranking VP2019_BASE zu 2040_P1, keine Ist-Entwicklung', 'b0406', fields(
-        mode=MODE, metric=enum('tonnes', 'tkm'), direction=enum('all', 'outbound', 'inbound'),
+    'forecast_ranking': ('F10', 'Ranking VP2019_BASE zu 2040_P1 für einen oder mehrere Landverkehrsträger; ausgewählte Verkehrsträger werden je Region vor der Rangbildung vollständig summiert, keine Ist-Entwicklung', 'b0406', fields(
+        modes={'type': 'array', 'items': MODE, 'minItems': 1, 'maxItems': 3, 'uniqueItems': True},
+        metric=enum('tonnes', 'tkm'), direction=enum('all', 'outbound', 'inbound'),
         measure=enum('absolute', 'relative'), top=TOP, descending={'type': 'boolean'})),
     'node_partners': ('F12', 'Veröffentlichte Hafen-/Flughafenpartner mit passendem Teilmengennenner', 'b0406', fields(
         kind=enum('air', 'sea'), node=CODE, year=YEAR, direction=enum('all', 'outbound', 'inbound'),

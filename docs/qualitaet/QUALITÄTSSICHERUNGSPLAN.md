@@ -1,5 +1,7 @@
 # Qualitätssicherungsplan für das Güterströme-Dashboard
 
+**Lokal, 15.09.2026 – Analyseassistent 0.8.0:** Die Prognoserangliste verarbeitet einen oder mehrere ausdrücklich gebundene Verkehrsträger. Gesamtformulierungen werden serverseitig gegen Straße, Schiene und Binnenschiff abgesichert; bei einer neuen, tatsächlich unklaren Rangfrage wird statt einer willkürlichen Einzelauswahl nachgefragt. Der Ladekreis im Antwortbereich bleibt bis zum Abschluss der Anfrage sichtbar, ohne den Livestream zu ersetzen. Der neue B04–B06-Stand und die davon abhängigen privaten Assistentenbestände wurden neu aufgebaut und quellseitig geprüft; vollständige Abschluss- und Portalprüfung folgt. [Prüfbericht](ANALYSEASSISTENT_GESAMTRANKING_UND_LADEANZEIGE_20260915.md).
+
 **Lokal, 15.09.2026:** Diagrammspezifische Kopfzeilen, regionale KV-Struktur und verzögerte Ladeanzeige umgesetzt. 228 Quellenkontrollen, 25 Browseransichten und bestehende Export-/Lade-/Luft-KPI-Prüfungen bestanden. Noch nicht bereitgestellt. [Prüfbericht und Grenzen](DIAGRAMMKONTEXT_UND_KV_20260915.md).
 
 **Testportal, 14.09.2026 – `loading01`:** Relationsanfragen für 2025 nennen den verfügbaren Jahrgang 2024; Flughafenhinweise aktualisiert und Ladeanzeige ohne Layoutverschiebung über der Karte. 218 lokale Tests, vollständige Linux-Prüfung und Browserstichprobe bestanden. [Bereitstellung und Nachweis](LADEANZEIGE_UND_RELATIONSJAHRE_20260914.md). Nachfolgend frühere Prüfstände.

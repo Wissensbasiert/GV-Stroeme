@@ -120,7 +120,9 @@
       "region": "DEE03",
       "start": 2016,
       "end": 2025,
-      "mode": "rail",
+      "modes": [
+        "rail"
+      ],
       "metric": "tonnes",
       "direction": "all"
     },

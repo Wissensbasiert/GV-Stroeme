@@ -1,5 +1,13 @@
 # Fachlicher Vertrag der Datenfunktionen
 
+## Ergänzung 0.8.0: Gesamtzuwachs in Prognoseranglisten
+
+`forecast_ranking(modes,metric,direction,top_n)` erhält eine ausdrückliche Liste von einem bis drei Verkehrsträgern. Bei mehreren Verkehrsträgern werden die vollständigen Werte für Straße, Schiene und/oder Binnenschiff zuerst je Region summiert; erst danach werden absolute und relative Änderung berechnet und die Regionen nach der ungerundeten absoluten Änderung sortiert. Fehlt für eine Region eine benötigte Basis- oder Prognosekomponente, darf für diese Region kein vollständiger Gesamtwert behauptet werden.
+
+Fragen nach „Gesamtzuwachs“, „gesamtem Güterverkehr“, „insgesamt“ oder „allen Verkehrsträgern“ verwenden Straße, Schiene und Binnenschiff gemeinsam. Wird bei einer neuen Prognoserangfrage kein Verkehrsträger genannt, gilt ebenfalls dieser Gesamtumfang. Ist aus der Formulierung nicht sicher erkennbar, ob der Gesamtverkehr oder ein einzelner Verkehrsträger gemeint ist, fragt der Assistent gezielt nach. Ein zuvor verwendeter Einzelverkehrsträger darf eine ausdrückliche Gesamtfrage nicht überschreiben.
+
+Die Ladeanzeige des Chats bleibt während der gesamten laufenden Anfrage sichtbar, auch zwischen zwei Fortschrittsmeldungen des Livestreams. Sie enthält keine zusätzliche fachliche Statusaussage und wird mit dem abgeschlossenen Ergebnis entfernt.
+
 ## Ergänzung 0.7.0: Knotenverbindungen und Vorschaufragen
 
 `node_connections(kind,node,year,direction,metric,partners,partner_group,partner_scope)` liest konkrete veröffentlichte Flughafen- oder Seehafenverbindungen, auch außerhalb einer Topliste. Höchstens zehn Partner; der Berichtsknoten muss im jeweiligen deutschen Katalog vorhanden sein. IATA-Codes werden quellgebunden auf ICAO normalisiert, z. B. LEJ → EDDP und LHR → EGLL. Ein einzelner Code bedeutet keine Stadtgruppe. `partner_group=london` umfasst EGGW, EGKK, EGLL, EGMC und EGSS, ausdrücklich nur die Londoner Flughäfen des vorhandenen Katalogs. Die Antwort nennt Mitglieder und Abdeckungsgrenze. Fehlende Zeilen und fehlende Werte bleiben getrennt; bei Lücken gibt es ausschließlich eine bekannte Teilsumme, keine vollständige Gesamtsumme.

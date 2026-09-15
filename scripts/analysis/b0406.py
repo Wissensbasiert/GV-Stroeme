@@ -164,16 +164,30 @@ def query_union(con,dataset,*,regions,year,mode,metric='tonnes',group='ALL'):
             **aggregate_union(con,annual,regions=regions,year=year,mode=mode,metric=metric,group=group)}
 
 
-def forecast_ranking(con,dataset,*,mode='rail',metric='tonnes',direction='all',measure='absolute',top=5,descending=True):
-    if mode not in {'road','rail','iww'} or metric not in {'tonnes','tkm'} or direction not in {'all','outbound','inbound','binnen'}:
+def forecast_ranking(con,dataset,*,modes=None,metric='tonnes',direction='all',measure='absolute',top=5,descending=True):
+    # Direkte historische Prüfaufrufe bleiben bei Schiene; der Chat setzt seinen
+    # fachlichen Standard für uneingeschränkte Fragen ausdrücklich auf alle drei Modi.
+    modes = ['rail'] if modes is None else modes
+    if (not isinstance(modes,list) or not modes or len(modes)>3 or len(set(modes))!=len(modes)
+            or any(mode not in {'road','rail','iww'} for mode in modes)
+            or metric not in {'tonnes','tkm'} or direction not in {'all','outbound','inbound','binnen'}):
         raise ValueError('Ungültige Prognoseauswahl')
-    data = rows(con.execute('''SELECT id,name,base,target FROM read_parquet(?)
-        WHERE mode=? AND metric=? AND direction=?''',[str(Path(dataset)/'forecast.parquet'),mode,metric,direction]))
-    return {**context(dataset,'forecast_ranking',mode=mode,metric=metric,direction=direction,measure=measure,top=top),
+    selected_count=len(modes)
+    data = rows(con.execute('''SELECT id,any_value(name) AS name,
+        CASE WHEN count(*)=? AND count(base)=? THEN sum(base) END AS base,
+        CASE WHEN count(*)=? AND count(target)=? THEN sum(target) END AS target
+        FROM read_parquet(?) WHERE mode IN (SELECT unnest(?)) AND metric=? AND direction=?
+        GROUP BY id''',[selected_count,selected_count,selected_count,selected_count,
+            str(Path(dataset)/'forecast.parquet'),modes,metric,direction]))
+    labels={'road':'Straße','rail':'Schiene','iww':'Binnenschiff'}
+    selection_label=('alle drei Landverkehrsträger' if set(modes)=={'road','rail','iww'} else
+        ' und '.join(labels[mode] for mode in modes))
+    return {**context(dataset,'forecast_ranking',modes=modes,metric=metric,direction=direction,measure=measure,top=top),
             **change_ranking(data,comparable=True,measure=measure,top=top,descending=descending),
             'descending':descending,
             'population_count':len(data),'comparability':'VP2019_BASE_to_2040_P1_only',
-            'counting':'all enthält Binnenverkehr einmal; Versand/Empfang ohne Binnenverkehr',
+            'modes':modes,'mode_selection_label':selection_label,
+            'counting':'Ausgewählte Verkehrsträger werden je Region vollständig addiert; all enthält Binnenverkehr je Verkehrsträger einmal, Versand/Empfang ohne Binnenverkehr.',
             'unit':'t' if metric=='tonnes' else 'tkm','note':'Modellvergleich 2019/2040, keine Ist-Zeitreihe oder zusätzliche Szenariorechnung.'}
 
 

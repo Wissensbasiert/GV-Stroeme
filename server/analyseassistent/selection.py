@@ -234,7 +234,7 @@ def resolve(name, arguments, state, datasets, explicit=None):
     if name == 'goods_history': defaults['modes'] = ['road','rail','iww']
     if name == 'partner_ranking': defaults.update(direction='all', external=True, top=5)
     if name == 'compare_regions': defaults.update(direction='all')
-    if name == 'forecast_ranking': defaults.update(direction='all',measure='absolute',descending=True,top=5)
+    if name == 'forecast_ranking': defaults.update(modes=['road','rail','iww'],direction='all',measure='absolute',descending=True,top=5)
     if name == 'transport_history': defaults.update(modes=['road','rail','iww'],direction='all',partner_scope='all')
     for key, value in defaults.items():
         if key in props and key not in args: args[key] = copy.deepcopy(value)
@@ -242,8 +242,12 @@ def resolve(name, arguments, state, datasets, explicit=None):
         notes.append('Rangliste: '+{'all':'Versand und Empfang gemeinsam','outbound':'Versand','inbound':'Empfang'}[args['direction']]
                      +'; Top '+str(args['top'])+(' andere Regionen (ohne Binnenverkehr).' if args['external'] else ' einschließlich Binnenverkehr.'))
     if name == 'forecast_ranking':
+        labels={'road':'Straße','rail':'Schiene','iww':'Binnenschiff'}
+        mode_note=('alle drei Landverkehrsträger zusammen' if set(args['modes'])=={'road','rail','iww'} else
+                   ' und '.join(labels[mode] for mode in args['modes']))
         notes.append('Prognoserangliste nach '+('absoluter Mengenänderung' if args['measure']=='absolute' else 'prozentualer Änderung')
-                     +', '+('absteigend' if args['descending'] else 'aufsteigend')+'; '+{'all':'beide Richtungen','outbound':'Versand','inbound':'Empfang'}[args['direction']]+'.')
+                     +', '+('absteigend' if args['descending'] else 'aufsteigend')+'; '+mode_note+'; '
+                     +{'all':'beide Richtungen','outbound':'Versand','inbound':'Empfang'}[args['direction']]+'.')
     if kind == 'since_available':
         start = dialogue['time'].get('start_year')
         if start is None or not {'start','end'} <= props.keys() or dialogue['time']['count'] != 0:

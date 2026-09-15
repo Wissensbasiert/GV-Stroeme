@@ -279,7 +279,7 @@ try:
             gap_text = ' '.join(present(gap_result, datasets)['paragraphs'])
             assert '2025' in gap_text and '2024' in gap_text and 'keine Relationsdaten' in gap_text
         report['relation_year_notice_verified'] = True
-        rank_parameters=dict(mode='rail',metric='tonnes',direction='all',measure='absolute',top=5,descending=True)
+        rank_parameters=dict(modes=['rail'],metric='tonnes',direction='all',measure='absolute',top=5,descending=True)
         ranking=make_result('forecast_ranking',rank_parameters,datasets.query('forecast_ranking',rank_parameters),datasets,'0.7.0')
         assert 'Hamburg' in present(ranking,datasets)['paragraphs'][0]
         assert 'absoluter Mengenänderung' in present(ranking,datasets)['paragraphs'][0]

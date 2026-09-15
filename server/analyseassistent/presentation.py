@@ -398,6 +398,10 @@ def present(result,datasets):
             designation=('NST-20 Abteilung ' if p['classification']=='NST20' else 'C7 Gruppe ')+p['group']
             answer['paragraphs']=[designation+': '+text for text in answer['paragraphs']]
         answer['notes'].extend(n for n in result.get('notices',[]) if not n.startswith('Datenstand:'))
+    if function=='forecast_ranking':
+        selected_modes=('alle drei Landverkehrsträger zusammen' if set(p['modes'])=={'road','rail','iww'} else
+                        ' und '.join(MODES[mode] for mode in p['modes']))
+        answer['notes'].append('Die Rangliste bezieht sich auf '+selected_modes+'. Die ausgewählten Verkehrsträger werden je Region vor der Rangbildung addiert.')
     if function in {'forecast_relation','forecast_regions','forecast_comparison','forecast_ranking'} or p.get('include_forecast'):
         answer['notes'].append('Die Prognose vergleicht das Basisszenario 2019 mit dem Szenario für 2040. Das sind Modellannahmen, keine beobachtete Entwicklung und keine sichere Vorhersage. Beobachtete Werte bleiben davon getrennt.')
     if function=='goods_structure' and len(p['directions'])==1:

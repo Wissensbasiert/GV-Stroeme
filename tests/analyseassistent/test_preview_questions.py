@@ -22,7 +22,7 @@ EXAMPLES = [
      'transport_history', {'region': 'DEE03', 'start': 2016, 'end': 2025, 'modes': ['rail'],
                            'metric': 'tonnes', 'direction': 'all', 'partner_scope': 'all'}),
     ('Wo wächst das Schienengüteraufkommen laut Prognose von 2019 bis 2040 am stärksten?',
-     'forecast_ranking', {'mode': 'rail', 'metric': 'tonnes', 'direction': 'all',
+     'forecast_ranking', {'modes': ['rail'], 'metric': 'tonnes', 'direction': 'all',
                           'measure': 'absolute', 'top': 10, 'descending': True}),
 ]
 

@@ -273,7 +273,9 @@ def analytical_statements(function,parameters,rows,datasets):
             leaders=[r for r in changes if r['rank']==leading]
             basis='absoluter Mengenänderung' if parameters['measure']=='absolute' else 'prozentualer Änderung'
             order='absteigend' if parameters['descending'] else 'aufsteigend'
-            add('Szenario 2019–2040, nach '+basis+' '+order+' geordnet: Rang '+str(leading)+' belegt '
+            selected_modes=('alle drei Landverkehrsträger zusammen' if set(parameters['modes'])=={'road','rail','iww'} else
+                ' und '.join(MODE_LABELS[mode] for mode in parameters['modes']))
+            add('Szenario 2019–2040, '+selected_modes+', nach '+basis+' '+order+' geordnet: Rang '+str(leading)+' belegt '
                 +'; '.join(r['label'].rsplit(' / ',1)[0]+' mit '+compact_value(r['value'],r['unit']) for r in leaders)
                 +'. Das ist eine Prognoseänderung, keine beobachtete Entwicklung.',*leaders)
     if function=='forecast_comparison':
@@ -496,10 +498,13 @@ def make_result(function, parameters, raw, datasets, rules_version):
         for row in raw.get('rows', []):
             label = row.get('name') or datasets.names.get(row['id'], [row['id']])[0]
             if function == 'forecast_ranking':
-                add(label + ' / 2019_BASE', row['base'],rank=row['rank'],region=row['id'])
-                add(label + ' / 2040_P1', row['target'],rank=row['rank'],region=row['id'])
-                add(label + ' / Absolute Änderung', row['absolute_change'],rank=row['rank'],region=row['id'])
+                metadata={'rank':row['rank'],'region':row['id'],'modes':raw['modes'],
+                          'aggregate_role':'modal_total' if len(raw['modes'])>1 else 'single_mode'}
+                add(label + ' / 2019_BASE', row['base'],**metadata)
+                add(label + ' / 2040_P1', row['target'],**metadata)
+                add(label + ' / Absolute Änderung', row['absolute_change'],**metadata)
                 add(label + ' / Relative Änderung', row['relative_change_pct'],row_unit='%',rank=row['rank'],region=row['id'],
+                    modes=raw['modes'],aggregate_role=metadata['aggregate_role'],
                     denominator=row['base'],denominator_scope='VP-Basisfall 2019_BASE derselben Auswahl',
                     formula='(VP2040_P1 - VP2019_BASE) / VP2019_BASE * 100')
             else:
@@ -511,6 +516,7 @@ def make_result(function, parameters, raw, datasets, rules_version):
                 add(label + ' / Anteil', row.get('share_pct'), row_unit='%',
                     denominator=raw.get('denominator'), denominator_scope=raw.get('denominator_scope'), **metadata)
         if function=='forecast_ranking':
+            notices.append('Verkehrsträger der Rangliste: '+raw['mode_selection_label']+'.')
             notices.append('Ranking über '+str(raw['population_count'])+' passende Gebiete vor Top-Begrenzung; Ranggleichstände erhalten.')
     # Explicit result bounds, never quietly truncate an analysis.
     if len(rows) > 600:
