@@ -1,5 +1,7 @@
 # Diagrammkopfzeilen, regionale KV-Struktur und Ladeanzeige
 
+**Bereitstellung vom 15.09.2026:** Der hier beschriebene und zunächst nur lokal geprüfte Stand ist vollständig im Testrelease `portal-test-20260915-gueterstroeme-total01` enthalten. Ausgangspunkt war der zwischenzeitlich aktive Release `mdc-license01`; unbeteiligte Portaldateien blieben unverändert. Manifest und Abschlussprüfung sind im [Prüfbericht zum Analyseassistenten 0.8.0](ANALYSEASSISTENT_GESAMTRANKING_UND_LADEANZEIGE_20260915.md) dokumentiert. Produktion unverändert.
+
 ## Stand und Umfang
 
 Lokal umgesetzt und geprüft am 15.09.2026. Noch keine Bereitstellung im Test- oder Produktivportal. Anlass sind die acht Browserkommentare vom 15.09.2026.

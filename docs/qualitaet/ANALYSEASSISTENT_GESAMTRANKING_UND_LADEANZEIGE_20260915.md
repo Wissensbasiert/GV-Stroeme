@@ -4,7 +4,7 @@ Stand: 15.09.2026
 
 Regelpaket: 0.8.0
 
-Status: lokal umgesetzt; Abschlussprüfung und Testportalbereitstellung laufen
+Status: im Testportal bereitgestellt und abschließend geprüft
 
 ## Anlass und Befund
 
@@ -44,4 +44,18 @@ Die Werte vergleichen ausschließlich die Modellstände `2019_BASE` und `2040_P1
 - Dashboard-Zugriffsbestand nach dem gemeinsamen Ausgangscommit neu aufgebaut: `f57cb170ea43c579e6b6`; 291.300 Zellen geprüft, keine unbekannten Hauptfelder.
 - Keine externen Modellaufrufe und keine Kontingentbuchung. Die Prüfung bewertet Datenfunktion, Auswahlregeln, Antwortbelege und Oberfläche deterministisch.
 
-Die vollständige Laufzeit-, Frontend-, Release-, Linux- und Browserprüfung sowie der endgültige Testportalstand werden nach Abschluss hier ergänzt. Das Produktionsportal bleibt unverändert.
+## Abschlussprüfung und Bereitstellung
+
+- 221/221 lokale Laufzeittests bestanden; keine Fehler, keine externen Modellaufrufe.
+- Frontend-Build, JavaScript-/JSON-Syntax, UTF-8-Inhalte, Änderungsprüfung, 896 Auslieferungsdateien sowie Lade-, Fehler-, Zeitbegrenzungs- und Abbruchfälle bestanden.
+- Die synthetische Chrome-Prüfung am vollständigen Release bestätigt genau einen Ladekreis und `aria-busy` während der gehaltenen Anfrage, die vorhandenen Fortschritts-/Antwortzustände sowie das vollständige Entfernen des Ladekreises nach dem Ergebnis. Zwölf Oberflächen- und Dialogprüfungen bestanden; keine Portalbuchung.
+- GitHub `main`: Implementierung `5ef96df`, aufbauend auf dem zuvor abgeglichenen Commit `e41ff90`.
+- Aktiver Testrelease: `portal-test-20260915-gueterstroeme-total01`, aus dem zuvor aktiven und bytegenau rekonstruierten `portal-test-20260915-mdc-license01` erstellt. 1.732 unveränderte Dateien wurden serverseitig unabhängig kopiert; 52 geänderte Nutzdateien plus Manifest wurden übertragen. Alle 1.784 Dateien mit insgesamt 888.940.241 Bytes bestanden den Abgleich. Manifest: `3b66223972ae62e8ff7652aa298a0dce9dc0cb187bc5db45a7066c6cf6ed220e`.
+- Die Linux-Nachprüfung bestätigt die private Laufzeit, Prognose-/Güter-/Knoten-/Gesamtsummenregressionen, 291.300 Dashboard-Zellen und eine lesende Datenbanktransaktion. Datenkennung: `24a4c8cee90c6f866fdba5a7`. API, Datenbank und monatliche KitaNavigator-Aufgabe 30833 sind bereit; temporäre Prüfmittel wurden entfernt.
+- Eine abschließende Inventur bestätigt `total01` als aktiven Testrelease, unveränderte Produktion und einen gesunden Portalzustand.
+
+Ein echter Modelllauf wurde bewusst nicht ausgeführt, weil hierfür kein gesonderter Kosten-/Datenauftrag vorlag. Die Korrektur ist durch Daten-, Auswahl-, Ergebnis-, Linux- und Browserprüfungen abgedeckt; beliebige freie Modellformulierungen sind damit nicht vollständig garantiert.
+
+Auf dem Testserver sind neben dem aktiven Release derzeit fünf ältere Releases vorhanden. Ein geprüfter, nicht ausgeführter Aufbewahrungsplan würde `mdc-license01` und `loading01` als zwei Rückfallstände behalten und `air01`, `nodes02` sowie `scope01` entfernen. Eine Löschung war nicht Teil dieses Auftrags und wurde daher nicht ausgeführt.
+
+Das Produktionsportal blieb unverändert.

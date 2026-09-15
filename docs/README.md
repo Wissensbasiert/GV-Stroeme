@@ -1,8 +1,8 @@
 # Dokumentationsübersicht
 
-**Lokal, 15.09.2026 – Analyseassistent 0.8.0:** Prognoseranglisten bilden den ausdrücklich oder standardmäßig gewünschten Gesamtzuwachs aus Straße, Schiene und Binnenschiff je Region; bei echter Unklarheit erfolgt eine Rückfrage. Ein dezenter Ladekreis ergänzt den unveränderten Livestream. Bereitstellung im Testportal folgt nach Abschlussprüfung. [Prüfbericht](qualitaet/ANALYSEASSISTENT_GESAMTRANKING_UND_LADEANZEIGE_20260915.md).
+**Testportal, 15.09.2026 – Analyseassistent 0.8.0 (`total01`):** Prognoseranglisten bilden den ausdrücklich oder standardmäßig gewünschten Gesamtzuwachs aus Straße, Schiene und Binnenschiff je Region; bei echter Unklarheit erfolgt eine Rückfrage. Ein dezenter Ladekreis ergänzt den unveränderten Livestream. 221 lokale Laufzeittests und die vollständige Release-/Linux-/Browserprüfung ohne externen Modellaufruf bestanden. [Prüfbericht](qualitaet/ANALYSEASSISTENT_GESAMTRANKING_UND_LADEANZEIGE_20260915.md).
 
-**Lokal, 15.09.2026:** Diagrammkopfzeilen, regionale KV-Struktur und verzögerte Ladeanzeige geprüft; noch keine Portalbereitstellung. [Prüfbericht](qualitaet/DIAGRAMMKONTEXT_UND_KV_20260915.md).
+**Testportal, 15.09.2026:** Diagrammkopfzeilen, regionale KV-Struktur und verzögerte Ladeanzeige sind im gemeinsamen Release `total01` bereitgestellt. [Prüfbericht](qualitaet/DIAGRAMMKONTEXT_UND_KV_20260915.md).
 
 **Testportal, 14.09.2026 – `loading01`:** Relationsanfragen für 2025 nennen den verfügbaren Jahrgang 2024; Flughafenhinweise aktualisiert und Ladeanzeige ohne Layoutverschiebung über der Karte. 218 lokale Tests, vollständige Linux-Prüfung und Browserstichprobe bestanden. [Bereitstellung und Nachweis](qualitaet/LADEANZEIGE_UND_RELATIONSJAHRE_20260914.md). Nachfolgend frühere Prüfstände.
 
