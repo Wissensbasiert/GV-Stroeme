@@ -133,7 +133,7 @@ class Service:
             payload['suggested_function']=route_hint(question,self.datasets.names)
             if payload['suggested_function']:
                 payload['availability']['selection'] = catalog(self.datasets, payload['suggested_function'], confirmed)['selection']
-            payload['allowed_defaults']={'metric':'tonnes','group':'ALL','nst':None,'top':10,
+            payload['allowed_defaults']={'metric':'tonnes','group':'ALL','classification':'C7','top':10,
                 'direction':'Bei von A nach B: Versand von A nach B; bei regionalem Profil ohne Richtung: beide Richtungen.',
                 'year':'Ein genanntes Jahr übernehmen. Bei aktuellstem Jahr prüft der Server den neuesten verfügbaren Jahrgang. Bei Mehrjahreswunsch keinen Einzeljahrgang verlangen.',
                 'history':'Die Frage enthält gegebenenfalls die letzten Nutzereingaben einschließlich Ergänzungen. Keine erneute Nachfrage nach bereits genannten Angaben.'}

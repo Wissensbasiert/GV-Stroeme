@@ -38,6 +38,21 @@ def enforce_forecast_ranking_scope(name, args, dialogue, question):
     return args
 
 
+def enforce_rail_goods_classification(name, args, question):
+    """Bind explicit NST wording to the named 20-division view; C7 stays the default."""
+    if name not in {'rail_goods','rail_goods_history'}:
+        return args
+    if re.search(r'\bNST(?:[- ]?20)?\b|\b20\s+(?:NST[- ]?)?(?:Gruppen|Abteilungen)\b', question, re.I):
+        args['classification'] = 'NST20'
+        if args.get('group') not in {'ALL', *[f'{number:02}' for number in range(1,21)]}:
+            args['group'] = 'ALL'
+    elif re.search(r'\bC7(?:[- ]?(?:Güter)?gruppen?)?\b',question,re.I):
+        args['classification'] = 'C7'
+        if args.get('group') not in {'ALL', *'1234567'}:
+            args['group'] = 'ALL'
+    return args
+
+
 def numbers(text):
     text = text.replace('−', '-')
     return {round(float(m.group().replace('.', '').replace(',', '.')), 6) for m in NUMBER.finditer(text)}
@@ -426,6 +441,7 @@ def analyze_chat(service, question, confirmed=None, *, function=None, history=No
         new_topic = isinstance(args.get('_dialogue'), dict) and args['_dialogue'].get('context') == 'new'
         name, args, dialogue, notes = resolve(name, args, state, service.datasets, explicit=confirmed)
         args = enforce_forecast_ranking_scope(name, args, dialogue, question)
+        args = enforce_rail_goods_classification(name, args, question)
         time_intent = copy.deepcopy(dialogue['time'])
         selected, selected_function = args, name
         audit['conversation_transition'] = dialogue['context']

@@ -226,7 +226,7 @@
       "year": 2024,
       "direction": "outbound",
       "group": "ALL",
-      "nst": null,
+      "classification": "C7",
       "metric": "tonnes"
     },
     "structured_function": "rail_goods",
@@ -259,7 +259,8 @@
         2024
       ],
       "direction": "outbound",
-      "metric": "tonnes"
+      "metric": "tonnes",
+      "classification": "C7"
     },
     "structured_function": "rail_goods_history",
     "preparation_status": "ready",
@@ -592,7 +593,7 @@
       "year": 2024,
       "direction": "outbound",
       "group": "ALL",
-      "nst": null,
+      "classification": "C7",
       "metric": "tonnes"
     },
     "structured_function": "rail_goods",

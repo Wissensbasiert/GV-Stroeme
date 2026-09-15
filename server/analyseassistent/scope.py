@@ -9,12 +9,11 @@ def explain_scope(con,dataset,*,topic,regional_scope=None):
     if topic=='classification':
         texts=[{'label':'C'+group,'text':'C'+group+': '+label,'group':group}
                for group,label in sorted(classification['groups'].items())]
-        for code in ['031','14']:
-            division=code[:2]
-            group=classification['divisions'][division]['group_7_id']
-            texts.append({'label':'NST '+code,'text':'NST '+code+' gehört zu C'+group+'.','nst':code,'group':group})
-        group=classification['vp_to_group']['140']
-        texts.append({'label':'VP 140','text':'VP 140 gehört zu C'+group+'.','vp':'140','group':group})
+        for division,item in sorted(classification['divisions'].items()):
+            group=item['group_7_id']
+            texts.append({'label':'NST-Abteilung '+division,
+                          'text':'NST-Abteilung '+division+': '+item['name']+'; zugeordnet zu C'+group+'.',
+                          'division':division,'group':group})
     elif topic=='road_goods_depth':
         texts=[{'label':'Regionale Güterstruktur','text':'Für die Kreise liegen Angaben zu sieben Güterhauptgruppen vor. Eine feinere Aufteilung auf 20 Güterabteilungen lässt sich daraus nicht ableiten.'},
                {'label':'Zusätzliche Straßendaten','text':'Die zusätzliche KBA-Statistik VD3c unterscheidet 20 Güterabteilungen für deutsche Güterkraftfahrzeuge auf einer anderen regionalen Ebene. Diese Angaben lassen sich nicht als Aufteilung einzelner Kreisprofile oder Straßenverbindungen verwenden.'}]

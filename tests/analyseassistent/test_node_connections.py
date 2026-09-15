@@ -9,7 +9,7 @@ from server.analyseassistent.datasets import Datasets
 from server.analyseassistent.selection import resolve, SelectionError
 from server.analyseassistent.results import make_result
 from server.analyseassistent.presentation import present
-from server.analyseassistent.chat import packet, check_prose, enforce_forecast_ranking_scope
+from server.analyseassistent.chat import packet, check_prose, enforce_forecast_ranking_scope, enforce_rail_goods_classification
 from server.analyseassistent.availability import catalog
 from server.analyseassistent.contracts import FUNCTIONS
 from server.analyseassistent.dialogue import available_years
@@ -167,6 +167,14 @@ class NodeConnections(unittest.TestCase):
         with self.assertRaisesRegex(SelectionError,'Gesamtzuwachs'):
             enforce_forecast_ranking_scope('forecast_ranking',{'modes':['road']},intent(),
                 'Welche Region gewinnt absolut gesehen am meisten an Güterverkehr bis 2040 zu?')
+
+    def test_native_rail_goods_guard_prefers_c7_and_switches_only_to_named_nst20(self):
+        self.assertEqual(enforce_rail_goods_classification(
+            'rail_goods_history',{'classification':'NST20','group':'14'},'Bitte die C7-Gütergruppen zeigen.'),
+            {'classification':'C7','group':'ALL'})
+        self.assertEqual(enforce_rail_goods_classification(
+            'rail_goods_history',{'classification':'C7','group':'7'},'Bitte nach NST-Gütergruppen aufschlüsseln.'),
+            {'classification':'NST20','group':'ALL'})
 
     def test_air_rankings_preserve_legacy_values(self):
         p=dict(kind='air',node='EDDP',year=2024,metric='tonnes',direction='outbound',international=True,top=100)

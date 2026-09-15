@@ -28,7 +28,8 @@ def missing_alternatives(result, datasets, deadline):
             raw = datasets.query(fn, parameters, timeout_seconds=until-time.monotonic())
         except (ValueError, KeyError, OSError, duckdb.Error):
             continue
-        record.update(status=raw['status'], available=(raw.get('value') is not None if fn == 'relation' else any(r.get('value') is not None for r in raw.get('observations' if fn=='relation_overview' else 'details', []))))
+        rows_key='observations' if fn=='relation_overview' else 'grouped_details'
+        record.update(status=raw['status'], available=(raw.get('value') is not None if fn == 'relation' else any(r.get('value') is not None for r in raw.get(rows_key, []))))
     return {'data_snapshot_id': datasets.snapshot_id, 'checks': checks}
 
 
@@ -41,7 +42,7 @@ def related_data(result, datasets, *, deadline=None):
     common = {'year': p['year'], 'metric': 'tonnes'}
     requests = [
         ('rail', 'rail_goods', {**common, 'region': p['origin'], 'partner': p['destination'],
-                              'direction': 'outbound', 'group': 'ALL', 'nst': None}),
+                              'direction': 'outbound', 'group': 'ALL', 'classification': 'C7'}),
         ('iww', 'relation', {**common, 'origin': p['origin'], 'destination': p['destination'],
                             'mode': 'iww', 'group': 'ALL'}),
         ('origin_goods', 'goods_structure', {**common, 'region': p['origin'], 'mode': 'road',
@@ -62,12 +63,15 @@ def related_data(result, datasets, *, deadline=None):
             # A failed optional check is neither evidence of absence nor an
             # error in the already verified primary answer.
             continue
-        record.update(status=raw.get('status', 'unknown'), evidence=raw)
         if key == 'rail':
-            record['available'] = any(row.get('value') is not None for row in raw.get('details', []))
+            public_raw={name:value for name,value in raw.items() if name!='details'}
+            record.update(status=raw.get('status', 'unknown'), evidence=public_raw)
+            record['available'] = any(row.get('value') is not None for row in raw.get('grouped_details', []))
         elif key == 'iww':
+            record.update(status=raw.get('status', 'unknown'), evidence=raw)
             record['available'] = raw.get('value') is not None
         else:
+            record.update(status=raw.get('status', 'unknown'), evidence=raw)
             record['available'] = any(row.get('group') and row.get('value') is not None
                                       and row.get('unit') != '%' for row in raw.get('observations', []))
     return evidence

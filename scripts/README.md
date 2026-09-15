@@ -1,5 +1,9 @@
 # Skriptübersicht
 
+## Analyseassistent 0.8.1 vom 15.09.2026
+
+Die öffentliche Schienen-Güterauswertung aggregiert interne Feinpositionen in `server/analyseassistent/relations.py` auf benannte C7- oder NST-20-Gruppen. `tests/analyseassistent/test_runtime.py` reproduziert den Dialog Berlin–Hamburg 2021–2025, prüft die Randjahresübernahme und verhindert dreistellige NST-Ausgaben. Die B03-Datenlogik und der geprüfte Datenbestand bleiben unverändert. [Prüfbericht](../docs/qualitaet/ANALYSEASSISTENT_SCHIENENGÜTERGRUPPEN_20260915.md).
+
 ## Analyseassistent 0.8.0 vom 15.09.2026
 
 `analysis/b0406.py` summiert für Prognoseranglisten die ausdrücklich ausgewählten Verkehrsträger je Region vor der Rangbildung. Nach Änderungen an dieser Logik sind B04–B06, Assistenten-Unterstützungsbestand und Dashboard-Zugriffsbestand in dieser Reihenfolge neu aufzubauen und vollständig zu prüfen. Die Chat-Browserprüfung kontrolliert zusätzlich den Ladekreis während der gesamten laufenden Anfrage. [Prüfbericht](../docs/qualitaet/ANALYSEASSISTENT_GESAMTRANKING_UND_LADEANZEIGE_20260915.md).

@@ -142,8 +142,10 @@ def defaults_for(function,question,datasets,parameters):
         if city_defaults:
             quoted=' und '.join('„'+place+'“' for place in city_defaults)
             notes.append(quoted+' wird als kreisfreie Stadt verstanden.' if len(city_defaults)==1 else quoted+' werden als kreisfreie Städte verstanden.')
-    choices={'metric':'tonnes','group':'ALL','nst':None,'top':10,'include_forecast':False,
-             'granularity':'NST20' if re.search(r'\bNST\s*20\b',question,re.I) else 'C7'}
+    nst_requested=bool(re.search(r'\bNST(?:[- ]?20)?\b|\b20\s+(?:NST[- ]?)?(?:Gruppen|Abteilungen)\b',question,re.I))
+    choices={'metric':'tonnes','group':'ALL','classification':'NST20' if nst_requested else 'C7',
+             'top':10,'include_forecast':False,
+             'granularity':'NST20' if nst_requested else 'C7'}
     mentioned_metrics=[m for m in ['tonnes','tkm','trips','load_units','teu','flights'] if question_supports(question,m,{})]
     if mentioned_metrics:
         choices['metric']=mentioned_metrics[0] if len(mentioned_metrics)==1 else None
@@ -153,7 +155,6 @@ def defaults_for(function,question,datasets,parameters):
     if 'directions' in props:
         choices['directions']=[d for d in ['outbound','inbound'] if question_supports(question,d,{})] or ['all']
     if re.search(r'\bC[1-7]\b',question,re.I): choices.pop('group',None)
-    if re.search(r'\bNST\s*\d',question,re.I):choices.pop('nst',None)
     if re.search(r'\btop\s+\d+\b',question,re.I):choices.pop('top',None)
     if re.search(r'\b(prognose|2040)\b',question,re.I):choices.pop('include_forecast',None)
     for key,value in choices.items():

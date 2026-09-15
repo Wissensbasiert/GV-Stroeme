@@ -183,7 +183,7 @@ class Datasets:
                     'forecast_regions': profiles.forecast_regions,
                     'relation': b01.query_relation, 'compare_regions': profiles.compare_regions,
                     'union': b0406.query_union, 'time_series': b02.query_series,
-                    'rail_goods': b03.query_rail, 'national': b0406.national,
+                    'rail_goods': relations.rail_goods, 'national': b0406.national,
                     'balance': b0406.direction_balance, 'forecast_ranking': b0406.forecast_ranking,
                     'node_partners': nodes.node_partners, 'node_statistics': nodes.node_statistics,
                     'road_details': b03.query_road}

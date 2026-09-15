@@ -50,17 +50,24 @@ def resume(question, state, datasets):
     requested_metrics=[m for m in ['tonnes','tkm'] if question_supports(text,m,{})]
     requested_modes=[m for m in ['road','rail','iww'] if question_supports(text,m,{})]
     goods=bool(re.search(r'\bgüter(?:art\w*|grupp\w*)\b',text,re.I))
+    goods_change=bool(re.search(r'\b(?:entwickel\w*|veränder\w*|verlor\w*|verlust\w*|gewinn\w*|zunahm\w*|abnahm\w*|anstieg\w*|rückgang\w*)\b',text,re.I))
+    classification='NST20' if re.search(r'\bNST(?:[- ]?20)?\b|\b20\s+(?:NST[- ]?)?(?:Gruppen|Abteilungen)\b',text,re.I) else 'C7'
     # A metric-only question without another place is itself a contextual
     # refinement, even if the user omits words such as "auch" or "dazu".
     refers_back=refers_back or bool((requested_metrics or goods) and not named)
     relation_functions={'relation','relation_matrix','relation_history','relation_overview','road_relation_goods_limit','rail_goods','rail_goods_history'}
     refinement=(refers_back and (requested_metrics or requested_modes or goods or same_route or YEAR.search(text))
         and (not named or named<={route_origin,route_destination}) and (not pairs or same_route)
-        and not re.search(r'\b(?:national\w*|luftfracht|prognose|kosten|emission\w*|NST|C[1-7])\b',text,re.I))
+        and not re.search(r'\b(?:national\w*|luftfracht|prognose|kosten|emission\w*)\b',text,re.I))
     if refinement and (requested_metrics or requested_modes or goods or same_route) and function in relation_functions and route_origin and route_destination:
         modes=old.get('modes') or ([old['mode']] if old.get('mode') else ['rail'] if function.startswith('rail_goods') else ['road'] if function=='road_relation_goods_limit' else ['road','rail','iww'])
         metrics=old.get('metrics') or [old.get('metric','tonnes')]
         metrics=list(dict.fromkeys([*metrics,*requested_metrics])) if re.search(r'\b(?:auch|zusätzlich)\b',text,re.I) else requested_metrics or metrics
+        comparison_years=old.get('years') or ([old['start'],old['end']] if old.get('start') is not None and old.get('end') is not None else None)
+        if goods and goods_change and modes==['rail'] and comparison_years:
+            parameters={'region':route_origin,'partner':route_destination,'years':comparison_years,
+                        'direction':'outbound','metric':metrics[0],'classification':classification}
+            return state['effective_question']+'\n'+text,parameters,'rail_goods_history','refinement'
         parameters={'origin':route_origin,'destination':route_destination,'modes':requested_modes or modes,'metrics':metrics,
             'include_goods':old.get('include_goods',function in {'rail_goods','rail_goods_history','road_relation_goods_limit'}) or goods}
         if old.get('year'):parameters['year']=old['year']

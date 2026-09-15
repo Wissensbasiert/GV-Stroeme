@@ -6,6 +6,39 @@ from scripts.analysis.b0406 import rank, rows
 from scripts.analysis.b03 import query_rail
 
 
+def _aggregate_rail_details(dataset, details, classification='C7', group='ALL'):
+    registry=json.loads((Path(dataset)/'classification.json').read_text(encoding='utf-8'))
+    if classification=='C7':
+        catalogue=registry['groups']; key=lambda row:row['group_7_id']
+    elif classification=='NST20':
+        catalogue={code:item['name'] for code,item in registry['divisions'].items()}; key=lambda row:row['nst_raw'][:2]
+    else:
+        raise ValueError('Gliederung muss C7 oder NST20 sein')
+    if group!='ALL' and group not in catalogue:
+        raise ValueError('Gütergruppe passt nicht zur gewählten Gliederung')
+    result=[]
+    for code in (catalogue if group=='ALL' else [group]):
+        selected=[row for row in details if key(row)==code]
+        missing=sum(row.get('missing_count') or 0 for row in selected)
+        restricted=sum(row.get('restricted_count') or 0 for row in selected)
+        values=[row['value'] for row in selected]
+        result.append({'group':code,'group_name':catalogue[code],'classification':classification,
+                       'value':sum(values) if selected and all(value is not None for value in values) else None,
+                       'source_status':'missing_row' if not selected else 'partial' if missing else 'available',
+                       'missing_count':missing,'restricted_count':restricted})
+    return result
+
+
+def rail_goods(con,dataset,*,year,region,direction,partner,classification,group,metric):
+    """Public rail-goods view: named C7 or NST-20 groups, never raw three-digit codes."""
+    raw=query_rail(con,dataset,year=year,region=region,direction=direction,partner=partner,
+                   group=group if classification=='C7' else 'ALL',nst=None,metric=metric)
+    raw['classification']=classification
+    raw['group']=group
+    raw['grouped_details']=_aggregate_rail_details(dataset,raw['details'],classification,group)
+    return raw
+
+
 def relation_matrix(con, dataset, *, origin, destination, year, metric):
     observations=[]
     for mode in ['road','rail','iww']:
@@ -90,20 +123,37 @@ def road_relation_goods_limit(con,dataset,*,origin,destination,year,metric):
             'note':raw['note']+' Die Güterstruktur dieser Straßenrelation ist nicht verfügbar. Weder C1–C7 noch NST-20 aus regionalen Randsummen auf die OD übertragen.'}
 
 
-def rail_goods_history(con,dataset,*,region,partner,years,direction,metric):
+def rail_goods_history(con,dataset,*,region,partner,years,direction,metric,classification):
     observations=[]
     for year in years:
-        raw=query_rail(con,dataset,region=region,partner=partner,year=year,direction=direction,metric=metric,group='ALL',nst=None)
-        for row in raw['details']:
-            observations.append({'label':str(year)+' / NST '+row['nst_raw'],'value':row['value'],'year':year,
-                                 'nst_raw':row['nst_raw'],'group':row['group_7_id'],'missing_count':row['missing_count'],
+        raw=rail_goods(con,dataset,region=region,partner=partner,year=year,direction=direction,
+                       metric=metric,classification=classification,group='ALL')
+        for row in raw['grouped_details']:
+            observations.append({'label':str(year)+' / '+row['group_name'],'value':row['value'],'year':year,
+                                 'classification':classification,'group':row['group'],'group_name':row['group_name'],
+                                 'source_status':row['source_status'],'missing_count':row['missing_count'],
                                  'restricted_count':row['restricted_count']})
-        observations.append({'label':str(year)+' / Summe bekannter veröffentlichter Feinpositionen',
+        observations.append({'label':str(year)+' / Summe verfügbarer veröffentlichter Güterangaben',
                              'value':raw['published_sum'],'year':year,'sum_scope':'Nur bekannte veröffentlichte Zeilen'})
+    start,end=years
+    grouped={row['group']:row for row in observations if row.get('year')==start and row.get('group')}
+    for last in [row for row in observations if row.get('year')==end and row.get('group')]:
+        first=grouped[last['group']]
+        if first['value'] is None or last['value'] is None:
+            continue
+        absolute=last['value']-first['value']
+        metadata={'classification':classification,'group':last['group'],'group_name':last['group_name'],
+                  'start_year':start,'end_year':end,'start_value':first['value'],'end_value':last['value']}
+        observations.append({'label':last['group_name']+' / Absolute Änderung '+str(start)+'–'+str(end),
+                             'value':absolute,'change':'absolute',**metadata})
+        observations.append({'label':last['group_name']+' / Relative Änderung '+str(start)+'–'+str(end),
+                             'value':absolute/first['value']*100 if first['value'] else None,
+                             'unit':'%','change':'relative','denominator':first['value'],**metadata})
     return {'status':'available' if observations and all(r['value'] is not None for r in observations) else 'partial',
             'observations':observations,'unit':'t' if metric=='tonnes' else 'tkm',
-            'scope':'Schienen-Feinpositionen der identischen bestätigten Relation, Kennzahl und Richtung, je Quelljahr.',
-            'note':'Fehlende Feinpositionen sind kein Nullnachweis; kein Rückgang um −100 % aus einer fehlenden Zeile. Quellenjahre nicht harmonisiert, keine bestätigte Änderungsrate und keine Ursache. Zeilensummen sind keine Garantie vollständigen realen Verkehrs.'}
+            'classification':classification,
+            'scope':('Sieben C7-Gütergruppen' if classification=='C7' else '20 NST-2007-Abteilungen')+' der identischen bestätigten Schienenrelation, Kennzahl und Richtung, je Quelljahr.',
+            'note':'Dreistellige NST-Feinpositionen bleiben intern und werden nicht ausgegeben. Fehlende Gruppenwerte sind kein Nullnachweis und werden nicht als Rückgang um −100 % behandelt. Quellenjahre sind nicht harmonisiert; rechnerische Veränderungen belegen keine Ursache.'}
 
 
 def partner_ranking(con,dataset,*,region,year,mode,metric,direction,group,top,external,partner_scope='all'):

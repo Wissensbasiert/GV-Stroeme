@@ -77,7 +77,7 @@ try:
         class DialogueModel:
             def complete(self,*args,**kwargs):
                 return {'phase':'plan','function_id':'rail_goods','parameters':{'region':'DE300','partner':'DE600'},
-                    'parameter_origins':{'region':'question','partner':'question'},'unresolved_fields':['year','direction','metric','group','nst'],
+                    'parameter_origins':{'region':'question','partner':'question'},'unresolved_fields':['year','direction','metric','group','classification'],
                     'status':'needs_clarification'},{}
         dialogue_service=Service(datasets,model=DialogueModel())
         initial='Welche Güter gehen per Schiene von Berlin nach Hamburg?'

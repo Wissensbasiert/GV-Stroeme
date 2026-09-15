@@ -250,12 +250,27 @@ def analytical_statements(function,parameters,rows,datasets):
             else:
                 comparison=' Wegen des Ausgangswerts null wird keine prozentuale Veränderung berechnet.'
             add('Die veröffentlichten Jahreswerte reichen von '+compact_value(lowest['value'],lowest['unit'])+' ('+str(lowest['year'])+') bis '+compact_value(highest['value'],highest['unit'])+' ('+str(highest['year'])+'). Im ersten betrachteten Jahr '+str(first['year'])+' waren es '+compact_value(first['value'],first['unit'])+', im letzten Jahr '+str(last['year'])+' '+compact_value(last['value'],last['unit'])+'.'+comparison,lowest,highest,first,last)
+    if function=='rail_goods_history':
+        changes=[r for r in available if r.get('change')=='absolute']
+        declines=sorted([r for r in changes if r['value']<0],key=lambda row:row['value'])
+        if declines:
+            largest=declines[0]
+            first=next((r for r in rows if r.get('group')==largest.get('group') and r.get('year')==parameters['years'][0]),None)
+            last=next((r for r in rows if r.get('group')==largest.get('group') and r.get('year')==parameters['years'][1]),None)
+            relative=next((r for r in rows if r.get('group')==largest.get('group') and r.get('change')=='relative'),None)
+            text='Den größten bezifferbaren Mengenrückgang verzeichnet '+largest['group_name']+': '+compact_value(first['value'],first['unit'])+' ('+str(parameters['years'][0])+') → '+compact_value(last['value'],last['unit'])+' ('+str(parameters['years'][1])+'), also '+compact_value(abs(largest['value']),largest['unit'])+' weniger'
+            if relative and relative['value'] is not None:text+=' ('+compact_value(abs(relative['value']),'%')+')'
+            add(text+'.',first,last,largest,relative)
+        elif changes:
+            add('Unter den in beiden Randjahren bezifferbaren Gütergruppen ist kein Mengenrückgang ausgewiesen.',*changes)
+        return findings
     if function=='rail_goods':
-        groups=[r for r in available if r.get('group') and r.get('unit')!='%' and r['label'].startswith('C')]
-        total=next((r for r in available if 'Summe bekannter' in r['label']),None)
+        groups=[r for r in available if r.get('group') and r.get('unit')!='%']
+        total=next((r for r in available if r.get('sum_scope')),None)
         if groups:
             leader=max(groups,key=lambda r:r['value'])
-            text='Die größte verfügbare C1–C7-Gütergruppe ist '+leader['label'].split(' / ')[0]+' mit '+compact_value(leader['value'],leader['unit'])+'.'
+            level='C7-Gütergruppe' if parameters.get('classification')=='C7' else 'NST-2007-Abteilung'
+            text='Die größte verfügbare '+level+' ist '+leader['group_name']+' mit '+compact_value(leader['value'],leader['unit'])+'.'
             if total:text+=' Die Summe der verfügbaren veröffentlichten Feinpositionen beträgt '+compact_value(total['value'],total['unit'])+'.'
             add(text,leader,total)
     if function=='national':
@@ -481,15 +496,11 @@ def make_result(function, parameters, raw, datasets, rules_version):
                 denominator=year['annual_value'],peak_months=year['peak_months'],denominator_scope='Vollständige zwölf veröffentlichte Monate der Auswahl')
         notices.append('Änderungsraten bleiben ohne bestätigte Gebiets- und Revisionsvergleichbarkeit gesperrt.')
     elif function == 'rail_goods':
-        for group in '1234567':
-            selected=[r for r in raw.get('details',[]) if r['group_7_id']==group]
-            value=sum(r['value'] for r in selected) if selected and all(r['value'] is not None for r in selected) else None
-            add('C'+group+' / veröffentlichte Zeilensumme',value,group=group,
-                value_status='missing_row' if not selected else None)
-        for row in raw.get('details', []):
-            add('NST ' + row['nst_raw'], row['value'], 'partial' if row['missing_count'] else 'available',
-                group=row['group_7_id'],nst_raw=row['nst_raw'],missing_count=row['missing_count'],restricted_count=row['restricted_count'])
-        add('Summe bekannter veröffentlichter Feinpositionen',raw.get('published_sum'),sum_scope='Keine Nullauffüllung fehlender Güterpositionen')
+        for row in raw.get('grouped_details',[]):
+            add(row['group_name'],row['value'],row['source_status'],classification=row['classification'],
+                group=row['group'],group_name=row['group_name'],missing_count=row['missing_count'],
+                restricted_count=row['restricted_count'],value_status='missing_row' if row['source_status']=='missing_row' else None)
+        add('Summe verfügbarer veröffentlichter Güterangaben',raw.get('published_sum'),sum_scope='Keine Nullauffüllung fehlender Güterpositionen')
     elif function == 'road_details':
         for row in raw['rows']:
             add(row['label'], row['value'], row['value_status'], quality=row['quality_status'],

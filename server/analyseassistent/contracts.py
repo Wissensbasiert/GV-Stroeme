@@ -48,9 +48,9 @@ FUNCTIONS = {
         include_goods={'type':'boolean'})),
     'road_relation_goods_limit': ('F07', 'Verfügbare Straßen-OD-Gesamtmenge mit ausdrücklicher Grenze fehlender Güterstruktur', 'b01', fields(
         origin=CODE,destination=CODE,year=YEAR,metric=enum('tonnes','tkm'))),
-    'rail_goods_history': ('F07', 'Schienen-Feinpositionen derselben Relation in zwei bestätigten Jahren, keine ungeprüften Raten', 'b03', fields(
+    'rail_goods_history': ('F07', 'Vergleich derselben Schienenrelation in zwei bestätigten Jahren; bevorzugt sieben C7-Gruppen, auf ausdrücklichen Wunsch 20 benannte NST-2007-Abteilungen; keine dreistelligen Feinpositionen', 'b03', fields(
         region=CODE,partner=CODE,years={'type':'array','items':YEAR,'minItems':2,'maxItems':2,'uniqueItems':True},
-        direction=enum('outbound','inbound'),metric=enum('tonnes','tkm'))),
+        direction=enum('outbound','inbound'),metric=enum('tonnes','tkm'),classification=enum('C7','NST20'))),
     'explain_scope': ('F15', 'Quellen-, Klassifikations- und Machbarkeitsgrenzen als belegte Hinweise', 'b03', fields(
         topic=enum('classification','source_flags','regional_vs_national','outside_scope','road_goods_depth'))),
     'goods_structure': ('F06', 'Regionale C1–C7-Güterstruktur je Verkehrsträger; keine künstliche NST-20-Aufteilung', 'assistant_support', fields(
@@ -111,10 +111,10 @@ FUNCTIONS = {
     'time_series': ('F04', 'Veröffentlichte Monatsreihen, keine ungeprüfte harmonisierte Änderungsrate', 'b02', fields(
         region=CODE, mode=MODE, direction=enum('outbound', 'inbound', 'total'), start=YEAR, end=YEAR,
         group=GROUP, metric=METRIC, partner={'anyOf': [CODE, {'type': 'null'}]})),
-    'rail_goods': ('F07', 'Veröffentlichte Schienen-Feinpositionen', 'b03', fields(
+    'rail_goods': ('F07', 'Veröffentlichte Gütergruppen einer Schienenrelation; bevorzugt C7, auf Wunsch 20 benannte NST-2007-Abteilungen; keine dreistelligen Feinpositionen', 'b03', fields(
         year=YEAR, region=CODE, direction=enum('outbound', 'inbound', 'total'),
-        partner={'anyOf': [CODE, {'type': 'null'}]}, nst={'anyOf': [{'type': 'string', 'pattern': '^[0-9]{2}[0-9A-Z]$'}, {'type': 'null'}]},
-        group=GROUP, metric=enum('tonnes', 'tkm', 'load_units'))),
+        partner={'anyOf': [CODE, {'type': 'null'}]}, classification=enum('C7','NST20'),
+        group={'type':'string','pattern':'^(ALL|[1-7]|0[1-9]|1[0-9]|20)$'}, metric=enum('tonnes', 'tkm', 'load_units'))),
     'national': ('F08', 'Nationale Verkehrsbeziehungen und nur bei vollständigem Nenner Anteile', 'b0406', fields(
         year=YEAR, metric=enum('tonnes', 'tkm'), mode={'anyOf': [MODE, {'type': 'null'}]})),
     'balance': ('F09', 'Versand, Empfang und Saldo eines Kreises', 'b0406', fields(

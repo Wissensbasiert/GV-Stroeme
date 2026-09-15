@@ -92,7 +92,7 @@ class Contracts(unittest.TestCase):
         datasets=MagicMock(snapshot_id='synthetic',paths={},names={})
         result={'function_id':'road_relation_goods_limit','data_snapshot_id':'synthetic',
                 'status':'partial','parameters':{'origin':'A','destination':'B','year':2024,'metric':'tonnes'}}
-        datasets.query.side_effect=[{'status':'available','details':[{'value':0}]},
+        datasets.query.side_effect=[{'status':'available','grouped_details':[{'value':0}]},
             {'status':'missing_row','value':None}, OSError('private failure'),
             {'status':'partial','observations':[{'group':'1','value':None},{'value':100}]}]
         result['related_data']=related_data(result,datasets)
@@ -207,7 +207,7 @@ class Contracts(unittest.TestCase):
                 validate(FUNCTIONS['forecast_comparison'][3],{'region':'DEA12','metric':'tonnes','direction':'all','observed_years':years})
 
     def test_relation_partner_is_not_conflicting_region(self):
-        parameters={'region':'DEA23','partner':'DE600','year':2024,'direction':'outbound','nst':None,'group':'ALL','metric':'tonnes'}
+        parameters={'region':'DEA23','partner':'DE600','year':2024,'direction':'outbound','classification':'C7','group':'ALL','metric':'tonnes'}
         record=plan(function_id='rail_goods',parameters=parameters,parameter_origins={k:'context' for k in parameters})
         self.assertTrue(verify_plan(record,'Welche Güter werden von Köln nach Hamburg versandt?',parameters,{'DEA23':['Köln'],'DE600':['Hamburg']}))
     def test_explicit_conflicting_year(self):
@@ -422,7 +422,7 @@ class RealData(unittest.TestCase):
             result=MagicMock()
             result.complete.return_value=(plan(function_id='rail_goods',parameters={'region':'DE300','partner':'DE600'},
                 parameter_origins={'region':'question','partner':'question'},
-                unresolved_fields=['year','direction','group','metric','nst'],status='needs_clarification'),{})
+                unresolved_fields=['year','direction','group','metric','classification'],status='needs_clarification'),{})
             return result
         initial='Welche Güter gehen per Schiene von Berlin nach Hamburg?'
         service=Service(self.datasets,model=model())
@@ -434,7 +434,7 @@ class RealData(unittest.TestCase):
         for reply,year in [('Das aktuellste Jahr',2025),('2024',2024)]:
             result,audit=service.analyze(reply,history=[initial],select_answer=False)
             self.assertIn(result['status'],['ok','partial'])
-            self.assertEqual(result['parameters'],{'region':'DE300','partner':'DE600','year':year,'direction':'outbound','group':'ALL','nst':None,'metric':'tonnes'})
+            self.assertEqual(result['parameters'],{'region':'DE300','partner':'DE600','year':year,'direction':'outbound','group':'ALL','classification':'C7','metric':'tonnes'})
             direct,_=self.service.analyze(f'Berlin nach Hamburg {year}',result['parameters'],function='rail_goods')
             self.assertEqual(result['facts'],direct['facts'])
         complete,_=service.analyze(initial+' Das Jahr 2024',select_answer=False)
@@ -569,12 +569,39 @@ class RealData(unittest.TestCase):
         self.assertTrue(any('Güterstruktur dieser Straßenrelation ist nicht verfügbar' in n for n in result['notices']))
 
     def test_rail_goods_two_years_preserve_published_sums(self):
-        params={'region':'DEA23','partner':'DE600','years':[2023,2024],'direction':'outbound','metric':'tonnes'}
+        params={'region':'DEA23','partner':'DE600','years':[2023,2024],'direction':'outbound','metric':'tonnes','classification':'C7'}
         result,_=self.service.analyze('Köln → Hamburg',params,function='rail_goods_history')
-        totals=[f['value'] for f in result['facts'] if 'Summe bekannter' in f['label']]
+        totals=[f['value'] for f in result['facts'] if f.get('sum_scope')]
         self.assertEqual(totals,[227456,199851])
-        self.assertFalse(any(f['unit']=='%' for f in result['facts']))
-        self.assertTrue(any('Fehlende Feinpositionen' in n for n in result['notices']))
+        self.assertTrue(any(f['unit']=='%' for f in result['facts']))
+        self.assertTrue(any('Dreistellige NST-Feinpositionen bleiben intern' in n for n in result['notices']))
+
+    def test_rail_relation_goods_followup_compares_named_groups_and_never_exposes_triples(self):
+        initial,_=self.service.analyze(
+            'Wie entwickelte sich der Schienengüterverkehr von Berlin nach Hamburg von 2021 bis 2025?',
+            {'origin':'DE300','destination':'DE600','start':2021,'end':2025,
+             'modes':['rail'],'metric':'tonnes'},function='relation_history',select_answer=False)
+        self.assertEqual(initial['function_id'],'relation_history')
+        followup,audit=self.service.analyze(
+            'Gab es Gütergruppen, die auf dieser Verbindung besonders verloren?',
+            conversation=initial['conversation'],select_answer=False)
+        self.assertEqual(audit['attempted_model_calls'],0)
+        self.assertEqual(followup['function_id'],'rail_goods_history')
+        self.assertEqual(followup['parameters']['years'],[2021,2025])
+        self.assertEqual(followup['parameters']['classification'],'C7')
+        decline=next(f for f in followup['facts'] if f.get('change')=='absolute' and f.get('group')=='7')
+        self.assertEqual(decline['value'],-159621)
+        self.assertEqual(decline['group_name'],'Sonstige Produkte')
+        public=json.dumps({'result':followup,'answer':followup['answer']},ensure_ascii=False)
+        self.assertNotRegex(public,r'NST\s+[0-9]{3}')
+        self.assertFalse(any('nst_raw' in f for f in followup['facts']))
+
+        nst,_=self.service.analyze(
+            'Und wie haben sich die NST-Gütergruppen entwickelt?',
+            conversation=followup['conversation'],select_answer=False)
+        self.assertEqual(nst['parameters']['classification'],'NST20')
+        self.assertTrue(any(f.get('group_name') for f in nst['facts']))
+        self.assertNotRegex(json.dumps(nst,ensure_ascii=False),r'NST\s+[0-9]{3}')
 
     def test_model_clarification_uses_only_known_field_labels(self):
         class Missing:
@@ -637,9 +664,9 @@ class RealData(unittest.TestCase):
         result,_=self.service.analyze('Gütergruppen',{'topic':'classification'},function='explain_scope')
         self.assertEqual(result['status'],'ok')
         self.assertEqual(result['facts'],[])
-        self.assertEqual(next(f['group'] for f in result['text_facts'] if f.get('nst')=='031'),'1')
-        self.assertEqual(next(f['group'] for f in result['text_facts'] if f.get('nst')=='14'),'6')
-        self.assertEqual(next(f['group'] for f in result['text_facts'] if f.get('vp')=='140'),'6')
+        self.assertEqual(next(f['group'] for f in result['text_facts'] if f.get('division')=='03'),'1')
+        self.assertEqual(next(f['group'] for f in result['text_facts'] if f.get('division')=='14'),'6')
+        self.assertFalse(any(f.get('nst') for f in result['text_facts']))
         self.assertEqual(result['tables'][0]['kind'],'text')
 
     def test_outside_scope_has_no_invented_numbers(self):
@@ -695,36 +722,36 @@ class RealData(unittest.TestCase):
         self.assertLessEqual(len(result['summary']),3)
 
     def test_rail_goods_groups_total_and_missing_positions_survive(self):
-        params={'year':2024,'region':'DEA23','partner':'DE600','direction':'outbound','metric':'tonnes','group':'ALL','nst':None}
+        params={'year':2024,'region':'DEA23','partner':'DE600','direction':'outbound','metric':'tonnes','group':'ALL','classification':'C7'}
         result,_=self.service.analyze('Köln → Hamburg',params,function='rail_goods')
-        groups=[f for f in result['facts'] if 'veröffentlichte Zeilensumme' in f['label']]
+        groups=[f for f in result['facts'] if f.get('group')]
         self.assertEqual([f['value'] for f in groups],[231,None,None,None,None,None,199620])
         self.assertTrue(all(f['value_status']=='missing_row' for f in groups[1:6]))
         self.assertEqual(result['facts'][-1]['value'],199851)
 
-    def test_rail_goods_answer_separates_groups_from_fine_positions(self):
+    def test_rail_goods_answer_uses_named_public_classifications_only(self):
         from server.analyseassistent.presentation import present, number
         from server.analyseassistent.narrative import evidence
-        params={'year':2025,'region':'DE300','partner':'DE600','direction':'outbound','metric':'tonnes','group':'ALL','nst':None}
+        params={'year':2025,'region':'DE300','partner':'DE600','direction':'outbound','metric':'tonnes','group':'ALL','classification':'C7'}
         result,_=self.service.analyze('Berlin → Hamburg',params,function='rail_goods')
         answer=present(result,self.datasets)
         rows=answer['tables'][0]['rows']
         self.assertEqual(len(rows),8)
-        grouped=[f for f in result['facts'] if f.get('group') and not f.get('nst_raw')]
+        grouped=[f for f in result['facts'] if f.get('group')]
         self.assertEqual([r['value'] for r in rows[:7]],[number(f['value']) for f in grouped])
         self.assertEqual(rows[-1]['value'],'240.297')
-        self.assertTrue(any(f.get('nst_raw') for f in result['facts']))
-        self.assertNotIn('NST ',json.dumps({'rows':rows,'paragraphs':answer['paragraphs']},ensure_ascii=False))
-        self.assertNotIn('NST ',json.dumps(evidence(result,answer),ensure_ascii=False))
-        # An explicitly selected fine position keeps its own level and exact value.
-        params['nst']='121'
-        detail,_=self.service.analyze('NST 121',params,function='rail_goods')
+        serialized=json.dumps({'result':result,'answer':answer,'evidence':evidence(result,answer)},ensure_ascii=False)
+        self.assertNotRegex(serialized,r'NST\s+[0-9]{3}')
+        self.assertFalse(any('nst_raw' in f for f in result['facts']))
+        # An explicit NST request uses named two-digit divisions, never fine positions.
+        params['classification']='NST20'
+        detail,_=self.service.analyze('NST-Gruppen',params,function='rail_goods')
         detail_rows=present(detail,self.datasets)['tables'][0]['rows']
-        self.assertEqual(len(detail_rows),2)
-        self.assertEqual(detail_rows[0]['label'],'NST 121')
-        self.assertEqual(detail_rows[0]['value'],number(next(f['value'] for f in detail['facts'] if f.get('nst_raw')=='121')))
+        self.assertEqual(len(detail_rows),21)
+        self.assertTrue(any('Nahrungs- und Genussmittel' in r['label'] for r in detail_rows))
+        self.assertNotRegex(json.dumps(detail,ensure_ascii=False),r'NST\s+[0-9]{3}')
         # A selected aggregate must not imply six other groups have missing data.
-        params.update(nst=None,group='5')
+        params.update(classification='C7',group='5')
         filtered,_=self.service.analyze('Güterart 5',params,function='rail_goods')
         self.assertEqual(len(present(filtered,self.datasets)['tables'][0]['rows']),2)
 

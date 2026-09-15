@@ -115,21 +115,20 @@ def present(result,datasets):
         answer['title']='Das lässt sich mit diesen Daten nicht beantworten'
         answer['paragraphs']=['Die vorhandenen Verkehrsstatistiken enthalten keine Angaben zu Transportkosten, Umweltbilanzen oder zur Auslastung einzelner Terminals. Dafür sind zusätzliche Daten nötig; aus den Gütermengen allein lassen sich diese Fragen nicht beantworten.']
         return answer
-    groups={}
+    groups={}; divisions={}
     if 'b03' in datasets.paths:
-        groups=json.loads((datasets.paths['b03']/'classification.json').read_text(encoding='utf-8'))['groups']
+        classification=json.loads((datasets.paths['b03']/'classification.json').read_text(encoding='utf-8'))
+        groups=classification['groups']
+        divisions={code:item['name'] for code,item in classification['divisions'].items()}
     facts=result.get('facts',[])
     labels={f['fact_id']:friendly_label(f,datasets,groups) for f in facts}
     # The audit result retains every fact. Display only one classification level:
     # grouped goods by default, or fine positions when explicitly selected.
     display_facts=facts
     if function=='rail_goods':
-        display_facts=[f for f in facts if f.get('sum_scope') or (
-            bool(f.get('nst_raw')) if p.get('nst') else
-            not f.get('nst_raw') and (p.get('group','ALL')=='ALL' or f.get('group')==p['group']))]
+        display_facts=[f for f in facts if f.get('sum_scope') or p.get('group','ALL')=='ALL' or f.get('group')==p['group']]
         for f in display_facts:
-            if f.get('group') and not f.get('nst_raw'):
-                labels[f['fact_id']]=groups.get(f['group'],labels[f['fact_id']])
+            if f.get('group_name'): labels[f['fact_id']]=f['group_name']
     if display_facts:
         rows=[]
         for f in display_facts:
@@ -154,8 +153,8 @@ def present(result,datasets):
             answer['tables'][0].update(title='Jahreswerte im Detail',collapsed=len(rows)>2,
                                       columns=['Jahr · Verkehrsträger','Wert','Einheit','Einordnung'])
         if function=='rail_goods':
-            answer['tables'][0].update(title='Güterpositionen im Überblick' if p.get('nst') else 'Güterarten im Überblick',
-                                      columns=['Güterposition' if p.get('nst') else 'Güterart','Menge','Einheit','Hinweis'])
+            answer['tables'][0].update(title=('C7-Gütergruppen' if p.get('classification')=='C7' else 'NST-2007-Abteilungen')+' im Überblick',
+                                      columns=['Gütergruppe','Menge','Einheit','Hinweis'])
     selected={s['text']:s for s in result.get('statements',[])}
     by_id={f['fact_id']:f for f in display_facts}
     for text in result.get('summary',[]):
@@ -169,13 +168,37 @@ def present(result,datasets):
                 answer['paragraphs'].append('Für '+labels[ids[0]]+' weist die Statistik '+number(f['value'])+' '+UNITS.get(f.get('unit'),f.get('unit',''))+' aus.')
         else:
             answer['paragraphs'].append(text)
+    if function=='rail_goods_history':
+        start,end=p['years']
+        comparison_rows=[]
+        group_codes=list(groups) if p['classification']=='C7' else list(divisions)
+        for code in group_codes:
+            first=next((f for f in facts if f.get('group')==code and f.get('year')==start),None)
+            last=next((f for f in facts if f.get('group')==code and f.get('year')==end),None)
+            if not first or not last or (first['value'] is None and last['value'] is None): continue
+            absolute=next((f for f in facts if f.get('group')==code and f.get('change')=='absolute'),None)
+            relative=next((f for f in facts if f.get('group')==code and f.get('change')=='relative'),None)
+            values=number(first['value'])+' → '+number(last['value'])
+            if absolute:
+                sign='+' if absolute['value']>0 else '−' if absolute['value']<0 else '±'
+                change=sign+number(abs(absolute['value']))+' '+UNITS.get(absolute['unit'],absolute['unit'])
+                if relative and relative['value'] is not None:
+                    change+=' ('+('+' if relative['value']>0 else '−' if relative['value']<0 else '±')+number(abs(relative['value']))+' %)'
+            else: change='Nicht vergleichbar, weil mindestens ein Randjahreswert fehlt.'
+            comparison_rows.append({'label':first.get('group_name') or labels[first['fact_id']],
+                'value':values,'unit':UNITS.get(first['unit'],first['unit']),'note':change,
+                'fact_ids':[f['fact_id'] for f in [first,last,absolute,relative] if f]})
+        answer['tables']=[{'title':('C7-Gütergruppen' if p['classification']=='C7' else 'NST-2007-Abteilungen')+' im Vergleich',
+            'columns':['Gütergruppe',str(start)+' → '+str(end),'Einheit','Veränderung'],
+            'rows':comparison_rows,'collapsed':len(comparison_rows)>8,'row_count':len(comparison_rows)}]
     region=name(p.get('region'),datasets) if p.get('region') else None
     if region:
         answer['title']='Ihre Auswertung für '+region+(f" ({p['year']})" if p.get('year') else '')
-        if function=='rail_goods' and p.get('partner'):
+        if function in {'rail_goods','rail_goods_history'} and p.get('partner'):
             other=name(p['partner'],datasets)
             route=(other+' nach '+region) if p.get('direction')=='inbound' else (region+' nach '+other)
-            answer['title']=('Güterverkehr auf der Schiene zwischen '+region+' und '+other if p.get('direction')=='total' else 'Güterverkehr auf der Schiene von '+route)+f" ({p['year']})"
+            period=str(p['year']) if p.get('year') else str(p['years'][0])+'–'+str(p['years'][1])
+            answer['title']=('Güterverkehr auf der Schiene zwischen '+region+' und '+other if p.get('direction')=='total' else 'Güterverkehr auf der Schiene von '+route)+f" ({period})"
     elif p.get('node'):
         node_name = datasets.airport_names.get(p['node'],p['node']) if p.get('kind')=='air' else name(p['node'],datasets)
         answer['title']='Ihre Auswertung für '+node_name+(f" ({p['year']})" if p.get('year') else '')
@@ -313,6 +336,8 @@ def present(result,datasets):
         answer['notes'].append('Wo kein Wert vorliegt, ist in der zugrunde liegenden Statistik kein nutzbarer Verkehrswert erfasst beziehungsweise veröffentlicht. Das beweist nicht, dass tatsächlich kein Verkehr stattfand.')
         if function in {'relation_history','rail_goods_history','time_series'}:
             answer['notes'].append('Eine ausgewiesene Veränderungsrate wird transparent aus vorhandenen veröffentlichten Werten berechnet. Sie ist nicht methodisch bereinigt und belegt keine Ursache.')
+        if function=='rail_goods_history':
+            answer['notes'].append('Die Darstellung verwendet '+('die sieben C7-Gütergruppen.' if p['classification']=='C7' else 'die 20 benannten NST-2007-Abteilungen.')+' Dreistellige Feinpositionen werden nicht ausgegeben.')
     elif function=='node_partners':
         if p['kind']=='air':
             answer['notes'].append('Die Anteile beziehen sich auf alle veröffentlichten Partnerverbindungen der Auswahl, nicht auf das gesamte Luftfrachtaufkommen des Flughafens. Kleinere Verbindungen können wegen Veröffentlichungsschwellen fehlen.')

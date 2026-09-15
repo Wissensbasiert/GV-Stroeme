@@ -1,5 +1,7 @@
 # Güterverkehrsströme Deutschland
 
+**Lokal geprüft, 15.09.2026 – Analyseassistent 0.8.1:** Schienenrelationen zeigen standardmäßig die sieben benannten C7-Gütergruppen wie im Dashboard und auf ausdrücklichen Wunsch die 20 benannten NST-2007-Abteilungen. Dreistellige NST-Feinpositionen werden nicht ausgegeben. Anschlussfragen nach Entwicklung, Gewinnen oder Verlusten vergleichen die bestätigten Randjahre. [Prüfbericht](docs/qualitaet/ANALYSEASSISTENT_SCHIENENGÜTERGRUPPEN_20260915.md). Noch nicht im Testportal bereitgestellt.
+
 **Testportal, 15.09.2026 – Analyseassistent 0.8.0 (`total01`):** „Gesamtzuwachs“ wird in Prognoseranglisten über Straße, Schiene und Binnenschiff je Region gebildet; unsichere Einzelauslegungen führen zu einer Rückfrage. Der KI-Chat zeigt während der laufenden Anfrage zusätzlich zum Livestream einen dezenten Ladekreis. 221 lokale Laufzeittests, vollständige Release-/Linux-Prüfung und synthetische Browserprüfung bestanden; keine externen Modellaufrufe. [Prüfbericht](docs/qualitaet/ANALYSEASSISTENT_GESAMTRANKING_UND_LADEANZEIGE_20260915.md).
 
 **Testportal, 15.09.2026:** Diagrammspezifische Kopfzeilen, regionale KV-Strukturdiagramme, kompakte See-/Luft-KPI und Ladeanzeige ab 1,5 Sekunden sind gemeinsam mit `total01` bereitgestellt. [Prüfbericht](docs/qualitaet/DIAGRAMMKONTEXT_UND_KV_20260915.md).

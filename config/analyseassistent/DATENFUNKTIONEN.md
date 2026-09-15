@@ -1,5 +1,11 @@
 # Fachlicher Vertrag der Datenfunktionen
 
+## Ergänzung 0.8.1: benannte Gütergruppen auf Schienenrelationen
+
+`rail_goods` und `rail_goods_history` geben keine dreistelligen NST-Feinpositionen mehr aus. Standard ist die im Dashboard verwendete Aggregation auf sieben benannte C7-Gütergruppen. Verlangt die Frage ausdrücklich eine NST-Gliederung, wird stattdessen auf die 20 benannten zweistelligen NST-2007-Abteilungen aggregiert. Die Rohcodes bleiben ausschließlich Bestandteil der internen Quellenverarbeitung.
+
+Fragen nach Entwicklung, Zunahme, Abnahme, Gewinn oder Verlust auf einer zuvor betrachteten Schienenverbindung verwenden die bestätigten Randjahre und vergleichen nur Gruppen, für die in beiden Randjahren ein veröffentlichter Wert vorliegt. Eine nur in einem Jahr veröffentlichte Gruppe wird als nicht vergleichbar gekennzeichnet und nicht als Null oder Rückgang um 100 Prozent behandelt.
+
 ## Ergänzung 0.8.0: Gesamtzuwachs in Prognoseranglisten
 
 `forecast_ranking(modes,metric,direction,top_n)` erhält eine ausdrückliche Liste von einem bis drei Verkehrsträgern. Bei mehreren Verkehrsträgern werden die vollständigen Werte für Straße, Schiene und/oder Binnenschiff zuerst je Region summiert; erst danach werden absolute und relative Änderung berechnet und die Regionen nach der ungerundeten absoluten Änderung sortiert. Fehlt für eine Region eine benötigte Basis- oder Prognosekomponente, darf für diese Region kein vollständiger Gesamtwert behauptet werden.

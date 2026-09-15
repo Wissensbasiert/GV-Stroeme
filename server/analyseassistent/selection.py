@@ -46,6 +46,10 @@ def validate_selection(name, args, datasets):
         validate({**FUNCTIONS[name][3], 'required': []}, args)
     except ValueError:
         raise SelectionError('invalid_parameters', 'Die Auswahl passt noch nicht zur möglichen Auswertung. Bitte präzisieren Sie Raum, Zeitraum oder Kennzahl.') from None
+    if name in {'rail_goods','rail_goods_history'} and args.get('classification') and args.get('group','ALL') != 'ALL':
+        valid = set('1234567') if args['classification']=='C7' else {f'{number:02}' for number in range(1,21)}
+        if args['group'] not in valid:
+            raise SelectionError('goods_group_mismatch', 'Die gewählte Gütergruppe passt nicht zur Gliederung. Möchten Sie C7 oder die 20 NST-Abteilungen betrachten?', ['classification','group'])
     if name in NODE_FUNCTIONS and args.get('kind'):
         kind = args['kind']
         registry = datasets.node_registry[kind]
@@ -224,7 +228,7 @@ def resolve(name, arguments, state, datasets, explicit=None):
             raise SelectionError('explicit_filter_conflict', 'Die verstandene Auswahl widerspricht Ihrer ausdrücklich gewählten Einstellung. Bitte bestätigen Sie die gewünschte Auswahl.')
         args[key] = value
     # Data defaults have no dependency on wording; no implicit year or place.
-    defaults = {'metric': 'tonnes', 'metrics': ['tonnes'], 'group': 'ALL', 'nst': None,
+    defaults = {'metric': 'tonnes', 'metrics': ['tonnes'], 'group': 'ALL', 'classification':'C7',
                 'top': 10, 'include_forecast': False, 'include_goods': True, 'granularity': 'C7'}
     if name == 'forecast_relation': defaults.update(goods=['ALL'], modes=['road','rail','iww'])
     if name == 'dashboard_detail': defaults.update(direction='all',classification='NST20' if args.get('product')=='regional_goods' else 'C7',partner=None)
