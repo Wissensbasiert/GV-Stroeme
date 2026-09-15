@@ -42,7 +42,7 @@
       element.setAttribute('role', 'tooltip');
       document.body.appendChild(element);
     }
-    if (!tooltip || tooltip.opacity === 0) {
+    if (!tooltip || tooltip.opacity === 0 || canvas._wbpAxisHover) {
       element.classList.remove('is-visible');
       return;
     }
@@ -148,7 +148,7 @@
 
     const tooltipId = `chart-axis-label-tooltip-${canvas.id}`;
     const chartTooltipId = `chart-hover-tooltip-${canvas.id}`;
-    const hide = () => document.getElementById(tooltipId)?.classList.remove('is-visible');
+    const hide = () => { canvas._wbpAxisHover = false; document.getElementById(tooltipId)?.classList.remove('is-visible'); };
     canvas.addEventListener('mouseleave', hide);
     canvas.addEventListener('mousemove', event => {
       const currentChart = typeof Chart !== 'undefined' && Chart.getChart ? Chart.getChart(canvas) : null;
@@ -163,7 +163,7 @@
       let nearestIndex = -1;
       let nearestDistance = Number.POSITIVE_INFINITY;
       currentLabels.forEach((_label, index) => {
-        const distance = Math.abs(scale.getPixelForTick(index) - mouseY);
+        const distance = Math.abs(scale.getPixelForValue(index) - mouseY);
         if (distance < nearestDistance) {
           nearestDistance = distance;
           nearestIndex = index;
@@ -171,6 +171,7 @@
       });
       const rowTolerance = Math.max(10, (scale.bottom - scale.top) / Math.max(1, currentLabels.length) / 2);
       if (nearestIndex < 0 || nearestDistance > rowTolerance) return hide();
+      canvas._wbpAxisHover = true;
 
       // Chart.js does not always issue a new data-tooltip update after the
       // pointer has crossed into its own Y-axis area. Remove the stale panel.
@@ -190,7 +191,7 @@
       const elementRect = element.getBoundingClientRect();
       const viewportGap = 12;
       const anchorX = rect.left + scale.right + 10;
-      const anchorY = rect.top + scale.getPixelForTick(nearestIndex);
+      const anchorY = rect.top + scale.getPixelForValue(nearestIndex);
       const left = Math.min(window.innerWidth - elementRect.width - viewportGap, Math.max(viewportGap, anchorX));
       const top = Math.min(window.innerHeight - elementRect.height - viewportGap, Math.max(viewportGap, anchorY - elementRect.height / 2));
       element.style.left = `${left}px`;
@@ -3375,7 +3376,7 @@
     const roadUnavailable = state.year === '2025';
     const nationalGroupWithoutTransit = !state.region && state.selectedGroup && state.selectedGroup !== 'ALL';
     const directionSuffix = dir === 'balance' ? ' (Saldo)' : dir === 'outbound' ? ' (Versand)' : dir === 'inbound' ? ' (Empfang)' : '';
-    const formatKpiValue = value => `${dir === 'balance' && value > 0 ? '+' : ''}${formatTrafficValue(value / divisor, metricLabel, 2)} ${metricLabel}`;
+    const formatKpiValue = value => `${dir === 'balance' && value > 0 ? '+' : ''}${formatKpiNumber(value / divisor)} ${metricLabel}`;
     const scopeSuffix = nationalGroupWithoutTransit ? ' ohne Transit' : '';
     setTxt('kpiTotalTitle', `${roadUnavailable ? 'Aufkommen ohne Straße' : 'Gesamtaufkommen'}${scopeSuffix}${directionSuffix}`);
     setTxt('kpiRoadTitle', `${roadUnavailable ? 'Straße (LKW) · NV' : 'Straße (LKW)'}${scopeSuffix}${directionSuffix}`);
@@ -3901,7 +3902,6 @@
 
     bodyEl.innerHTML = `
       <article class="steckbrief-report">
-        <div class="steckbrief-context">Alle Güterarten · Versand und Empfang · Beförderungsmenge · einschließlich Binnenverkehr</div>
 
         <section class="steckbrief-summary">
           <div class="steckbrief-summary-label">Kurzfazit</div>
@@ -5004,6 +5004,28 @@
     if (element) element.textContent = value;
   }
 
+  // KPI precision follows the displayed unit, not the unscaled source value.
+  function formatKpiNumber(value) {
+    if (value === null || value === undefined || !Number.isFinite(Number(value))) return '--';
+    const number = Number(value), absolute = Math.abs(number);
+    if (absolute === 0) return '0';
+    const decimals = absolute >= 100 ? 0 : absolute >= 1 ? 1 : Math.max(1, 1 - Math.floor(Math.log10(absolute)));
+    if (decimals > 10) return number.toLocaleString('de-DE', { notation: 'scientific', maximumFractionDigits: 1 });
+    return formatDeNum(number, decimals);
+  }
+
+  // Keep adjacent axis ticks distinguishable, including sub-unit and signed scales.
+  function formatChartAxisTick(value, index, ticks) {
+    const values = (ticks || []).map(tick => Number(tick.value)).filter(Number.isFinite).sort((a, b) => a - b);
+    const gaps = values.slice(1).map((v, i) => v - values[i]).filter(gap => gap > 0);
+    const step = gaps.length ? Math.min(...gaps) : Math.abs(Number(value));
+    if (!step || Math.abs(Number(value)) < step * 1e-8) return '0';
+    let decimals = Math.max(0, Math.ceil(-Math.log10(step)));
+    while (decimals < 10 && Math.abs(step * 10 ** decimals - Math.round(step * 10 ** decimals)) > 1e-7) decimals++;
+    if (decimals > 10) return Number(value).toLocaleString('de-DE', { notation: 'scientific', maximumFractionDigits: 2 });
+    return formatDeNum(value, decimals);
+  }
+
   // Quantities use one decimal place by default. Very small non-zero values
   // retain further precision so an existing relation never appears as zero.
   function formatQuantity(val, standardDecimals = 1) {
@@ -5058,7 +5080,6 @@
     const number = Number(value) / divisor;
     return `${signed && number > 0 ? '+' : ''}${formatDeNum(number, decimals)}`;
   }
-
   // Precompute National Aggregates from summaryData & benchmarkData
   function computeNationalSummaries(summaryData, benchmarkData) {
     const national = {};
@@ -5209,6 +5230,7 @@
     notice.hidden = false;
   }
 
+  const moduleLoadingTimers = new Map();
   function setModuleLoadingState(tabId, isLoading) {
     const pane = document.getElementById(tabId);
     if (!pane) return;
@@ -5226,7 +5248,13 @@
     }
     notice.setAttribute('role', 'status');
     notice.textContent = 'Bitte einen Augenblick Geduld, Daten werden geladen …';
-    notice.hidden = !isLoading;
+    clearTimeout(moduleLoadingTimers.get(tabId));
+    moduleLoadingTimers.delete(tabId);
+    notice.hidden = true;
+    if (isLoading) moduleLoadingTimers.set(tabId, setTimeout(() => {
+      moduleLoadingTimers.delete(tabId);
+      if (pane.getAttribute('aria-busy') === 'true' && pane.dataset.loadError !== 'true' && notice.isConnected) notice.hidden = false;
+    }, 1500));
   }
 
   // Keep local rebuilds fresh; bound stalled requests without bypassing TLS/CORS.
@@ -6141,8 +6169,8 @@
     
     // KPI 1: Seegüterumschlag (Gesamt)
     const directionSuffix = dirFilter === 'balance' ? ' · Saldo' : dirFilter === 'inbound' ? ' · Empfang' : dirFilter === 'outbound' ? ' · Versand' : '';
-    const formatSaldo = (value, unit) => `${dirFilter === 'balance' && value > 0 ? '+' : ''}${formatSmartMioTonnes(value, unit)}`;
-    setTxt('kpiMrtmTotalTitle', isSpecific ? `Seegüterumschlag (${portName}${directionSuffix})` : `Seegüterumschlag (Gesamt${directionSuffix})`);
+    const formatSaldo = (value, unit) => `${dirFilter === 'balance' && value > 0 ? '+' : ''}${formatKpiNumber(value / 1e6)} ${unit}`;
+    setTxt('kpiMrtmTotalTitle', `Seegüterumschlag${directionSuffix}`);
     setTxt('kpiMrtmTotalVal', formatSaldo(totVal, 'Mio. t'));
     setHtml('kpiMrtmTotalSub', formatYoYBadge(totVal, prevTot));
 
@@ -6158,18 +6186,18 @@
       }
     }
     const teuDirectionLabel = { inbound: 'Empfang', outbound: 'Versand', balance: 'Saldo' }[dirFilter] || 'Gesamt';
-    setTxt('kpiMrtmTeuTitle', isSpecific ? `Containerumschlag (${portName} · ${teuDirectionLabel})` : `Containerumschlag (${teuDirectionLabel})`);
+    setTxt('kpiMrtmTeuTitle', state.direction === 'all' ? 'Containerumschlag' : `Containerumschlag (${teuDirectionLabel})`);
     setTxt('kpiMrtmTeuVal', formattedTeu);
     setHtml('kpiMrtmTeuSub', formatYoYBadge(teuVal, prevTeu));
 
     // KPI 3: Seeseitiger Empfang
-    setTxt('kpiMrtmInTitle', isSpecific ? `Seeseitiger Empfang (${portName})` : 'Seeseitiger Empfang');
-    setTxt('kpiMrtmInVal', formatSmartMioTonnes(inVal, 'Mio. t'));
+    setTxt('kpiMrtmInTitle', 'Seeseitiger Empfang');
+    setTxt('kpiMrtmInVal', `${formatKpiNumber(inVal / 1e6)} Mio. t`);
     setHtml('kpiMrtmInSub', formatYoYBadge(inVal, prevIn));
 
     // KPI 4: Seeseitiger Versand
-    setTxt('kpiMrtmOutTitle', isSpecific ? `Seeseitiger Versand (${portName})` : 'Seeseitiger Versand');
-    setTxt('kpiMrtmOutVal', formatSmartMioTonnes(outVal, 'Mio. t'));
+    setTxt('kpiMrtmOutTitle', 'Seeseitiger Versand');
+    setTxt('kpiMrtmOutVal', `${formatKpiNumber(outVal / 1e6)} Mio. t`);
     setHtml('kpiMrtmOutSub', formatYoYBadge(outVal, prevOut));
 
     // 2. Map & Port Circle Markers (with Hover Tooltips and Detail Popups)
@@ -6837,13 +6865,19 @@
       ? (isAirfreightAirportMetricYearAvailable(year, metric) ? getAirfreightValue(airfreightData.airportValues?.[year]?.[code], metric, direction) : null)
       : getAirfreightValue(airfreightData.national?.[year], metric, direction);
     const current = read(state.year), previous = read(previousYear);
+    const kpiValue = amount => {
+      if (metric === 'flights' || amount == null) return formatAirfreightValue(amount, metric);
+      const divisor = Math.abs(amount) >= 1e6 ? 1e6 : Math.abs(amount) >= 1e3 ? 1e3 : 1;
+      const unit = divisor === 1e6 ? 'Mio. t' : divisor === 1e3 ? 'Tsd. t' : 't';
+      return `${isBalance && amount > 0 ? '+' : ''}${formatKpiNumber(amount / divisor)} ${unit}`;
+    };
     const metricLabel = metric === 'flights' ? 'Reine Fracht- und Postflüge' : 'Luftfracht- und Luftpostaufkommen';
-    setText('airfreightNationalTitle', `${metricLabel} ${code ? '· ' + name : 'in Deutschland'}`);
-    setText('airfreightNationalValue', formatAirfreightValue(current, metric));
+    setText('airfreightNationalTitle', metricLabel);
+    setText('airfreightNationalValue', kpiValue(current));
     setText('airfreightNationalSub', current === null ? (code && !airportMetricAvailable ? 'Flughafenwerte derzeit nicht belastbar' : 'Kein veröffentlichter Wert für diese Auswahl') : getAirfreightDirectionLabel(direction, true));
     setText('airfreightYoYTitle', isBalance ? `Saldo ${previousYear}` : 'Veränderung zum Vorjahr');
     if (isBalance) {
-      setText('airfreightYoYValue', formatAirfreightValue(previous, metric, true, 'balance'));
+      setText('airfreightYoYValue', kpiValue(previous));
       setText('airfreightYoYSub', previous === null ? `Kein Vergleichswert für ${previousYear}` : 'Historischer Saldo; keine Prozentveränderung');
     } else {
       const change = current !== null && previous > 0 ? ((current - previous) / previous) * 100 : null;
@@ -6861,9 +6895,10 @@
       setText('airfreightTop3Share', rank === null ? '--' : `${rank} von ${entries.length}`);
       setText('airfreightTop3Sub', !airportMetricAvailable ? 'Flughafenwerte derzeit nicht belastbar' : current === null ? 'Kein veröffentlichter Flughafenwert' : 'Gleiche Werte erhalten denselben Rang');
     } else {
-      setText('airfreightAirportCountTitle', metric === 'flights' ? 'Deutsche Flughäfen mit ausgewiesener Zahl reiner Fracht- und Postflüge' : 'Deutsche Flughäfen mit ausgewiesenem Frachtaufkommen');
-      setText('airfreightAirportCount', airportMetricAvailable ? String(entries.length) : '--');
-      setText('airfreightAirportCountSub', airportMetricAvailable ? 'Einschließlich veröffentlichter Nullwerte' : 'Flughafenwerte derzeit nicht belastbar');
+      const countEntries = isBalance ? getAirfreightAirportEntries(state.year, metric, 'all') : entries;
+      setText('airfreightAirportCountTitle', metric === 'flights' ? 'Deutsche Flughäfen mit reinen Fracht- und Postflügen' : 'Deutsche Flughäfen mit Fracht- und Postaufkommen');
+      setText('airfreightAirportCount', airportMetricAvailable ? String(countEntries.filter(record => record.value > 0).length) : '--');
+      setText('airfreightAirportCountSub', airportMetricAvailable ? (isBalance ? 'Flughäfen mit Verkehr insgesamt, unabhängig vom Saldo' : metric === 'flights' ? 'Ausgewiesene Anzahl > 0 Flüge' : 'Ausgewiesenes Aufkommen > 0 t') : 'Flughafenwerte derzeit nicht belastbar');
       const topThree = entries.slice(0, 3).reduce((sum, record) => sum + magnitude(record.value || 0), 0);
       setText('airfreightTop3Title', 'Konzentration auf die Top 3');
       setText('airfreightTop3Share', total > 0 ? `${formatDeNum(topThree / total * 100, 1)} %` : '--');
@@ -7155,10 +7190,14 @@
         indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        interaction: { mode: 'index', axis: 'y', intersect: false },
+        plugins: { legend: { display: false }, tooltip: { callbacks: {
+          title: items => labels[items[0]?.dataIndex] || '',
+          label: item => `${getAirfreightMetricLabel(metric)}: ${formatAirfreightValue(visible[item.dataIndex].value, metric, true, direction)}`
+        } } },
         scales: {
           x: { beginAtZero: !isBalance, title: { display: true, text: isBalance ? `Saldo (${unit})` : unit, font: { size: 11, weight: '600' } } },
-          y: { ticks: { callback: (_value, index) => abbreviateAxisLabel(labels[index], 22), font: { size: 11, weight: '600' } } }
+          y: { ticks: { callback: function(value) { return abbreviateAxisLabel(this.getLabelForValue(value), 22); }, font: { size: 11, weight: '600' } } }
         }
       }
     });
@@ -8807,8 +8846,8 @@
     setText('sgkvIwwTitle', `KV Binnenschiff${scopeSuffix}${directionSuffix}`);
     setText('sgkvRailShareTitle', `KV-Anteil Schiene${scopeSuffix}${directionSuffix}`);
     setText('sgkvIwwShareTitle', `KV-Anteil Binnenschiff${scopeSuffix}${directionSuffix}`);
-    setText('sgkvRailIntermodal', formatMetric(scopedRecord(railKv)));
-    setText('sgkvIwwContainer', formatMetric(scopedRecord(iwwKv)));
+    setText('sgkvRailIntermodal', `${isBalance && railKv > 0 ? '+' : ''}${formatKpiNumber(railKv / divisor)} ${unit}`);
+    setText('sgkvIwwContainer', `${isBalance && iwwKv > 0 ? '+' : ''}${formatKpiNumber(iwwKv / divisor)} ${unit}`);
     setText('sgkvRailShareKpi', railShare === null ? '—' : `${formatDeNum(railShare, 1)} %`);
     setText('sgkvIwwShareKpi', iwwShare === null ? '—' : `${formatDeNum(iwwShare, 1)} %`);
     const railYoY = document.getElementById('sgkvRailShare');
@@ -9150,6 +9189,20 @@
       }
     }
 
+    const structurePack = year => {
+      const record = (mode, category) => ({ [metric]: getScopedIntermodalMetric(year, mode, category, metric) });
+      return {
+        rail: {
+          intermodal_load_units: record('rail', 'intermodal_load_units'),
+          load_unit_structure: Object.fromEntries(['containers_and_swap_bodies', 'unaccompanied_semitrailers', 'accompanied_road_vehicles'].map(key => [key, record('rail', key)]))
+        },
+        iww: {
+          containerised_transport: record('iww', 'containerised_transport'),
+          container_size_structure: Object.fromEntries(['c20', 'c40', 'other_sizes'].map(key => [key, record('iww', key)]))
+        }
+      };
+    };
+    const structureCurrent = structurePack(activeYear);
     const renderStructure = (canvasId, labels, getters, colors, denominator, axis, structureView) => {
       const canvas = document.getElementById(canvasId);
       if (!canvas) return;
@@ -9163,7 +9216,7 @@
             labels: years,
             datasets: labels.map((label, index) => ({
               label,
-              data: years.map(year => value(getters[index](intermodalData.data_by_year?.[String(year)])) / divisor),
+              data: years.map(year => value(getters[index](structurePack(year))) / divisor),
               borderColor: colors[index], backgroundColor: colors[index], borderWidth: 2.25, pointRadius: 2.5, tension: 0.18
             }))
           },
@@ -9171,23 +9224,23 @@
             responsive: true, maintainAspectRatio: false, interaction: { mode: 'nearest', intersect: true },
             plugins: {
               legend: { position: 'bottom', align: 'start', labels: { boxWidth: 10, padding: 8, font: { size: 10, weight: '600' } } },
-              tooltip: { callbacks: { title: items => `Berichtsjahr ${items[0]?.label}`, label: item => formatDynamicChartShare(item, unit, canvasId === 'chartKvRailUnits' ? ' aller Ladeeinheiten' : ' aller Containergrößen') } }
+              tooltip: { callbacks: { title: items => `Berichtsjahr ${items[0]?.label}`, label: item => isBalance ? `${item.dataset.label}: ${formatTrafficValue(item.raw, unit, 2)} ${unit} (Saldo)` : formatDynamicChartShare(item, unit, canvasId === 'chartKvRailUnits' ? ' aller Ladeeinheiten' : ' aller Containergrößen') } }
             },
             scales: {
               x: { title: { display: true, text: 'Berichtsjahr', font: { weight: '600' } }, ticks: { font: { size: 10 } }, grid: { display: false } },
-              y: { beginAtZero: true, title: { display: true, text: unit, font: { weight: '600' } }, ticks: { callback: tick => formatDeNum(tick, 0) } }
+              y: { beginAtZero: true, title: { display: true, text: unit, font: { weight: '600' } }, ticks: { callback: formatChartAxisTick } }
             }
           }
         })
         : new Chart(canvas, {
           type: 'bar',
-          data: { labels, datasets: [{ data: getters.map(getter => share(value(getter(pack)), value(denominator(pack)))), backgroundColor: colors, borderRadius: 5, maxBarThickness: 26 }] },
+          data: { labels, datasets: [{ data: getters.map(getter => isBalance ? value(getter(structureCurrent)) / divisor : value(denominator(structureCurrent)) > 0 ? share(value(getter(structureCurrent)), value(denominator(structureCurrent))) : null), backgroundColor: colors, borderRadius: 5, maxBarThickness: 26 }] },
           options: {
             indexAxis: 'y', responsive: true, maintainAspectRatio: false,
             layout: { padding: { left: 8 } },
-            plugins: { legend: { display: false }, tooltip: { callbacks: { label: item => ` ${formatDeNum(item.raw, 1)} % (${formatMetric(getters[item.dataIndex](pack))})` } } },
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: item => isBalance ? `Saldo: ${formatMetric(getters[item.dataIndex](structureCurrent))}` : ` ${formatDeNum(item.raw, 1)} % (${formatMetric(getters[item.dataIndex](structureCurrent))})` } } },
             scales: {
-              x: { beginAtZero: true, max: 100, title: { display: true, text: axis, font: { weight: '600' } }, ticks: { callback: tick => `${tick} %` }, grid: { color: '#e2e8f0' } },
+              x: { beginAtZero: true, max: isBalance ? undefined : 100, title: { display: true, text: isBalance ? `Saldo (${unit})` : axis, font: { weight: '600' } }, ticks: { callback: (tick, index, ticks) => isBalance ? formatChartAxisTick(tick, index, ticks) : `${tick} %` }, grid: { color: '#e2e8f0' } },
               y: {
                 afterFit: scale => { scale.width = getYAxisLabelAreaWidth(scale.chart.width); },
                 ticks: {
@@ -9432,7 +9485,7 @@
     const kv = regInfo?.kv || {};
     let kvTonnes = null;
     let kvTeu = null;
-    if (!hasGroupFilter && !isTkm) {
+    if (!hasGroupFilter && regInfo?.kv) {
       if (direction === 'outbound') {
         kvTonnes = kv.outbound_tonnes ?? 0;
         kvTeu = kv.outbound_teu ?? 0;
@@ -9452,8 +9505,10 @@
       ?? groupValue('all')
       ?? (isTkm ? regInfo?.tkm?.total : regInfo?.tonnes?.total)
       ?? 0;
-    const kvShare = kvTonnes !== null && Math.abs(selectedDirectionTotal) > 0
-      ? Math.abs(kvTonnes) / Math.abs(selectedDirectionTotal) * 100
+    // KV is a tonnes/TEU supplement even when the map shows tonne-kilometres.
+    const kvDenominator = regInfo?.directions_tonnes?.[directionKey];
+    const kvShare = kvTonnes !== null && Math.abs(kvDenominator) > 0
+      ? Math.abs(kvTonnes) / Math.abs(kvDenominator) * 100
       : null;
 
     return {
@@ -9487,42 +9542,19 @@
     note.textContent = message;
   }
 
-  // Keep the rich regional hover card inside the visible Leaflet viewport.
-  // Leaflet's built-in "auto" direction only decides left versus right; it
-  // does not account for the height of this tooltip.  Test the rendered card
-  // against the map frame and flip it vertically only when it would be cut off.
-  function fitForecastRegionTooltip(map, layer) {
-    const tooltip = layer.getTooltip?.();
-    const tooltipEl = tooltip?.getElement?.();
-    const mapEl = map?.getContainer?.();
-    if (!tooltip || !tooltipEl || !mapEl) return;
-
-    const mapRect = mapEl.getBoundingClientRect();
-    const inset = 8;
-    const anchor = map.latLngToContainerPoint(tooltip.getLatLng());
-    const spaceAbove = anchor.y - inset;
-    const spaceBelow = mapRect.height - anchor.y - inset;
-    const preferredDirection = spaceAbove >= spaceBelow ? 'top' : 'bottom';
-
-    if (tooltip.options.direction !== preferredDirection) {
-      tooltip.options.direction = preferredDirection;
-      tooltip.options.offset = L.point(0, preferredDirection === 'top' ? -10 : 10);
-      tooltip.setLatLng(tooltip.getLatLng());
-    }
-
-    // Choosing north or south alone is insufficient when a long card is near
-    // an edge. Clamp Leaflet's positioned element into the actual map frame.
-    const tipRect = tooltipEl.getBoundingClientRect();
-    let shiftX = 0;
-    let shiftY = 0;
-    if (tipRect.left < mapRect.left + inset) shiftX = mapRect.left + inset - tipRect.left;
-    else if (tipRect.right > mapRect.right - inset) shiftX = mapRect.right - inset - tipRect.right;
-    if (tipRect.top < mapRect.top + inset) shiftY = mapRect.top + inset - tipRect.top;
-    else if (tipRect.bottom > mapRect.bottom - inset) shiftY = mapRect.bottom - inset - tipRect.bottom;
-    if (shiftX || shiftY) {
-      const position = L.DomUtil.getPosition(tooltipEl);
-      if (position) L.DomUtil.setPosition(tooltipEl, position.add(L.point(shiftX, shiftY)));
-    }
+  // Position both region and route cards after every Leaflet position update,
+  // including sticky movement on paths whose mouse events do not bubble.
+  function containForecastTooltip(map, layer) {
+    const tooltip = layer.getTooltip();
+    const updatePosition = tooltip._updatePosition;
+    tooltip._updatePosition = function () {
+      if (!this._map || !this._latlng) return;
+      const point = map.latLngToContainerPoint(this._latlng);
+      this.options.direction = point.x < map.getSize().x / 2 ? 'right' : 'left';
+      this.options.offset = L.point(0, 0);
+      updatePosition.call(this);
+      fitLeafletTooltipToMap(map, this);
+    };
   }
 
   // Master Forecast Tab Renderer
@@ -9607,7 +9639,7 @@
     // Further filter settings are intentionally kept out of the KPI titles.
     const scopeSuffix = nationalFilteredScope ? ' ohne Transit' : '';
     setTxt('kpiForecastTotalTitle', `Gesamtaufkommen${scopeSuffix}${directionSuffix}`);
-    const formatKpiValue = value => `${dir === 'balance' && value > 0 ? '+' : ''}${formatTrafficValue(value / divisor, unitLabel, 2)} ${unitLabel}`;
+    const formatKpiValue = value => `${dir === 'balance' && value > 0 ? '+' : ''}${formatKpiNumber(value / divisor)} ${unitLabel}`;
     setTxt('kpiForecastTotalTonnes', formatKpiValue(totVal));
     
     let totGrowthVal, roadGrowthVal, railGrowthVal, iwwGrowthVal;
@@ -9678,6 +9710,62 @@
   }
 
   // Update Forecast Leaflet Map with Linked Filters & Rich Interactive Tooltips
+  function getForecastHoverComparison(nutsId, isTkm) {
+    const direction = state.direction || 'all';
+    const group = state.selectedGroup && state.selectedGroup !== 'ALL' ? state.selectedGroup : null;
+    const read = scenarioId => {
+      const region = forecastData?.scenarios?.[scenarioId]?.regions?.[nutsId];
+      const values = region?.[`${group ? 'groups_7' : 'directions'}_${isTkm ? 'tkm' : 'tonnes'}`];
+      const value = group ? values?.[direction]?.[group] : values?.[direction];
+      return Number.isFinite(value) ? value : null;
+    };
+    const base = read('2019_BASE'), future = read('2040_P1');
+    return formatForecastHoverChange(base, future, isTkm);
+  }
+
+  function formatForecastHoverChange(base, future, isTkm, relation = false, publishedPercent = null) {
+    const label = state.forecastScenario === '2019_BASE' ? 'Δ Erwartete Veränderung bis 2040' : 'Δ Veränderung gegenüber 2019';
+    const available = Number.isFinite(base) && Number.isFinite(future);
+    const difference = available ? future - base : null;
+    let value, change = difference;
+    if (!available && !Number.isFinite(publishedPercent)) {
+      return `<div>${label}: <strong style="color:#64748b;">nicht verfügbar</strong></div>`;
+    }
+    if (state.direction === 'balance') {
+      const unit = isTkm ? (relation ? 'Mio. tkm' : 'Mrd. tkm') : (relation ? 'Tsd. t' : 'Mio. t');
+      const divisor = isTkm ? (relation ? 1e6 : 1e9) : (relation ? 1e3 : 1e6);
+      value = `${difference > 0 ? '+' : ''}${formatTrafficValue(difference / divisor, unit, 2)} ${unit}`;
+    } else if (available && base === 0 && future !== 0) {
+      return `<div>${label}: <strong style="color:#64748b;">nicht berechenbar (2019: 0)</strong></div>`;
+    } else {
+      const percent = available ? (base === 0 ? 0 : difference / base * 100) : publishedPercent;
+      change = percent;
+      value = `${percent > 0 ? '+' : ''}${formatDeNum(percent, 1)} %`;
+    }
+    const color = change > 0 ? '#16a34a' : change < 0 ? '#dc2626' : '#64748b';
+    const arrow = change > 0 ? '↗ ' : change < 0 ? '↘ ' : '→ ';
+    return `<div>${label}: <strong style="color:${color};">${arrow}${value}</strong></div>`;
+  }
+
+  function getForecastRelationHoverComparison(partnerId, isTkm) {
+    const metric = isTkm ? 'tkm' : 'tonnes';
+    const group = state.selectedGroup && state.selectedGroup !== 'ALL' ? state.selectedGroup : null;
+    const read = scenarioId => {
+      const data = forecastData?.scenarios?.[scenarioId]?.regions?.[state.region];
+      const source = group ? data?.by_group_relations?.[group] : data?.relations_overall;
+      const find = direction => source?.[direction]?.find(row => String(row.partner_id || row.dest_id || row.orig_id) === String(partnerId));
+      if (state.direction === 'balance') {
+        // Published browser rankings are truncated. An absent direction is not zero.
+        const outbound = find('outbound'), inbound = find('inbound');
+        return { value: Number.isFinite(outbound?.[metric]) && Number.isFinite(inbound?.[metric]) ? outbound[metric] - inbound[metric] : null };
+      }
+      const row = find(state.direction || 'all');
+      return { value: Number.isFinite(row?.[metric]) ? row[metric] : null, percent: row?.growth_2019?.[metric] };
+    };
+    const base = read('2019_BASE'), future = read('2040_P1');
+    return formatForecastHoverChange(base.value, future.value, isTkm, true, future.percent);
+  }
+
   function updateForecastLeafletMap(active) {
     active = active || getForecastActiveRegion();
     const map = maps.forecast;
@@ -9772,7 +9860,7 @@
         const val = choroDict[nutsId] || 0;
 
         layer.wbpExport = { code: nutsId, name: cName, value: val, unit: isTkm ? 'tkm' : 't' };
-        const details = getForecastRegionTooltipDetails(regInfo, isTkm);
+
 
         let dirText = 'Gesamtaufkommen';
         if (state.direction === 'outbound') dirText = 'Versand (Güterausgang)';
@@ -9784,33 +9872,14 @@
           grpBadge = `<div class="map-tooltip-context">Güterart: ${NST_GROUPS_7[state.selectedGroup]}</div>`;
         }
 
-        const balStatus = details.balanceValue > 0
-          ? 'Versandüberschuss'
-          : details.balanceValue < 0
-            ? 'Empfangsüberschuss'
-            : 'Ausgeglichen';
-        const balSign = details.balanceValue > 0 ? '+' : '';
-        const metricLabel = isTkm ? 'Verkehrsleistung' : 'Beförderungsmenge';
-        const goodsScope = details.hasGroupFilter ? NST_GROUPS_7[state.selectedGroup] : 'alle Güter';
-        const directionHtml = `<div><strong>${metricLabel} (${goodsScope}):</strong> Versand ${formatTrafficValue(details.outboundValue / divisor, unitLabel, 2)} ${unitLabel} | Empfang ${formatTrafficValue(details.inboundValue / divisor, unitLabel, 2)} ${unitLabel} | Binnenverkehr ${formatTrafficValue(details.binnenValue / divisor, unitLabel, 2)} ${unitLabel}</div>
-          <div class="forecast-total-definition"><strong>Gesamtaufkommen:</strong> Versand + Empfang + Binnenverkehr</div>
-          <div><strong>Netto-Saldo:</strong> ${balSign}${formatTrafficValue(details.balanceValue / divisor, unitLabel, 2)} ${unitLabel} (${balStatus}; Binnenverkehr nicht saldowirksam)</div>`;
-        const modalHtml = details.modalSplit
-          ? `<div><strong>${state.direction === 'balance' ? 'Modalstruktur des Saldos (Beträge)' : 'Modal Split'}:</strong> Straße ${formatDeNum(details.modalSplit[0], 1)} % | Schiene ${formatDeNum(details.modalSplit[1], 1)} % | Binnenschiff ${formatDeNum(details.modalSplit[2], 1)} %</div>`
-          : '';
-        const kvQuantityLabel = state.direction === 'outbound' ? 'Versand'
-          : state.direction === 'inbound' ? 'Empfang'
-          : state.direction === 'balance' ? 'Nettosaldo'
-          : 'Gesamtaufkommen';
-        const kvShareLabel = state.direction === 'outbound' ? 'der Beförderungsmenge im Versand'
-          : state.direction === 'inbound' ? 'der Beförderungsmenge im Empfang'
-          : 'der gesamten Beförderungsmenge';
-        const kvShareHtml = details.kvShare !== null && state.direction !== 'balance'
-          ? ` (${formatDeNum(details.kvShare, 1)} % ${kvShareLabel})`
-          : '';
+        const definition = state.direction === 'all' ? '<div>Versand + Empfang + Binnenverkehr</div>' : '';
+        const comparison = getForecastHoverComparison(nutsId, isTkm);
+        const details = getForecastRegionTooltipDetails(regInfo, isTkm);
+        const kvLabel = state.direction === 'outbound' ? 'Versand' : state.direction === 'inbound' ? 'Empfang' : state.direction === 'balance' ? 'Nettosaldo' : 'Gesamtaufkommen';
+        const kvShare = details.kvShare !== null && state.direction !== 'balance'
+          ? ` (${formatDeNum(details.kvShare, 1)} % der Beförderungsmenge)` : '';
         const kvHtml = details.kvTonnes !== null && details.kvTeu !== null
-          ? `<div style="margin-top:6px;"><strong>Kombinierter Verkehr:</strong><div><strong>${kvQuantityLabel}:</strong> ${formatDeNum(details.kvTonnes / 1e6, 2)} Mio. t${kvShareHtml}</div><div><strong>TEU:</strong> ${formatDeNum(details.kvTeu / 1e3, 1)} Tsd. TEU</div></div>`
-          : '';
+          ? `<div class="forecast-kv-detail"><strong>Kombinierter Verkehr</strong><div>${kvLabel}: ${formatTrafficValue(details.kvTonnes / 1e6, 'Mio. t', 2)} Mio. t${kvShare}</div><div>${formatQuantity(details.kvTeu / 1e3, 1)} Tsd. TEU</div></div>` : '';
 
         const tipHtml = `
           <div class="map-region-tooltip">
@@ -9819,8 +9888,8 @@
             <div class="map-tooltip-value">${isTkm ? 'Verkehrsleistung' : 'Beförderungsmenge'}: ${formatTrafficValue(val / divisor, unitLabel, 2)} ${unitLabel}</div>
             ${grpBadge}
             <div class="map-tooltip-context">
-              ${directionHtml}
-              ${modalHtml}
+              ${definition}
+              ${comparison}
               ${kvHtml}
             </div>
             <div class="map-tooltip-filter-hint">Klicken Sie, um diese Region/diesen Kreis als Filter zu aktivieren.</div>
@@ -9833,10 +9902,7 @@
           className: 'forecast-region-leaflet-tooltip'
         });
         delayRegionTooltip(layer);
-        layer.on('tooltipopen', () => {
-          requestAnimationFrame(() => fitForecastRegionTooltip(map, layer));
-        });
-        layer.on('mousemove', () => fitForecastRegionTooltip(map, layer));
+        containForecastTooltip(map, layer);
 
         if (isSelected && layer.bringToFront) {
           setTimeout(() => { if (layer.bringToFront) layer.bringToFront(); }, 0);
@@ -10004,7 +10070,7 @@
       }
 
       const kvInfo = rel.teu > 0 
-        ? `<div class="flow-tooltip-context"><strong>Containerladung:</strong> ${formatQuantity(rel.teu / 1e3, 1)} Tsd. TEU · ${formatQuantity(rel.tonnes / 1e3, 1)} Tsd. t</div>` 
+        ? `<div class="flow-tooltip-context"><strong>Kombinierter Verkehr · Containerladung:</strong> <span class="forecast-quantity">${formatQuantity(rel.teu / 1e3, 1)} Tsd. TEU</span></div>`
         : '';
 
       const outboundValue = isTkm ? (rel.outbound_tkm || 0) / 1e6 : (rel.outbound_tonnes || 0) / 1e3;
@@ -10012,7 +10078,7 @@
       const balanceHtml = state.direction === 'balance' ? `
         <div class="flow-tooltip-context"><strong>Versand:</strong> ${isTkm ? formatTkmQuantity(outboundValue, 1, true) : formatQuantity(outboundValue, 1)} ${unitLabel}<br>
           <strong>Empfang:</strong> ${isTkm ? formatTkmQuantity(inboundValue, 1, true) : formatQuantity(inboundValue, 1)} ${unitLabel}<br>
-          <strong>Saldo:</strong> ${formattedVol} ${unitLabel} · ${displayVol >= 0 ? 'Versandüberschuss' : 'Empfangsüberschuss'}</div>` : '';
+          <strong>Saldo:</strong> <span class="forecast-quantity">${formattedVol} ${unitLabel}</span> · ${displayVol >= 0 ? 'Versandüberschuss' : 'Empfangsüberschuss'}</div>` : '';
 
       const routeArrow = (state.direction === 'all' || state.direction === 'balance') ? '↔' : '→';
       const metricLabel = isTkm ? 'Verkehrsleistung' : 'Beförderungsmenge';
@@ -10024,9 +10090,10 @@
           <div class="flow-tooltip-route">${oName} <span>${routeArrow}</span> ${dName}</div>
           <div><strong>Güterart:</strong> ${gName}</div>
           <div class="flow-tooltip-value">
-            ${state.direction === 'balance' ? 'Nettosaldo' : metricLabel}: ${formattedVol} ${unitLabel}
+            ${state.direction === 'balance' ? 'Nettosaldo' : metricLabel}: <span class="forecast-quantity">${formattedVol} ${unitLabel}</span>
           </div>
           ${balanceHtml}
+          <div class="flow-tooltip-context">${getForecastRelationHoverComparison(partnerId, isTkm)}</div>
           ${modeBadges ? `<div class="flow-tooltip-modes"><strong>Verkehrsträger:</strong> ${modeBadges}</div>` : ''}
           ${kvInfo}
         </div>
@@ -10039,6 +10106,8 @@
       };
       line.bindTooltip(tipHtml, relationTooltipOptions);
       marker.bindTooltip(tipHtml, relationTooltipOptions);
+      containForecastTooltip(map, line);
+      containForecastTooltip(map, marker);
 
       line.on('mouseover', event => {
         openActiveRelationTooltip('forecast', line, event);
@@ -10482,6 +10551,35 @@
     if (value && Object.getPrototypeOf(value) === Object.prototype) return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, cloneChartSetting(v)]));
     return value;
   }
+  function chartContext(chart) {
+    const id = chart.canvas.id;
+    const text = key => exportText(document.getElementById(key));
+    const trend = chart.config.type === 'line';
+    const years = chart.data.labels || [];
+    const period = trend && years.length ? `${years[0]}–${years.at(-1)}` : text('summaryPeriod');
+    const measurement = state.metric === 'tkm' ? 'Verkehrsleistung' : 'Verkehrsaufkommen';
+    const region = text('summaryRegion');
+    const direction = text('summaryDirection');
+    let parts;
+    if (id === 'chartAirfreightAirports') {
+      parts = ['Deutschland', period, direction];
+      if (trend) parts.push(`Führende Flughäfen nach Stand ${state.year}`);
+    } else if (id === 'chartTollDistanceClasses') {
+      parts = [region, period, direction, 'Anteil der Mautfahrten nach mittlerer Distanz', state.includeBinnen ? 'Binnenverkehr einbezogen' : 'Ohne Binnenverkehr'];
+    } else if (id === 'chartForecastCommodityKv' && state.forecastChart2View !== 'commodity') {
+      // Behältertypen are always total tonnes, independent of goods, direction and metric.
+      parts = [region, period, 'Verkehrsaufkommen nach Ladeeinheitentyp · Gesamtverkehr'];
+    } else {
+      parts = [region, period, direction, id === 'chartMaritimeCommodity' ? 'Seegüterumschlag' : measurement];
+      if (id === 'chartModalSplit' || id === 'chartForecastModalSplit') {
+        if (state.selectedGroup && state.selectedGroup !== 'ALL') parts.push(text('summaryGoods'));
+      }
+      if (id === 'chartKvRailUnits' || id === 'chartKvIwwUnits') {
+        if (!trend && state.direction !== 'balance') parts[3] = state.metric === 'tkm' ? 'Anteile an der Verkehrsleistung' : 'Anteile am Verkehrsaufkommen';
+      }
+    }
+    return parts.filter(Boolean).join(' · ');
+  }
   function snapshotChart(chart) {
     const config = cloneChartSetting(chart.config._config);
     config.data.datasets.forEach((dataset, i) => { dataset.hidden = !chart.isDatasetVisible(i); });
@@ -10505,8 +10603,10 @@
     }
     // Custom legend callbacks may close over the small chart. Use this chart's defaults.
     if (config.options.plugins.legend) delete config.options.plugins.legend.onClick;
-    const unit = chart.canvas.id.includes('Toll') ? '%' : chart.canvas.id.includes('Airfreight') ? (state.airfreightMetric === 'flights' ? 'Flüge' : 'Mio. t') : chart.data.datasets.some(d => d.label === 'Mio. t') ? 'Mio. t' : state.metric === 'tkm' ? 'Mrd. tkm' : 'Mio. t';
-    return { unit, id: chart.canvas.id, title: exportChartTitle(chart.canvas), config, hiddenIndices: (chart.data.labels || []).map((_, i) => chart.getDataVisibility(i) ? -1 : i).filter(i => i >= 0) };
+    const valueAxis = chart.options.scales?.[chart.options.indexAxis === 'y' ? 'x' : 'y'];
+    const axisUnit = valueAxis?.title?.text;
+    const unit = chart.canvas.id === 'chartTollDistanceClasses' || /%/.test(axisUnit || '') ? '%' : axisUnit && axisUnit !== 'Berichtsjahr' ? axisUnit : chart.data.datasets.some(d => d.label === 'Mio. t') ? 'Mio. t' : state.metric === 'tkm' ? 'Mrd. tkm' : 'Mio. t';
+    return { unit, context: chartContext(chart), id: chart.canvas.id, title: exportChartTitle(chart.canvas), config, hiddenIndices: (chart.data.labels || []).map((_, i) => chart.getDataVisibility(i) ? -1 : i).filter(i => i >= 0) };
   }
   function createSnapshotChart(canvas, snapshot, responsive = true) {
     const config = cloneChartSetting(snapshot.config);
@@ -10597,7 +10697,7 @@
       ctx.font = '24px Arial';
       const titleLines = canvasTextLines(ctx, chartSnapshot.title, 1680);
       ctx.font = '19px Arial';
-      const contextLines = canvasTextLines(ctx, `${snapshot.tabName} · ${snapshot.context} · Diagrammwerte: ${chartSnapshot.unit}`, 1680);
+      const contextLines = canvasTextLines(ctx, chartSnapshot.context, 1680);
       const sourceText = 'Wissensbasierte Planung · ' + sourceCredit(snapshot.tabName) + ' · Eigene Auswertung. Export: ' + snapshot.createdAt.slice(0, 10) + '. Quellen und Nutzungsbedingungen: Menü Quellen.';
       const sourceLines = canvasTextLines(ctx, sourceText, 1680);
       const chartTop = 48 + titleLines.length * 32 + contextLines.length * 26;
@@ -10749,7 +10849,7 @@
         enlargedSnapshot = captureExportSnapshot(); const chartSnapshot = snapshotChart(source);
         enlargedSnapshot.charts = [chartSnapshot];
         document.getElementById('largeChartTitle').textContent = chartSnapshot.title;
-        document.getElementById('largeChartContext').textContent = `${enlargedSnapshot.tabName} · ${enlargedSnapshot.context} · Diagrammwerte: ${chartSnapshot.unit}`;
+        document.getElementById('largeChartContext').textContent = chartSnapshot.context;
         document.getElementById('largeChartStatus').textContent = '';
         document.querySelector('.large-chart-canvas').style.height = chartSnapshot.config.options?.indexAxis === 'y' && chartSnapshot.config.data.labels.length >= 12 ? `${chartSnapshot.config.data.labels.length * 40 + 110}px` : 'clamp(320px, 60vh, 720px)';
         enlargedChart?.destroy();

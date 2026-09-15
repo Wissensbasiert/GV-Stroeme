@@ -170,7 +170,7 @@
     const kv = regInfo?.kv || {};
     let kvTonnes = null;
     let kvTeu = null;
-    if (!hasGroupFilter && !isTkm) {
+    if (!hasGroupFilter && regInfo?.kv) {
       if (direction === 'outbound') {
         kvTonnes = kv.outbound_tonnes ?? 0;
         kvTeu = kv.outbound_teu ?? 0;
@@ -190,8 +190,10 @@
       ?? groupValue('all')
       ?? (isTkm ? regInfo?.tkm?.total : regInfo?.tonnes?.total)
       ?? 0;
-    const kvShare = kvTonnes !== null && Math.abs(selectedDirectionTotal) > 0
-      ? Math.abs(kvTonnes) / Math.abs(selectedDirectionTotal) * 100
+    // KV is a tonnes/TEU supplement even when the map shows tonne-kilometres.
+    const kvDenominator = regInfo?.directions_tonnes?.[directionKey];
+    const kvShare = kvTonnes !== null && Math.abs(kvDenominator) > 0
+      ? Math.abs(kvTonnes) / Math.abs(kvDenominator) * 100
       : null;
 
     return {
@@ -225,42 +227,19 @@
     note.textContent = message;
   }
 
-  // Keep the rich regional hover card inside the visible Leaflet viewport.
-  // Leaflet's built-in "auto" direction only decides left versus right; it
-  // does not account for the height of this tooltip.  Test the rendered card
-  // against the map frame and flip it vertically only when it would be cut off.
-  function fitForecastRegionTooltip(map, layer) {
-    const tooltip = layer.getTooltip?.();
-    const tooltipEl = tooltip?.getElement?.();
-    const mapEl = map?.getContainer?.();
-    if (!tooltip || !tooltipEl || !mapEl) return;
-
-    const mapRect = mapEl.getBoundingClientRect();
-    const inset = 8;
-    const anchor = map.latLngToContainerPoint(tooltip.getLatLng());
-    const spaceAbove = anchor.y - inset;
-    const spaceBelow = mapRect.height - anchor.y - inset;
-    const preferredDirection = spaceAbove >= spaceBelow ? 'top' : 'bottom';
-
-    if (tooltip.options.direction !== preferredDirection) {
-      tooltip.options.direction = preferredDirection;
-      tooltip.options.offset = L.point(0, preferredDirection === 'top' ? -10 : 10);
-      tooltip.setLatLng(tooltip.getLatLng());
-    }
-
-    // Choosing north or south alone is insufficient when a long card is near
-    // an edge. Clamp Leaflet's positioned element into the actual map frame.
-    const tipRect = tooltipEl.getBoundingClientRect();
-    let shiftX = 0;
-    let shiftY = 0;
-    if (tipRect.left < mapRect.left + inset) shiftX = mapRect.left + inset - tipRect.left;
-    else if (tipRect.right > mapRect.right - inset) shiftX = mapRect.right - inset - tipRect.right;
-    if (tipRect.top < mapRect.top + inset) shiftY = mapRect.top + inset - tipRect.top;
-    else if (tipRect.bottom > mapRect.bottom - inset) shiftY = mapRect.bottom - inset - tipRect.bottom;
-    if (shiftX || shiftY) {
-      const position = L.DomUtil.getPosition(tooltipEl);
-      if (position) L.DomUtil.setPosition(tooltipEl, position.add(L.point(shiftX, shiftY)));
-    }
+  // Position both region and route cards after every Leaflet position update,
+  // including sticky movement on paths whose mouse events do not bubble.
+  function containForecastTooltip(map, layer) {
+    const tooltip = layer.getTooltip();
+    const updatePosition = tooltip._updatePosition;
+    tooltip._updatePosition = function () {
+      if (!this._map || !this._latlng) return;
+      const point = map.latLngToContainerPoint(this._latlng);
+      this.options.direction = point.x < map.getSize().x / 2 ? 'right' : 'left';
+      this.options.offset = L.point(0, 0);
+      updatePosition.call(this);
+      fitLeafletTooltipToMap(map, this);
+    };
   }
 
   // Master Forecast Tab Renderer
@@ -345,7 +324,7 @@
     // Further filter settings are intentionally kept out of the KPI titles.
     const scopeSuffix = nationalFilteredScope ? ' ohne Transit' : '';
     setTxt('kpiForecastTotalTitle', `Gesamtaufkommen${scopeSuffix}${directionSuffix}`);
-    const formatKpiValue = value => `${dir === 'balance' && value > 0 ? '+' : ''}${formatTrafficValue(value / divisor, unitLabel, 2)} ${unitLabel}`;
+    const formatKpiValue = value => `${dir === 'balance' && value > 0 ? '+' : ''}${formatKpiNumber(value / divisor)} ${unitLabel}`;
     setTxt('kpiForecastTotalTonnes', formatKpiValue(totVal));
     
     let totGrowthVal, roadGrowthVal, railGrowthVal, iwwGrowthVal;
@@ -416,6 +395,62 @@
   }
 
   // Update Forecast Leaflet Map with Linked Filters & Rich Interactive Tooltips
+  function getForecastHoverComparison(nutsId, isTkm) {
+    const direction = state.direction || 'all';
+    const group = state.selectedGroup && state.selectedGroup !== 'ALL' ? state.selectedGroup : null;
+    const read = scenarioId => {
+      const region = forecastData?.scenarios?.[scenarioId]?.regions?.[nutsId];
+      const values = region?.[`${group ? 'groups_7' : 'directions'}_${isTkm ? 'tkm' : 'tonnes'}`];
+      const value = group ? values?.[direction]?.[group] : values?.[direction];
+      return Number.isFinite(value) ? value : null;
+    };
+    const base = read('2019_BASE'), future = read('2040_P1');
+    return formatForecastHoverChange(base, future, isTkm);
+  }
+
+  function formatForecastHoverChange(base, future, isTkm, relation = false, publishedPercent = null) {
+    const label = state.forecastScenario === '2019_BASE' ? 'Δ Erwartete Veränderung bis 2040' : 'Δ Veränderung gegenüber 2019';
+    const available = Number.isFinite(base) && Number.isFinite(future);
+    const difference = available ? future - base : null;
+    let value, change = difference;
+    if (!available && !Number.isFinite(publishedPercent)) {
+      return `<div>${label}: <strong style="color:#64748b;">nicht verfügbar</strong></div>`;
+    }
+    if (state.direction === 'balance') {
+      const unit = isTkm ? (relation ? 'Mio. tkm' : 'Mrd. tkm') : (relation ? 'Tsd. t' : 'Mio. t');
+      const divisor = isTkm ? (relation ? 1e6 : 1e9) : (relation ? 1e3 : 1e6);
+      value = `${difference > 0 ? '+' : ''}${formatTrafficValue(difference / divisor, unit, 2)} ${unit}`;
+    } else if (available && base === 0 && future !== 0) {
+      return `<div>${label}: <strong style="color:#64748b;">nicht berechenbar (2019: 0)</strong></div>`;
+    } else {
+      const percent = available ? (base === 0 ? 0 : difference / base * 100) : publishedPercent;
+      change = percent;
+      value = `${percent > 0 ? '+' : ''}${formatDeNum(percent, 1)} %`;
+    }
+    const color = change > 0 ? '#16a34a' : change < 0 ? '#dc2626' : '#64748b';
+    const arrow = change > 0 ? '↗ ' : change < 0 ? '↘ ' : '→ ';
+    return `<div>${label}: <strong style="color:${color};">${arrow}${value}</strong></div>`;
+  }
+
+  function getForecastRelationHoverComparison(partnerId, isTkm) {
+    const metric = isTkm ? 'tkm' : 'tonnes';
+    const group = state.selectedGroup && state.selectedGroup !== 'ALL' ? state.selectedGroup : null;
+    const read = scenarioId => {
+      const data = forecastData?.scenarios?.[scenarioId]?.regions?.[state.region];
+      const source = group ? data?.by_group_relations?.[group] : data?.relations_overall;
+      const find = direction => source?.[direction]?.find(row => String(row.partner_id || row.dest_id || row.orig_id) === String(partnerId));
+      if (state.direction === 'balance') {
+        // Published browser rankings are truncated. An absent direction is not zero.
+        const outbound = find('outbound'), inbound = find('inbound');
+        return { value: Number.isFinite(outbound?.[metric]) && Number.isFinite(inbound?.[metric]) ? outbound[metric] - inbound[metric] : null };
+      }
+      const row = find(state.direction || 'all');
+      return { value: Number.isFinite(row?.[metric]) ? row[metric] : null, percent: row?.growth_2019?.[metric] };
+    };
+    const base = read('2019_BASE'), future = read('2040_P1');
+    return formatForecastHoverChange(base.value, future.value, isTkm, true, future.percent);
+  }
+
   function updateForecastLeafletMap(active) {
     active = active || getForecastActiveRegion();
     const map = maps.forecast;
@@ -510,7 +545,7 @@
         const val = choroDict[nutsId] || 0;
 
         layer.wbpExport = { code: nutsId, name: cName, value: val, unit: isTkm ? 'tkm' : 't' };
-        const details = getForecastRegionTooltipDetails(regInfo, isTkm);
+
 
         let dirText = 'Gesamtaufkommen';
         if (state.direction === 'outbound') dirText = 'Versand (Güterausgang)';
@@ -522,33 +557,14 @@
           grpBadge = `<div class="map-tooltip-context">Güterart: ${NST_GROUPS_7[state.selectedGroup]}</div>`;
         }
 
-        const balStatus = details.balanceValue > 0
-          ? 'Versandüberschuss'
-          : details.balanceValue < 0
-            ? 'Empfangsüberschuss'
-            : 'Ausgeglichen';
-        const balSign = details.balanceValue > 0 ? '+' : '';
-        const metricLabel = isTkm ? 'Verkehrsleistung' : 'Beförderungsmenge';
-        const goodsScope = details.hasGroupFilter ? NST_GROUPS_7[state.selectedGroup] : 'alle Güter';
-        const directionHtml = `<div><strong>${metricLabel} (${goodsScope}):</strong> Versand ${formatTrafficValue(details.outboundValue / divisor, unitLabel, 2)} ${unitLabel} | Empfang ${formatTrafficValue(details.inboundValue / divisor, unitLabel, 2)} ${unitLabel} | Binnenverkehr ${formatTrafficValue(details.binnenValue / divisor, unitLabel, 2)} ${unitLabel}</div>
-          <div class="forecast-total-definition"><strong>Gesamtaufkommen:</strong> Versand + Empfang + Binnenverkehr</div>
-          <div><strong>Netto-Saldo:</strong> ${balSign}${formatTrafficValue(details.balanceValue / divisor, unitLabel, 2)} ${unitLabel} (${balStatus}; Binnenverkehr nicht saldowirksam)</div>`;
-        const modalHtml = details.modalSplit
-          ? `<div><strong>${state.direction === 'balance' ? 'Modalstruktur des Saldos (Beträge)' : 'Modal Split'}:</strong> Straße ${formatDeNum(details.modalSplit[0], 1)} % | Schiene ${formatDeNum(details.modalSplit[1], 1)} % | Binnenschiff ${formatDeNum(details.modalSplit[2], 1)} %</div>`
-          : '';
-        const kvQuantityLabel = state.direction === 'outbound' ? 'Versand'
-          : state.direction === 'inbound' ? 'Empfang'
-          : state.direction === 'balance' ? 'Nettosaldo'
-          : 'Gesamtaufkommen';
-        const kvShareLabel = state.direction === 'outbound' ? 'der Beförderungsmenge im Versand'
-          : state.direction === 'inbound' ? 'der Beförderungsmenge im Empfang'
-          : 'der gesamten Beförderungsmenge';
-        const kvShareHtml = details.kvShare !== null && state.direction !== 'balance'
-          ? ` (${formatDeNum(details.kvShare, 1)} % ${kvShareLabel})`
-          : '';
+        const definition = state.direction === 'all' ? '<div>Versand + Empfang + Binnenverkehr</div>' : '';
+        const comparison = getForecastHoverComparison(nutsId, isTkm);
+        const details = getForecastRegionTooltipDetails(regInfo, isTkm);
+        const kvLabel = state.direction === 'outbound' ? 'Versand' : state.direction === 'inbound' ? 'Empfang' : state.direction === 'balance' ? 'Nettosaldo' : 'Gesamtaufkommen';
+        const kvShare = details.kvShare !== null && state.direction !== 'balance'
+          ? ` (${formatDeNum(details.kvShare, 1)} % der Beförderungsmenge)` : '';
         const kvHtml = details.kvTonnes !== null && details.kvTeu !== null
-          ? `<div style="margin-top:6px;"><strong>Kombinierter Verkehr:</strong><div><strong>${kvQuantityLabel}:</strong> ${formatDeNum(details.kvTonnes / 1e6, 2)} Mio. t${kvShareHtml}</div><div><strong>TEU:</strong> ${formatDeNum(details.kvTeu / 1e3, 1)} Tsd. TEU</div></div>`
-          : '';
+          ? `<div class="forecast-kv-detail"><strong>Kombinierter Verkehr</strong><div>${kvLabel}: ${formatTrafficValue(details.kvTonnes / 1e6, 'Mio. t', 2)} Mio. t${kvShare}</div><div>${formatQuantity(details.kvTeu / 1e3, 1)} Tsd. TEU</div></div>` : '';
 
         const tipHtml = `
           <div class="map-region-tooltip">
@@ -557,8 +573,8 @@
             <div class="map-tooltip-value">${isTkm ? 'Verkehrsleistung' : 'Beförderungsmenge'}: ${formatTrafficValue(val / divisor, unitLabel, 2)} ${unitLabel}</div>
             ${grpBadge}
             <div class="map-tooltip-context">
-              ${directionHtml}
-              ${modalHtml}
+              ${definition}
+              ${comparison}
               ${kvHtml}
             </div>
             <div class="map-tooltip-filter-hint">Klicken Sie, um diese Region/diesen Kreis als Filter zu aktivieren.</div>
@@ -571,10 +587,7 @@
           className: 'forecast-region-leaflet-tooltip'
         });
         delayRegionTooltip(layer);
-        layer.on('tooltipopen', () => {
-          requestAnimationFrame(() => fitForecastRegionTooltip(map, layer));
-        });
-        layer.on('mousemove', () => fitForecastRegionTooltip(map, layer));
+        containForecastTooltip(map, layer);
 
         if (isSelected && layer.bringToFront) {
           setTimeout(() => { if (layer.bringToFront) layer.bringToFront(); }, 0);
@@ -742,7 +755,7 @@
       }
 
       const kvInfo = rel.teu > 0 
-        ? `<div class="flow-tooltip-context"><strong>Containerladung:</strong> ${formatQuantity(rel.teu / 1e3, 1)} Tsd. TEU · ${formatQuantity(rel.tonnes / 1e3, 1)} Tsd. t</div>` 
+        ? `<div class="flow-tooltip-context"><strong>Kombinierter Verkehr · Containerladung:</strong> <span class="forecast-quantity">${formatQuantity(rel.teu / 1e3, 1)} Tsd. TEU</span></div>`
         : '';
 
       const outboundValue = isTkm ? (rel.outbound_tkm || 0) / 1e6 : (rel.outbound_tonnes || 0) / 1e3;
@@ -750,7 +763,7 @@
       const balanceHtml = state.direction === 'balance' ? `
         <div class="flow-tooltip-context"><strong>Versand:</strong> ${isTkm ? formatTkmQuantity(outboundValue, 1, true) : formatQuantity(outboundValue, 1)} ${unitLabel}<br>
           <strong>Empfang:</strong> ${isTkm ? formatTkmQuantity(inboundValue, 1, true) : formatQuantity(inboundValue, 1)} ${unitLabel}<br>
-          <strong>Saldo:</strong> ${formattedVol} ${unitLabel} · ${displayVol >= 0 ? 'Versandüberschuss' : 'Empfangsüberschuss'}</div>` : '';
+          <strong>Saldo:</strong> <span class="forecast-quantity">${formattedVol} ${unitLabel}</span> · ${displayVol >= 0 ? 'Versandüberschuss' : 'Empfangsüberschuss'}</div>` : '';
 
       const routeArrow = (state.direction === 'all' || state.direction === 'balance') ? '↔' : '→';
       const metricLabel = isTkm ? 'Verkehrsleistung' : 'Beförderungsmenge';
@@ -762,9 +775,10 @@
           <div class="flow-tooltip-route">${oName} <span>${routeArrow}</span> ${dName}</div>
           <div><strong>Güterart:</strong> ${gName}</div>
           <div class="flow-tooltip-value">
-            ${state.direction === 'balance' ? 'Nettosaldo' : metricLabel}: ${formattedVol} ${unitLabel}
+            ${state.direction === 'balance' ? 'Nettosaldo' : metricLabel}: <span class="forecast-quantity">${formattedVol} ${unitLabel}</span>
           </div>
           ${balanceHtml}
+          <div class="flow-tooltip-context">${getForecastRelationHoverComparison(partnerId, isTkm)}</div>
           ${modeBadges ? `<div class="flow-tooltip-modes"><strong>Verkehrsträger:</strong> ${modeBadges}</div>` : ''}
           ${kvInfo}
         </div>
@@ -777,6 +791,8 @@
       };
       line.bindTooltip(tipHtml, relationTooltipOptions);
       marker.bindTooltip(tipHtml, relationTooltipOptions);
+      containForecastTooltip(map, line);
+      containForecastTooltip(map, marker);
 
       line.on('mouseover', event => {
         openActiveRelationTooltip('forecast', line, event);

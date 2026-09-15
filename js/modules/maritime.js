@@ -260,8 +260,8 @@
     
     // KPI 1: Seegüterumschlag (Gesamt)
     const directionSuffix = dirFilter === 'balance' ? ' · Saldo' : dirFilter === 'inbound' ? ' · Empfang' : dirFilter === 'outbound' ? ' · Versand' : '';
-    const formatSaldo = (value, unit) => `${dirFilter === 'balance' && value > 0 ? '+' : ''}${formatSmartMioTonnes(value, unit)}`;
-    setTxt('kpiMrtmTotalTitle', isSpecific ? `Seegüterumschlag (${portName}${directionSuffix})` : `Seegüterumschlag (Gesamt${directionSuffix})`);
+    const formatSaldo = (value, unit) => `${dirFilter === 'balance' && value > 0 ? '+' : ''}${formatKpiNumber(value / 1e6)} ${unit}`;
+    setTxt('kpiMrtmTotalTitle', `Seegüterumschlag${directionSuffix}`);
     setTxt('kpiMrtmTotalVal', formatSaldo(totVal, 'Mio. t'));
     setHtml('kpiMrtmTotalSub', formatYoYBadge(totVal, prevTot));
 
@@ -277,18 +277,18 @@
       }
     }
     const teuDirectionLabel = { inbound: 'Empfang', outbound: 'Versand', balance: 'Saldo' }[dirFilter] || 'Gesamt';
-    setTxt('kpiMrtmTeuTitle', isSpecific ? `Containerumschlag (${portName} · ${teuDirectionLabel})` : `Containerumschlag (${teuDirectionLabel})`);
+    setTxt('kpiMrtmTeuTitle', state.direction === 'all' ? 'Containerumschlag' : `Containerumschlag (${teuDirectionLabel})`);
     setTxt('kpiMrtmTeuVal', formattedTeu);
     setHtml('kpiMrtmTeuSub', formatYoYBadge(teuVal, prevTeu));
 
     // KPI 3: Seeseitiger Empfang
-    setTxt('kpiMrtmInTitle', isSpecific ? `Seeseitiger Empfang (${portName})` : 'Seeseitiger Empfang');
-    setTxt('kpiMrtmInVal', formatSmartMioTonnes(inVal, 'Mio. t'));
+    setTxt('kpiMrtmInTitle', 'Seeseitiger Empfang');
+    setTxt('kpiMrtmInVal', `${formatKpiNumber(inVal / 1e6)} Mio. t`);
     setHtml('kpiMrtmInSub', formatYoYBadge(inVal, prevIn));
 
     // KPI 4: Seeseitiger Versand
-    setTxt('kpiMrtmOutTitle', isSpecific ? `Seeseitiger Versand (${portName})` : 'Seeseitiger Versand');
-    setTxt('kpiMrtmOutVal', formatSmartMioTonnes(outVal, 'Mio. t'));
+    setTxt('kpiMrtmOutTitle', 'Seeseitiger Versand');
+    setTxt('kpiMrtmOutVal', `${formatKpiNumber(outVal / 1e6)} Mio. t`);
     setHtml('kpiMrtmOutSub', formatYoYBadge(outVal, prevOut));
 
     // 2. Map & Port Circle Markers (with Hover Tooltips and Detail Popups)

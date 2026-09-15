@@ -26,6 +26,35 @@
     if (value && Object.getPrototypeOf(value) === Object.prototype) return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, cloneChartSetting(v)]));
     return value;
   }
+  function chartContext(chart) {
+    const id = chart.canvas.id;
+    const text = key => exportText(document.getElementById(key));
+    const trend = chart.config.type === 'line';
+    const years = chart.data.labels || [];
+    const period = trend && years.length ? `${years[0]}–${years.at(-1)}` : text('summaryPeriod');
+    const measurement = state.metric === 'tkm' ? 'Verkehrsleistung' : 'Verkehrsaufkommen';
+    const region = text('summaryRegion');
+    const direction = text('summaryDirection');
+    let parts;
+    if (id === 'chartAirfreightAirports') {
+      parts = ['Deutschland', period, direction];
+      if (trend) parts.push(`Führende Flughäfen nach Stand ${state.year}`);
+    } else if (id === 'chartTollDistanceClasses') {
+      parts = [region, period, direction, 'Anteil der Mautfahrten nach mittlerer Distanz', state.includeBinnen ? 'Binnenverkehr einbezogen' : 'Ohne Binnenverkehr'];
+    } else if (id === 'chartForecastCommodityKv' && state.forecastChart2View !== 'commodity') {
+      // Behältertypen are always total tonnes, independent of goods, direction and metric.
+      parts = [region, period, 'Verkehrsaufkommen nach Ladeeinheitentyp · Gesamtverkehr'];
+    } else {
+      parts = [region, period, direction, id === 'chartMaritimeCommodity' ? 'Seegüterumschlag' : measurement];
+      if (id === 'chartModalSplit' || id === 'chartForecastModalSplit') {
+        if (state.selectedGroup && state.selectedGroup !== 'ALL') parts.push(text('summaryGoods'));
+      }
+      if (id === 'chartKvRailUnits' || id === 'chartKvIwwUnits') {
+        if (!trend && state.direction !== 'balance') parts[3] = state.metric === 'tkm' ? 'Anteile an der Verkehrsleistung' : 'Anteile am Verkehrsaufkommen';
+      }
+    }
+    return parts.filter(Boolean).join(' · ');
+  }
   function snapshotChart(chart) {
     const config = cloneChartSetting(chart.config._config);
     config.data.datasets.forEach((dataset, i) => { dataset.hidden = !chart.isDatasetVisible(i); });
@@ -49,8 +78,10 @@
     }
     // Custom legend callbacks may close over the small chart. Use this chart's defaults.
     if (config.options.plugins.legend) delete config.options.plugins.legend.onClick;
-    const unit = chart.canvas.id.includes('Toll') ? '%' : chart.canvas.id.includes('Airfreight') ? (state.airfreightMetric === 'flights' ? 'Flüge' : 'Mio. t') : chart.data.datasets.some(d => d.label === 'Mio. t') ? 'Mio. t' : state.metric === 'tkm' ? 'Mrd. tkm' : 'Mio. t';
-    return { unit, id: chart.canvas.id, title: exportChartTitle(chart.canvas), config, hiddenIndices: (chart.data.labels || []).map((_, i) => chart.getDataVisibility(i) ? -1 : i).filter(i => i >= 0) };
+    const valueAxis = chart.options.scales?.[chart.options.indexAxis === 'y' ? 'x' : 'y'];
+    const axisUnit = valueAxis?.title?.text;
+    const unit = chart.canvas.id === 'chartTollDistanceClasses' || /%/.test(axisUnit || '') ? '%' : axisUnit && axisUnit !== 'Berichtsjahr' ? axisUnit : chart.data.datasets.some(d => d.label === 'Mio. t') ? 'Mio. t' : state.metric === 'tkm' ? 'Mrd. tkm' : 'Mio. t';
+    return { unit, context: chartContext(chart), id: chart.canvas.id, title: exportChartTitle(chart.canvas), config, hiddenIndices: (chart.data.labels || []).map((_, i) => chart.getDataVisibility(i) ? -1 : i).filter(i => i >= 0) };
   }
   function createSnapshotChart(canvas, snapshot, responsive = true) {
     const config = cloneChartSetting(snapshot.config);
@@ -141,7 +172,7 @@
       ctx.font = '24px Arial';
       const titleLines = canvasTextLines(ctx, chartSnapshot.title, 1680);
       ctx.font = '19px Arial';
-      const contextLines = canvasTextLines(ctx, `${snapshot.tabName} · ${snapshot.context} · Diagrammwerte: ${chartSnapshot.unit}`, 1680);
+      const contextLines = canvasTextLines(ctx, chartSnapshot.context, 1680);
       const sourceText = 'Wissensbasierte Planung · ' + sourceCredit(snapshot.tabName) + ' · Eigene Auswertung. Export: ' + snapshot.createdAt.slice(0, 10) + '. Quellen und Nutzungsbedingungen: Menü Quellen.';
       const sourceLines = canvasTextLines(ctx, sourceText, 1680);
       const chartTop = 48 + titleLines.length * 32 + contextLines.length * 26;
@@ -293,7 +324,7 @@
         enlargedSnapshot = captureExportSnapshot(); const chartSnapshot = snapshotChart(source);
         enlargedSnapshot.charts = [chartSnapshot];
         document.getElementById('largeChartTitle').textContent = chartSnapshot.title;
-        document.getElementById('largeChartContext').textContent = `${enlargedSnapshot.tabName} · ${enlargedSnapshot.context} · Diagrammwerte: ${chartSnapshot.unit}`;
+        document.getElementById('largeChartContext').textContent = chartSnapshot.context;
         document.getElementById('largeChartStatus').textContent = '';
         document.querySelector('.large-chart-canvas').style.height = chartSnapshot.config.options?.indexAxis === 'y' && chartSnapshot.config.data.labels.length >= 12 ? `${chartSnapshot.config.data.labels.length * 40 + 110}px` : 'clamp(320px, 60vh, 720px)';
         enlargedChart?.destroy();

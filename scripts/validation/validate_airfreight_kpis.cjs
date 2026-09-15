@@ -25,3 +25,10 @@ assert.equal(element('airfreightNationalValue').textContent,'48.657 Flüge');
 assert.match(element('airfreightYoYValue').innerHTML,/-2,6/);
 assert.equal(c.getAirfreightRelations().length,0);
 console.log('PASS: corrected 2025 Leipzig flights, prior-year comparison and no fabricated 2025 relations.');
+
+state.year='2024';state.airfreightMetric='tonnes';state.direction='all';state.selectedAirport=null;
+c.renderAirfreightKpis(c.getAirfreightAirportEntries());
+assert.equal(element('airfreightAirportCount').textContent,'18');
+state.direction='balance';c.renderAirfreightKpis(c.getAirfreightAirportEntries());
+assert.equal(element('airfreightAirportCount').textContent,'18','A zero balance is not absence of freight');
+console.log('PASS: 18 airports with positive 2024 freight, four published zeros excluded, balance count uses total traffic.');

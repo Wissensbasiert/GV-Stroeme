@@ -291,13 +291,19 @@
       ? (isAirfreightAirportMetricYearAvailable(year, metric) ? getAirfreightValue(airfreightData.airportValues?.[year]?.[code], metric, direction) : null)
       : getAirfreightValue(airfreightData.national?.[year], metric, direction);
     const current = read(state.year), previous = read(previousYear);
+    const kpiValue = amount => {
+      if (metric === 'flights' || amount == null) return formatAirfreightValue(amount, metric);
+      const divisor = Math.abs(amount) >= 1e6 ? 1e6 : Math.abs(amount) >= 1e3 ? 1e3 : 1;
+      const unit = divisor === 1e6 ? 'Mio. t' : divisor === 1e3 ? 'Tsd. t' : 't';
+      return `${isBalance && amount > 0 ? '+' : ''}${formatKpiNumber(amount / divisor)} ${unit}`;
+    };
     const metricLabel = metric === 'flights' ? 'Reine Fracht- und Postflüge' : 'Luftfracht- und Luftpostaufkommen';
-    setText('airfreightNationalTitle', `${metricLabel} ${code ? '· ' + name : 'in Deutschland'}`);
-    setText('airfreightNationalValue', formatAirfreightValue(current, metric));
+    setText('airfreightNationalTitle', metricLabel);
+    setText('airfreightNationalValue', kpiValue(current));
     setText('airfreightNationalSub', current === null ? (code && !airportMetricAvailable ? 'Flughafenwerte derzeit nicht belastbar' : 'Kein veröffentlichter Wert für diese Auswahl') : getAirfreightDirectionLabel(direction, true));
     setText('airfreightYoYTitle', isBalance ? `Saldo ${previousYear}` : 'Veränderung zum Vorjahr');
     if (isBalance) {
-      setText('airfreightYoYValue', formatAirfreightValue(previous, metric, true, 'balance'));
+      setText('airfreightYoYValue', kpiValue(previous));
       setText('airfreightYoYSub', previous === null ? `Kein Vergleichswert für ${previousYear}` : 'Historischer Saldo; keine Prozentveränderung');
     } else {
       const change = current !== null && previous > 0 ? ((current - previous) / previous) * 100 : null;
@@ -315,9 +321,10 @@
       setText('airfreightTop3Share', rank === null ? '--' : `${rank} von ${entries.length}`);
       setText('airfreightTop3Sub', !airportMetricAvailable ? 'Flughafenwerte derzeit nicht belastbar' : current === null ? 'Kein veröffentlichter Flughafenwert' : 'Gleiche Werte erhalten denselben Rang');
     } else {
-      setText('airfreightAirportCountTitle', metric === 'flights' ? 'Deutsche Flughäfen mit ausgewiesener Zahl reiner Fracht- und Postflüge' : 'Deutsche Flughäfen mit ausgewiesenem Frachtaufkommen');
-      setText('airfreightAirportCount', airportMetricAvailable ? String(entries.length) : '--');
-      setText('airfreightAirportCountSub', airportMetricAvailable ? 'Einschließlich veröffentlichter Nullwerte' : 'Flughafenwerte derzeit nicht belastbar');
+      const countEntries = isBalance ? getAirfreightAirportEntries(state.year, metric, 'all') : entries;
+      setText('airfreightAirportCountTitle', metric === 'flights' ? 'Deutsche Flughäfen mit reinen Fracht- und Postflügen' : 'Deutsche Flughäfen mit Fracht- und Postaufkommen');
+      setText('airfreightAirportCount', airportMetricAvailable ? String(countEntries.filter(record => record.value > 0).length) : '--');
+      setText('airfreightAirportCountSub', airportMetricAvailable ? (isBalance ? 'Flughäfen mit Verkehr insgesamt, unabhängig vom Saldo' : metric === 'flights' ? 'Ausgewiesene Anzahl > 0 Flüge' : 'Ausgewiesenes Aufkommen > 0 t') : 'Flughafenwerte derzeit nicht belastbar');
       const topThree = entries.slice(0, 3).reduce((sum, record) => sum + magnitude(record.value || 0), 0);
       setText('airfreightTop3Title', 'Konzentration auf die Top 3');
       setText('airfreightTop3Share', total > 0 ? `${formatDeNum(topThree / total * 100, 1)} %` : '--');
@@ -609,10 +616,14 @@
         indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        interaction: { mode: 'index', axis: 'y', intersect: false },
+        plugins: { legend: { display: false }, tooltip: { callbacks: {
+          title: items => labels[items[0]?.dataIndex] || '',
+          label: item => `${getAirfreightMetricLabel(metric)}: ${formatAirfreightValue(visible[item.dataIndex].value, metric, true, direction)}`
+        } } },
         scales: {
           x: { beginAtZero: !isBalance, title: { display: true, text: isBalance ? `Saldo (${unit})` : unit, font: { size: 11, weight: '600' } } },
-          y: { ticks: { callback: (_value, index) => abbreviateAxisLabel(labels[index], 22), font: { size: 11, weight: '600' } } }
+          y: { ticks: { callback: function(value) { return abbreviateAxisLabel(this.getLabelForValue(value), 22); }, font: { size: 11, weight: '600' } } }
         }
       }
     });

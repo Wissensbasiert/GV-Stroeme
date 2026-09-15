@@ -1,5 +1,9 @@
 # Pflege der Weboberfläche
 
+## Ergänzung 15.09.2026: Diagrammkontext und Ladeanzeige
+
+`js/modules/export.js` hält für jedes Diagramm den tatsächlichen Filter- und Zeitbezug fest; große Ansicht und PNG teilen diesen Kontext. Der sichtbare Kartenladehinweis beginnt nach 1.500 ms. Die KV-Strukturdiagramme lesen regionale Kategorien aus dem ergänzten Intermodalpaket. [Regeln, Diagramminventar und lokale Prüfung](../qualitaet/DIAGRAMMKONTEXT_UND_KV_20260915.md).
+
 > **Pflichtlektüre vor jeder Datenänderung – auch für KI-Systeme:**
 > [`ANLEITUNG_DATENAKTUALISIERUNG.md`](ANLEITUNG_DATENAKTUALISIERUNG.md) und
 > [`QUALITÄTSSICHERUNGSPLAN.md`](../qualitaet/QUALITÄTSSICHERUNGSPLAN.md). Beide Dokumente
@@ -196,3 +200,16 @@ Die verbleibenden Beispiele betreffen Regionsvergleich, gerichtete Schienengüte
 ### Ladeanzeige und Flughafenhinweise (14.09.2026, lokal)
 
 Die gemeinsame Ladeanzeige in `js/shared/data-access.js` liegt mittig als halbtransparente Einblendung über der Karte. Sie verändert die Höhe des Moduls nicht; Fehler mit Wiederholungsmöglichkeit bleiben eigenständige Meldungen. Die Bewegung berücksichtigt die Systemeinstellung für reduzierte Animationen. Flughafen-Infobox und Quellenfenster nennen den freigegebenen Gesamtstand bis 2025 und den Relationsstand bis 2024.
+
+
+### Nachprüfung 15.09.2026: Achsenpräzision und KPI
+
+KV-Achsen passen ihre Dezimalstellen an den Skalenabstand an. Mengen-/Leistungs-KPI runden ab 100 auf ganze Werte, kleinere Werte abgestuft ohne Scheinnullen. Ladeanzeige nun ab 1.500 ms. 32 Achsenkonfigurationen für Köln 2025, 25 Kontextansichten, Zahlen- und Luft-KPI-Prüfungen bestanden. Details im Prüfbericht DIAGRAMMKONTEXT_UND_KV_20260915.md, Abschnitt Nachprüfung. Weiterhin lokal, nicht im Testportal.
+
+
+### Flughafenzählung und Hover, 15.09.2026
+
+Flughafenzählung auf positive Verkehrs-/Flugwerte begrenzt (2024 Gesamtfracht: 18). Kategorienzuordnung und zeilenweiser Hover im Flughafenranking korrigiert; Achsen- und Datenhinweise abgestimmt. Prognosekarten-Hover gekürzt und mit dynamischem Vergleich 2019–2040 ergänzt. 48 Filter-/Szenariofälle, Fehlwertgrenzen, Luft-KPI sowie Maus-/Kartenvergleich lokal bestanden. Details und Grenzen im Prüfbericht DIAGRAMMKONTEXT_UND_KV_20260915.md, letzter Nachprüfungsabschnitt. Nicht bereitgestellt.
+
+
+Prognose-Nachtrag 15.09.2026: Δ und Grün/Rot/Grau für Flächen- und Verbindungsvergleiche harmonisiert. Verbindungen vergleichen 2019–2040 mit identischer Richtung, Kennzahl und Güterauswahl; fehlende Ranglisteneinträge sind keine Nullwerte. Lokale Fach- und Browserprüfung im letzten Abschnitt von DIAGRAMMKONTEXT_UND_KV_20260915.md dokumentiert.

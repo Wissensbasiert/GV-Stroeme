@@ -1800,3 +1800,12 @@ svg:focus {
 /* Portal navigation shares the existing header button layout. */
 a.btn-header { text-decoration: none; }
 a.btn-header svg { width: 16px; height: 16px; flex: 0 0 16px; }
+
+/* Keep forecast quantities together while allowing the label to wrap. */
+.leaflet-tooltip.forecast-relation-leaflet-tooltip .flow-tooltip-value {
+  white-space: normal;
+}
+.forecast-quantity { display: inline-block; white-space: nowrap; }
+.forecast-kv-detail { margin-top: 0.75rem; }
+
+.source-tool-meta + .source-tool-meta { margin-top: 1em; }

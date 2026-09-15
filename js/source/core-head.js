@@ -42,7 +42,7 @@
       element.setAttribute('role', 'tooltip');
       document.body.appendChild(element);
     }
-    if (!tooltip || tooltip.opacity === 0) {
+    if (!tooltip || tooltip.opacity === 0 || canvas._wbpAxisHover) {
       element.classList.remove('is-visible');
       return;
     }
@@ -148,7 +148,7 @@
 
     const tooltipId = `chart-axis-label-tooltip-${canvas.id}`;
     const chartTooltipId = `chart-hover-tooltip-${canvas.id}`;
-    const hide = () => document.getElementById(tooltipId)?.classList.remove('is-visible');
+    const hide = () => { canvas._wbpAxisHover = false; document.getElementById(tooltipId)?.classList.remove('is-visible'); };
     canvas.addEventListener('mouseleave', hide);
     canvas.addEventListener('mousemove', event => {
       const currentChart = typeof Chart !== 'undefined' && Chart.getChart ? Chart.getChart(canvas) : null;
@@ -163,7 +163,7 @@
       let nearestIndex = -1;
       let nearestDistance = Number.POSITIVE_INFINITY;
       currentLabels.forEach((_label, index) => {
-        const distance = Math.abs(scale.getPixelForTick(index) - mouseY);
+        const distance = Math.abs(scale.getPixelForValue(index) - mouseY);
         if (distance < nearestDistance) {
           nearestDistance = distance;
           nearestIndex = index;
@@ -171,6 +171,7 @@
       });
       const rowTolerance = Math.max(10, (scale.bottom - scale.top) / Math.max(1, currentLabels.length) / 2);
       if (nearestIndex < 0 || nearestDistance > rowTolerance) return hide();
+      canvas._wbpAxisHover = true;
 
       // Chart.js does not always issue a new data-tooltip update after the
       // pointer has crossed into its own Y-axis area. Remove the stale panel.
@@ -190,7 +191,7 @@
       const elementRect = element.getBoundingClientRect();
       const viewportGap = 12;
       const anchorX = rect.left + scale.right + 10;
-      const anchorY = rect.top + scale.getPixelForTick(nearestIndex);
+      const anchorY = rect.top + scale.getPixelForValue(nearestIndex);
       const left = Math.min(window.innerWidth - elementRect.width - viewportGap, Math.max(viewportGap, anchorX));
       const top = Math.min(window.innerHeight - elementRect.height - viewportGap, Math.max(viewportGap, anchorY - elementRect.height / 2));
       element.style.left = `${left}px`;
@@ -3375,7 +3376,7 @@
     const roadUnavailable = state.year === '2025';
     const nationalGroupWithoutTransit = !state.region && state.selectedGroup && state.selectedGroup !== 'ALL';
     const directionSuffix = dir === 'balance' ? ' (Saldo)' : dir === 'outbound' ? ' (Versand)' : dir === 'inbound' ? ' (Empfang)' : '';
-    const formatKpiValue = value => `${dir === 'balance' && value > 0 ? '+' : ''}${formatTrafficValue(value / divisor, metricLabel, 2)} ${metricLabel}`;
+    const formatKpiValue = value => `${dir === 'balance' && value > 0 ? '+' : ''}${formatKpiNumber(value / divisor)} ${metricLabel}`;
     const scopeSuffix = nationalGroupWithoutTransit ? ' ohne Transit' : '';
     setTxt('kpiTotalTitle', `${roadUnavailable ? 'Aufkommen ohne Straße' : 'Gesamtaufkommen'}${scopeSuffix}${directionSuffix}`);
     setTxt('kpiRoadTitle', `${roadUnavailable ? 'Straße (LKW) · NV' : 'Straße (LKW)'}${scopeSuffix}${directionSuffix}`);
@@ -3901,7 +3902,6 @@
 
     bodyEl.innerHTML = `
       <article class="steckbrief-report">
-        <div class="steckbrief-context">Alle Güterarten · Versand und Empfang · Beförderungsmenge · einschließlich Binnenverkehr</div>
 
         <section class="steckbrief-summary">
           <div class="steckbrief-summary-label">Kurzfazit</div>

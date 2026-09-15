@@ -1,5 +1,7 @@
 # Güterverkehrsströme Deutschland
 
+**Lokal, 15.09.2026:** Diagrammspezifische Kopfzeilen, regionale KV-Strukturdiagramme, kompakte See-/Luft-KPI und Ladeanzeige ab 1,5 Sekunden umgesetzt und geprüft. Noch nicht im Testportal bereitgestellt. [Prüfbericht](docs/qualitaet/DIAGRAMMKONTEXT_UND_KV_20260915.md).
+
 **Testportal, 14.09.2026 – `loading01`:** Relationsanfragen für 2025 nennen den verfügbaren Jahrgang 2024; Flughafenhinweise aktualisiert und Ladeanzeige ohne Layoutverschiebung über der Karte. 218 lokale Tests, vollständige Linux-Prüfung und Browserstichprobe bestanden. [Bereitstellung und Nachweis](docs/qualitaet/LADEANZEIGE_UND_RELATIONSJAHRE_20260914.md). Nachfolgend frühere Prüfstände.
 
 Interaktives Fach-Dashboard von Wissensbasierte Planung zur Analyse räumlicher Güterverkehrsströme in Deutschland.

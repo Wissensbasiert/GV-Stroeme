@@ -172,6 +172,7 @@ def build_dataset() -> dict[str, object]:
                 CAST(Empfangsregion_NUTS2024 AS VARCHAR) AS destination_id,
                 TRY_CAST(REPLACE(CAST(Befoerderungsmenge_in_Tonnen AS VARCHAR), ',', '.') AS DOUBLE) AS tonnes,
                 TRY_CAST(REPLACE(CAST(Befoerderungsleistung_in_TKM AS VARCHAR), ',', '.') AS DOUBLE) AS tkm,
+                CAST(Ladeeinheit AS VARCHAR) AS structure_code,
                 CASE WHEN Ladeeinheit IS NOT NULL AND Ladeeinheit <> 'Keine' THEN 1 ELSE 0 END AS is_qualified
             FROM read_csv('{rail_pattern}', delim=';', header=true, encoding='latin-1', union_by_name=true)
             WHERE CAST(Referenzzeitraum_Jahr AS INTEGER) >= {MIN_YEAR}
@@ -179,35 +180,41 @@ def build_dataset() -> dict[str, object]:
             -- Nationaler Gesamtwert: der unveränderte Statistikumfang, damit
             -- die Gesamtansicht keine innerdeutschen Relationen doppelt zählt.
             SELECT year_ref, 'DE' AS region_id, 'all' AS direction,
-                tonnes, tkm, is_qualified
+                tonnes, tkm, is_qualified, structure_code
             FROM source
             UNION ALL
             -- Deutschland: jede inländische oder grenzüberschreitende Bewegung genau einmal.
             SELECT year_ref, 'DE' AS region_id,
                 CASE WHEN origin_id = destination_id THEN 'binnen' ELSE 'outbound' END AS direction,
-                tonnes, tkm, is_qualified
+                tonnes, tkm, is_qualified, structure_code
             FROM source WHERE origin_id LIKE 'DE%'
             UNION ALL
             SELECT year_ref, 'DE' AS region_id, 'inbound' AS direction,
-                tonnes, tkm, is_qualified
+                tonnes, tkm, is_qualified, structure_code
             FROM source WHERE destination_id LIKE 'DE%' AND origin_id <> destination_id
             UNION ALL
             -- Region: Versand (einschließlich grenzüberschreitend) und Binnenverkehr.
             SELECT year_ref, origin_id AS region_id,
                 CASE WHEN origin_id = destination_id THEN 'binnen' ELSE 'outbound' END AS direction,
-                tonnes, tkm, is_qualified
+                tonnes, tkm, is_qualified, structure_code
             FROM source WHERE origin_id LIKE 'DE%'
             UNION ALL
             -- Region: Empfang; Binnenverkehr wurde oben bereits genau einmal erfasst.
             SELECT year_ref, destination_id AS region_id, 'inbound' AS direction,
-                tonnes, tkm, is_qualified
+                tonnes, tkm, is_qualified, structure_code
             FROM source WHERE destination_id LIKE 'DE%' AND origin_id <> destination_id
         )
         SELECT year_ref, region_id, direction,
             SUM(tonnes) AS total_tonnes,
             SUM(tkm) AS total_tkm,
             SUM(CASE WHEN is_qualified = 1 THEN tonnes ELSE 0 END) AS qualified_tonnes,
-            SUM(CASE WHEN is_qualified = 1 THEN tkm ELSE 0 END) AS qualified_tkm
+            SUM(CASE WHEN is_qualified = 1 THEN tkm ELSE 0 END) AS qualified_tkm,
+            SUM(CASE WHEN structure_code LIKE 'Container%' THEN tonnes ELSE 0 END) AS structure0_tonnes,
+            SUM(CASE WHEN structure_code LIKE 'Container%' THEN tkm ELSE 0 END) AS structure0_tkm,
+            SUM(CASE WHEN structure_code LIKE 'Sattelzuganhaenger%' THEN tonnes ELSE 0 END) AS structure1_tonnes,
+            SUM(CASE WHEN structure_code LIKE 'Sattelzuganhaenger%' THEN tkm ELSE 0 END) AS structure1_tkm,
+            SUM(CASE WHEN structure_code LIKE 'Lastkraftwagen%' OR structure_code LIKE 'Lastzug%' THEN tonnes ELSE 0 END) AS structure2_tonnes,
+            SUM(CASE WHEN structure_code LIKE 'Lastkraftwagen%' OR structure_code LIKE 'Lastzug%' THEN tkm ELSE 0 END) AS structure2_tkm
         FROM scoped
         GROUP BY year_ref, region_id, direction
         ORDER BY year_ref, region_id, direction
@@ -223,37 +230,44 @@ def build_dataset() -> dict[str, object]:
                 CAST(Ausladeregion_NUTS3 AS VARCHAR) AS destination_id,
                 TRY_CAST(REPLACE(CAST(Tonnen AS VARCHAR), ',', '.') AS DOUBLE) AS tonnes,
                 TRY_CAST(REPLACE(CAST(Tonnen_km AS VARCHAR), ',', '.') AS DOUBLE) AS tkm,
+                TRY_CAST(Container_Groesse AS INTEGER) AS structure_code,
                 CASE WHEN TRY_CAST(Container_Groesse AS INTEGER) IS NOT NULL THEN 1 ELSE 0 END AS is_qualified
             FROM read_csv('{iww_pattern}', delim=';', header=true, encoding='utf-8', union_by_name=true)
             WHERE CAST(Referenzzeitraum_Jahr AS INTEGER) >= {MIN_YEAR}
         ), scoped AS (
             SELECT year_ref, 'DE' AS region_id, 'all' AS direction,
-                tonnes, tkm, is_qualified
+                tonnes, tkm, is_qualified, structure_code
             FROM source
             UNION ALL
             SELECT year_ref, 'DE' AS region_id,
                 CASE WHEN origin_id = destination_id THEN 'binnen' ELSE 'outbound' END AS direction,
-                tonnes, tkm, is_qualified
+                tonnes, tkm, is_qualified, structure_code
             FROM source WHERE origin_id LIKE 'DE%'
             UNION ALL
             SELECT year_ref, 'DE' AS region_id, 'inbound' AS direction,
-                tonnes, tkm, is_qualified
+                tonnes, tkm, is_qualified, structure_code
             FROM source WHERE destination_id LIKE 'DE%' AND origin_id <> destination_id
             UNION ALL
             SELECT year_ref, origin_id AS region_id,
                 CASE WHEN origin_id = destination_id THEN 'binnen' ELSE 'outbound' END AS direction,
-                tonnes, tkm, is_qualified
+                tonnes, tkm, is_qualified, structure_code
             FROM source WHERE origin_id LIKE 'DE%'
             UNION ALL
             SELECT year_ref, destination_id AS region_id, 'inbound' AS direction,
-                tonnes, tkm, is_qualified
+                tonnes, tkm, is_qualified, structure_code
             FROM source WHERE destination_id LIKE 'DE%' AND origin_id <> destination_id
         )
         SELECT year_ref, region_id, direction,
             SUM(tonnes) AS total_tonnes,
             SUM(tkm) AS total_tkm,
             SUM(CASE WHEN is_qualified = 1 THEN tonnes ELSE 0 END) AS qualified_tonnes,
-            SUM(CASE WHEN is_qualified = 1 THEN tkm ELSE 0 END) AS qualified_tkm
+            SUM(CASE WHEN is_qualified = 1 THEN tkm ELSE 0 END) AS qualified_tkm,
+            SUM(CASE WHEN structure_code = 1 THEN tonnes ELSE 0 END) AS structure0_tonnes,
+            SUM(CASE WHEN structure_code = 1 THEN tkm ELSE 0 END) AS structure0_tkm,
+            SUM(CASE WHEN structure_code = 3 THEN tonnes ELSE 0 END) AS structure1_tonnes,
+            SUM(CASE WHEN structure_code = 3 THEN tkm ELSE 0 END) AS structure1_tkm,
+            SUM(CASE WHEN structure_code IN (2, 4) THEN tonnes ELSE 0 END) AS structure2_tonnes,
+            SUM(CASE WHEN structure_code IN (2, 4) THEN tkm ELSE 0 END) AS structure2_tkm
         FROM scoped
         GROUP BY year_ref, region_id, direction
         ORDER BY year_ref, region_id, direction
@@ -354,6 +368,9 @@ def build_dataset() -> dict[str, object]:
                 mode_pack = region_pack.setdefault(mode, {"total": {}, qualified_key: {}})
                 mode_pack["total"][direction] = metric_pair(row, "total")
                 mode_pack[qualified_key][direction] = metric_pair(row, "qualified")
+                keys = ("containers_and_swap_bodies", "unaccompanied_semitrailers", "accompanied_road_vehicles") if mode == "rail" else ("c20", "c40", "other_sizes")
+                for index, key in enumerate(keys):
+                    mode_pack.setdefault(key, {})[direction] = metric_pair(row, f"structure{index}")
 
     return {
         "schema_version": 3,

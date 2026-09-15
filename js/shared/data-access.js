@@ -37,6 +37,7 @@
     notice.hidden = false;
   }
 
+  const moduleLoadingTimers = new Map();
   function setModuleLoadingState(tabId, isLoading) {
     const pane = document.getElementById(tabId);
     if (!pane) return;
@@ -54,7 +55,13 @@
     }
     notice.setAttribute('role', 'status');
     notice.textContent = 'Bitte einen Augenblick Geduld, Daten werden geladen …';
-    notice.hidden = !isLoading;
+    clearTimeout(moduleLoadingTimers.get(tabId));
+    moduleLoadingTimers.delete(tabId);
+    notice.hidden = true;
+    if (isLoading) moduleLoadingTimers.set(tabId, setTimeout(() => {
+      moduleLoadingTimers.delete(tabId);
+      if (pane.getAttribute('aria-busy') === 'true' && pane.dataset.loadError !== 'true' && notice.isConnected) notice.hidden = false;
+    }, 1500));
   }
 
   // Keep local rebuilds fresh; bound stalled requests without bypassing TLS/CORS.

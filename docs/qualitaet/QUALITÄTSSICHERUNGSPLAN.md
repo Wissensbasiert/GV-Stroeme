@@ -1,5 +1,7 @@
 # Qualitätssicherungsplan für das Güterströme-Dashboard
 
+**Lokal, 15.09.2026:** Diagrammspezifische Kopfzeilen, regionale KV-Struktur und verzögerte Ladeanzeige umgesetzt. 228 Quellenkontrollen, 25 Browseransichten und bestehende Export-/Lade-/Luft-KPI-Prüfungen bestanden. Noch nicht bereitgestellt. [Prüfbericht und Grenzen](DIAGRAMMKONTEXT_UND_KV_20260915.md).
+
 **Testportal, 14.09.2026 – `loading01`:** Relationsanfragen für 2025 nennen den verfügbaren Jahrgang 2024; Flughafenhinweise aktualisiert und Ladeanzeige ohne Layoutverschiebung über der Karte. 218 lokale Tests, vollständige Linux-Prüfung und Browserstichprobe bestanden. [Bereitstellung und Nachweis](LADEANZEIGE_UND_RELATIONSJAHRE_20260914.md). Nachfolgend frühere Prüfstände.
 
 ## Lokale Antwort- und Ladehinweise vom 14.09.2026
@@ -1010,3 +1012,16 @@ Die Originalquellenprüfung bestätigt 110.050 Tonnen für 2020 und 55.106 Tonne
 `outputs/analyseassistent_kundenantwort_20260911/targeted_validation.json` bestätigt 13/13 gezielte Prüfungen. Ein ausdrücklich erlaubter echter Requesty-Antwortaufruf besteht mit 3.024 Tokens und 0,0029502 USD, ohne Kundenbuchung. Die gespeicherte echte Antwort ist mit dem vorhandenen Chatclient und aktuellem CSS auf Desktop und Mobilgerät geprüft; Jahresdetails bleiben vollständig zugänglich. CSS-Build und Syntax-/Diffprüfung bestanden.
 
 Der breite Gesamtprüflauf wurde nach mehr als zwölf Minuten ohne Abschluss beendet und zählt nicht als bestanden. Keine aktuelle Gesamtfreigabe, kein Testportal-Deployment und keine Produktionsänderung aus dieser Korrektur. Vor Releasefreigabe ist der vollständige Laufzeitnachweis abzuschließen.
+
+
+### Nachprüfung 15.09.2026: Achsenpräzision und KPI
+
+KV-Achsen passen ihre Dezimalstellen an den Skalenabstand an. Mengen-/Leistungs-KPI runden ab 100 auf ganze Werte, kleinere Werte abgestuft ohne Scheinnullen. Ladeanzeige nun ab 1.500 ms. 32 Achsenkonfigurationen für Köln 2025, 25 Kontextansichten, Zahlen- und Luft-KPI-Prüfungen bestanden. Details im Prüfbericht DIAGRAMMKONTEXT_UND_KV_20260915.md, Abschnitt Nachprüfung. Weiterhin lokal, nicht im Testportal.
+
+
+### Flughafenzählung und Hover, 15.09.2026
+
+Flughafenzählung auf positive Verkehrs-/Flugwerte begrenzt (2024 Gesamtfracht: 18). Kategorienzuordnung und zeilenweiser Hover im Flughafenranking korrigiert; Achsen- und Datenhinweise abgestimmt. Prognosekarten-Hover gekürzt und mit dynamischem Vergleich 2019–2040 ergänzt. 48 Filter-/Szenariofälle, Fehlwertgrenzen, Luft-KPI sowie Maus-/Kartenvergleich lokal bestanden. Details und Grenzen im Prüfbericht DIAGRAMMKONTEXT_UND_KV_20260915.md, letzter Nachprüfungsabschnitt. Nicht bereitgestellt.
+
+
+Prognose-Nachtrag 15.09.2026: Δ und Grün/Rot/Grau für Flächen- und Verbindungsvergleiche harmonisiert. Verbindungen vergleichen 2019–2040 mit identischer Richtung, Kennzahl und Güterauswahl; fehlende Ranglisteneinträge sind keine Nullwerte. Lokale Fach- und Browserprüfung im letzten Abschnitt von DIAGRAMMKONTEXT_UND_KV_20260915.md dokumentiert.

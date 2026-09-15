@@ -1,5 +1,9 @@
 # Skriptübersicht
 
+## Diagramm- und KV-Prüfung vom 15.09.2026
+
+`python -B scripts/validation/validate_intermodal_structure.py` kontrolliert neue regionale KV-Kategorien gegen Original-CSV und nationale Reihen. `node scripts/validation/validate_chart_context.cjs http://127.0.0.1:8015/ <Ausgabeordner>` prüft Kopfzeilen, regionale KV-Auswahl und die verzögerte Ladeanzeige. Playwright wie bisher ausschließlich aus einem externen Ordner unter `C:/tmp` laden. [Nachweis](../docs/qualitaet/DIAGRAMMKONTEXT_UND_KV_20260915.md).
+
 ## Luftverkehrsupdate vom 14.09.2026
 
 Auf dem Testportal mit Release `portal-test-20260914-gueterstroeme-air01` bestätigt. `analysis/fetch_verified_test_release.py --portal <Portalordner> --base <vorhandene lokale Kopie> --output C:/tmp/<aktiver Release> --expected-sha <geprüfter Manifesthash> --report <Bericht.json>` rekonstruiert eine fehlende lokale Basis aus dem aktiven Testrelease: passende lokale Dateien kopieren, übrige über einen temporären FTPS-Zugang laden, jede Datei prüfen. Der API-Schlüssel kommt ausschließlich aus der geschützten Umgebung; der Zugang wird anschließend entfernt. `validation/validate_assistant_alwaysdata.py` prüft nun die korrigierten Flughafenwerte 2025 einschließlich Jahresauswahl und weiterhin fehlender Relationswerte direkt im aktiven Serverbestand, ohne Modellaufruf.

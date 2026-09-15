@@ -1,5 +1,9 @@
 # Datenaktualisierung und Reproduktion des Güterströme-Dashboards
 
+## Ergänzung 15.09.2026: regionale KV-Struktur
+
+`build_intermodal_data.py` ergänzt die drei Ladeeinheiten- bzw. Containergrößenkategorien je Region, Jahr, Richtung und Kennzahl unter `scoped_metrics_by_year`. Nach dem Aufbau `python -B scripts/validation/validate_intermodal_structure.py` und die Browserprüfung `validate_chart_context.cjs` ausführen. Nationalwerte und bisherige Kennwerte müssen erhalten bleiben. Vor Portalbereitstellung die abhängigen privaten Analysepakete und deren Feldinventar neu prüfen. [Prüfbericht](../qualitaet/DIAGRAMMKONTEXT_UND_KV_20260915.md).
+
 ## Ergänzung 14.09.2026: privaten Dashboardzugriff für den KI-Chat erneuern
 
 Nach betroffenen kanonischen Daten und Browserpaketen zusätzlich `python -B scripts/analysis/build_dashboard_access.py` ausführen. Das unabhängige Paket liest die vollständigen sechs Landverkehrs-VP-Matrizen sowie Regional-, Hafen- und Intermodal-Dashboarddaten. Alle regionalen C7/VP25-Kombinationen in beiden Kennzahlen, Szenarien und Richtungen werden mit dem Prognosekern abgeglichen; nationale Summen und Berlin/Schiene/Metalle zusätzlich geprüft. Gesamtaufkommen der Original-VP-Gruppen muss Versand + Empfang + Binnen enthalten; der bis 0.4.2 fehlende Empfangsanteil wurde in der Pipeline korrigiert.

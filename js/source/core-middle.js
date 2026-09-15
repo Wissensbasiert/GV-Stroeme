@@ -80,8 +80,8 @@
     setText('sgkvIwwTitle', `KV Binnenschiff${scopeSuffix}${directionSuffix}`);
     setText('sgkvRailShareTitle', `KV-Anteil Schiene${scopeSuffix}${directionSuffix}`);
     setText('sgkvIwwShareTitle', `KV-Anteil Binnenschiff${scopeSuffix}${directionSuffix}`);
-    setText('sgkvRailIntermodal', formatMetric(scopedRecord(railKv)));
-    setText('sgkvIwwContainer', formatMetric(scopedRecord(iwwKv)));
+    setText('sgkvRailIntermodal', `${isBalance && railKv > 0 ? '+' : ''}${formatKpiNumber(railKv / divisor)} ${unit}`);
+    setText('sgkvIwwContainer', `${isBalance && iwwKv > 0 ? '+' : ''}${formatKpiNumber(iwwKv / divisor)} ${unit}`);
     setText('sgkvRailShareKpi', railShare === null ? '—' : `${formatDeNum(railShare, 1)} %`);
     setText('sgkvIwwShareKpi', iwwShare === null ? '—' : `${formatDeNum(iwwShare, 1)} %`);
     const railYoY = document.getElementById('sgkvRailShare');
@@ -423,6 +423,20 @@
       }
     }
 
+    const structurePack = year => {
+      const record = (mode, category) => ({ [metric]: getScopedIntermodalMetric(year, mode, category, metric) });
+      return {
+        rail: {
+          intermodal_load_units: record('rail', 'intermodal_load_units'),
+          load_unit_structure: Object.fromEntries(['containers_and_swap_bodies', 'unaccompanied_semitrailers', 'accompanied_road_vehicles'].map(key => [key, record('rail', key)]))
+        },
+        iww: {
+          containerised_transport: record('iww', 'containerised_transport'),
+          container_size_structure: Object.fromEntries(['c20', 'c40', 'other_sizes'].map(key => [key, record('iww', key)]))
+        }
+      };
+    };
+    const structureCurrent = structurePack(activeYear);
     const renderStructure = (canvasId, labels, getters, colors, denominator, axis, structureView) => {
       const canvas = document.getElementById(canvasId);
       if (!canvas) return;
@@ -436,7 +450,7 @@
             labels: years,
             datasets: labels.map((label, index) => ({
               label,
-              data: years.map(year => value(getters[index](intermodalData.data_by_year?.[String(year)])) / divisor),
+              data: years.map(year => value(getters[index](structurePack(year))) / divisor),
               borderColor: colors[index], backgroundColor: colors[index], borderWidth: 2.25, pointRadius: 2.5, tension: 0.18
             }))
           },
@@ -444,23 +458,23 @@
             responsive: true, maintainAspectRatio: false, interaction: { mode: 'nearest', intersect: true },
             plugins: {
               legend: { position: 'bottom', align: 'start', labels: { boxWidth: 10, padding: 8, font: { size: 10, weight: '600' } } },
-              tooltip: { callbacks: { title: items => `Berichtsjahr ${items[0]?.label}`, label: item => formatDynamicChartShare(item, unit, canvasId === 'chartKvRailUnits' ? ' aller Ladeeinheiten' : ' aller Containergrößen') } }
+              tooltip: { callbacks: { title: items => `Berichtsjahr ${items[0]?.label}`, label: item => isBalance ? `${item.dataset.label}: ${formatTrafficValue(item.raw, unit, 2)} ${unit} (Saldo)` : formatDynamicChartShare(item, unit, canvasId === 'chartKvRailUnits' ? ' aller Ladeeinheiten' : ' aller Containergrößen') } }
             },
             scales: {
               x: { title: { display: true, text: 'Berichtsjahr', font: { weight: '600' } }, ticks: { font: { size: 10 } }, grid: { display: false } },
-              y: { beginAtZero: true, title: { display: true, text: unit, font: { weight: '600' } }, ticks: { callback: tick => formatDeNum(tick, 0) } }
+              y: { beginAtZero: true, title: { display: true, text: unit, font: { weight: '600' } }, ticks: { callback: formatChartAxisTick } }
             }
           }
         })
         : new Chart(canvas, {
           type: 'bar',
-          data: { labels, datasets: [{ data: getters.map(getter => share(value(getter(pack)), value(denominator(pack)))), backgroundColor: colors, borderRadius: 5, maxBarThickness: 26 }] },
+          data: { labels, datasets: [{ data: getters.map(getter => isBalance ? value(getter(structureCurrent)) / divisor : value(denominator(structureCurrent)) > 0 ? share(value(getter(structureCurrent)), value(denominator(structureCurrent))) : null), backgroundColor: colors, borderRadius: 5, maxBarThickness: 26 }] },
           options: {
             indexAxis: 'y', responsive: true, maintainAspectRatio: false,
             layout: { padding: { left: 8 } },
-            plugins: { legend: { display: false }, tooltip: { callbacks: { label: item => ` ${formatDeNum(item.raw, 1)} % (${formatMetric(getters[item.dataIndex](pack))})` } } },
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: item => isBalance ? `Saldo: ${formatMetric(getters[item.dataIndex](structureCurrent))}` : ` ${formatDeNum(item.raw, 1)} % (${formatMetric(getters[item.dataIndex](structureCurrent))})` } } },
             scales: {
-              x: { beginAtZero: true, max: 100, title: { display: true, text: axis, font: { weight: '600' } }, ticks: { callback: tick => `${tick} %` }, grid: { color: '#e2e8f0' } },
+              x: { beginAtZero: true, max: isBalance ? undefined : 100, title: { display: true, text: isBalance ? `Saldo (${unit})` : axis, font: { weight: '600' } }, ticks: { callback: (tick, index, ticks) => isBalance ? formatChartAxisTick(tick, index, ticks) : `${tick} %` }, grid: { color: '#e2e8f0' } },
               y: {
                 afterFit: scale => { scale.width = getYAxisLabelAreaWidth(scale.chart.width); },
                 ticks: {

@@ -12,6 +12,28 @@
     if (element) element.textContent = value;
   }
 
+  // KPI precision follows the displayed unit, not the unscaled source value.
+  function formatKpiNumber(value) {
+    if (value === null || value === undefined || !Number.isFinite(Number(value))) return '--';
+    const number = Number(value), absolute = Math.abs(number);
+    if (absolute === 0) return '0';
+    const decimals = absolute >= 100 ? 0 : absolute >= 1 ? 1 : Math.max(1, 1 - Math.floor(Math.log10(absolute)));
+    if (decimals > 10) return number.toLocaleString('de-DE', { notation: 'scientific', maximumFractionDigits: 1 });
+    return formatDeNum(number, decimals);
+  }
+
+  // Keep adjacent axis ticks distinguishable, including sub-unit and signed scales.
+  function formatChartAxisTick(value, index, ticks) {
+    const values = (ticks || []).map(tick => Number(tick.value)).filter(Number.isFinite).sort((a, b) => a - b);
+    const gaps = values.slice(1).map((v, i) => v - values[i]).filter(gap => gap > 0);
+    const step = gaps.length ? Math.min(...gaps) : Math.abs(Number(value));
+    if (!step || Math.abs(Number(value)) < step * 1e-8) return '0';
+    let decimals = Math.max(0, Math.ceil(-Math.log10(step)));
+    while (decimals < 10 && Math.abs(step * 10 ** decimals - Math.round(step * 10 ** decimals)) > 1e-7) decimals++;
+    if (decimals > 10) return Number(value).toLocaleString('de-DE', { notation: 'scientific', maximumFractionDigits: 2 });
+    return formatDeNum(value, decimals);
+  }
+
   // Quantities use one decimal place by default. Very small non-zero values
   // retain further precision so an existing relation never appears as zero.
   function formatQuantity(val, standardDecimals = 1) {
@@ -66,4 +88,3 @@
     const number = Number(value) / divisor;
     return `${signed && number > 0 ? '+' : ''}${formatDeNum(number, decimals)}`;
   }
-
