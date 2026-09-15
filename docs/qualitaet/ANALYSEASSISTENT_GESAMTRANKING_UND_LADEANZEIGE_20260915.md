@@ -56,6 +56,6 @@ Die Werte vergleichen ausschließlich die Modellstände `2019_BASE` und `2040_P1
 
 Ein echter Modelllauf wurde bewusst nicht ausgeführt, weil hierfür kein gesonderter Kosten-/Datenauftrag vorlag. Die Korrektur ist durch Daten-, Auswahl-, Ergebnis-, Linux- und Browserprüfungen abgedeckt; beliebige freie Modellformulierungen sind damit nicht vollständig garantiert.
 
-Auf dem Testserver sind neben dem aktiven Release derzeit fünf ältere Releases vorhanden. Ein geprüfter, nicht ausgeführter Aufbewahrungsplan würde `mdc-license01` und `loading01` als zwei Rückfallstände behalten und `air01`, `nodes02` sowie `scope01` entfernen. Eine Löschung war nicht Teil dieses Auftrags und wurde daher nicht ausgeführt.
+Nach gesonderter Löschfreigabe wurden `air01`, `nodes02` und `scope01` anhand des geprüften Plans entfernt. Verblieben sind genau der aktive Release `total01` sowie die beiden vollständig manifestgeprüften Rückfallstände `mdc-license01` und `loading01`. Portalzustand und Produktion blieben unverändert; temporäre Prüfmittel wurden entfernt. Die gelöschten Releaseordner sind auf dem Testserver nicht wiederherstellbar, ihre Git-Stände und reproduzierbaren Datenaufbereitungen bleiben davon unberührt.
 
 Das Produktionsportal blieb unverändert.

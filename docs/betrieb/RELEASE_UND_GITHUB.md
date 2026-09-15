@@ -1,6 +1,6 @@
 # GitHub-Sicherung und AlwaysData-Testreleases
 
-**Testportal, 15.09.2026 – `total01`:** Analyseassistent 0.8.0 mit Gesamtverkehrs-Prognoserangliste und dezenter KI-Ladeanzeige sowie der gemeinsame Dashboardstand aus `e41ff90`. GitHub-Implementierung `5ef96df` regulär auf `main`. Ausgangspunkt war der zwischenzeitlich aktive und vollständig rekonstruierte Release `mdc-license01`; unbeteiligte Portaldateien blieben unverändert. 1.732 Dateien serverseitig unabhängig kopiert, 52 geänderte Nutzdateien plus Manifest übertragen; alle 1.784 Dateien geprüft. Manifest `3b66223972ae62e8ff7652aa298a0dce9dc0cb187bc5db45a7066c6cf6ed220e`, Datenkennung `24a4c8cee90c6f866fdba5a7`. API und Datenbank bereit; Linux- und Browserprüfung bestanden, keine externen Modellaufrufe. Produktion unverändert. [Abschluss und Grenzen](../qualitaet/ANALYSEASSISTENT_GESAMTRANKING_UND_LADEANZEIGE_20260915.md). Nachfolgend frühere Prüfstände.
+**Testportal, 15.09.2026 – `total01`:** Analyseassistent 0.8.0 mit Gesamtverkehrs-Prognoserangliste und dezenter KI-Ladeanzeige sowie der gemeinsame Dashboardstand aus `e41ff90`. GitHub-Implementierung `5ef96df` regulär auf `main`. Ausgangspunkt war der zwischenzeitlich aktive und vollständig rekonstruierte Release `mdc-license01`; unbeteiligte Portaldateien blieben unverändert. 1.732 Dateien serverseitig unabhängig kopiert, 52 geänderte Nutzdateien plus Manifest übertragen; alle 1.784 Dateien geprüft. Manifest `3b66223972ae62e8ff7652aa298a0dce9dc0cb187bc5db45a7066c6cf6ed220e`, Datenkennung `24a4c8cee90c6f866fdba5a7`. API und Datenbank bereit; Linux- und Browserprüfung bestanden, keine externen Modellaufrufe. Nach gesonderter Freigabe wurden `air01`, `nodes02` und `scope01` entfernt; aktiv `total01` plus die zwei vollständig geprüften Rückfallstände `mdc-license01` und `loading01` bleiben erhalten. Produktion unverändert. [Abschluss und Grenzen](../qualitaet/ANALYSEASSISTENT_GESAMTRANKING_UND_LADEANZEIGE_20260915.md). Nachfolgend frühere Prüfstände.
 
 **Testportal, 14.09.2026 – `loading01`:** Relationsanfragen für 2025 nennen den verfügbaren Jahrgang 2024; Flughafenhinweise aktualisiert und Ladeanzeige ohne Layoutverschiebung über der Karte. 218 lokale Tests, vollständige Linux-Prüfung und Browserstichprobe bestanden. [Bereitstellung und Nachweis](../qualitaet/LADEANZEIGE_UND_RELATIONSJAHRE_20260914.md). Nachfolgend frühere Prüfstände.
 
@@ -41,6 +41,8 @@ Fehlt ein kompatibles Ausgangsmanifest, wird abgebrochen. Nur dann begründet de
 Die Änderung gilt für die Testsite 1067000. Die Produktionsbereitstellung bleibt unverändert und benötigt einen gesonderten Auftrag.
 
 ## Aufbewahrung auf AlwaysData
+
+**Abgeschlossen am 15.09.2026 nach ausdrücklicher Löschfreigabe:** Aktiv `total01`, Rückfallstände `mdc-license01` und `loading01`; alle drei Bestände vollständig anhand ihrer Manifeste geprüft. `air01`, `nodes02` und `scope01` entfernt, danach genau drei Releases vorhanden. Testportal gesund, aktiver Release und Produktion unverändert.
 
 **Abgeschlossen am 14.09.2026 nach ausdrücklicher Löschfreigabe:** Aktiv `air01`, Rückfallstände `nodes02` und `scope01`; alle 5.212 Manifestdateien der drei Bestände geprüft. Acht ältere Testreleases entfernt, danach genau drei vorhanden. Testportal gesund, aktiver Release und Produktion unverändert. [Nachweis](../qualitaet/LUFTVERKEHR_UPDATE_20260914.md).
 
